@@ -151,6 +151,10 @@ export default function Home() {
     setTimeout(() => setCopiedEmail(false), 2000);
   };
 
+  // Надежное определение роли: проверяем и метаданные аутентификации, и таблицу profiles
+  const userRole = userProfile?.role || user?.user_metadata?.role;
+  const isEmployer = userRole === 'employer';
+
   return (
     <div className="min-h-screen bg-neutral-950 text-neutral-100 antialiased font-sans relative">
       <header className="border-b border-neutral-800 bg-neutral-900/80 backdrop-blur-md sticky top-0 z-20">
@@ -168,23 +172,20 @@ export default function Home() {
             
             {user ? (
               <div className="flex items-center gap-3">
-                {/* Соискатели видят "Мои отклики" */}
-                {user.user_metadata?.role !== 'employer' && (
-                  <Link 
-                    href="/applications"
-                    className="px-3 py-1.5 bg-neutral-800 hover:bg-neutral-700 text-neutral-200 rounded-lg text-xs font-medium transition-colors border border-neutral-700"
-                  >
-                    Мои отклики
-                  </Link>
-                )}
-
-                {/* Работодатели видят "Кабинет HR" */}
-                {user.user_metadata?.role === 'employer' && (
+                {/* Если работодатель — показываем Кабинет HR, если соискатель — Мои отклики */}
+                {isEmployer ? (
                   <Link 
                     href="/employer"
                     className="px-3 py-1.5 bg-neutral-800 hover:bg-neutral-700 text-neutral-200 rounded-lg text-xs font-medium transition-colors border border-neutral-700"
                   >
                     Кабинет HR
+                  </Link>
+                ) : (
+                  <Link 
+                    href="/applications"
+                    className="px-3 py-1.5 bg-neutral-800 hover:bg-neutral-700 text-neutral-200 rounded-lg text-xs font-medium transition-colors border border-neutral-700"
+                  >
+                    Мои отклики
                   </Link>
                 )}
 
