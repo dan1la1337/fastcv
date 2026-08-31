@@ -168,18 +168,26 @@ export default function Home() {
             
             {user ? (
               <div className="flex items-center gap-3">
-                <Link 
-                  href="/applications"
-                  className="px-3 py-1.5 bg-neutral-800 hover:bg-neutral-700 text-neutral-200 rounded-lg text-xs font-medium transition-colors border border-neutral-700"
-                >
-                  Мои отклики
-                </Link>
-                <Link 
-                  href="/employer"
-                  className="px-3 py-1.5 bg-neutral-800 hover:bg-neutral-700 text-neutral-200 rounded-lg text-xs font-medium transition-colors border border-neutral-700"
-                >
-                  Кабинет HR
-                </Link>
+                {/* Соискатели видят "Мои отклики" */}
+                {user.user_metadata?.role !== 'employer' && (
+                  <Link 
+                    href="/applications"
+                    className="px-3 py-1.5 bg-neutral-800 hover:bg-neutral-700 text-neutral-200 rounded-lg text-xs font-medium transition-colors border border-neutral-700"
+                  >
+                    Мои отклики
+                  </Link>
+                )}
+
+                {/* Работодатели видят "Кабинет HR" */}
+                {user.user_metadata?.role === 'employer' && (
+                  <Link 
+                    href="/employer"
+                    className="px-3 py-1.5 bg-neutral-800 hover:bg-neutral-700 text-neutral-200 rounded-lg text-xs font-medium transition-colors border border-neutral-700"
+                  >
+                    Кабинет HR
+                  </Link>
+                )}
+
                 <button 
                   onClick={() => window.location.href = '/profile'}
                   className="w-9 h-9 flex items-center justify-center rounded-full bg-blue-600/20 border border-blue-500/50 text-blue-400 font-bold cursor-pointer hover:bg-blue-600/30 transition-colors relative z-50"
@@ -188,7 +196,7 @@ export default function Home() {
                   {user.email?.charAt(0).toUpperCase()}
                 </button>
               </div>
-           ) : (
+            ) : (
               <Link 
                 href="/register"
                 className="px-4 py-2 bg-neutral-800 hover:bg-neutral-700 text-white rounded-lg text-sm font-medium transition-colors border border-neutral-700 relative z-50"
