@@ -188,12 +188,12 @@ export default function Home() {
                   {user.email?.charAt(0).toUpperCase()}
                 </button>
               </div>
-            ) : (
+           ) : (
               <Link 
-                href="/login"
+                href="/register"
                 className="px-4 py-2 bg-neutral-800 hover:bg-neutral-700 text-white rounded-lg text-sm font-medium transition-colors border border-neutral-700 relative z-50"
               >
-                Войти
+                Войти / Регистрация
               </Link>
             )}
           </div>
