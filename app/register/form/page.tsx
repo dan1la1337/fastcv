@@ -1,15 +1,19 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
+import { createClient } from '@supabase/supabase-js';
 
-export default function RegistrationForm() {
+// Инициализируем стандартный клиент Supabase
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
+const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
+const supabase = createClient(supabaseUrl, supabaseKey);
+
+function RegisterFormContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
-  const supabase = createClientComponentClient();
   
-  const role = searchParams.get('role') || 'candidate'; // Получаем роль из URL
+  const role = searchParams.get('role') || 'candidate';
   
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -25,9 +29,7 @@ export default function RegistrationForm() {
       email,
       password,
       options: {
-        data: {
-          role: role, // Записываем роль в базу данных
-        },
+        data: { role: role },
         emailRedirectTo: `${window.location.origin}/auth/callback`,
       },
     });
@@ -38,7 +40,6 @@ export default function RegistrationForm() {
       return;
     }
 
-    // Если всё ок, кидаем пользователя в его личный кабинет
     if (role === 'candidate') {
       router.push('/dashboard/candidate');
     } else {
@@ -93,5 +94,13 @@ export default function RegistrationForm() {
         </form>
       </div>
     </div>
+  );
+}
+
+export default function RegistrationForm() {
+  return (
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center">Загрузка...</div>}>
+      <RegisterFormContent />
+    </Suspense>
   );
 }
