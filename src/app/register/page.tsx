@@ -75,6 +75,15 @@ export default function RoleSelectionPage() {
         >
           Продолжить <ArrowRight className="ml-2" size={18} />
         </button>
+
+        {/* НОВАЯ ССЫЛКА НА ВХОД */}
+        <div className="mt-8 text-center text-sm text-gray-500">
+          Уже есть аккаунт?{' '}
+          <a href="/login" className="text-blue-600 hover:underline font-medium">
+            Войти
+          </a>
+        </div>
+
       </div>
     </div>
   );

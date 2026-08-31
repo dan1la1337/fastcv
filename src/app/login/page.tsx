@@ -3,13 +3,12 @@
 import { useState } from "react";
 import { supabase } from "@/lib/supabase";
 import { useRouter } from "next/navigation";
-import { Briefcase, Loader2 } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import Link from "next/link";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [isLogin, setIsLogin] = useState(true);
   const [loading, setLoading] = useState(false);
   const router = useRouter();
 
@@ -18,16 +17,18 @@ export default function LoginPage() {
     setLoading(true);
 
     try {
-      if (isLogin) {
-        const { error } = await supabase.auth.signInWithPassword({ email, password });
-        if (error) throw error;
+      const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+      if (error) throw error;
+
+      // Проверяем роль и направляем в нужный кабинет
+      const role = data.user?.user_metadata?.role;
+      if (role === 'employer') {
+        router.push('/dashboard/company');
       } else {
-        const { error } = await supabase.auth.signUp({ email, password });
-        if (error) throw error;
+        router.push('/'); // Кандидата на главную к вакансиям
       }
-      router.push("/"); // После успеха возвращаем на главную
     } catch (error: any) {
-      alert(error.message || "Ошибка авторизации");
+      alert(error.message || "Ошибка авторизации. Проверьте логин и пароль.");
     } finally {
       setLoading(false);
     }
@@ -42,10 +43,10 @@ export default function LoginPage() {
             <span className="font-semibold text-neutral-100">Job Aggregator</span>
           </Link>
           <h1 className="text-2xl font-bold text-white">
-            {isLogin ? "С возвращением" : "Создать аккаунт"}
+            С возвращением
           </h1>
           <p className="text-neutral-400 text-sm mt-2">
-            {isLogin ? "Войдите, чтобы откликаться с помощью ИИ" : "Присоединяйтесь к платформе нового поколения"}
+            Войдите, чтобы откликаться с помощью ИИ
           </p>
         </div>
 
@@ -79,18 +80,17 @@ export default function LoginPage() {
             disabled={loading}
             className="w-full flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-500 text-white py-3 rounded-xl text-sm font-semibold transition-colors disabled:opacity-50 mt-6"
           >
-            {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : (isLogin ? "Войти" : "Зарегистрироваться")}
+            {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : "Войти"}
           </button>
         </form>
 
         <div className="mt-6 text-center">
-          <button
-            type="button"
-            onClick={() => setIsLogin(!isLogin)}
+          <Link
+            href="/register"
             className="text-sm text-neutral-400 hover:text-white transition-colors"
           >
-            {isLogin ? "Нет аккаунта? Создать" : "Уже есть аккаунт? Войти"}
-          </button>
+            Нет аккаунта? Создать
+          </Link>
         </div>
       </div>
     </div>
