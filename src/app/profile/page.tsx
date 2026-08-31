@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
 import { useRouter } from "next/navigation";
-import { Loader2, LogOut, Save } from "lucide-react";
+import { Loader2, LogOut, Save, Briefcase, UserCircle } from "lucide-react";
 import Link from "next/link";
 
 export default function ProfilePage() {
@@ -32,6 +32,9 @@ export default function ProfilePage() {
     }
     setUser(user);
 
+    // Берем роль из метаданных (сохраненных при регистрации), по умолчанию 'candidate'
+    const userRole = user.user_metadata?.role || "candidate";
+
     // Вытягиваем данные из таблицы profiles
     const { data: profile } = await supabase
       .from("profiles")
@@ -41,9 +44,12 @@ export default function ProfilePage() {
 
     if (profile) {
       setName(profile.name || "");
-      setRole(profile.role || "candidate");
+      setRole(profile.role || userRole);
       setDescription(profile.description || "");
       setSkills(profile.skills ? profile.skills.join(", ") : "");
+    } else {
+      // Если профиля в БД еще нет, устанавливаем роль из регистрации
+      setRole(userRole);
     }
     setLoading(false);
   }
@@ -58,7 +64,7 @@ export default function ProfilePage() {
     const payload = {
       id: user.id,
       name,
-      role,
+      role, // Роль сохраняется, но пользователь больше не может её изменить
       description,
       skills: skillsArray,
     };
@@ -105,23 +111,43 @@ export default function ProfilePage() {
           <h1 className="text-2xl font-bold mb-6 text-white">Личный кабинет</h1>
           
           <form onSubmit={saveProfile} className="space-y-6">
+            
+            {/* СТАТИЧНАЯ ПЛАШКА РОЛИ ВМЕСТО ВЫПАДАЮЩЕГО СПИСКА */}
             <div>
-              <label className="block text-xs font-bold text-neutral-500 uppercase tracking-wider mb-2">Ваша роль</label>
-              <select value={role} onChange={(e) => setRole(e.target.value)} className="w-full bg-neutral-950 border border-neutral-800 rounded-xl px-4 py-3 text-sm text-neutral-200 focus:outline-none focus:border-blue-500 transition-colors">
-                <option value="candidate">Соискатель</option>
-                <option value="employer">Работодатель</option>
-              </select>
+              <label className="block text-xs font-bold text-neutral-500 uppercase tracking-wider mb-2">Ваш тип аккаунта</label>
+              <div className="inline-flex items-center gap-2 px-4 py-2 bg-neutral-950 border border-neutral-800 rounded-xl text-sm font-medium text-neutral-300">
+                {role === 'employer' ? (
+                  <><Briefcase className="w-4 h-4 text-blue-400" /> Работодатель</>
+                ) : (
+                  <><UserCircle className="w-4 h-4 text-emerald-400" /> Соискатель</>
+                )}
+              </div>
             </div>
 
             <div>
-              <label className="block text-xs font-bold text-neutral-500 uppercase tracking-wider mb-2">Имя / Название компании</label>
-              <input required type="text" value={name} onChange={(e) => setName(e.target.value)} placeholder="Например, Иван Иванов" className="w-full bg-neutral-950 border border-neutral-800 rounded-xl px-4 py-3 text-sm text-neutral-200 focus:outline-none focus:border-blue-500 transition-colors" />
+              <label className="block text-xs font-bold text-neutral-500 uppercase tracking-wider mb-2">
+                {role === "candidate" ? "Ваше Имя" : "Название компании"}
+              </label>
+              <input 
+                required 
+                type="text" 
+                value={name} 
+                onChange={(e) => setName(e.target.value)} 
+                placeholder={role === "candidate" ? "Например, Иван Иванов" : "Например, ООО Технологии"} 
+                className="w-full bg-neutral-950 border border-neutral-800 rounded-xl px-4 py-3 text-sm text-neutral-200 focus:outline-none focus:border-blue-500 transition-colors" 
+              />
             </div>
 
             {role === "candidate" && (
               <div>
                 <label className="block text-xs font-bold text-neutral-500 uppercase tracking-wider mb-2">Ключевые навыки (через запятую)</label>
-                <input type="text" value={skills} onChange={(e) => setSkills(e.target.value)} placeholder="React, Node.js, Python..." className="w-full bg-neutral-950 border border-neutral-800 rounded-xl px-4 py-3 text-sm text-neutral-200 focus:outline-none focus:border-blue-500 transition-colors" />
+                <input 
+                  type="text" 
+                  value={skills} 
+                  onChange={(e) => setSkills(e.target.value)} 
+                  placeholder="React, Node.js, Python..." 
+                  className="w-full bg-neutral-950 border border-neutral-800 rounded-xl px-4 py-3 text-sm text-neutral-200 focus:outline-none focus:border-blue-500 transition-colors" 
+                />
               </div>
             )}
 
@@ -129,7 +155,13 @@ export default function ProfilePage() {
               <label className="block text-xs font-bold text-neutral-500 uppercase tracking-wider mb-2">
                 {role === "candidate" ? "Опыт работы и о себе" : "Описание компании"}
               </label>
-              <textarea required value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Подробно расскажите о вашем опыте..." className="w-full h-32 bg-neutral-950 border border-neutral-800 rounded-xl p-4 text-sm text-neutral-200 focus:outline-none focus:border-blue-500 transition-colors resize-none leading-relaxed" />
+              <textarea 
+                required 
+                value={description} 
+                onChange={(e) => setDescription(e.target.value)} 
+                placeholder={role === "candidate" ? "Подробно расскажите о вашем опыте..." : "Расскажите о вашей компании и проектах..."} 
+                className="w-full h-32 bg-neutral-950 border border-neutral-800 rounded-xl p-4 text-sm text-neutral-200 focus:outline-none focus:border-blue-500 transition-colors resize-none leading-relaxed" 
+              />
             </div>
 
             <button type="submit" disabled={saving} className="w-full flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-500 text-white py-3.5 rounded-xl text-sm font-semibold transition-colors disabled:opacity-50 mt-4">
