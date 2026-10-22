@@ -5,8 +5,7 @@
 -- и данные не трогает: создаёт только недостающее, включает RLS и
 -- переустанавливает политики.
 --
--- Структура таблиц восстановлена по коду приложения. Если в вашей базе
--- колонки называются иначе, сверьте их перед запуском.
+-- Описания таблиц совпадают с рабочей базой проекта (сверено 22.10.2026).
 --
 -- Кто что может:
 --   * вакансии читают все; публикует только работодатель и только от своего имени;
@@ -14,7 +13,7 @@
 --   * отклик создаёт только кандидат от своего имени; видят его кандидат и
 --     работодатель-владелец вакансии; работодатель меняет только статус;
 --   * роль задаётся один раз при регистрации и дальше не меняется;
---   * таблица channels доступна только сборщику.
+--   * таблицы channels и companies доступны только через service-role.
 
 create extension if not exists pgcrypto;
 
@@ -23,45 +22,57 @@ create extension if not exists pgcrypto;
 -- ---------------------------------------------------------------------------
 
 create table if not exists public.profiles (
-  id          uuid primary key references auth.users (id) on delete cascade,
-  role        text not null default 'candidate' check (role in ('candidate', 'employer')),
-  name        text,
+  id          uuid primary key default gen_random_uuid(),
+  role        varchar not null check (role in ('candidate', 'employer')),
+  name        text not null,
   description text,
-  skills      text[] not null default '{}',
-  created_at  timestamptz not null default now()
+  skills      jsonb default '[]'::jsonb,
+  trust_score integer default 100,
+  created_at  timestamptz default timezone('utc', now())
+);
+
+create table if not exists public.companies (
+  id          uuid primary key default gen_random_uuid(),
+  name        text not null,
+  domain      text unique,
+  trust_score numeric default 5.0,
+  is_claimed  boolean default false,
+  owner_id    uuid
 );
 
 create table if not exists public.vacancies (
   id             uuid primary key default gen_random_uuid(),
+  company_id     uuid references public.companies (id),
   raw_hash       text unique,
   title          text not null,
   description    text,
   salary_min     integer,
   salary_max     integer,
   city           text,
-  is_remote      boolean not null default false,
+  is_remote      boolean,
   contact_type   text,
   contact_value  text,
-  ranking_weight numeric not null default 1.0,
-  source_type    text not null default 'external' check (source_type in ('external', 'internal')),
-  employer_id    uuid references public.profiles (id) on delete cascade,
-  created_at     timestamptz not null default now()
+  ranking_weight double precision default 1.0,
+  created_at     timestamptz default now(),
+  source_type    text default 'external' check (source_type in ('internal', 'external')),
+  employer_id    uuid references public.profiles (id)
 );
 
 create table if not exists public.applications (
   id            uuid primary key default gen_random_uuid(),
-  vacancy_id    uuid not null references public.vacancies (id) on delete cascade,
-  candidate_id  uuid not null references public.profiles (id) on delete cascade,
+  vacancy_id    uuid references public.vacancies (id),
+  candidate_id  uuid references public.profiles (id),
   cover_letter  text,
-  status        text not null default 'new' check (status in ('new', 'interview_scheduled', 'rejected')),
+  status        varchar default 'new' check (status in ('new', 'viewed', 'interview_scheduled', 'rejected')),
   hr_replied_at timestamptz,
-  created_at    timestamptz not null default now(),
-  unique (vacancy_id, candidate_id)
+  created_at    timestamptz default timezone('utc', now())
 );
 
 create table if not exists public.channels (
-  username       text primary key,
-  is_active      boolean not null default true,
+  id             serial primary key,
+  username       text not null unique,
+  category       text default 'general',
+  is_active      boolean default true,
   last_parsed_at timestamptz
 );
 
@@ -94,10 +105,12 @@ security definer
 set search_path = public
 as $$
 begin
-  insert into public.profiles (id, role)
+  -- name обязателен; пустое имя пользователь заполнит в профиле после входа
+  insert into public.profiles (id, role, name)
   values (
     new.id,
-    case when new.raw_user_meta_data ->> 'role' = 'employer' then 'employer' else 'candidate' end
+    case when new.raw_user_meta_data ->> 'role' = 'employer' then 'employer' else 'candidate' end,
+    ''
   )
   on conflict (id) do nothing;
   return new;
@@ -109,11 +122,21 @@ create trigger on_auth_user_created
   after insert on auth.users
   for each row execute function public.handle_new_user();
 
+-- Профили для пользователей, зарегистрированных до появления триггера
+insert into public.profiles (id, role, name)
+select
+  u.id,
+  case when u.raw_user_meta_data ->> 'role' = 'employer' then 'employer' else 'candidate' end,
+  ''
+from auth.users u
+where not exists (select 1 from public.profiles p where p.id = u.id);
+
 -- Пользователь не может сменить себе роль. Администратор (SQL Editor,
 -- service-role) — может: у таких запросов нет auth.uid().
 create or replace function public.prevent_role_change()
 returns trigger
 language plpgsql
+set search_path = public
 as $$
 begin
   if new.role is distinct from old.role and auth.uid() is not null then
@@ -136,6 +159,7 @@ alter table public.profiles     enable row level security;
 alter table public.vacancies    enable row level security;
 alter table public.applications enable row level security;
 alter table public.channels     enable row level security;
+alter table public.companies    enable row level security;
 
 -- Снимаем все старые политики, чтобы не осталось открытых правил
 do $$
@@ -144,7 +168,7 @@ begin
   for p in
     select policyname, tablename from pg_policies
     where schemaname = 'public'
-      and tablename in ('profiles', 'vacancies', 'applications', 'channels')
+      and tablename in ('profiles', 'vacancies', 'applications', 'channels', 'companies')
   loop
     execute format('drop policy %I on public.%I', p.policyname, p.tablename);
   end loop;
@@ -236,4 +260,5 @@ create policy applications_update on public.applications
 revoke update on public.applications from anon, authenticated;
 grant update (status, hr_replied_at) on public.applications to authenticated;
 
--- channels: политик нет — доступ только у service-role (сборщик)
+-- channels и companies: политик нет — доступ только у service-role
+-- (channels читает и обновляет сборщик, companies кодом пока не используется)
