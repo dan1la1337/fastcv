@@ -25,7 +25,7 @@ def page(channel: str, ids: list[int], before: int | None = None, text: str = "P
     more = f'<a href="/s/{channel}?before={before}" class="tme_messages_more js-messages_more" data-before="{before}"></a>' if before else ""
     msgs = "".join(
         f'<div class="tgme_widget_message_wrap"><div class="tgme_widget_message js-widget_message" data-post="{channel}/{i}">'
-        f'<div class="tgme_widget_message_text js-message_text">{text} #{i}</div>'
+        f'<div class="tgme_widget_message_text js-message_text">{text} (пост {i})</div>'
         f'<a class="tgme_widget_message_date" href="https://t.me/{channel}/{i}"><time datetime="2026-10-22T10:00:00+00:00">10:00</time></a>'
         f"</div></div>"
         for i in ids
@@ -33,10 +33,16 @@ def page(channel: str, ids: list[int], before: int | None = None, text: str = "P
     return f'<section class="tgme_channel_history">{more}{msgs}</section>'
 
 
+def per_post_job(text: str) -> VacancyAI:
+    """Разные посты — разные вакансии (иначе сработает поиск дублей)."""
+    return job(title=f"Python Developer {main.text_fingerprint(text)[:8]}")
+
+
 def job(**overrides) -> VacancyAI:
     data = dict(is_job=True, title="Python Developer", company="Kaspi.kz", description="Описание", salary_min=200000,
                 salary_max=None, salary_currency="RUB", city=None, is_remote=True, contact_type="telegram",
-                contact_value="@hr", stack=["Python", "python", " Django "])
+                contact_value="@hr", stack=["Python", "python", " Django "],
+                level="senior", direction="backend", work_format="remote")
     data.update(overrides)
     return VacancyAI(**data)
 
@@ -44,6 +50,7 @@ def job(**overrides) -> VacancyAI:
 class FakeStore:
     def __init__(self, known: set[str] | None = None, rows: list[dict] | None = None):
         self.known = known or set()
+        self.dup_checks: list[tuple] = []
         self.inserted: list[dict] = []
         self.channel_updates: dict[str, dict] = {}
         self.rows = rows or []
@@ -51,14 +58,21 @@ class FakeStore:
     def active_channels(self):
         return self.rows
 
-    def is_known(self, post, raw_hash):
-        return post.key in self.known or raw_hash in self.known
+    def is_known(self, post, raw_hash, fingerprint):
+        return post.key in self.known or raw_hash in self.known or fingerprint in self.known
+
+    def find_duplicate(self, key, company, contact):
+        self.dup_checks.append((key, company, contact))
+        return any(v["title_key"] == key and ((company and (v["company_name"] or "").lower() == company.lower())
+                                              or (contact and (v["contact_value"] or "").lower() == contact.lower()))
+                   for v in self.inserted)
 
     def insert_vacancy(self, payload):
         if payload["source_post"] in self.known:
             return False
         self.known.add(payload["source_post"])
-        self.inserted.append(payload)
+        self.known.add(payload["text_fingerprint"])
+        self.inserted.append({**payload, "title_key": main.title_key(payload["title"])})
         return True
 
     def update_channel(self, username, fields):
@@ -184,7 +198,7 @@ def test_salary_currency_saved_only_with_salary():
     store = FakeStore()
     process_post(post(1), store, lambda t: job(salary_min=5000, salary_currency="USD"))
     process_post(post(2, "Ищем дизайнера в команду, удалённо, пишите @hr_lead"), store,
-                 lambda t: job(salary_min=None, salary_max=None, salary_currency="RUB"))
+                 lambda t: job(title="Дизайнер", salary_min=None, salary_max=None, salary_currency="RUB"))
     assert store.inserted[0]["salary_currency"] == "USD"
     assert store.inserted[1]["salary_currency"] is None
 
@@ -206,7 +220,7 @@ def test_channel_progress_saved_and_failure_reset():
     store = FakeStore()
     fetch = lambda url: page("ch", [5, 6, 7], before=None)
     r = process_channel({"username": "@ch", "last_post_id": 4, "failed_runs": 3}, store,
-                        lambda t: job(), fetch=fetch, pause=lambda s: None)
+                        per_post_job, fetch=fetch, pause=lambda s: None)
     assert (r.new_posts, r.saved, r.error) == (3, 3, None)
     assert store.channel_updates["ch"]["last_post_id"] == 7
     assert store.channel_updates["ch"]["failed_runs"] == 0
@@ -220,7 +234,7 @@ def test_ai_outage_keeps_unprocessed_posts_for_next_run():
         calls["n"] += 1
         if calls["n"] == 2:
             raise AIUnavailable("503")
-        return job()
+        return per_post_job(text)
 
     fetch = lambda url: page("ch", [5, 6, 7])
     r = process_channel({"username": "ch", "last_post_id": 4}, store, flaky, fetch=fetch, pause=lambda s: None)
@@ -495,3 +509,69 @@ def test_daily_report_text():
     assert "у 2: @a, @b" in text
     assert "без проблем" in text
     assert "Последний запуск" not in main.daily_report_text(stats)
+
+
+# --- нормализация и дубли ----------------------------------------------------------
+
+
+def test_fingerprint_ignores_links_mentions_tags_and_emoji():
+    a = "🔥 Python developer в Acme!\nЗП 300к. Пишите @hr_acme https://t.me/jobs/1 #вакансия"
+    b = "Python developer в Acme\n\nЗП 300к.   Пишите @recruiter #job #python http://acme.io/jobs"
+    assert main.text_fingerprint(a) == main.text_fingerprint(b)
+    assert main.text_fingerprint(a) != main.text_fingerprint("Go developer в Acme. ЗП 300к.")
+
+
+def test_title_key_matches_database_rule():
+    assert main.title_key("Android-разработчик") == main.title_key("android  разработчик") == "android разработчик"
+    assert main.title_key(" Senior Python-developer (Remote) ") == "senior python developer remote"
+
+
+def test_repost_with_cosmetic_changes_is_not_sent_to_ai():
+    store = FakeStore()
+    calls = []
+
+    def normalize(text):
+        calls.append(text)
+        return job()
+
+    text = "Python developer, удалёнка, вилка 200 000 — пишите @hr #вакансия"
+    assert process_post(Post("a", 1, text, None, "u"), store, normalize) == "saved"
+    repost = "Python developer, удалёнка, вилка 200 000 — пишите @other_hr #jobs 🔥"
+    assert process_post(Post("b", 7, repost, None, "u"), store, normalize) == "duplicate"
+    assert len(calls) == 1
+
+
+def test_same_job_from_other_channel_with_other_text_is_duplicate():
+    store = FakeStore()
+    first = "Kaspi ищет Python-разработчика. Удалённо, 300к. Писать @hr"
+    second = "В Kaspi.kz открыта вакансия Python developer, полная удалёнка, оклад 300 000. Контакт: @HR"
+    assert process_post(Post("a", 1, first, None, "u"), store, lambda t: job(title="Python-разработчик")) == "saved"
+    assert process_post(Post("b", 2, second, None, "u"), store,
+                        lambda t: job(title="Python разработчик", company=None, contact_value="@HR")) == "duplicate"
+    assert store.dup_checks[-1] == ("python разработчик", None, "HR")
+    # другая должность той же компании — не дубль
+    assert process_post(Post("c", 3, "Kaspi ищет Go-разработчика на 400к, пишите @hr", None, "u"), store,
+                        lambda t: job(title="Go-разработчик")) == "saved"
+
+
+def test_normalized_fields_are_saved():
+    store = FakeStore()
+    process_post(Post("a", 1, "x" * 50, None, "u"), store, lambda t: job(level="junior", direction="qa", work_format="hybrid"))
+    saved = store.inserted[0]
+    assert (saved["level"], saved["direction"], saved["work_format"]) == ("junior", "qa", "hybrid")
+    assert saved["text_fingerprint"] == main.text_fingerprint("x" * 50)
+
+
+def test_duplicate_query_escapes_values():
+    log = []
+    db = type("DB", (), {"table": lambda self, t: FakeQuery(log, data=[])})()
+    assert main.Store(db).find_duplicate("qa", 'Acme_100%, "Ltd"', None) is False
+    or_args = [args[0] for name, args in log if name == "or_"]
+    assert or_args == [r'company_name.ilike."Acme\\_100\\%, \"Ltd\""']
+
+
+def test_duplicate_check_skipped_without_company_or_contact():
+    log = []
+    db = type("DB", (), {"table": lambda self, t: FakeQuery(log, data=[{"id": 1}])})()
+    assert main.Store(db).find_duplicate("qa engineer", None, None) is False
+    assert not log

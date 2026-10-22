@@ -2,9 +2,9 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { cache } from "react";
-import { ArrowLeft, Calendar, ExternalLink, Globe, MapPin } from "lucide-react";
+import { ArrowLeft, Briefcase, Building2, Calendar, ExternalLink, Globe, MapPin } from "lucide-react";
 import { supabase } from "@/lib/supabase";
-import { formatSalary, type Vacancy } from "@/lib/vacancies";
+import { formatLabel, formatSalary, levelLabel, type Vacancy } from "@/lib/vacancies";
 import ApplyButton from "@/components/ApplyButton";
 
 type Props = { params: Promise<{ id: string }> };
@@ -19,7 +19,12 @@ const getVacancy = cache(async (id: string): Promise<Vacancy | null> => {
 });
 
 function summary(v: Vacancy): string {
-  const parts = [formatSalary(v.salary_min, v.salary_max, v.salary_currency), v.city, v.is_remote ? "удалённо" : null];
+  const parts = [
+    formatSalary(v.salary_min, v.salary_max, v.salary_currency),
+    levelLabel(v.level),
+    v.city,
+    formatLabel(v.work_format)?.toLowerCase() ?? (v.is_remote ? "удалённо" : null),
+  ];
   const head = parts.filter(Boolean).join(" · ");
   return `${head}. ${v.description ?? ""}`.slice(0, 200);
 }
@@ -55,7 +60,7 @@ function jobPostingJsonLd(v: Vacancy) {
     description: v.description ?? v.title,
     datePosted: posted,
     validThrough,
-    ...(v.is_remote ? { jobLocationType: "TELECOMMUTE" } : {}),
+    ...(v.work_format === "remote" || (!v.work_format && v.is_remote) ? { jobLocationType: "TELECOMMUTE" } : {}),
     ...(v.city ? { jobLocation: { "@type": "Place", address: { "@type": "PostalAddress", addressLocality: v.city } } } : {}),
     ...(salaryValue && v.salary_currency ? { baseSalary: salaryValue } : {}),
     ...(v.stack?.length ? { skills: v.stack.join(", ") } : {}),
@@ -108,7 +113,10 @@ export default async function VacancyPage({ params }: Props) {
             </p>
             <p className="flex flex-wrap items-center gap-4 text-sm text-neutral-400">
               {vacancy.city && <span className="inline-flex items-center gap-1.5"><MapPin className="w-4 h-4" />{vacancy.city}</span>}
-              {vacancy.is_remote && <span className="inline-flex items-center gap-1.5"><Globe className="w-4 h-4" />Удалённо</span>}
+              {vacancy.level && <span className="inline-flex items-center gap-1.5"><Briefcase className="w-4 h-4" />{levelLabel(vacancy.level)}</span>}
+              {vacancy.work_format === "remote" || (!vacancy.work_format && vacancy.is_remote)
+                ? <span className="inline-flex items-center gap-1.5"><Globe className="w-4 h-4" />Удалённо</span>
+                : vacancy.work_format && <span className="inline-flex items-center gap-1.5"><Building2 className="w-4 h-4" />{formatLabel(vacancy.work_format)}</span>}
               <span className="inline-flex items-center gap-1.5"><Calendar className="w-4 h-4" />{posted}</span>
             </p>
           </header>

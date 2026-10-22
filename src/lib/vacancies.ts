@@ -19,29 +19,79 @@ export interface Vacancy {
   stack: string[] | null;
   employer_id: string | null;
   archived_at?: string | null;
+  level?: Level | null;
+  direction?: string | null;
+  work_format?: WorkFormat | null;
 }
+
+export type Level = "intern" | "junior" | "middle" | "senior" | "lead";
+export type WorkFormat = "remote" | "hybrid" | "office";
 
 export interface VacancyFilters {
   search: string;
-  remote: boolean;
+  /** Формат работы; пусто — любой. */
+  format: WorkFormat | "";
   minSalary: number;
   withSalary: boolean;
   city: string;
+  /** Направление (vacancies.direction); пусто — все. */
+  direction: string;
+  /** Уровни: вакансия подходит, если её уровень среди выбранных. */
+  levels: Level[];
   /** Технологии: вакансия подходит, если упоминает хотя бы одну. */
   stack: string[];
 }
 
 export const PAGE_SIZE = 30;
 
-export const SPECIALTIES: Record<string, string[]> = {
-  Backend: ["Backend", "Java", "Python", "Go", "Golang", "Node.js", "PHP", "C#", ".NET", "SQL", "Spring", "Django"],
-  Frontend: ["Frontend", "React", "Vue", "Angular", "TypeScript", "JavaScript", "Next.js", "Tailwind"],
-  Mobile: ["iOS", "Android", "Swift", "Kotlin", "Flutter", "React Native"],
-  QA: ["QA", "тестировщик", "тестирование", "Selenium", "Cypress", "Appium", "Postman", "Playwright"],
-  DevOps: ["DevOps", "SRE", "Docker", "Kubernetes", "CI/CD", "Linux", "Ansible", "Terraform"],
-  "Data / ML": ["Data", "ML", "Machine Learning", "Data Science", "Spark", "Airflow", "Pandas", "PyTorch"],
-  Design: ["дизайнер", "Designer", "UI", "UX", "Figma"],
-};
+export interface Direction {
+  id: string;
+  label: string;
+  group: "it" | "other";
+  /** Технологии для уточнения внутри направления. */
+  tech?: string[];
+}
+
+/** Направления — те же значения, что в ограничении vacancies.direction (supabase/schema.sql). */
+export const DIRECTIONS: Direction[] = [
+  { id: "backend", label: "Backend", group: "it", tech: ["Java", "Python", "Go", "Node.js", "PHP", "C#", ".NET", "1С", "SQL", "Spring", "Django"] },
+  { id: "frontend", label: "Frontend", group: "it", tech: ["React", "Vue", "Angular", "TypeScript", "JavaScript", "Next.js"] },
+  { id: "fullstack", label: "Fullstack", group: "it", tech: ["React", "Node.js", "Python", "TypeScript", "PHP"] },
+  { id: "mobile", label: "Мобильная разработка", group: "it", tech: ["iOS", "Android", "Swift", "Kotlin", "Flutter", "React Native"] },
+  { id: "qa", label: "QA и тестирование", group: "it", tech: ["Selenium", "Playwright", "Cypress", "Appium", "Postman", "Python", "Java"] },
+  { id: "devops", label: "DevOps и инфраструктура", group: "it", tech: ["Docker", "Kubernetes", "Linux", "Terraform", "Ansible", "CI/CD"] },
+  { id: "data_ml", label: "Data / ML / AI", group: "it", tech: ["Python", "SQL", "PyTorch", "Spark", "Airflow", "LLM"] },
+  { id: "analytics", label: "Аналитика", group: "it", tech: ["SQL", "Python", "Excel", "Power BI", "Tableau"] },
+  { id: "security", label: "Безопасность", group: "it" },
+  { id: "gamedev", label: "Gamedev", group: "it", tech: ["Unity", "Unreal Engine", "C#", "C++"] },
+  { id: "design", label: "Дизайн и арт", group: "other", tech: ["Figma", "Photoshop", "Blender", "After Effects"] },
+  { id: "product", label: "Продукт и проекты", group: "other" },
+  { id: "marketing", label: "Маркетинг и SMM", group: "other" },
+  { id: "content", label: "Медиа и контент", group: "other" },
+  { id: "sales", label: "Продажи", group: "other" },
+  { id: "hr", label: "HR", group: "other" },
+  { id: "support", label: "Поддержка", group: "other" },
+  { id: "finance", label: "Финансы", group: "other" },
+  { id: "education", label: "Образование", group: "other" },
+  { id: "other", label: "Другое", group: "other" },
+];
+
+export const LEVELS: { id: Level; label: string }[] = [
+  { id: "intern", label: "Стажёр" },
+  { id: "junior", label: "Junior" },
+  { id: "middle", label: "Middle" },
+  { id: "senior", label: "Senior" },
+  { id: "lead", label: "Lead" },
+];
+
+export const WORK_FORMATS: { id: WorkFormat; label: string }[] = [
+  { id: "remote", label: "Удалённо" },
+  { id: "hybrid", label: "Гибрид" },
+  { id: "office", label: "Офис" },
+];
+
+export const levelLabel = (level?: string | null) => LEVELS.find(l => l.id === level)?.label ?? null;
+export const formatLabel = (format?: string | null) => WORK_FORMATS.find(f => f.id === format)?.label ?? null;
 
 // --- построение фильтров PostgREST ------------------------------------------
 
@@ -103,7 +153,9 @@ export async function fetchVacancyPage(
     .select("*", { count: "exact" })
     .is("archived_at", null);
 
-  if (filters.remote) query = query.eq("is_remote", true);
+  if (filters.format) query = query.eq("work_format", filters.format);
+  if (filters.direction) query = query.eq("direction", filters.direction);
+  if (filters.levels.length) query = query.in("level", filters.levels);
   const city = filters.city.trim();
   if (city) query = query.ilike("city", `%${city.replace(/[%_\\]/g, "\\$&")}%`);
 

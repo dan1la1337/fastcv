@@ -2,8 +2,11 @@
 
 import { useEffect, useRef, useState } from "react";
 import { supabase } from "@/lib/supabase";
-import { fetchVacancyPage, formatSalary, plural, PAGE_SIZE, SPECIALTIES, VACANCY_FORMS, type Vacancy, type VacancyFilters } from "@/lib/vacancies";
-import { Search, MapPin, ChevronDown, ChevronRight, Sparkles, Loader2, ExternalLink, Globe, SlidersHorizontal } from "lucide-react";
+import {
+  DIRECTIONS, LEVELS, WORK_FORMATS, fetchVacancyPage, formatLabel, formatSalary, levelLabel, plural, PAGE_SIZE,
+  VACANCY_FORMS, type Level, type Vacancy, type VacancyFilters, type WorkFormat,
+} from "@/lib/vacancies";
+import { Search, MapPin, ChevronDown, ChevronRight, Sparkles, Loader2, ExternalLink, Globe, SlidersHorizontal, Briefcase, Building2 } from "lucide-react";
 import type { User } from "@supabase/supabase-js";
 import Link from "next/link";
 import SmartApply from "@/components/SmartApply";
@@ -20,12 +23,13 @@ export default function Home() {
 
   // Фильтры
   const [search, setSearch] = useState("");
-  const [onlyRemote, setOnlyRemote] = useState(false);
+  const [format, setFormat] = useState<WorkFormat | "">("");
   const [minSalary, setMinSalary] = useState<number>(0);
   const [onlyWithSalary, setOnlyWithSalary] = useState<boolean>(false);
   const [city, setCity] = useState("");
 
-  const [selectedSpecialty, setSelectedSpecialty] = useState<string | null>(null);
+  const [selectedDirection, setSelectedDirection] = useState<string | null>(null);
+  const [selectedLevels, setSelectedLevels] = useState<Level[]>([]);
   const [selectedStack, setSelectedStack] = useState<string[]>([]);
   // На телефоне фильтры свёрнуты, иначе они занимают весь первый экран
   const [filtersOpen, setFiltersOpen] = useState(false);
@@ -51,12 +55,13 @@ export default function Home() {
   // первой тысяче, и страница грузит только PAGE_SIZE карточек за раз.
   const filters: VacancyFilters = {
     search,
-    remote: onlyRemote,
+    format,
     minSalary,
     withSalary: onlyWithSalary,
     city,
-    // Специальность без выбранных технологий — ищем по всем её технологиям
-    stack: selectedStack.length ? selectedStack : selectedSpecialty ? SPECIALTIES[selectedSpecialty] : [],
+    direction: selectedDirection ?? "",
+    levels: selectedLevels,
+    stack: selectedStack,
   };
   const filtersKey = JSON.stringify(filters);
   const requestId = useRef(0);
@@ -101,6 +106,14 @@ export default function Home() {
   const toggleStack = (tech: string) => {
     setSelectedStack(prev => prev.includes(tech) ? prev.filter(t => t !== tech) : [...prev, tech]);
   };
+  const toggleLevel = (level: Level) => {
+    setSelectedLevels(prev => prev.includes(level) ? prev.filter(l => l !== level) : [...prev, level]);
+  };
+  const direction = DIRECTIONS.find(d => d.id === selectedDirection);
+  const chip = (active: boolean) =>
+    `text-xs px-2.5 py-1.5 rounded-md border transition-colors ${active
+      ? "bg-blue-600 border-blue-500 text-white"
+      : "bg-neutral-950 border-neutral-700 text-neutral-400 hover:border-neutral-500 hover:text-neutral-200"}`;
 
   // Надежное определение роли: проверяем и метаданные аутентификации, и таблицу profiles
   const userRole = userProfile?.role || user?.user_metadata?.role;
@@ -162,7 +175,7 @@ export default function Home() {
 
       <main className="max-w-6xl mx-auto px-4 py-6 lg:py-8 grid grid-cols-1 lg:grid-cols-4 gap-4 lg:gap-8 relative z-0">
         {(() => {
-          const active = [search.trim(), onlyRemote, minSalary > 0, onlyWithSalary, city.trim(), selectedSpecialty].filter(Boolean).length;
+          const active = [search.trim(), format, minSalary > 0, onlyWithSalary, city.trim(), selectedDirection, selectedLevels.length > 0].filter(Boolean).length;
           return (
             <button
               onClick={() => setFiltersOpen(open => !open)}
@@ -228,19 +241,29 @@ export default function Home() {
               </label>
             </div>
 
-            {/* Удаленка */}
+            {/* Формат работы */}
             <div className="space-y-3 pt-2 border-t border-neutral-800/60">
-              <label 
-                onClick={() => setOnlyRemote(!onlyRemote)}
-                className="flex items-center gap-3 cursor-pointer group select-none"
-              >
-                <div className={`w-5 h-5 rounded border flex items-center justify-center transition-colors ${onlyRemote ? 'bg-blue-600 border-blue-500' : 'border-neutral-700 group-hover:border-neutral-500'}`}>
-                  {onlyRemote && <span className="text-white text-xs font-bold">✓</span>}
-                </div>
-                <span className="text-sm text-neutral-300 group-hover:text-neutral-100 transition-colors">
-                  Только удалёнка
-                </span>
-              </label>
+              <label className="text-xs font-bold text-neutral-500 uppercase tracking-wider">Формат</label>
+              <div className="flex flex-wrap gap-2">
+                <button onClick={() => setFormat("")} className={chip(format === "")} aria-pressed={format === ""}>Любой</button>
+                {WORK_FORMATS.map(f => (
+                  <button key={f.id} onClick={() => setFormat(format === f.id ? "" : f.id)} className={chip(format === f.id)} aria-pressed={format === f.id}>
+                    {f.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Уровень */}
+            <div className="space-y-3 pt-2 border-t border-neutral-800/60">
+              <label className="text-xs font-bold text-neutral-500 uppercase tracking-wider">Уровень</label>
+              <div className="flex flex-wrap gap-2">
+                {LEVELS.map(l => (
+                  <button key={l.id} onClick={() => toggleLevel(l.id)} className={chip(selectedLevels.includes(l.id))} aria-pressed={selectedLevels.includes(l.id)}>
+                    {l.label}
+                  </button>
+                ))}
+              </div>
             </div>
 
             {/* Город */}
@@ -253,39 +276,39 @@ export default function Home() {
             </div>
           </div>
 
-          {/* Многоуровневый фильтр стека */}
+          {/* Направление и уточнение по технологиям */}
           <div className="bg-neutral-900/50 border border-neutral-800 rounded-xl p-5 space-y-4">
-             <label className="text-xs font-bold text-neutral-500 uppercase tracking-wider">Направление</label>
-             
-             <div className="space-y-1.5 pt-1">
-               {Object.keys(SPECIALTIES).map(spec => (
-                 <button 
-                    key={spec}
-                    onClick={() => { setSelectedSpecialty(selectedSpecialty === spec ? null : spec); setSelectedStack([]); }}
-                    className={`w-full flex items-center justify-between text-sm px-3 py-2 rounded-md transition-colors ${selectedSpecialty === spec ? 'bg-blue-600/10 text-blue-400 font-medium' : 'text-neutral-300 hover:bg-neutral-800/50'}`}
-                 >
-                   {spec}
-                   {selectedSpecialty === spec && <ChevronRight className="w-4 h-4" />}
-                 </button>
-               ))}
-             </div>
+            <label className="text-xs font-bold text-neutral-500 uppercase tracking-wider">Направление</label>
 
-             {selectedSpecialty && (
-               <div className="pt-4 border-t border-neutral-800 animate-in fade-in slide-in-from-top-2">
-                 <p className="text-xs text-neutral-500 mb-3">Уточнить по технологиям (можно несколько):</p>
-                 <div className="flex flex-wrap gap-2">
-                   {SPECIALTIES[selectedSpecialty].slice(1).map(tech => (
-                     <button
-                        key={tech}
-                        onClick={() => toggleStack(tech)}
-                        className={`text-xs px-2.5 py-1.5 rounded border transition-all ${selectedStack.includes(tech) ? 'bg-blue-600 border-blue-500 text-white' : 'bg-neutral-950 border-neutral-700 text-neutral-400 hover:border-neutral-500 hover:text-neutral-200'}`}
-                     >
-                       {tech}
-                     </button>
-                   ))}
-                 </div>
-               </div>
-             )}
+            {(["it", "other"] as const).map(group => (
+              <div key={group} className="space-y-1">
+                <p className="text-[11px] text-neutral-500 px-3 pt-1">{group === "it" ? "IT" : "Не только IT"}</p>
+                {DIRECTIONS.filter(d => d.group === group).map(d => (
+                  <button
+                    key={d.id}
+                    onClick={() => { setSelectedDirection(selectedDirection === d.id ? null : d.id); setSelectedStack([]); }}
+                    aria-pressed={selectedDirection === d.id}
+                    className={`w-full flex items-center justify-between text-sm px-3 py-1.5 rounded-md transition-colors ${selectedDirection === d.id ? "bg-blue-600/10 text-blue-400 font-medium" : "text-neutral-300 hover:bg-neutral-800/50"}`}
+                  >
+                    {d.label}
+                    {selectedDirection === d.id && <ChevronRight className="w-4 h-4" />}
+                  </button>
+                ))}
+              </div>
+            ))}
+
+            {direction?.tech && (
+              <div className="pt-4 border-t border-neutral-800">
+                <p className="text-xs text-neutral-500 mb-3">Уточнить по технологиям (можно несколько):</p>
+                <div className="flex flex-wrap gap-2">
+                  {direction.tech.map(tech => (
+                    <button key={tech} onClick={() => toggleStack(tech)} className={chip(selectedStack.includes(tech))} aria-pressed={selectedStack.includes(tech)}>
+                      {tech}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
         </aside>
 
@@ -324,10 +347,13 @@ export default function Home() {
                       </h2>
                       {item.company_name && <p className="text-sm text-neutral-400 mt-0.5">{item.company_name}</p>}
                       <p className="text-base font-semibold text-emerald-400 mt-1">{formatSalary(item.salary_min, item.salary_max, item.salary_currency)}</p>
-                      {(item.city || item.is_remote) && (
+                      {(item.city || item.work_format || item.is_remote || item.level) && (
                         <p className="flex flex-wrap items-center gap-3 text-xs text-neutral-400 mt-2">
+                          {item.level && <span className="inline-flex items-center gap-1"><Briefcase className="w-3.5 h-3.5" />{levelLabel(item.level)}</span>}
                           {item.city && <span className="inline-flex items-center gap-1"><MapPin className="w-3.5 h-3.5" />{item.city}</span>}
-                          {item.is_remote && <span className="inline-flex items-center gap-1"><Globe className="w-3.5 h-3.5" />Удалённо</span>}
+                          {item.work_format === "remote" || (!item.work_format && item.is_remote)
+                            ? <span className="inline-flex items-center gap-1"><Globe className="w-3.5 h-3.5" />Удалённо</span>
+                            : item.work_format && <span className="inline-flex items-center gap-1"><Building2 className="w-3.5 h-3.5" />{formatLabel(item.work_format)}</span>}
                         </p>
                       )}
                     </div>
