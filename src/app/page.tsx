@@ -2,9 +2,11 @@
 
 import { useEffect, useRef, useState } from "react";
 import { supabase } from "@/lib/supabase";
-import { fetchVacancyPage, formatSalary, PAGE_SIZE, SPECIALTIES, type Vacancy, type VacancyFilters } from "@/lib/vacancies";
-import { Search, MapPin, Send, ChevronRight, X, Sparkles, Loader2, Copy, Check, Mail, ExternalLink, Globe } from "lucide-react";
+import { fetchVacancyPage, formatSalary, plural, PAGE_SIZE, SPECIALTIES, VACANCY_FORMS, type Vacancy, type VacancyFilters } from "@/lib/vacancies";
+import { Search, MapPin, ChevronRight, Sparkles, Loader2, ExternalLink, Globe } from "lucide-react";
+import type { User } from "@supabase/supabase-js";
 import Link from "next/link";
+import SmartApply from "@/components/SmartApply";
 
 export default function Home() {
   const [vacancies, setVacancies] = useState<Vacancy[]>([]);
@@ -13,8 +15,8 @@ export default function Home() {
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
-  const [user, setUser] = useState<any>(null);
-  const [userProfile, setUserProfile] = useState<any>(null);
+  const [user, setUser] = useState<User | null>(null);
+  const [userProfile, setUserProfile] = useState<{ role?: string } | null>(null);
 
   // Фильтры
   const [search, setSearch] = useState("");
@@ -26,22 +28,8 @@ export default function Home() {
   const [selectedSpecialty, setSelectedSpecialty] = useState<string | null>(null);
   const [selectedStack, setSelectedStack] = useState<string[]>([]);
 
-  // Состояния модального окна Smart Apply
-  const [applyModalOpen, setApplyModalOpen] = useState(false);
-  const [selectedVacancy, setSelectedVacancy] = useState<Vacancy | null>(null);
-  const [coverLetter, setCoverLetter] = useState("");
-  const [isGenerating, setIsGenerating] = useState(false);
-  const [generationError, setGenerationError] = useState<string | null>(null);
-
-  // Состояние окна подтверждения для Email / Внешних контактов
-  const [successContactModal, setSuccessContactModal] = useState<{
-    open: boolean;
-    type: string;
-    value: string;
-    vacancyTitle: string;
-  }>({ open: false, type: "", value: "", vacancyTitle: "" });
-  
-  const [copiedEmail, setCopiedEmail] = useState(false);
+  // Вакансия, на которую сейчас откликаются (окно Smart Apply)
+  const [applyVacancy, setApplyVacancy] = useState<Vacancy | null>(null);
 
   useEffect(() => {
     supabase.auth.getUser().then(async ({ data }) => {
@@ -112,53 +100,6 @@ export default function Home() {
     setSelectedStack(prev => prev.includes(tech) ? prev.filter(t => t !== tech) : [...prev, tech]);
   };
 
-  // --- ЛОГИКА SMART APPLY ---
-  const openApplyModal = (vacancy: Vacancy) => {
-    setSelectedVacancy(vacancy);
-    setCoverLetter("");
-    setGenerationError(null);
-    setApplyModalOpen(true);
-  };
-
-  const generateCoverLetter = async () => {
-    if (!selectedVacancy) return;
-    setIsGenerating(true);
-    setGenerationError(null);
-
-    try {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) {
-        setGenerationError("Войдите, чтобы сгенерировать письмо.");
-        return;
-      }
-
-      const res = await fetch("/api/cover-letter", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${session.access_token}`,
-        },
-        body: JSON.stringify({ vacancyId: selectedVacancy.id }),
-      });
-      const data = await res.json();
-      if (res.ok && data.text) {
-        setCoverLetter(data.text);
-      } else {
-        setGenerationError(data.error || "Не удалось сгенерировать письмо. Попробуйте ещё раз.");
-      }
-    } catch {
-      setGenerationError("Не удалось связаться с сервером. Попробуйте ещё раз.");
-    } finally {
-      setIsGenerating(false);
-    }
-  };
-
-  const handleCopy = (text: string) => {
-    navigator.clipboard.writeText(text);
-    setCopiedEmail(true);
-    setTimeout(() => setCopiedEmail(false), 2000);
-  };
-
   // Надежное определение роли: проверяем и метаданные аутентификации, и таблицу profiles
   const userRole = userProfile?.role || user?.user_metadata?.role;
   const isEmployer = userRole === 'employer';
@@ -175,7 +116,7 @@ export default function Home() {
           </div>
           <div className="flex items-center gap-4">
             <span className="text-xs font-medium text-emerald-400 bg-emerald-400/10 px-3 py-1.5 rounded-full border border-emerald-400/20">
-              {loading ? "…" : `${total} вакансий`}
+              {loading ? "…" : `${total} ${plural(total, VACANCY_FORMS)}`}
             </span>
             
             {user ? (
@@ -197,13 +138,13 @@ export default function Home() {
                   </Link>
                 )}
 
-                <button 
-                  onClick={() => window.location.href = '/profile'}
+                <Link
+                  href="/profile"
                   className="w-9 h-9 flex items-center justify-center rounded-full bg-blue-600/20 border border-blue-500/50 text-blue-400 font-bold cursor-pointer hover:bg-blue-600/30 transition-colors relative z-50"
                   title="Перейти в личный кабинет"
                 >
                   {user.email?.charAt(0).toUpperCase()}
-                </button>
+                </Link>
               </div>
             ) : (
               <Link 
@@ -360,8 +301,10 @@ export default function Home() {
 
                   <div className="flex flex-col sm:flex-row justify-between gap-4">
                     <div className="pr-12">
-                      <h2 className="text-xl font-bold text-neutral-100">{item.title}</h2>
-                      <p className="text-base font-semibold text-emerald-400 mt-1">{formatSalary(item.salary_min, item.salary_max)}</p>
+                      <h2 className="text-xl font-bold text-neutral-100">
+                        <Link href={`/vacancy/${item.id}`} className="hover:text-blue-400 transition-colors">{item.title}</Link>
+                      </h2>
+                      <p className="text-base font-semibold text-emerald-400 mt-1">{formatSalary(item.salary_min, item.salary_max, item.salary_currency)}</p>
                       {(item.city || item.is_remote) && (
                         <p className="flex flex-wrap items-center gap-3 text-xs text-neutral-400 mt-2">
                           {item.city && <span className="inline-flex items-center gap-1"><MapPin className="w-3.5 h-3.5" />{item.city}</span>}
@@ -371,7 +314,7 @@ export default function Home() {
                     </div>
                     
                     <button
-                      onClick={() => openApplyModal(item)}
+                      onClick={() => setApplyVacancy(item)}
                       className="inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-sm font-semibold transition-colors shrink-0 shadow-lg shadow-blue-500/20 relative z-10"
                     >
                       <Sparkles className="w-4 h-4" /> Smart Apply
@@ -417,193 +360,7 @@ export default function Home() {
         </section>
       </main>
 
-      {/* --- МОДАЛЬНОЕ ОКНО SMART APPLY --- */}
-      {applyModalOpen && selectedVacancy && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in">
-          <div className="bg-neutral-900 border border-neutral-800 rounded-2xl w-full max-w-2xl overflow-hidden shadow-2xl flex flex-col max-h-[90vh]">
-            
-            <div className="flex items-center justify-between p-5 border-b border-neutral-800 bg-neutral-950/50">
-              <div>
-                <h3 className="text-lg font-bold text-white">Отклик с ИИ</h3>
-                <p className="text-sm text-neutral-400">{selectedVacancy.title}</p>
-              </div>
-              <button onClick={() => setApplyModalOpen(false)} className="text-neutral-500 hover:text-white transition-colors">
-                <X className="w-6 h-6" />
-              </button>
-            </div>
-
-            <div className="p-5 overflow-y-auto space-y-4">
-              {!coverLetter ? (
-                <div className="bg-blue-950/20 border border-blue-500/20 rounded-xl p-6 text-center space-y-4">
-                  <Sparkles className="w-10 h-10 text-blue-400 mx-auto" />
-                  <div>
-                    <h4 className="text-white font-medium mb-1">Сгенерировать идеальное письмо?</h4>
-                    <p className="text-sm text-neutral-400">LLM-агент проанализирует твой профиль и требования вакансии, чтобы составить уникальное сопроводительное.</p>
-                  </div>
-                  {user ? (
-                    <button 
-                      onClick={generateCoverLetter} 
-                      disabled={isGenerating}
-                      className="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-500 text-white px-6 py-2.5 rounded-lg text-sm font-medium transition-colors disabled:opacity-50"
-                    >
-                      {isGenerating ? <><Loader2 className="w-4 h-4 animate-spin" /> Анализируем...</> : 'Начать магию'}
-                    </button>
-                  ) : (
-                    <Link
-                      href="/login"
-                      className="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-500 text-white px-6 py-2.5 rounded-lg text-sm font-medium transition-colors"
-                    >
-                      Войдите, чтобы откликнуться
-                    </Link>
-                  )}
-                  {generationError && (
-                    <p className="text-sm text-red-400">{generationError}</p>
-                  )}
-                </div>
-              ) : (
-                <div className="space-y-3 animate-in fade-in slide-in-from-bottom-2">
-                  <label className="text-xs font-bold text-neutral-500 uppercase tracking-wider">Сопроводительное письмо</label>
-                  <textarea 
-                    value={coverLetter}
-                    onChange={(e) => setCoverLetter(e.target.value)}
-                    className="w-full h-64 bg-neutral-950 border border-neutral-800 rounded-xl p-4 text-sm text-neutral-200 focus:outline-none focus:border-blue-500 leading-relaxed resize-none"
-                  />
-                  <p className="text-xs text-neutral-500">Ты можешь отредактировать текст перед отправкой.</p>
-                </div>
-              )}
-            </div>
-
-            {coverLetter && (
-              <div className="p-5 border-t border-neutral-800 bg-neutral-950/50 flex justify-end gap-3">
-                <button onClick={() => setCoverLetter("")} className="px-4 py-2 text-sm font-medium text-neutral-400 hover:text-white transition-colors">Переписать</button>
-                
-                <button 
-                  onClick={async () => {
-                    if (!user) {
-                      alert("Сначала войдите в систему");
-                      return;
-                    }
-
-                    const { error } = await supabase.from("applications").insert({
-                      vacancy_id: selectedVacancy.id,
-                      candidate_id: user.id,
-                      cover_letter: coverLetter,
-                      status: 'new'
-                    });
-
-                    if (error) {
-                      alert(error.code === "23505"
-                        ? "Вы уже откликались на эту вакансию."
-                        : "Ошибка отправки: " + error.message);
-                      return;
-                    }
-
-                    // Копируем сопроводительное письмо кандидату в буфер обмена для удобства
-                    navigator.clipboard.writeText(coverLetter);
-
-                    setApplyModalOpen(false);
-
-                    // Разделяем поведение контактов
-                    if (selectedVacancy.source_type === 'external' && selectedVacancy.contact_value) {
-                      if (selectedVacancy.contact_type === 'email') {
-                        // Показываем модальное окно для отправки на Email без навязчивого Outlook
-                        setSuccessContactModal({
-                          open: true,
-                          type: 'email',
-                          value: selectedVacancy.contact_value,
-                          vacancyTitle: selectedVacancy.title
-                        });
-                      } else {
-                        // Для Telegram
-                        const contactLink = `https://t.me/${selectedVacancy.contact_value.replace('@', '')}`;
-                        window.open(contactLink, '_blank');
-                      }
-                    } else if (selectedVacancy.source_type === 'external') {
-                      // Контакта в посте нет — открываем оригинал, там есть ссылка на отклик
-                      if (selectedVacancy.source_url) window.open(selectedVacancy.source_url, '_blank');
-                      alert("Письмо скопировано. Контакта в посте нет — откликнитесь по ссылке из оригинального поста.");
-                    } else {
-                      // Внутренняя вакансия — перенаправляем в диалоги платформы
-                      alert("Отклик доставлен работодателю в личный кабинет!");
-                      window.location.href = '/applications';
-                    }
-                  }}
-                  className="inline-flex items-center gap-2 bg-emerald-600 hover:bg-emerald-500 text-white px-6 py-2 rounded-lg text-sm font-bold transition-colors cursor-pointer"
-                >
-                  <Send className="w-4 h-4" /> Отправить HR
-                </button>
-              </div>
-            )}
-
-          </div>
-        </div>
-      )}
-
-      {/* --- МОДАЛЬНОЕ ОКНО ДЛЯ EMAIL-ВАКАНСИЙ (БЕЗ ПРИНУДИТЕЛЬНОГО OUTLOOK) --- */}
-      {successContactModal.open && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-in fade-in">
-          <div className="bg-neutral-900 border border-neutral-800 rounded-2xl w-full max-w-lg p-6 space-y-6 shadow-2xl relative">
-            <div className="flex items-center justify-between border-b border-neutral-800 pb-4">
-              <div className="flex items-center gap-2.5 text-emerald-400">
-                <div className="w-8 h-8 rounded-full bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center">
-                  <Check className="w-4 h-4" />
-                </div>
-                <h3 className="font-bold text-white text-base">Отклик сформирован</h3>
-              </div>
-              <button onClick={() => setSuccessContactModal({ ...successContactModal, open: false })} className="text-neutral-500 hover:text-white">
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-
-            <div className="space-y-4">
-              <p className="text-xs text-neutral-400">
-                Текст сопроводительного письма <span className="text-emerald-400 font-semibold">уже скопирован в буфер обмена</span>. Отправьте резюме на почту работодателя:
-              </p>
-
-              {/* Поле с адресом почты и кнопкой копирования */}
-              <div className="flex items-center justify-between bg-neutral-950 border border-neutral-800 rounded-xl p-3.5">
-                <div className="flex items-center gap-3 overflow-hidden">
-                  <Mail className="w-4 h-4 text-blue-400 shrink-0" />
-                  <span className="text-sm font-mono text-neutral-200 truncate">{successContactModal.value}</span>
-                </div>
-                <button
-                  onClick={() => handleCopy(successContactModal.value)}
-                  className="flex items-center gap-1.5 px-3 py-1.5 bg-neutral-800 hover:bg-neutral-700 text-neutral-200 rounded-lg text-xs font-medium transition-colors shrink-0 ml-2"
-                >
-                  {copiedEmail ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
-                  {copiedEmail ? "Скопировано" : "Скопировать"}
-                </button>
-              </div>
-
-              {/* Кнопки выбора способа отправки */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-2">
-                <a
-                  href={`https://mail.google.com/mail/?view=cm&fs=1&to=${successContactModal.value}&su=Отклик на вакансию: ${encodeURIComponent(successContactModal.vacancyTitle)}`}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="flex items-center justify-center gap-2 py-2.5 px-4 bg-neutral-800 hover:bg-neutral-700 border border-neutral-700 rounded-xl text-xs font-semibold text-neutral-200 transition-colors"
-                >
-                  <ExternalLink className="w-3.5 h-3.5 text-red-400" /> Открыть в Gmail
-                </a>
-
-                <a
-                  href={`mailto:${successContactModal.value}?subject=Отклик на вакансию: ${encodeURIComponent(successContactModal.vacancyTitle)}`}
-                  className="flex items-center justify-center gap-2 py-2.5 px-4 bg-blue-600 hover:bg-blue-500 rounded-xl text-xs font-semibold text-white transition-colors"
-                >
-                  <Mail className="w-3.5 h-3.5" /> Написать на почту
-                </a>
-              </div>
-            </div>
-
-            <button
-              onClick={() => setSuccessContactModal({ ...successContactModal, open: false })}
-              className="w-full py-2.5 bg-neutral-950 hover:bg-neutral-800 border border-neutral-800 text-neutral-400 text-xs font-medium rounded-xl transition-colors"
-            >
-              Закрыть
-            </button>
-          </div>
-        </div>
-      )}
+      <SmartApply vacancy={applyVacancy} user={user} onClose={() => setApplyVacancy(null)} />
     </div>
   );
 }

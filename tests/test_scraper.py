@@ -35,7 +35,7 @@ def page(channel: str, ids: list[int], before: int | None = None, text: str = "P
 
 def job(**overrides) -> VacancyAI:
     data = dict(is_job=True, title="Python Developer", description="Описание", salary_min=200000,
-                salary_max=None, city=None, is_remote=True, contact_type="telegram",
+                salary_max=None, salary_currency="RUB", city=None, is_remote=True, contact_type="telegram",
                 contact_value="@hr", stack=["Python", "python", " Django "])
     data.update(overrides)
     return VacancyAI(**data)
@@ -177,6 +177,15 @@ def test_short_and_non_job_posts_are_not_saved():
     assert process_post(post(text="Привет!"), store, lambda t: job()) == "short"
     assert process_post(post(2), store, lambda t: job(is_job=False, title=None)) == "not_job"
     assert store.inserted == []
+
+
+def test_salary_currency_saved_only_with_salary():
+    store = FakeStore()
+    process_post(post(1), store, lambda t: job(salary_min=5000, salary_currency="USD"))
+    process_post(post(2, "Ищем дизайнера в команду, удалённо, пишите @hr_lead"), store,
+                 lambda t: job(salary_min=None, salary_max=None, salary_currency="RUB"))
+    assert store.inserted[0]["salary_currency"] == "USD"
+    assert store.inserted[1]["salary_currency"] is None
 
 
 def test_contact_type_dropped_without_contact_value():

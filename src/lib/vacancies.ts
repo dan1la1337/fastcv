@@ -6,6 +6,7 @@ export interface Vacancy {
   description: string | null;
   salary_min: number | null;
   salary_max: number | null;
+  salary_currency: string | null;
   city: string | null;
   is_remote: boolean | null;
   contact_type: string | null;
@@ -113,6 +114,8 @@ export async function fetchVacancyPage(
   ]) {
     if (condition) query = query.or(condition);
   }
+  // Ползунок в рублях: зарплаты в других валютах с ним не сравниваем
+  if (filters.minSalary > 0) query = query.or("salary_currency.is.null,salary_currency.eq.RUB");
 
   const from = page * PAGE_SIZE;
   const { data, count, error } = await query
@@ -125,9 +128,32 @@ export async function fetchVacancyPage(
   return { rows: (data ?? []) as Vacancy[], total: count ?? 0 };
 }
 
-export function formatSalary(min: number | null, max: number | null): string {
+const CURRENCY_SIGNS: Record<string, string> = {
+  RUB: "₽", USD: "$", EUR: "€", KZT: "₸", BYN: "Br", UAH: "₴", UZS: "сум", GEL: "₾",
+  AMD: "֏", TRY: "₺", AED: "AED", RSD: "RSD", PLN: "zł",
+};
+
+/**
+ * Вилка зарплаты. Валюта берётся из вакансии; у старых вакансий из Telegram
+ * она неизвестна — тогда показываем число без знака, а не подставляем ₽.
+ */
+export function formatSalary(min: number | null, max: number | null, currency?: string | null): string {
   if (!min && !max) return "По договорённости";
-  if (min && max) return `${min.toLocaleString("ru-RU")} — ${max.toLocaleString("ru-RU")} ₽`;
-  if (min) return `от ${min.toLocaleString("ru-RU")} ₽`;
-  return `до ${max!.toLocaleString("ru-RU")} ₽`;
+  const sign = currency ? ` ${CURRENCY_SIGNS[currency] ?? currency}` : "";
+  const n = (v: number) => v.toLocaleString("ru-RU");
+  if (min && max) return min === max ? `${n(min)}${sign}` : `${n(min)} — ${n(max)}${sign}`;
+  if (min) return `от ${n(min)}${sign}`;
+  return `до ${n(max!)}${sign}`;
 }
+
+/** «1 вакансия», «3 вакансии», «5 вакансий». */
+export function plural(count: number, forms: [string, string, string]): string {
+  const n = Math.abs(count) % 100;
+  const last = n % 10;
+  if (n > 10 && n < 20) return forms[2];
+  if (last > 1 && last < 5) return forms[1];
+  if (last === 1) return forms[0];
+  return forms[2];
+}
+
+export const VACANCY_FORMS: [string, string, string] = ["вакансия", "вакансии", "вакансий"];
