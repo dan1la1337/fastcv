@@ -58,18 +58,10 @@ export default function SmartApply({
     setGenerationError(null);
 
     try {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) {
-        setGenerationError("Войдите, чтобы сгенерировать письмо.");
-        return;
-      }
-
+      // Сессия уходит в cookies сама: токен вручную передавать не нужно
       const res = await fetch("/api/cover-letter", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${session.access_token}`,
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ vacancyId: vacancy.id }),
       });
       const data = await res.json();
