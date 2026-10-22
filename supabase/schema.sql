@@ -664,3 +664,19 @@ begin
   end if;
 end;
 $$;
+
+-- ---------------------------------------------------------------------------
+-- Поиск по-русски
+-- ---------------------------------------------------------------------------
+-- Словоформы: «разработчик» находит «разработчика», «платежи» — «платежей».
+-- Латиница в конфигурации russian обрабатывается английским стеммером.
+-- Лента ищет и по этому полю, и по подстроке (для «C++», «.NET», «PostgreSQL» по «postgres»).
+alter table public.vacancies
+  add column if not exists search_tsv tsvector
+    generated always as (
+      setweight(to_tsvector('russian', coalesce(title, '')), 'A') ||
+      setweight(to_tsvector('russian', coalesce(company_name, '')), 'B') ||
+      setweight(to_tsvector('russian', coalesce(description, '')), 'C')
+    ) stored;
+
+create index if not exists vacancies_search_idx on public.vacancies using gin (search_tsv);
