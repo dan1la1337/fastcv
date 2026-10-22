@@ -64,7 +64,7 @@ export default function CandidateApplications() {
             <Link href="/" className="p-2 bg-neutral-900 border border-neutral-800 rounded-xl hover:bg-neutral-800 transition-colors">
               <ArrowLeft className="w-4 h-4" />
             </Link>
-            <h1 className="text-xl font-bold">Мои отклики и чаты</h1>
+            <h1 className="text-xl font-bold">Мои отклики</h1>
           </div>
           <span className="text-xs text-neutral-400 bg-neutral-900 px-3 py-1.5 rounded-full border border-neutral-800">
             Всего: {applications.length}

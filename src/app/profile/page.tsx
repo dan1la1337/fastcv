@@ -99,8 +99,7 @@ export default function ProfilePage() {
       <div className="max-w-2xl mx-auto space-y-8">
         <div className="flex items-center justify-between">
           <Link href="/" className="inline-flex items-center gap-2 hover:opacity-80 transition-opacity">
-            <span className="bg-blue-600 text-white font-black px-2.5 py-1 rounded-md text-xs tracking-widest shadow-lg shadow-blue-500/20">SJT</span>
-            <span className="font-semibold">Job Aggregator</span>
+            <span className="bg-blue-600 text-white font-black px-2.5 py-1 rounded-lg text-sm tracking-tight shadow-lg shadow-blue-500/25">⚡ Fast<span className="text-blue-200">CV</span></span>
           </Link>
           <button onClick={handleLogout} className="text-sm text-neutral-400 hover:text-white flex items-center gap-2 transition-colors">
             <LogOut className="w-4 h-4" /> Выйти

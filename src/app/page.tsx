@@ -1,39 +1,18 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { supabase } from "@/lib/supabase";
-import { Search, MapPin, Briefcase, Send, ChevronRight, X, Sparkles, Loader2, Copy, Check, Mail, ExternalLink } from "lucide-react";
+import { fetchVacancyPage, formatSalary, PAGE_SIZE, SPECIALTIES, type Vacancy, type VacancyFilters } from "@/lib/vacancies";
+import { Search, MapPin, Send, ChevronRight, X, Sparkles, Loader2, Copy, Check, Mail, ExternalLink, Globe } from "lucide-react";
 import Link from "next/link";
-
-// --- ТИПЫ И НАСТРОЙКИ ---
-interface Vacancy {
-  id: string;
-  title: string;
-  description: string;
-  salary_min: number | null;
-  salary_max: number | null;
-  city: string | null;
-  is_remote: boolean;
-  contact_type: string | null;
-  contact_value: string | null;
-  created_at: string;
-  source_type: string;
-  source_url: string | null;
-  stack: string[] | null;
-}
-
-const CATEGORIES: Record<string, Record<string, string[]>> = {
-  "IT": {
-    "Backend": ["Java", "Python", "Go", "Node.js", "SQL", "Spring"],
-    "Frontend": ["React", "Vue", "Angular", "TypeScript", "Tailwind"],
-    "QA": ["Selenium", "Cypress", "Appium", "Postman", "Автотестирование"],
-    "DevOps": ["Docker", "Kubernetes", "CI/CD", "Linux", "Ansible"]
-  }
-};
 
 export default function Home() {
   const [vacancies, setVacancies] = useState<Vacancy[]>([]);
+  const [total, setTotal] = useState(0);
+  const [page, setPage] = useState(0);
   const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const [user, setUser] = useState<any>(null);
   const [userProfile, setUserProfile] = useState<any>(null);
 
@@ -42,8 +21,8 @@ export default function Home() {
   const [onlyRemote, setOnlyRemote] = useState(false);
   const [minSalary, setMinSalary] = useState<number>(0);
   const [onlyWithSalary, setOnlyWithSalary] = useState<boolean>(false);
-  
-  const [selectedCategory, setSelectedCategory] = useState<string>("IT");
+  const [city, setCity] = useState("");
+
   const [selectedSpecialty, setSelectedSpecialty] = useState<string | null>(null);
   const [selectedStack, setSelectedStack] = useState<string[]>([]);
 
@@ -65,7 +44,6 @@ export default function Home() {
   const [copiedEmail, setCopiedEmail] = useState(false);
 
   useEffect(() => {
-    fetchVacancies();
     supabase.auth.getUser().then(async ({ data }) => {
       if (data.user) {
         setUser(data.user);
@@ -79,48 +57,59 @@ export default function Home() {
     });
   }, []);
 
-  async function fetchVacancies() {
-    setLoading(true);
-    // Архивные вакансии (устаревшие посты из Telegram) в ленте не показываем
-    const { data } = await supabase
-      .from("vacancies")
-      .select("*")
-      .is("archived_at", null)
-      .order("created_at", { ascending: false });
-    if (data) setVacancies(data);
-    setLoading(false);
+  // Фильтры применяются в базе: так поиск идёт по всем вакансиям, а не по
+  // первой тысяче, и страница грузит только PAGE_SIZE карточек за раз.
+  const filters: VacancyFilters = {
+    search,
+    remote: onlyRemote,
+    minSalary,
+    withSalary: onlyWithSalary,
+    city,
+    // Специальность без выбранных технологий — ищем по всем её технологиям
+    stack: selectedStack.length ? selectedStack : selectedSpecialty ? SPECIALTIES[selectedSpecialty] : [],
+  };
+  const filtersKey = JSON.stringify(filters);
+  const requestId = useRef(0);
+
+  useEffect(() => {
+    const id = ++requestId.current;
+    // Ждём, пока пользователь допечатает, чтобы не слать запрос на каждую букву
+    const timer = setTimeout(async () => {
+      setLoading(true);
+      setLoadError(null);
+      try {
+        const { rows, total } = await fetchVacancyPage(JSON.parse(filtersKey), 0);
+        if (id !== requestId.current) return; // пришёл ответ на устаревшие фильтры
+        setVacancies(rows);
+        setTotal(total);
+        setPage(0);
+      } catch {
+        if (id === requestId.current) setLoadError("Не удалось загрузить вакансии. Обновите страницу.");
+      } finally {
+        if (id === requestId.current) setLoading(false);
+      }
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [filtersKey]);
+
+  async function loadMore() {
+    const id = requestId.current;
+    setLoadingMore(true);
+    try {
+      const { rows, total } = await fetchVacancyPage(filters, page + 1);
+      if (id !== requestId.current) return;
+      setVacancies(prev => [...prev, ...rows.filter(r => !prev.some(p => p.id === r.id))]);
+      setTotal(total);
+      setPage(page + 1);
+    } catch {
+      setLoadError("Не удалось загрузить следующую страницу.");
+    } finally {
+      setLoadingMore(false);
+    }
   }
 
   const toggleStack = (tech: string) => {
     setSelectedStack(prev => prev.includes(tech) ? prev.filter(t => t !== tech) : [...prev, tech]);
-  };
-
-  const filtered = vacancies.filter((v) => {
-    const fullText = `${v.title} ${v.description || ""}`.toLowerCase();
-    const matchesSearch = search === "" || fullText.includes(search.toLowerCase());
-    const matchesRemote = !onlyRemote || v.is_remote;
-    
-    // Фильтр по зарплате и наличию вилки
-    const hasSalary = v.salary_min !== null || v.salary_max !== null;
-    if (onlyWithSalary && !hasSalary) return false;
-
-    let matchesSalary = true;
-    if (minSalary > 0) {
-      const effectiveMax = v.salary_max || v.salary_min || 0;
-      matchesSalary = effectiveMax >= minSalary;
-    }
-
-    const vacancyStack = (v.stack || []).map(t => t.toLowerCase());
-    const matchesStack = selectedStack.length === 0 || selectedStack.some(tech =>
-      vacancyStack.includes(tech.toLowerCase()) || fullText.includes(tech.toLowerCase()));
-    return matchesSearch && matchesRemote && matchesSalary && matchesStack;
-  });
-
-  const formatSalary = (min: number | null, max: number | null) => {
-    if (!min && !max) return "По договоренности";
-    if (min && max) return `${min.toLocaleString("ru-RU")} — ${max.toLocaleString("ru-RU")} ₽`;
-    if (min) return `от ${min.toLocaleString("ru-RU")} ₽`;
-    return `до ${max!.toLocaleString("ru-RU")} ₽`;
   };
 
   // --- ЛОГИКА SMART APPLY ---
@@ -186,7 +175,7 @@ export default function Home() {
           </div>
           <div className="flex items-center gap-4">
             <span className="text-xs font-medium text-emerald-400 bg-emerald-400/10 px-3 py-1.5 rounded-full border border-emerald-400/20">
-              {vacancies.length} вакансий
+              {loading ? "…" : `${total} вакансий`}
             </span>
             
             {user ? (
@@ -290,9 +279,18 @@ export default function Home() {
                   {onlyRemote && <span className="text-white text-xs font-bold">✓</span>}
                 </div>
                 <span className="text-sm text-neutral-300 group-hover:text-neutral-100 transition-colors">
-                  Только удаленка
+                  Только удалёнка
                 </span>
               </label>
+            </div>
+
+            {/* Город */}
+            <div className="space-y-3 pt-2 border-t border-neutral-800/60">
+              <label className="text-xs font-bold text-neutral-500 uppercase tracking-wider">Город</label>
+              <div className="relative">
+                <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400" />
+                <input type="text" placeholder="Москва, Алматы..." value={city} onChange={(e) => setCity(e.target.value)} className="w-full pl-9 pr-4 py-2.5 bg-neutral-950 border border-neutral-800 rounded-lg text-sm text-neutral-100 focus:outline-none focus:border-blue-500 transition-colors" />
+              </div>
             </div>
           </div>
 
@@ -300,23 +298,11 @@ export default function Home() {
           <div className="bg-neutral-900/50 border border-neutral-800 rounded-xl p-5 space-y-4">
              <label className="text-xs font-bold text-neutral-500 uppercase tracking-wider">Направление</label>
              
-             <div className="flex gap-2 border-b border-neutral-800 pb-3">
-               {Object.keys(CATEGORIES).map(cat => (
-                 <button 
-                    key={cat}
-                    onClick={() => { setSelectedCategory(cat); setSelectedSpecialty(null); setSelectedStack([]); }}
-                    className={`text-sm px-3 py-1.5 rounded-md transition-colors ${selectedCategory === cat ? 'bg-neutral-800 text-white' : 'text-neutral-400 hover:text-neutral-200'}`}
-                 >
-                   {cat}
-                 </button>
-               ))}
-             </div>
-
              <div className="space-y-1.5 pt-1">
-               {Object.keys(CATEGORIES[selectedCategory]).map(spec => (
+               {Object.keys(SPECIALTIES).map(spec => (
                  <button 
                     key={spec}
-                    onClick={() => setSelectedSpecialty(selectedSpecialty === spec ? null : spec)}
+                    onClick={() => { setSelectedSpecialty(selectedSpecialty === spec ? null : spec); setSelectedStack([]); }}
                     className={`w-full flex items-center justify-between text-sm px-3 py-2 rounded-md transition-colors ${selectedSpecialty === spec ? 'bg-blue-600/10 text-blue-400 font-medium' : 'text-neutral-300 hover:bg-neutral-800/50'}`}
                  >
                    {spec}
@@ -327,9 +313,9 @@ export default function Home() {
 
              {selectedSpecialty && (
                <div className="pt-4 border-t border-neutral-800 animate-in fade-in slide-in-from-top-2">
-                 <p className="text-xs text-neutral-500 mb-3">Технологии (можно выбрать несколько):</p>
+                 <p className="text-xs text-neutral-500 mb-3">Уточнить по технологиям (можно несколько):</p>
                  <div className="flex flex-wrap gap-2">
-                   {CATEGORIES[selectedCategory][selectedSpecialty].map(tech => (
+                   {SPECIALTIES[selectedSpecialty].slice(1).map(tech => (
                      <button
                         key={tech}
                         onClick={() => toggleStack(tech)}
@@ -348,9 +334,16 @@ export default function Home() {
         <section className="lg:col-span-3">
           {loading ? (
             <div className="flex items-center justify-center h-64"><div className="w-6 h-6 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"></div></div>
+          ) : loadError ? (
+            <div className="text-center py-20 text-sm text-red-400">{loadError}</div>
+          ) : vacancies.length === 0 ? (
+            <div className="text-center py-20 bg-neutral-900/30 border border-dashed border-neutral-800 rounded-2xl">
+              <p className="text-neutral-300 text-sm font-medium">Ничего не нашлось</p>
+              <p className="text-neutral-500 text-xs mt-1">Попробуйте ослабить фильтры</p>
+            </div>
           ) : (
             <div className="flex flex-col gap-4">
-              {filtered.map((item) => (
+              {vacancies.map((item) => (
                 <div key={item.id} className="bg-neutral-900/60 border border-neutral-800/80 rounded-2xl p-6 flex flex-col gap-4 relative overflow-hidden group">
                   
                   {/* Бейджи источников */}
@@ -361,7 +354,7 @@ export default function Home() {
                   ) : (
                      <div className="absolute top-0 right-0 bg-emerald-500/10 text-emerald-400 text-[10px] uppercase font-bold px-3 py-1 rounded-bl-lg border-b border-l border-emerald-500/20 z-10 flex items-center gap-1">
                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
-                       Прямой работодатель • SLA 24h
+                       Прямой работодатель
                      </div>
                   )}
 
@@ -369,6 +362,12 @@ export default function Home() {
                     <div className="pr-12">
                       <h2 className="text-xl font-bold text-neutral-100">{item.title}</h2>
                       <p className="text-base font-semibold text-emerald-400 mt-1">{formatSalary(item.salary_min, item.salary_max)}</p>
+                      {(item.city || item.is_remote) && (
+                        <p className="flex flex-wrap items-center gap-3 text-xs text-neutral-400 mt-2">
+                          {item.city && <span className="inline-flex items-center gap-1"><MapPin className="w-3.5 h-3.5" />{item.city}</span>}
+                          {item.is_remote && <span className="inline-flex items-center gap-1"><Globe className="w-3.5 h-3.5" />Удалённо</span>}
+                        </p>
+                      )}
                     </div>
                     
                     <button
@@ -401,6 +400,18 @@ export default function Home() {
                   ) : null}
                 </div>
               ))}
+
+              {vacancies.length < total && (
+                <button
+                  onClick={loadMore}
+                  disabled={loadingMore}
+                  className="mx-auto mt-2 inline-flex items-center gap-2 px-6 py-2.5 bg-neutral-900 hover:bg-neutral-800 border border-neutral-800 rounded-xl text-sm text-neutral-200 transition-colors disabled:opacity-50"
+                >
+                  {loadingMore
+                    ? <><Loader2 className="w-4 h-4 animate-spin" /> Загружаем…</>
+                    : `Показать ещё (${Math.min(PAGE_SIZE, total - vacancies.length)} из ${total - vacancies.length})`}
+                </button>
+              )}
             </div>
           )}
         </section>
