@@ -1,84 +1,132 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { supabase } from "@/lib/supabase";
+import { useEffect, useRef, useState } from "react";
+import type { User } from "@supabase/supabase-js";
 import { useRouter } from "next/navigation";
-import { Loader2, LogOut, Save, Briefcase, UserCircle } from "lucide-react";
 import Link from "next/link";
+import { Briefcase, FileText, Loader2, LogOut, Save, Trash2, Upload, UserCircle } from "lucide-react";
+import { supabase, getUserRole, type UserRole } from "@/lib/supabase";
+
+const RESUME_MAX_BYTES = 5 * 1024 * 1024; // совпадает с лимитом бакета resumes
+
+const inputClass =
+  "w-full bg-neutral-950 border border-neutral-800 rounded-xl px-4 py-3 text-sm text-neutral-200 focus:outline-none focus:border-blue-500 transition-colors";
+const labelClass = "block text-xs font-bold text-neutral-500 uppercase tracking-wider mb-2";
 
 export default function ProfilePage() {
-  const [user, setUser] = useState<any>(null);
+  const router = useRouter();
+  const [user, setUser] = useState<User | null>(null);
+  const [role, setRole] = useState<UserRole>("candidate");
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const router = useRouter();
+  const [notice, setNotice] = useState<{ kind: "ok" | "error"; text: string } | null>(null);
 
-  // Состояния формы
   const [name, setName] = useState("");
-  const [role, setRole] = useState("candidate");
   const [description, setDescription] = useState("");
   const [skills, setSkills] = useState("");
 
+  const [resumePath, setResumePath] = useState<string | null>(null);
+  const [resumeBusy, setResumeBusy] = useState(false);
+  const fileInput = useRef<HTMLInputElement>(null);
+
   useEffect(() => {
-    loadProfile();
-  }, []);
+    (async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        router.push("/login");
+        return;
+      }
+      setUser(user);
+      setRole(await getUserRole(user));
 
-  async function loadProfile() {
-    setLoading(true);
-    const { data: { user } } = await supabase.auth.getUser();
-    
-    if (!user) {
-      router.push("/login");
-      return;
-    }
-    setUser(user);
-
-    // Берем роль из метаданных (сохраненных при регистрации), по умолчанию 'candidate'
-    const userRole = user.user_metadata?.role || "candidate";
-
-    // Вытягиваем данные из таблицы profiles
-    const { data: profile } = await supabase
-      .from("profiles")
-      .select("*")
-      .eq("id", user.id)
-      .single();
-
-    if (profile) {
-      setName(profile.name || "");
-      setRole(profile.role || userRole);
-      setDescription(profile.description || "");
-      setSkills(profile.skills ? profile.skills.join(", ") : "");
-    } else {
-      // Если профиля в БД еще нет, устанавливаем роль из регистрации
-      setRole(userRole);
-    }
-    setLoading(false);
-  }
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("name, description, skills, resume_path")
+        .eq("id", user.id)
+        .maybeSingle();
+      if (profile) {
+        setName(profile.name || "");
+        setDescription(profile.description || "");
+        setSkills(Array.isArray(profile.skills) ? profile.skills.join(", ") : "");
+        setResumePath(profile.resume_path ?? null);
+      }
+      setLoading(false);
+    })();
+  }, [router]);
 
   async function saveProfile(e: React.FormEvent) {
     e.preventDefault();
     if (!user) return;
     setSaving(true);
+    setNotice(null);
 
-    const skillsArray = skills.split(",").map(s => s.trim()).filter(Boolean);
-
-    const payload = {
+    const { error } = await supabase.from("profiles").upsert({
       id: user.id,
-      name,
-      role, // Роль сохраняется, но пользователь больше не может её изменить
-      description,
-      skills: skillsArray,
-    };
+      role, // роль менять нельзя: база отклонит попытку (триггер prevent_role_change)
+      name: name.trim(),
+      description: description.trim(),
+      skills: skills.split(",").map(s => s.trim()).filter(Boolean),
+    });
 
-    const { error } = await supabase
-      .from("profiles")
-      .upsert(payload);
-
-    if (error) {
-      alert("Ошибка сохранения: " + error.message);
-    } else {
-      alert("Профиль успешно сохранен!");
-    }
     setSaving(false);
+    setNotice(error
+      ? { kind: "error", text: "Не удалось сохранить профиль: " + error.message }
+      : { kind: "ok", text: "Профиль сохранён." });
+  }
+
+  async function uploadResume(file: File) {
+    if (!user) return;
+    setNotice(null);
+    if (file.type !== "application/pdf") {
+      setNotice({ kind: "error", text: "Нужен файл в формате PDF." });
+      return;
+    }
+    if (file.size > RESUME_MAX_BYTES) {
+      setNotice({ kind: "error", text: "Файл больше 5 МБ. Сожмите PDF или уберите лишние страницы." });
+      return;
+    }
+    setResumeBusy(true);
+    // Папка = id пользователя: так правила хранилища пускают его только в свою папку
+    const path = `${user.id}/resume.pdf`;
+    const { error: uploadError } = await supabase.storage
+      .from("resumes")
+      .upload(path, file, { upsert: true, contentType: "application/pdf" });
+    if (!uploadError) {
+      const { error } = await supabase.from("profiles").update({ resume_path: path }).eq("id", user.id);
+      if (!error) {
+        setResumePath(path);
+        setNotice({ kind: "ok", text: "Резюме загружено. Работодатели увидят его в ваших откликах." });
+      } else {
+        setNotice({ kind: "error", text: "Файл загружен, но не привязан к профилю: " + error.message });
+      }
+    } else {
+      setNotice({ kind: "error", text: "Не удалось загрузить резюме: " + uploadError.message });
+    }
+    setResumeBusy(false);
+    if (fileInput.current) fileInput.current.value = "";
+  }
+
+  async function openResume() {
+    if (!resumePath) return;
+    // Бакет приватный: открываем по временной ссылке на 5 минут
+    const { data, error } = await supabase.storage.from("resumes").createSignedUrl(resumePath, 300);
+    if (data?.signedUrl) window.open(data.signedUrl, "_blank", "noopener");
+    else setNotice({ kind: "error", text: "Не удалось открыть резюме: " + (error?.message ?? "нет ссылки") });
+  }
+
+  async function removeResume() {
+    if (!user || !resumePath) return;
+    setResumeBusy(true);
+    setNotice(null);
+    const { error } = await supabase.storage.from("resumes").remove([resumePath]);
+    if (!error) {
+      await supabase.from("profiles").update({ resume_path: null }).eq("id", user.id);
+      setResumePath(null);
+      setNotice({ kind: "ok", text: "Резюме удалено." });
+    } else {
+      setNotice({ kind: "error", text: "Не удалось удалить резюме: " + error.message });
+    }
+    setResumeBusy(false);
   }
 
   async function handleLogout() {
@@ -94,6 +142,8 @@ export default function ProfilePage() {
     );
   }
 
+  const isCandidate = role === "candidate";
+
   return (
     <div className="min-h-screen bg-neutral-950 text-neutral-100 font-sans p-4 sm:p-8">
       <div className="max-w-2xl mx-auto space-y-8">
@@ -106,68 +156,91 @@ export default function ProfilePage() {
           </button>
         </div>
 
-        <div className="bg-neutral-900/50 border border-neutral-800 rounded-2xl p-6 sm:p-8 shadow-xl relative overflow-hidden">
+        {notice && (
+          <div className={`rounded-xl px-4 py-3 text-sm border ${
+            notice.kind === "ok" ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-300" : "bg-red-500/10 border-red-500/20 text-red-300"
+          }`}>
+            {notice.text}
+          </div>
+        )}
+
+        <div className="bg-neutral-900/50 border border-neutral-800 rounded-2xl p-6 sm:p-8 shadow-xl">
           <h1 className="text-2xl font-bold mb-6 text-white">Личный кабинет</h1>
-          
+
           <form onSubmit={saveProfile} className="space-y-6">
-            
-            {/* СТАТИЧНАЯ ПЛАШКА РОЛИ ВМЕСТО ВЫПАДАЮЩЕГО СПИСКА */}
             <div>
-              <label className="block text-xs font-bold text-neutral-500 uppercase tracking-wider mb-2">Ваш тип аккаунта</label>
+              <label className={labelClass}>Тип аккаунта</label>
               <div className="inline-flex items-center gap-2 px-4 py-2 bg-neutral-950 border border-neutral-800 rounded-xl text-sm font-medium text-neutral-300">
-                {role === 'employer' ? (
-                  <><Briefcase className="w-4 h-4 text-blue-400" /> Работодатель</>
-                ) : (
-                  <><UserCircle className="w-4 h-4 text-emerald-400" /> Соискатель</>
-                )}
+                {isCandidate
+                  ? <><UserCircle className="w-4 h-4 text-emerald-400" /> Соискатель</>
+                  : <><Briefcase className="w-4 h-4 text-blue-400" /> Работодатель</>}
               </div>
             </div>
 
             <div>
-              <label className="block text-xs font-bold text-neutral-500 uppercase tracking-wider mb-2">
-                {role === "candidate" ? "Ваше Имя" : "Название компании"}
-              </label>
-              <input 
-                required 
-                type="text" 
-                value={name} 
-                onChange={(e) => setName(e.target.value)} 
-                placeholder={role === "candidate" ? "Например, Иван Иванов" : "Например, ООО Технологии"} 
-                className="w-full bg-neutral-950 border border-neutral-800 rounded-xl px-4 py-3 text-sm text-neutral-200 focus:outline-none focus:border-blue-500 transition-colors" 
-              />
+              <label className={labelClass}>{isCandidate ? "Ваше имя" : "Название компании"}</label>
+              <input required type="text" maxLength={200} value={name} onChange={e => setName(e.target.value)}
+                placeholder={isCandidate ? "Например, Иван Иванов" : "Например, ООО Технологии"} className={inputClass} />
             </div>
 
-            {role === "candidate" && (
+            {isCandidate && (
               <div>
-                <label className="block text-xs font-bold text-neutral-500 uppercase tracking-wider mb-2">Ключевые навыки (через запятую)</label>
-                <input 
-                  type="text" 
-                  value={skills} 
-                  onChange={(e) => setSkills(e.target.value)} 
-                  placeholder="React, Node.js, Python..." 
-                  className="w-full bg-neutral-950 border border-neutral-800 rounded-xl px-4 py-3 text-sm text-neutral-200 focus:outline-none focus:border-blue-500 transition-colors" 
-                />
+                <label className={labelClass}>Ключевые навыки (через запятую)</label>
+                <input type="text" value={skills} onChange={e => setSkills(e.target.value)}
+                  placeholder="React, Node.js, Python..." className={inputClass} />
               </div>
             )}
 
             <div>
-              <label className="block text-xs font-bold text-neutral-500 uppercase tracking-wider mb-2">
-                {role === "candidate" ? "Опыт работы и о себе" : "Описание компании"}
-              </label>
-              <textarea 
-                required 
-                value={description} 
-                onChange={(e) => setDescription(e.target.value)} 
-                placeholder={role === "candidate" ? "Подробно расскажите о вашем опыте..." : "Расскажите о вашей компании и проектах..."} 
-                className="w-full h-32 bg-neutral-950 border border-neutral-800 rounded-xl p-4 text-sm text-neutral-200 focus:outline-none focus:border-blue-500 transition-colors resize-none leading-relaxed" 
-              />
+              <label className={labelClass}>{isCandidate ? "Опыт работы и о себе" : "Описание компании"}</label>
+              <textarea required value={description} onChange={e => setDescription(e.target.value)}
+                placeholder={isCandidate ? "Подробно расскажите о вашем опыте — по нему ИИ пишет сопроводительные письма" : "Расскажите о вашей компании и проектах..."}
+                className={`${inputClass} h-32 resize-y leading-relaxed`} />
             </div>
 
-            <button type="submit" disabled={saving} className="w-full flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-500 text-white py-3.5 rounded-xl text-sm font-semibold transition-colors disabled:opacity-50 mt-4">
+            <button type="submit" disabled={saving} className="w-full flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-500 text-white py-3.5 rounded-xl text-sm font-semibold transition-colors disabled:opacity-50">
               {saving ? <Loader2 className="w-5 h-5 animate-spin" /> : <><Save className="w-4 h-4" /> Сохранить профиль</>}
             </button>
           </form>
         </div>
+
+        {isCandidate && (
+          <div className="bg-neutral-900/50 border border-neutral-800 rounded-2xl p-6 sm:p-8 space-y-4">
+            <div>
+              <h2 className="text-lg font-bold text-white">Резюме</h2>
+              <p className="text-sm text-neutral-400 mt-1">
+                PDF до 5 МБ. Его увидят только работодатели, на чьи вакансии вы откликнулись.
+              </p>
+            </div>
+
+            {resumePath ? (
+              <div className="flex flex-wrap items-center gap-3 bg-neutral-950 border border-neutral-800 rounded-xl p-4">
+                <FileText className="w-5 h-5 text-blue-400 shrink-0" />
+                <button onClick={openResume} className="text-sm text-neutral-200 hover:text-blue-400 underline-offset-2 hover:underline">
+                  resume.pdf
+                </button>
+                <div className="ml-auto flex items-center gap-2">
+                  <button onClick={() => fileInput.current?.click()} disabled={resumeBusy}
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-neutral-800 text-xs text-neutral-300 hover:bg-neutral-800 disabled:opacity-50">
+                    <Upload className="w-3.5 h-3.5" /> Заменить
+                  </button>
+                  <button onClick={removeResume} disabled={resumeBusy}
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-neutral-800 text-xs text-neutral-300 hover:text-red-300 hover:bg-red-950/30 disabled:opacity-50">
+                    <Trash2 className="w-3.5 h-3.5" /> Удалить
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <button onClick={() => fileInput.current?.click()} disabled={resumeBusy}
+                className="w-full flex items-center justify-center gap-2 border border-dashed border-neutral-700 hover:border-blue-500 rounded-xl py-6 text-sm text-neutral-300 transition-colors disabled:opacity-50">
+                {resumeBusy ? <Loader2 className="w-5 h-5 animate-spin" /> : <><Upload className="w-4 h-4" /> Загрузить PDF</>}
+              </button>
+            )}
+
+            <input ref={fileInput} type="file" accept="application/pdf" className="hidden"
+              onChange={e => { const f = e.target.files?.[0]; if (f) void uploadResume(f); }} />
+          </div>
+        )}
       </div>
     </div>
   );

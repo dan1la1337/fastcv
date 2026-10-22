@@ -5,7 +5,7 @@ import type { User } from "@supabase/supabase-js";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import {
-  Archive, ArrowLeft, Briefcase, CheckCircle2, Eye, Loader2, Pencil, PlusCircle, RotateCcw, XCircle,
+  Archive, ArrowLeft, Briefcase, CheckCircle2, Eye, FileText, Loader2, Pencil, PlusCircle, RotateCcw, XCircle,
 } from "lucide-react";
 import { supabase, getUserRole } from "@/lib/supabase";
 import { formatSalary, plural, type Vacancy } from "@/lib/vacancies";
@@ -18,7 +18,7 @@ interface Application {
   cover_letter: string | null;
   created_at: string;
   vacancies: { id: string; title: string; employer_id: string };
-  profiles: { name: string | null; skills: string[] | null } | null;
+  profiles: { name: string | null; skills: string[] | null; resume_path: string | null } | null;
 }
 
 interface VacancyForm {
@@ -65,7 +65,7 @@ export default function EmployerDashboard() {
       supabase.from("profiles").select("name").eq("id", currentUser.id).maybeSingle(),
       supabase
         .from("applications")
-        .select("id, status, cover_letter, created_at, vacancies!inner (id, title, employer_id), profiles (name, skills)")
+        .select("id, status, cover_letter, created_at, vacancies!inner (id, title, employer_id), profiles (name, skills, resume_path)")
         .eq("vacancies.employer_id", currentUser.id)
         .order("created_at", { ascending: false }),
       supabase
@@ -172,6 +172,14 @@ export default function EmployerDashboard() {
     }
     setVacancies(prev => prev.map(v => v.id === vacancy.id ? { ...v, archived_at: archived ? new Date().toISOString() : null } : v));
     setNotice({ kind: "ok", text: archived ? "Вакансия закрыта и скрыта из ленты." : "Вакансия снова в ленте." });
+  }
+
+  async function openResume(path: string) {
+    // Бакет приватный: временная ссылка на 5 минут. Правила хранилища пускают
+    // работодателя только к резюме кандидатов, откликнувшихся на его вакансии.
+    const { data, error } = await supabase.storage.from("resumes").createSignedUrl(path, 300);
+    if (data?.signedUrl) window.open(data.signedUrl, "_blank", "noopener");
+    else setNotice({ kind: "error", text: "Не удалось открыть резюме: " + (error?.message ?? "нет ссылки") });
   }
 
   async function updateStatus(appId: string, status: string) {
@@ -392,6 +400,12 @@ export default function EmployerDashboard() {
                   </div>
 
                   <div className="flex items-center justify-end gap-3 pt-2 border-t border-neutral-800/60">
+                    {app.profiles?.resume_path && (
+                      <button onClick={() => openResume(app.profiles!.resume_path!)}
+                        className="mr-auto px-3 py-1.5 bg-neutral-800 hover:bg-neutral-700 text-neutral-200 rounded-lg text-xs font-medium border border-neutral-700 transition-colors flex items-center gap-1.5">
+                        <FileText className="w-3.5 h-3.5" /> Резюме (PDF)
+                      </button>
+                    )}
                     <button onClick={() => updateStatus(app.id, "rejected")}
                       className="px-3 py-1.5 bg-neutral-800 hover:bg-red-950/40 text-neutral-300 hover:text-red-400 rounded-lg text-xs font-medium border border-neutral-700 transition-colors flex items-center gap-1.5">
                       <XCircle className="w-3.5 h-3.5" /> Отказать
