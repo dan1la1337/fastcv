@@ -36,6 +36,26 @@ if not supabase_key:
 
 if not supabase_url or not supabase_key:
     raise ValueError("Не найдены ключи Supabase! Проверьте .env или .env.local")
+
+
+def describe_key(key: str) -> str:
+    """Тип ключа без раскрытия значения — для диагностики в логах."""
+    if key.startswith("sb_secret_"):
+        return "secret (sb_secret_)"
+    if key.startswith("sb_publishable_"):
+        return "publishable (sb_publishable_)"
+    if key.count(".") == 2:
+        return "legacy JWT"
+    return "неизвестный формат"
+
+
+print(f"Ключ Supabase: {describe_key(supabase_key)}, длина {len(supabase_key)}")
+if not supabase_key.isascii() or any(c.isspace() for c in supabase_key):
+    raise ValueError(
+        "Ключ Supabase содержит недопустимые символы (например «•» или пробелы). "
+        "Похоже, скопирован замаскированный ключ с экрана: в Supabase → Project Settings → "
+        "API Keys нажмите кнопку копирования у ключа и обновите секрет SUPABASE_SERVICE_ROLE_KEY."
+    )
 if not gemini_key:
     raise ValueError("Не найден GEMINI_API_KEY! Проверьте .env или .env.local")
 
