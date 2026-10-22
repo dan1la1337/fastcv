@@ -443,3 +443,186 @@ begin
   end if;
 end;
 $$;
+
+-- ---------------------------------------------------------------------------
+-- Нормализация вакансий: уровень, направление, формат работы, город; дубли
+-- ---------------------------------------------------------------------------
+-- Сборщик берёт эти поля у Gemini; если их нет (вакансии работодателей,
+-- старые записи), триггер заполняет их по названию правилами ниже.
+
+-- Уровень по названию должности; при нескольких («Middle/Senior») берём нижний,
+-- чтобы вакансию увидел и тот, кто фильтрует по нижнему уровню.
+create or replace function public.vacancy_level(title text, description text default null)
+returns text language sql immutable set search_path = '' as $$
+  select case
+    when t ~* '(стаж[её]р|стажировк|intern\M|internship|trainee)' then 'intern'
+    when t ~* '(\mjunior|джун|младш|начинающ|ассистент|помощник|assistant)' then 'junior'
+    when t ~* '(\mmiddle|мидл)' then 'middle'
+    when t ~* '(\msenior|сеньор|синьор|ведущ|старш|главн)' then 'senior'
+    when t ~* '(\mlead\M|тимлид|техлид|\mhead\M|руководител|начальник|principal|архитектор|architect|\mcto\M|\mcoo\M|\mceo\M|chief|директор|director|шеф)' then 'lead'
+    when d ~* '(\mjunior)' then 'junior'
+    when d ~* '(\mmiddle)' then 'middle'
+    when d ~* '(\msenior)' then 'senior'
+  end
+  from (select coalesce(title, '') as t, coalesce(description, '') as d) x
+$$;
+
+-- Направление: сначала по названию, порядок правил важен
+-- («QA Automation на Python» — это QA, «Mobile product designer» — дизайн,
+-- «Менеджер по продажам кредитных продуктов» — продажи). Если по названию
+-- не понять, смотрим на технологии.
+create or replace function public.vacancy_direction(title text, stack jsonb default null)
+returns text language sql immutable set search_path = '' as $$
+  select case
+    when t ~* '(безопасност|security|pentest|пентест|appsec|devsecops|\msoc\M|antifraud|антифрод)' then 'security'
+    when t ~* '(\mqa\M|\maqa\M|тестировщ|tester|тестирован|quality assurance|sdet)' then 'qa'
+    when t ~* '(\munity\M|unreal|gamedev|геймдизайн|game|игров|\mlevel )' then 'gamedev'
+    when t ~* '(дизайн|design|\mui\M|\mux\M|motion|моушн|иллюстратор|художник|artist|аниматор|animator|\m[23]d\M|арт-директор|art director|creative director)' then 'design'
+    when t ~* '(devops|\msre\M|site reliability|инфраструктур|системн\w* администратор|сисадмин|\madmin|platform engineer|\mdba\M|администратор баз)' then 'devops'
+    when t ~* '(data scien|scientist|data[- ]engineer|data integration|machine learning|\mml\M|\mml-|\mai\M|\mai-|\mии\M|\mllm|нейросет|data engineer|инженер данных|computer vision|\mcv\M|\mnlp\M|deep learning|\mdwh\M|\metl\M|mlops|prompt|robotics)' then 'data_ml'
+    when t ~* '(аналитик|analyst|analytics)' then 'analytics'
+    when t ~* '(android|\mios\M|\mswift|flutter|react native|mobile|мобильн)' then 'mobile'
+    when t ~* '(fullstack|full-stack|full stack|фулстек|фуллстек)' then 'fullstack'
+    when t ~* '(frontend|front-end|front end|фронтенд|фронт-энд|верстальщик|верстк|лендинг|\mreact\M|\mvue|angular)' then 'frontend'
+    when t ~* '(поддержк|support|helpdesk|help desk|оператор|call-центр|колл-центр|контакт-центр|customer success|техподдерж|клиентского сервиса|обслуживани)' then 'support'
+    when t ~* '(маркет|marketing|\msmm|\mсмм|\mseo|\mpr\M|\mpr-|таргет|реклам|бренд|brand|reels|рилс|медиабай|медиаплан|трафик|traffic|growth|\mcmo\M|директолог|контекстолог|google ads|директ\M|продвиж|influence|инфлюенс|\mugc|сторис|креатор|социальн|соцсет|instagram|tiktok|community|сообществ|linkbuild|\mpbn\M|paid media|контент|content)' then 'marketing'
+    when t ~* '(редактор|editor|журналист|сценарист|\mавтор|копирайт|copywrit|писател|радиоведущ|продюсер|producer|режисс|монтаж|звукорежисс|саунд|видео|video|фотограф)' then 'content'
+    when t ~* '(продаж|sales|account|аккаунт|business development|развити\w* бизнес|развити\w* партн|bizdev|\mbdm\M|закупк|снабжен|tender|тендер|торгов|клиент|партн[её]р|агент|ozon|wildberries|маркетплейс|категорийн)' then 'sales'
+    when t ~* '(product manager|product owner|head of product|продакт|менеджер продукта|продукт-менеджер|продуктов\w* менеджер|развити\w* продукт|project manager|проджект|менеджер проект|менеджер по проект|менеджер спецпроект|руководител\w* (it |ит )?проект|scrum|agile|delivery manager|head of production|\mcpo\M|\mpm\M|\mpo\M)' then 'product'
+    when t ~* '(\mhr\M|\mhr-|рекрут|recruit|персонал|talent|\mhrbp|retention)' then 'hr'
+    when t ~* '(бухгалт|финанс|accountant|finance|взыскани|кредит|ипотек|страхов|рефинанс|\mбки\M|экономист|казначей)' then 'finance'
+    when t ~* '(преподават|репетитор|педагог|учител|наставник|лектор|тренер|куратор|teacher|tutor|методист)' then 'education'
+    when t ~* '(backend|back-end|бэкенд|бекенд|python|\mjava\M|golang|\mgo\M|\mphp|ruby|\mc#|\.net|node|rust|scala|c\+\+|\m1[сc]\M|программист|разработчик|разработк|developer|engineer|инженер-программист|\mdev\M|битрикс|bitrix|wordpress|чат-бот|chatbot)' then 'backend'
+    when s ~* '(android|\mios\M|swift|kotlin|flutter)' then 'mobile'
+    when s ~* '(\mreact\M|\mvue|angular|typescript|javascript)' then 'frontend'
+    when s ~* '(python|\mjava\M|\mgo\M|golang|php|c#|\.net|node)' then 'backend'
+    when s ~* '(figma|photoshop|illustrator)' then 'design'
+    else 'other'
+  end
+  from (select coalesce(title, '') as t, coalesce(stack::text, '') as s) x
+$$;
+
+-- Формат работы: гибрид упоминают в тексте; удалёнка — флаг is_remote; иначе офис, если указан город.
+create or replace function public.vacancy_work_format(is_remote boolean, city text, title text, description text)
+returns text language sql immutable set search_path = '' as $$
+  select case
+    when coalesce(title, '') || ' ' || coalesce(description, '') ~* '(гибрид|hybrid)' then 'hybrid'
+    when is_remote then 'remote'
+    when nullif(trim(city), '') is not null then 'office'
+  end
+$$;
+
+-- Город к единому написанию: один город (первый из списка), по-русски, без «г.».
+create or replace function public.normalize_city(city text)
+returns text language sql immutable set search_path = '' as $$
+  with first as (
+    select nullif(trim(both ' .' from regexp_replace(
+             split_part(split_part(split_part(coalesce(city, ''), ',', 1), '/', 1), ';', 1),
+             '^(г\.|город)\s*', '', 'i')), '') as c
+  )
+  select case
+    when c is null then null
+    when lower(c) in ('москва', 'moscow', 'мск', 'msk') then 'Москва'
+    when lower(c) in ('санкт-петербург', 'санкт петербург', 'спб', 'питер', 'петербург', 'saint petersburg',
+                      'st. petersburg', 'st petersburg', 'saint-petersburg', 'spb') then 'Санкт-Петербург'
+    when lower(c) in ('ташкент', 'toshkent', 'tashkent') then 'Ташкент'
+    when lower(c) in ('лимассол', 'лимасол', 'limassol') then 'Лимассол'
+    when lower(c) in ('алматы', 'алма-ата', 'almaty') then 'Алматы'
+    when lower(c) in ('астана', 'нур-султан', 'astana') then 'Астана'
+    when lower(c) in ('минск', 'minsk') then 'Минск'
+    when lower(c) in ('ереван', 'yerevan') then 'Ереван'
+    when lower(c) in ('тбилиси', 'tbilisi') then 'Тбилиси'
+    when lower(c) in ('белград', 'belgrade', 'beograd') then 'Белград'
+    when lower(c) in ('варшава', 'warsaw', 'warszawa') then 'Варшава'
+    when lower(c) in ('берлин', 'berlin') then 'Берлин'
+    when lower(c) in ('дубай', 'dubai') then 'Дубай'
+    when lower(c) in ('абу-даби', 'abu dhabi') then 'Абу-Даби'
+    when lower(c) in ('барселона', 'barcelona') then 'Барселона'
+    when lower(c) in ('лиссабон', 'lisbon') then 'Лиссабон'
+    when lower(c) in ('лондон', 'london') then 'Лондон'
+    when lower(c) in ('бишкек', 'bishkek') then 'Бишкек'
+    when lower(c) in ('баку', 'baku') then 'Баку'
+    when lower(c) in ('новосибирск', 'novosibirsk') then 'Новосибирск'
+    when lower(c) in ('екатеринбург', 'екб', 'yekaterinburg') then 'Екатеринбург'
+    when lower(c) in ('нижний новгород', 'нн', 'nizhny novgorod') then 'Нижний Новгород'
+    when lower(c) in ('казань', 'kazan') then 'Казань'
+    when lower(c) in ('рф', 'россия', 'russia') then 'Россия'
+    else upper(left(c, 1)) || substr(c, 2)
+  end
+  from first
+$$;
+
+alter table public.vacancies
+  add column if not exists level text
+    constraint vacancies_level_check check (level in ('intern', 'junior', 'middle', 'senior', 'lead')),
+  add column if not exists direction text
+    constraint vacancies_direction_check check (direction in (
+      'backend', 'frontend', 'fullstack', 'mobile', 'qa', 'devops', 'data_ml', 'analytics', 'security',
+      'gamedev', 'design', 'product', 'marketing', 'content', 'sales', 'hr', 'support', 'finance',
+      'education', 'other')),
+  add column if not exists work_format text
+    constraint vacancies_work_format_check check (work_format in ('office', 'hybrid', 'remote')),
+  -- Хэш текста поста без ссылок, упоминаний, хэштегов, эмодзи и пробелов: ловит репосты
+  -- одной вакансии в разных каналах с косметическими отличиями
+  add column if not exists text_fingerprint text,
+  -- Название для поиска дублей: «Android-разработчик» = «android разработчик»
+  add column if not exists title_key text
+    generated always as (btrim(regexp_replace(lower(title), '[^[:alnum:]]+', ' ', 'g'))) stored;
+
+create index if not exists vacancies_direction_idx on public.vacancies (direction) where archived_at is null;
+create index if not exists vacancies_level_idx on public.vacancies (level) where archived_at is null;
+create index if not exists vacancies_fingerprint_idx on public.vacancies (text_fingerprint);
+create index if not exists vacancies_title_key_idx on public.vacancies (title_key) where archived_at is null;
+
+create or replace function public.normalize_vacancy()
+returns trigger
+language plpgsql
+set search_path = ''
+as $$
+begin
+  -- Название поменяли, а уровень/направление явно не задали — пересчитываем
+  if tg_op = 'UPDATE' and new.title is distinct from old.title then
+    if new.level is not distinct from old.level then new.level := null; end if;
+    if new.direction is not distinct from old.direction then new.direction := null; end if;
+  end if;
+  if tg_op = 'UPDATE' and (new.is_remote, new.city, new.description) is distinct from (old.is_remote, old.city, old.description)
+     and new.work_format is not distinct from old.work_format then
+    new.work_format := null;
+  end if;
+  new.city := public.normalize_city(new.city);
+  new.level := coalesce(new.level, public.vacancy_level(new.title, new.description));
+  new.direction := coalesce(new.direction, public.vacancy_direction(new.title, new.stack));
+  new.work_format := coalesce(new.work_format,
+                              public.vacancy_work_format(new.is_remote, new.city, new.title, new.description));
+  return new;
+end;
+$$;
+
+create or replace trigger vacancies_normalize
+  before insert or update on public.vacancies
+  for each row execute function public.normalize_vacancy();
+
+-- Заполнить старые вакансии (повторный запуск ничего не меняет: значения уже есть)
+update public.vacancies
+   set city = public.normalize_city(city)
+ where direction is null
+    or city is distinct from public.normalize_city(city);
+
+-- Дубли из разных каналов: та же должность у той же компании или с тем же контактом
+-- в пределах 21 дня. Оставляем первую (раньше опубликованную), остальные — в архив.
+update public.vacancies d
+   set archived_at = now()
+ where d.archived_at is null
+   and d.source_type = 'external'
+   and exists (
+     select 1 from public.vacancies o
+      where o.archived_at is null
+        and o.id <> d.id
+        and o.title_key = d.title_key
+        and (
+          (o.company_name is not null and lower(o.company_name) = lower(d.company_name))
+          or (o.contact_value is not null and lower(o.contact_value) = lower(d.contact_value))
+        )
+        and abs(extract(epoch from coalesce(o.posted_at, o.created_at) - coalesce(d.posted_at, d.created_at))) < 21 * 86400
+        and (coalesce(o.posted_at, o.created_at), o.id) < (coalesce(d.posted_at, d.created_at), d.id)
+   );
