@@ -13,8 +13,9 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "FastCV",
-  description: "Платформа для быстрого поиска работы и сотрудников",
+  metadataBase: new URL("https://fastcv.ru"),
+  title: "FastCV — вакансии с откликом от ИИ",
+  description: "Свежие IT-вакансии из Telegram-каналов и от прямых работодателей. Сопроводительное письмо под каждую вакансию пишет ИИ.",
 };
 
 export default function RootLayout({

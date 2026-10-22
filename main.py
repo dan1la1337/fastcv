@@ -140,15 +140,20 @@ def collect_new_posts(
 # ---------------------------------------------------------------------------
 
 
+Currency = Literal["RUB", "USD", "EUR", "KZT", "BYN", "UAH", "UZS", "GEL", "AMD", "TRY", "AED", "RSD", "PLN"]
+
+
 class VacancyAI(BaseModel):
     """Ответ Gemini. Все поля обязательны, но могут быть null: так модель
     всегда возвращает полную структуру, а схема не зависит от значений по умолчанию."""
 
     is_job: bool
     title: Optional[str]
+    company: Optional[str]
     description: Optional[str]
     salary_min: Optional[int]
     salary_max: Optional[int]
+    salary_currency: Optional[Currency]
     city: Optional[str]
     is_remote: bool
     contact_type: Optional[Literal["telegram", "email"]]
@@ -162,8 +167,13 @@ PROMPT = """Ты нормализатор вакансий для доски о�
 
 Если это вакансия, заполни поля:
 - title: название должности, коротко;
+- company: название компании-работодателя, если оно есть в тексте, иначе null
+  (не путай с названием канала или кадрового агентства, если оно не нанимает само);
 - description: 2–3 предложения о требованиях, обязанностях и условиях, по-русски;
 - salary_min / salary_max: числа в месяц в валюте поста, если указаны, иначе null;
+  «$5k» = 5000, «300к» = 300000; если указана почасовая или годовая ставка — пересчитай в месяц;
+- salary_currency: ISO-код валюты зарплаты (RUB, USD, EUR, KZT…); если зарплата есть,
+  а валюта не указана — RUB для постов на русском; null, если зарплаты нет;
 - city: город, если указан, иначе null;
 - is_remote: true, если можно работать удалённо;
 - contact_type и contact_value: "telegram" и username без @, либо "email" и адрес;
@@ -290,9 +300,11 @@ def process_post(post: Post, store: Store, normalize: Callable[[str], VacancyAI]
         "source_url": post.url,
         "posted_at": post.posted_at,
         "title": vacancy.title.strip()[:200],
+        "company_name": (vacancy.company or "").strip()[:200] or None,
         "description": (vacancy.description or "").strip(),
         "salary_min": vacancy.salary_min,
         "salary_max": vacancy.salary_max,
+        "salary_currency": vacancy.salary_currency if (vacancy.salary_min or vacancy.salary_max) else None,
         "city": vacancy.city,
         "is_remote": vacancy.is_remote,
         "contact_type": vacancy.contact_type if vacancy.contact_value else None,
