@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { fence, sanitizeLetter } from "@/lib/ai-safety";
+import { createSupabaseServerClient } from "@/lib/supabase-server";
 
 // Модели по очереди: если одна перегружена (503/429) или недоступна (404),
 // пробуем следующую. Тот же порядок, что и в сборщике вакансий (main.py).
@@ -75,21 +76,20 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Сервер не настроен" }, { status: 500 });
   }
 
-  // 1. Только для вошедших пользователей
+  // 1. Только для вошедших пользователей. Сессия — из cookies; заголовок Bearer
+  // принимается для вкладок, открытых до перехода на cookies.
   const token = req.headers.get("authorization")?.replace(/^Bearer\s+/i, "");
-  if (!token) {
-    return NextResponse.json({ error: "Войдите, чтобы сгенерировать письмо" }, { status: 401 });
-  }
+  // Клиент от имени пользователя: запросы ниже проходят через его правила доступа
+  const supabase = token
+    ? createClient(supabaseUrl, supabaseAnonKey, {
+        global: { headers: { Authorization: `Bearer ${token}` } },
+        auth: { persistSession: false, autoRefreshToken: false },
+      })
+    : await createSupabaseServerClient();
 
-  // Клиент от имени пользователя: запросы ниже проходят через его RLS-политики
-  const supabase = createClient(supabaseUrl, supabaseAnonKey, {
-    global: { headers: { Authorization: `Bearer ${token}` } },
-    auth: { persistSession: false, autoRefreshToken: false },
-  });
-
-  const { data: auth } = await supabase.auth.getUser(token);
+  const { data: auth } = token ? await supabase.auth.getUser(token) : await supabase.auth.getUser();
   if (!auth.user) {
-    return NextResponse.json({ error: "Сессия истекла, войдите заново" }, { status: 401 });
+    return NextResponse.json({ error: "Войдите, чтобы сгенерировать письмо" }, { status: 401 });
   }
 
   const { data: quota, error: quotaError } = await supabase.rpc("consume_ai_quota", {

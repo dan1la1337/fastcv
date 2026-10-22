@@ -1,17 +1,22 @@
 "use client";
 
-import { useState } from "react";
+import { Suspense, useState } from "react";
 import { supabase, getUserRole, homeForRole } from "@/lib/supabase";
 import { authErrorText } from "@/lib/auth-errors";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Loader2 } from "lucide-react";
 import Link from "next/link";
 
-export default function LoginPage() {
+function LoginForm() {
+  const searchParams = useSearchParams();
+  // Куда вернуть после входа: только путь на нашем сайте
+  const nextParam = searchParams.get("next");
+  const next = nextParam && nextParam.startsWith("/") && !nextParam.startsWith("//") ? nextParam : null;
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  // Ошибка из ссылки письма (/auth/callback) показывается сразу
+  const [error, setError] = useState<string | null>(searchParams.get("error"));
   const router = useRouter();
 
   const handleAuth = async (e: React.FormEvent) => {
@@ -28,7 +33,8 @@ export default function LoginPage() {
 
     // Работодателя — в кабинет HR, кандидата — на главную к вакансиям
     const role = await getUserRole(data.user);
-    router.push(homeForRole(role));
+    router.push(next ?? homeForRole(role));
+    router.refresh();
   };
 
   return (
@@ -94,5 +100,13 @@ export default function LoginPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-neutral-950" />}>
+      <LoginForm />
+    </Suspense>
   );
 }

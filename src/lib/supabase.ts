@@ -1,11 +1,12 @@
 import { createClient, type User } from "@supabase/supabase-js";
+import { createBrowserClient } from "@supabase/ssr";
 
 // NEXT_PUBLIC_* переменные подставляются в бандл во время `next build`,
 // поэтому обращаться к ним нужно только напрямую, без динамических ключей.
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
-if (!supabaseUrl || !supabaseAnonKey) {
+if (!url || !anonKey) {
   throw new Error(
     "Не заданы NEXT_PUBLIC_SUPABASE_URL и NEXT_PUBLIC_SUPABASE_ANON_KEY. " +
       "Скопируйте .env.example в .env.local и заполните значения (на Vercel — в Environment Variables).",
@@ -15,7 +16,7 @@ if (!supabaseUrl || !supabaseAnonKey) {
 // Секретный ключ (sb_secret_… или legacy service_role) обходит все правила
 // доступа. Если его по ошибке положить в NEXT_PUBLIC_*, он уедет в браузер
 // каждому посетителю — поэтому останавливаем сборку.
-if (supabaseAnonKey.startsWith("sb_secret_") || isServiceRoleJwt(supabaseAnonKey)) {
+if (anonKey.startsWith("sb_secret_") || isServiceRoleJwt(anonKey)) {
   throw new Error(
     "В NEXT_PUBLIC_SUPABASE_ANON_KEY лежит секретный ключ Supabase. " +
       "Нужен публичный ключ (sb_publishable_… или anon) из Supabase → Project Settings → API Keys.",
@@ -33,7 +34,21 @@ function isServiceRoleJwt(key: string): boolean {
   }
 }
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey);
+export const supabaseUrl: string = url;
+export const supabaseAnonKey: string = anonKey;
+
+/**
+ * Клиент Supabase для кода, который работает и в браузере, и на сервере.
+ * - В браузере сессия хранится в cookies (`@supabase/ssr`): так её видит сервер,
+ *   и кабинеты закрываются ещё до отрисовки (см. src/proxy.ts).
+ * - На сервере (страница вакансии, карта сайта) — клиент без сессии для публичных
+ *   данных. Код, которому нужен вошедший пользователь на сервере, берёт клиент
+ *   из src/lib/supabase-server.ts.
+ */
+export const supabase =
+  typeof window === "undefined"
+    ? createClient(supabaseUrl, supabaseAnonKey, { auth: { persistSession: false, autoRefreshToken: false } })
+    : createBrowserClient(supabaseUrl, supabaseAnonKey);
 
 export type UserRole = "candidate" | "employer";
 
