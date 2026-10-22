@@ -457,3 +457,41 @@ def test_notify_failure_does_not_raise(monkeypatch, capsys):
 
     assert main.notify("x", post=boom) is False
     assert "secret" not in capsys.readouterr().out
+
+
+# --- сводка за сутки ---------------------------------------------------------------
+
+
+class FakeQuery:
+    def __init__(self, log, count=0, data=None):
+        self.log, self._count, self._data = log, count, data or []
+
+    def __getattr__(self, name):
+        def call(*args, **kwargs):
+            self.log.append((name, args))
+            return self
+        return call
+
+    def execute(self):
+        return type("R", (), {"count": self._count, "data": self._data})()
+
+
+def test_store_count_maps_filters_to_postgrest():
+    log = []
+    db = type("DB", (), {"table": lambda self, t: (log.append(("table", (t,))), FakeQuery(log, count=7))[1]})()
+    n = main.Store(db).count("vacancies", gte_created_at="2026-10-22", is_archived_at="null", eq_is_active=True)
+    assert n == 7
+    assert ("gte", ("created_at", "2026-10-22")) in log
+    assert ("is_", ("archived_at", "null")) in log
+    assert ("eq", ("is_active", True)) in log
+
+
+def test_daily_report_text():
+    stats = {"vacancies_external": 40, "vacancies_employer": 2, "vacancies_in_feed": 610, "users": 3,
+             "applications": 5, "channels": 34, "unavailable_channels": ["a", "b"]}
+    text = main.daily_report_text(stats, main.RunSummary(2, [ok("x"), ok("y")]))
+    assert "Новых вакансий: 42 (из каналов 40, от работодателей 2)" in text
+    assert "Всего в ленте: 610" in text
+    assert "у 2: @a, @b" in text
+    assert "без проблем" in text
+    assert "Последний запуск" not in main.daily_report_text(stats)
