@@ -76,6 +76,22 @@ create table if not exists public.channels (
   last_parsed_at timestamptz
 );
 
+-- Этап 2: источник поста, дата публикации, архив, стек технологий.
+-- Отдельные alter table — чтобы скрипт обновлял и базы, созданные раньше.
+alter table public.vacancies
+  add column if not exists source_post text,                       -- "канал/id поста", устойчив к правкам поста
+  add column if not exists source_url  text,                       -- ссылка на оригинальный пост
+  add column if not exists posted_at   timestamptz,                -- когда пост вышел в Telegram
+  add column if not exists archived_at timestamptz,                -- не показывается в ленте
+  add column if not exists stack       jsonb not null default '[]'::jsonb;
+
+alter table public.channels
+  add column if not exists last_post_id bigint,                    -- последний обработанный пост
+  add column if not exists last_error   text,
+  add column if not exists failed_runs  integer not null default 0; -- запусков подряд без доступа к ленте
+
+create unique index if not exists vacancies_source_post_key on public.vacancies (source_post);
+create index if not exists vacancies_feed_idx on public.vacancies (created_at desc) where archived_at is null;
 create index if not exists vacancies_created_at_idx on public.vacancies (created_at desc);
 create index if not exists vacancies_employer_idx   on public.vacancies (employer_id);
 create index if not exists applications_vacancy_idx on public.applications (vacancy_id);
@@ -129,6 +145,25 @@ select
   ''
 from auth.users u
 where not exists (select 1 from public.profiles p where p.id = u.id);
+
+-- Архивация устаревших вакансий из Telegram. Вызывает только сборщик
+-- (service-role); вакансии прямых работодателей не трогает.
+create or replace function public.archive_stale_vacancies(days integer default 30)
+returns integer
+language sql
+security definer
+set search_path = public
+as $$
+  with archived as (
+    update public.vacancies
+       set archived_at = now()
+     where archived_at is null
+       and source_type = 'external'
+       and coalesce(posted_at, created_at) < now() - make_interval(days => days)
+    returning 1
+  )
+  select count(*)::integer from archived;
+$$;
 
 -- Пользователь не может сменить себе роль. Администратор (SQL Editor,
 -- service-role) — может: у таких запросов нет auth.uid().
@@ -279,6 +314,8 @@ create or replace trigger applications_prevent_tamper
 -- Служебные функции не должны вызываться напрямую через API (/rest/v1/rpc).
 -- app_user_role нужна вошедшим пользователям: её вызывают политики.
 revoke execute on function public.handle_new_user() from public, anon, authenticated;
+revoke execute on function public.archive_stale_vacancies(integer) from public, anon, authenticated;
+grant execute on function public.archive_stale_vacancies(integer) to service_role;
 revoke execute on function public.app_user_role() from public, anon;
 grant execute on function public.app_user_role() to authenticated;
 

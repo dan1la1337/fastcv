@@ -18,6 +18,8 @@ interface Vacancy {
   contact_value: string | null;
   created_at: string;
   source_type: string;
+  source_url: string | null;
+  stack: string[] | null;
 }
 
 const CATEGORIES: Record<string, Record<string, string[]>> = {
@@ -79,7 +81,12 @@ export default function Home() {
 
   async function fetchVacancies() {
     setLoading(true);
-    const { data } = await supabase.from("vacancies").select("*").order("created_at", { ascending: false });
+    // Архивные вакансии (устаревшие посты из Telegram) в ленте не показываем
+    const { data } = await supabase
+      .from("vacancies")
+      .select("*")
+      .is("archived_at", null)
+      .order("created_at", { ascending: false });
     if (data) setVacancies(data);
     setLoading(false);
   }
@@ -103,7 +110,9 @@ export default function Home() {
       matchesSalary = effectiveMax >= minSalary;
     }
 
-    const matchesStack = selectedStack.length === 0 || selectedStack.some(tech => fullText.includes(tech.toLowerCase()));
+    const vacancyStack = (v.stack || []).map(t => t.toLowerCase());
+    const matchesStack = selectedStack.length === 0 || selectedStack.some(tech =>
+      vacancyStack.includes(tech.toLowerCase()) || fullText.includes(tech.toLowerCase()));
     return matchesSearch && matchesRemote && matchesSalary && matchesStack;
   });
 
@@ -370,6 +379,26 @@ export default function Home() {
                     </button>
                   </div>
                   <p className="text-sm text-neutral-400 leading-relaxed line-clamp-3">{item.description}</p>
+
+                  {(item.stack?.length || item.source_url) ? (
+                    <div className="flex flex-wrap items-center gap-2">
+                      {item.stack?.slice(0, 8).map(tech => (
+                        <span key={tech} className="text-[11px] px-2 py-0.5 rounded-md bg-neutral-800/80 border border-neutral-700/60 text-neutral-300">
+                          {tech}
+                        </span>
+                      ))}
+                      {item.source_url && (
+                        <a
+                          href={item.source_url}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="ml-auto inline-flex items-center gap-1 text-xs text-neutral-500 hover:text-blue-400 transition-colors"
+                        >
+                          Пост в Telegram <ExternalLink className="w-3 h-3" />
+                        </a>
+                      )}
+                    </div>
+                  ) : null}
                 </div>
               ))}
             </div>
@@ -478,6 +507,10 @@ export default function Home() {
                         const contactLink = `https://t.me/${selectedVacancy.contact_value.replace('@', '')}`;
                         window.open(contactLink, '_blank');
                       }
+                    } else if (selectedVacancy.source_type === 'external') {
+                      // Контакта в посте нет — открываем оригинал, там есть ссылка на отклик
+                      if (selectedVacancy.source_url) window.open(selectedVacancy.source_url, '_blank');
+                      alert("Письмо скопировано. Контакта в посте нет — откликнитесь по ссылке из оригинального поста.");
                     } else {
                       // Внутренняя вакансия — перенаправляем в диалоги платформы
                       alert("Отклик доставлен работодателю в личный кабинет!");
