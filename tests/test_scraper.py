@@ -260,10 +260,11 @@ def _fake_gemini(monkeypatch, outcomes):
     """Подменяет google.genai.Client: generate_content по очереди отдаёт outcomes."""
     from google import genai
 
-    calls = {"n": 0}
+    calls = {"n": 0, "models": []}
 
     class Models:
         def generate_content(self, **kwargs):
+            calls["models"].append(kwargs["model"])
             item = outcomes[calls["n"]]
             calls["n"] += 1
             if isinstance(item, Exception):
@@ -271,7 +272,8 @@ def _fake_gemini(monkeypatch, outcomes):
             return _FakeResponse(item)
 
     class Client:
-        def __init__(self, api_key):
+        def __init__(self, api_key, http_options=None):
+            calls["timeout"] = http_options.timeout if http_options else None
             self.models = Models()
 
     monkeypatch.setattr(genai, "Client", Client)
@@ -285,20 +287,60 @@ def _api_error(code):
     return cls(code, {"error": {"code": code, "message": "x", "status": "UNAVAILABLE" if code >= 500 else "INVALID_ARGUMENT"}})
 
 
-def test_gemini_retries_temporary_errors(monkeypatch):
+MODELS = ("model-a", "model-b", "model-c")
+
+
+def test_gemini_falls_back_to_next_model_when_overloaded(monkeypatch):
     calls = _fake_gemini(monkeypatch, [_api_error(503), _api_error(429), job()])
-    result = main.make_gemini_normalizer("key")("текст")
-    assert result.title == "Python Developer" and calls["n"] == 3
+    result = main.make_gemini_normalizer("key", MODELS)("текст")
+    assert result.title == "Python Developer"
+    # две попытки на перегруженной модели, затем успех на следующей
+    assert calls["models"] == ["model-a", "model-a", "model-b"]
+    assert calls["timeout"] == main.AI_TIMEOUT_MS
 
 
-def test_gemini_gives_up_after_attempts(monkeypatch):
-    _fake_gemini(monkeypatch, [_api_error(503)] * main.AI_ATTEMPTS)
+def test_gemini_missing_model_is_skipped_immediately(monkeypatch):
+    calls = _fake_gemini(monkeypatch, [_api_error(404), job()])
+    main.make_gemini_normalizer("key", MODELS)("текст")
+    assert calls["models"] == ["model-a", "model-b"]
+
+
+def test_gemini_gives_up_after_all_models(monkeypatch):
+    calls = _fake_gemini(monkeypatch, [_api_error(503)] * (main.AI_ATTEMPTS * len(MODELS)))
     with pytest.raises(AIUnavailable):
-        main.make_gemini_normalizer("key")("текст")
+        main.make_gemini_normalizer("key", MODELS)("текст")
+    assert calls["n"] == main.AI_ATTEMPTS * len(MODELS)
 
 
 def test_gemini_does_not_retry_bad_request(monkeypatch):
     calls = _fake_gemini(monkeypatch, [_api_error(400), job()])
     with pytest.raises(AIUnavailable):
-        main.make_gemini_normalizer("key")("текст")
+        main.make_gemini_normalizer("key", MODELS)("текст")
     assert calls["n"] == 1
+
+
+def test_circuit_breaker_stops_after_consecutive_ai_failures(monkeypatch):
+    """Если Gemini не отвечает на нескольких каналах подряд, остальные не трогаем."""
+    monkeypatch.setattr(main.time, "sleep", lambda s: None)
+    rows = [{"username": f"ch{i}", "last_post_id": 1} for i in range(6)]
+    store = FakeStore(rows=rows)
+    fetched = []
+
+    def fetch(url):
+        fetched.append(url)
+        channel = url.split("/s/")[1].split("?")[0]
+        return page(channel, [2])
+
+    monkeypatch.setattr(main, "fetch_page", fetch)
+    # process_channel берёт fetch по умолчанию из модуля — подменяем через обёртку
+    original = main.process_channel
+    monkeypatch.setattr(main, "process_channel", lambda row, st, norm: original(row, st, norm, fetch=fetch, pause=lambda s: None))
+
+    def down(text):
+        raise AIUnavailable("503")
+
+    results = main.run(store, down)
+    assert len(results) == main.AI_CIRCUIT_BREAKER
+    assert len(fetched) == main.AI_CIRCUIT_BREAKER
+    # отложенные каналы не тронуты: их last_post_id не менялся
+    assert set(store.channel_updates) == {f"ch{i}" for i in range(main.AI_CIRCUIT_BREAKER)}

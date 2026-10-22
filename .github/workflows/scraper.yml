@@ -5,9 +5,16 @@ on:
     - cron: '0 */6 * * *'
   workflow_dispatch:
 
+# Не запускать два сборщика одновременно: второй дождётся первого
+concurrency:
+  group: vacancy-scraper
+  cancel-in-progress: false
+
 jobs:
   scrape:
     runs-on: ubuntu-latest
+    # Обычный прогон — несколько минут; лимит страхует от зависания
+    timeout-minutes: 30
 
     steps:
       - name: Checkout repository
@@ -31,4 +38,5 @@ jobs:
           # Settings → Secrets and variables → Actions.
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
-        run: python main.py
+        # -u: вывод сразу попадает в лог Actions, а не копится в буфере до конца
+        run: python -u main.py
