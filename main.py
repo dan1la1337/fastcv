@@ -24,7 +24,7 @@ import re
 import sys
 import time
 from dataclasses import dataclass
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from typing import Callable, Literal, Optional
 
 import requests
@@ -296,6 +296,29 @@ class Store:
     def update_channel(self, username: str, fields: dict) -> None:
         self.db.table("channels").update(fields).eq("username", username).execute()
 
+    def count(self, table: str, **filters) -> int:
+        """Число строк без их загрузки. filters: gte_<колонка>, eq_<колонка>, is_<колонка>."""
+        query = self.db.table(table).select("*", count="exact", head=True)
+        for key, value in filters.items():
+            op, column = key.split("_", 1)
+            query = getattr(query, "is_" if op == "is" else op)(column, value)
+        return int(query.execute().count or 0)
+
+    def daily_stats(self) -> dict:
+        since = (datetime.now(timezone.utc) - timedelta(days=1)).isoformat()
+        unavailable = (self.db.table("channels").select("username")
+                       .eq("is_active", True).gt("failed_runs", 0).order("username")
+                       .execute().data)
+        return {
+            "vacancies_external": self.count("vacancies", gte_created_at=since, eq_source_type="external"),
+            "vacancies_employer": self.count("vacancies", gte_created_at=since, eq_source_type="internal"),
+            "vacancies_in_feed": self.count("vacancies", is_archived_at="null"),
+            "users": self.count("profiles", gte_created_at=since),
+            "applications": self.count("applications", gte_created_at=since),
+            "channels": self.count("channels", eq_is_active=True),
+            "unavailable_channels": [r["username"] for r in unavailable],
+        }
+
     def archive_stale(self, days: int) -> int:
         result = self.db.rpc("archive_stale_vacancies", {"days": days}).execute()
         return int(result.data or 0)
@@ -458,6 +481,27 @@ def alert_text(summary: RunSummary) -> Optional[str]:
     return "\n".join(lines)
 
 
+def daily_report_text(stats: dict, summary: Optional[RunSummary] = None) -> str:
+    """Сводка за сутки для владельца: что прибавилось и всё ли в порядке с источниками."""
+    unavailable = stats["unavailable_channels"]
+    lines = [
+        "📊 FastCV: сводка за сутки",
+        "",
+        f"Новых вакансий: {stats['vacancies_external'] + stats['vacancies_employer']} "
+        f"(из каналов {stats['vacancies_external']}, от работодателей {stats['vacancies_employer']})",
+        f"Всего в ленте: {stats['vacancies_in_feed']}",
+        f"Новых пользователей: {stats['users']}",
+        f"Откликов: {stats['applications']}",
+        f"Каналов: {stats['channels']}, лента не открывается у {len(unavailable)}"
+        + (": " + ", ".join("@" + c for c in unavailable[:10]) + (" и др." if len(unavailable) > 10 else "")
+           if unavailable else ""),
+    ]
+    if summary is not None:
+        lines.append(f"Последний запуск: новых постов {summary.new_posts}, сохранено {summary.saved}"
+                     + (", были проблемы (сообщение выше)" if alert_text(summary) else ", без проблем"))
+    return "\n".join(lines)
+
+
 def run_link() -> Optional[str]:
     """Ссылка на текущий запуск в GitHub Actions (в оповещении — чтобы сразу открыть лог)."""
     server, repo, run_id = (os.getenv(k) for k in ("GITHUB_SERVER_URL", "GITHUB_REPOSITORY", "GITHUB_RUN_ID"))
@@ -558,11 +602,6 @@ def main() -> None:
     load_dotenv(".env.local")
     load_dotenv(".env")
 
-    if (os.getenv("ALERT_TEST") or "").lower() == "true":
-        sent = notify("✅ FastCV: оповещения сборщика работают. Сюда придёт сообщение, если сбор вакансий сломается.")
-        sys.exit(0 if sent else "Тестовое сообщение не отправлено: проверьте секреты TELEGRAM_BOT_TOKEN и TELEGRAM_CHAT_ID "
-                 "и что вы нажали Start у своего бота.")
-
     supabase_url = env("SUPABASE_URL", "NEXT_PUBLIC_SUPABASE_URL")
     gemini_key = env("GEMINI_API_KEY")
     # Сборщику нужен service-role ключ: запись в vacancies и channels для
@@ -587,11 +626,21 @@ def main() -> None:
             "API Keys нажмите кнопку копирования у ключа и обновите секрет SUPABASE_SERVICE_ROLE_KEY."
         )
 
+    if (os.getenv("ALERT_TEST") or "").lower() == "true":
+        sent = notify("✅ FastCV: оповещения сборщика работают. Сюда придёт сообщение, если сбор вакансий "
+                      "сломается, и каждое утро — сводка за сутки. Пример сводки ниже.")
+        if not sent:
+            sys.exit("Тестовое сообщение не отправлено: проверьте секреты TELEGRAM_BOT_TOKEN и TELEGRAM_CHAT_ID "
+                     "и что вы нажали Start у своего бота.")
+        notify(daily_report_text(Store(create_client(supabase_url, supabase_key)).daily_stats()))
+        return
+
     print("==================== ЗАПУСК СБОРА ====================")
     models = tuple(m.strip() for m in (env("GEMINI_MODELS") or "").split(",") if m.strip()) or GEMINI_MODELS
     print(f"Модели Gemini: {', '.join(models)}")
     try:
-        summary = run(Store(create_client(supabase_url, supabase_key)), make_gemini_normalizer(gemini_key, models))
+        store = Store(create_client(supabase_url, supabase_key))
+        summary = run(store, make_gemini_normalizer(gemini_key, models))
     except Exception as e:
         # Текст ошибки без значений ключей: они в заголовках запросов, а не в сообщении
         notify(f"❌ FastCV: сборщик упал\n\n{type(e).__name__}: {str(e)[:500]}")
@@ -599,6 +648,11 @@ def main() -> None:
     text = alert_text(summary)
     if text:
         notify(text)
+    if (os.getenv("DAILY_REPORT") or "").lower() == "true":
+        try:
+            notify(daily_report_text(store.daily_stats(), summary))
+        except Exception as e:  # сводка не должна ронять успешный сбор
+            print(f"⚠️ Не удалось собрать сводку: {type(e).__name__}: {str(e)[:200]}")
     print("==================== ЦИКЛ ЗАВЕРШЁН ====================")
 
 

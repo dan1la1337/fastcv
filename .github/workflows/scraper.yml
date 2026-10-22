@@ -2,11 +2,17 @@ name: Scheduled Vacancy Scraper
 
 on:
   schedule:
-    - cron: '0 */6 * * *'
+    - cron: '0 0,12,18 * * *'
+    # Утренний запуск (09:00 по Москве) дополнительно присылает сводку за сутки
+    - cron: '0 6 * * *'
   workflow_dispatch:
     inputs:
       test_alert:
         description: 'Только отправить тестовое сообщение в Telegram (без сбора)'
+        type: boolean
+        default: false
+      daily_report:
+        description: 'После сбора прислать сводку за сутки'
         type: boolean
         default: false
 
@@ -48,6 +54,7 @@ jobs:
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
           ALERT_TEST: ${{ inputs.test_alert }}
+          DAILY_REPORT: ${{ github.event.schedule == '0 6 * * *' || inputs.daily_report == true }}
         # -u: вывод сразу попадает в лог Actions, а не копится в буфере до конца
         run: python -u main.py
 
