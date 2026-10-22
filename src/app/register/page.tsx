@@ -1,89 +1,59 @@
-'use client';
+import type { Metadata } from 'next';
+import Link from 'next/link';
+import { ArrowRight, Briefcase, UserCircle } from 'lucide-react';
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { Briefcase, UserCircle, ArrowRight } from 'lucide-react';
+export const metadata: Metadata = { title: 'Регистрация — FastCV' };
+
+const ROLES = [
+  {
+    role: 'candidate',
+    icon: UserCircle,
+    title: 'Ищу работу',
+    text: 'Свежие вакансии из Telegram и от прямых работодателей. Сопроводительное письмо под каждую вакансию пишет ИИ.',
+  },
+  {
+    role: 'employer',
+    icon: Briefcase,
+    title: 'Ищу сотрудника',
+    text: 'Публикуйте вакансии, получайте отклики с сопроводительным письмом и резюме и отвечайте кандидатам в кабинете.',
+  },
+] as const;
 
 export default function RoleSelectionPage() {
-  const router = useRouter();
-  const [selectedRole, setSelectedRole] = useState<'candidate' | 'employer' | null>(null);
-
-  const handleContinue = () => {
-    if (selectedRole) {
-      router.push(`/register/form?role=${selectedRole}`);
-    }
-  };
-
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 p-4">
-      <div className="max-w-3xl w-full text-center space-y-8">
-        <div className="space-y-2">
-          <h1 className="text-3xl font-bold tracking-tight text-gray-900">Добро пожаловать в FastCV</h1>
-          <p className="text-gray-500">Выберите, с какой целью вы здесь, чтобы мы настроили платформу под вас.</p>
+    <div className="min-h-screen bg-neutral-950 flex items-center justify-center p-4">
+      <div className="max-w-3xl w-full space-y-8">
+        <div className="text-center space-y-3">
+          <Link href="/" className="inline-flex items-center gap-2 hover:opacity-80 transition-opacity">
+            <span className="bg-blue-600 text-white font-black px-2.5 py-1 rounded-lg text-sm tracking-tight shadow-lg shadow-blue-500/25">⚡ Fast<span className="text-blue-200">CV</span></span>
+          </Link>
+          <h1 className="text-3xl font-bold tracking-tight text-white">Добро пожаловать в FastCV</h1>
+          <p className="text-neutral-400">Выберите, зачем вы здесь. Тип аккаунта потом изменить нельзя.</p>
         </div>
 
-        <div className="grid md:grid-cols-2 gap-6 mt-8">
-          <button
-            onClick={() => setSelectedRole('candidate')}
-            className={`relative p-8 rounded-2xl border-2 text-left transition-all duration-200 ${
-              selectedRole === 'candidate'
-                ? 'border-blue-600 bg-blue-50/50 shadow-md flex-col'
-                : 'border-gray-200 bg-white hover:border-blue-300 hover:shadow-sm'
-            }`}
-          >
-            <div className="flex justify-between items-start mb-4">
-              <div className={`p-3 rounded-xl ${selectedRole === 'candidate' ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-600'}`}>
-                <UserCircle size={28} />
+        <div className="grid md:grid-cols-2 gap-4">
+          {ROLES.map(({ role, icon: Icon, title, text }) => (
+            <Link
+              key={role}
+              href={`/register/form?role=${role}`}
+              className="group p-6 sm:p-8 rounded-2xl border border-neutral-800 bg-neutral-900/50 hover:border-blue-500/60 hover:bg-neutral-900 transition-colors"
+            >
+              <div className="flex items-start justify-between mb-4">
+                <div className="p-3 rounded-xl bg-blue-600/15 text-blue-400 group-hover:bg-blue-600 group-hover:text-white transition-colors">
+                  <Icon size={28} />
+                </div>
+                <ArrowRight className="w-5 h-5 text-neutral-600 group-hover:text-blue-400 group-hover:translate-x-0.5 transition-all" />
               </div>
-              <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center ${selectedRole === 'candidate' ? 'border-blue-600' : 'border-gray-300'}`}>
-                {selectedRole === 'candidate' && <div className="w-3 h-3 bg-blue-600 rounded-full" />}
-              </div>
-            </div>
-            <h3 className="text-xl font-semibold text-gray-900 mb-2">Ищу работу</h3>
-            <p className="text-gray-500 text-sm">Хочу создать AI-резюме, автоматизировать отклики и найти работу мечты.</p>
-          </button>
-
-          <button
-            onClick={() => setSelectedRole('employer')}
-            className={`relative p-8 rounded-2xl border-2 text-left transition-all duration-200 ${
-              selectedRole === 'employer'
-                ? 'border-blue-600 bg-blue-50/50 shadow-md flex-col'
-                : 'border-gray-200 bg-white hover:border-blue-300 hover:shadow-sm'
-            }`}
-          >
-            <div className="flex justify-between items-start mb-4">
-              <div className={`p-3 rounded-xl ${selectedRole === 'employer' ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-600'}`}>
-                <Briefcase size={28} />
-              </div>
-              <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center ${selectedRole === 'employer' ? 'border-blue-600' : 'border-gray-300'}`}>
-                {selectedRole === 'employer' && <div className="w-3 h-3 bg-blue-600 rounded-full" />}
-              </div>
-            </div>
-            <h3 className="text-xl font-semibold text-gray-900 mb-2">Ищу сотрудника</h3>
-            <p className="text-gray-500 text-sm">Хочу размещать вакансии и находить топовых специалистов для своих проектов.</p>
-          </button>
+              <h2 className="text-xl font-semibold text-white mb-2">{title}</h2>
+              <p className="text-neutral-400 text-sm leading-relaxed">{text}</p>
+            </Link>
+          ))}
         </div>
 
-        <button
-          disabled={!selectedRole}
-          onClick={handleContinue}
-          className={`mt-10 inline-flex items-center justify-center px-8 py-3 rounded-xl font-medium transition-all duration-200 ${
-            selectedRole
-              ? 'bg-gray-900 text-white hover:bg-gray-800 shadow-md hover:shadow-lg'
-              : 'bg-gray-200 text-gray-400 cursor-not-allowed'
-          }`}
-        >
-          Продолжить <ArrowRight className="ml-2" size={18} />
-        </button>
-
-        {/* НОВАЯ ССЫЛКА НА ВХОД */}
-        <div className="mt-8 text-center text-sm text-gray-500">
+        <p className="text-center text-sm text-neutral-400">
           Уже есть аккаунт?{' '}
-          <a href="/login" className="text-blue-600 hover:underline font-medium">
-            Войти
-          </a>
-        </div>
-
+          <Link href="/login" className="text-blue-400 hover:text-blue-300 font-medium">Войти</Link>
+        </p>
       </div>
     </div>
   );

@@ -257,7 +257,11 @@ class Store:
     def active_channels(self) -> list[dict]:
         return (self.db.table("channels")
                 .select("username, last_post_id, failed_runs")
-                .eq("is_active", True).order("username").execute().data)
+                .eq("is_active", True)
+                # Сначала каналы, которые дольше всего не проверялись: если предохранитель
+                # Gemini прервёт прогон, в следующий раз очередь дойдёт до остальных
+                .order("last_parsed_at", nullsfirst=True).order("username")
+                .execute().data)
 
     def is_known(self, post: Post, raw_hash: str) -> bool:
         rows = (self.db.table("vacancies").select("id")
