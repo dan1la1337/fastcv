@@ -326,6 +326,74 @@ grant execute on function public.app_user_role() to authenticated;
 -- (channels читает и обновляет сборщик, companies кодом пока не используется)
 
 -- ---------------------------------------------------------------------------
+-- Лимит запросов к ИИ (сопроводительные письма и другие генерации)
+-- ---------------------------------------------------------------------------
+-- Каждый вызов ИИ записывается в ai_usage. Проверка и запись делаются одной
+-- функцией под блокировкой на пользователя, поэтому параллельные запросы не
+-- обходят лимит. Прямого доступа к таблице нет ни у кого, кроме service-role.
+
+create table if not exists public.ai_usage (
+  id         bigserial primary key,
+  user_id    uuid not null references auth.users (id) on delete cascade,
+  kind       text not null,
+  created_at timestamptz not null default now()
+);
+
+create index if not exists ai_usage_user_kind_time_idx on public.ai_usage (user_id, kind, created_at desc);
+
+alter table public.ai_usage enable row level security;
+
+-- Разрешить вызов или отказать. Возвращает {"allowed": bool, "retry_after": секунды}.
+create or replace function public.consume_ai_quota(
+  quota_kind text,
+  max_calls integer,
+  window_seconds integer
+)
+returns jsonb
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  uid uuid := auth.uid();
+  used integer;
+  oldest timestamptz;
+begin
+  if uid is null then
+    raise exception 'Нужна авторизация';
+  end if;
+  -- Потолок параметров: функцию можно вызвать и напрямую, и без него пользователь
+  -- мог бы записать в таблицу сколько угодно строк
+  if max_calls not between 1 and 100 or window_seconds not between 1 and 86400 or length(quota_kind) > 40 then
+    raise exception 'Некорректные параметры лимита';
+  end if;
+
+  -- Один пользователь — одна проверка за раз
+  perform pg_advisory_xact_lock(hashtext('ai_quota:' || uid::text));
+
+  select count(*), min(created_at)
+    into used, oldest
+    from public.ai_usage
+   where user_id = uid
+     and kind = quota_kind
+     and created_at > now() - make_interval(secs => window_seconds);
+
+  if used >= max_calls then
+    return jsonb_build_object(
+      'allowed', false,
+      'retry_after', greatest(1, ceil(extract(epoch from (oldest + make_interval(secs => window_seconds) - now()))))::integer
+    );
+  end if;
+
+  insert into public.ai_usage (user_id, kind) values (uid, quota_kind);
+  return jsonb_build_object('allowed', true, 'retry_after', 0);
+end;
+$$;
+
+revoke execute on function public.consume_ai_quota(text, integer, integer) from public, anon;
+grant execute on function public.consume_ai_quota(text, integer, integer) to authenticated;
+
+-- ---------------------------------------------------------------------------
 -- Резюме (Supabase Storage)
 -- ---------------------------------------------------------------------------
 -- Файл кандидата лежит в приватном бакете resumes по пути <user_id>/resume.pdf.
