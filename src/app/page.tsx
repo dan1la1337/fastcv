@@ -304,6 +304,7 @@ export default function Home() {
                       <h2 className="text-xl font-bold text-neutral-100">
                         <Link href={`/vacancy/${item.id}`} className="hover:text-blue-400 transition-colors">{item.title}</Link>
                       </h2>
+                      {item.company_name && <p className="text-sm text-neutral-400 mt-0.5">{item.company_name}</p>}
                       <p className="text-base font-semibold text-emerald-400 mt-1">{formatSalary(item.salary_min, item.salary_max, item.salary_currency)}</p>
                       {(item.city || item.is_remote) && (
                         <p className="flex flex-wrap items-center gap-3 text-xs text-neutral-400 mt-2">

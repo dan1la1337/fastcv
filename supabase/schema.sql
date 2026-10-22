@@ -84,7 +84,8 @@ alter table public.vacancies
   add column if not exists posted_at   timestamptz,                -- когда пост вышел в Telegram
   add column if not exists archived_at timestamptz,                -- не показывается в ленте
   add column if not exists stack       jsonb not null default '[]'::jsonb,
-  add column if not exists salary_currency text;                   -- ISO-код (RUB, USD…); null — валюта неизвестна
+  add column if not exists salary_currency text,
+  add column if not exists company_name text;                      -- компания-работодатель (из поста или профиля)                   -- ISO-код (RUB, USD…); null — валюта неизвестна
 
 alter table public.channels
   add column if not exists last_post_id bigint,                    -- последний обработанный пост

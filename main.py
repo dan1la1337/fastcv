@@ -149,6 +149,7 @@ class VacancyAI(BaseModel):
 
     is_job: bool
     title: Optional[str]
+    company: Optional[str]
     description: Optional[str]
     salary_min: Optional[int]
     salary_max: Optional[int]
@@ -166,6 +167,8 @@ PROMPT = """Ты нормализатор вакансий для доски о�
 
 Если это вакансия, заполни поля:
 - title: название должности, коротко;
+- company: название компании-работодателя, если оно есть в тексте, иначе null
+  (не путай с названием канала или кадрового агентства, если оно не нанимает само);
 - description: 2–3 предложения о требованиях, обязанностях и условиях, по-русски;
 - salary_min / salary_max: числа в месяц в валюте поста, если указаны, иначе null;
   «$5k» = 5000, «300к» = 300000; если указана почасовая или годовая ставка — пересчитай в месяц;
@@ -297,6 +300,7 @@ def process_post(post: Post, store: Store, normalize: Callable[[str], VacancyAI]
         "source_url": post.url,
         "posted_at": post.posted_at,
         "title": vacancy.title.strip()[:200],
+        "company_name": (vacancy.company or "").strip()[:200] or None,
         "description": (vacancy.description or "").strip(),
         "salary_min": vacancy.salary_min,
         "salary_max": vacancy.salary_max,

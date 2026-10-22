@@ -34,7 +34,7 @@ def page(channel: str, ids: list[int], before: int | None = None, text: str = "P
 
 
 def job(**overrides) -> VacancyAI:
-    data = dict(is_job=True, title="Python Developer", description="Описание", salary_min=200000,
+    data = dict(is_job=True, title="Python Developer", company="Kaspi.kz", description="Описание", salary_min=200000,
                 salary_max=None, salary_currency="RUB", city=None, is_remote=True, contact_type="telegram",
                 contact_value="@hr", stack=["Python", "python", " Django "])
     data.update(overrides)
@@ -161,6 +161,7 @@ def test_saves_vacancy_with_source_link_and_stack():
     assert saved["posted_at"] == "2026-10-22T10:00:00+00:00"
     assert saved["stack"] == ["Python", "Django"]
     assert saved["contact_value"] == "hr"
+    assert saved["company_name"] == "Kaspi.kz"
 
 
 def test_known_post_is_not_sent_to_ai_again():

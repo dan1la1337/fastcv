@@ -137,6 +137,7 @@ export default function EmployerDashboard() {
       salary_currency: salaryMin || salaryMax ? form.currency : null,
       city: form.city.trim() || null,
       is_remote: form.isRemote,
+      company_name: companyName,
     };
 
     const { error } = editingId

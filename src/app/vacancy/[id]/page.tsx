@@ -28,7 +28,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const vacancy = await getVacancy((await params).id);
   if (!vacancy) return { title: "Вакансия не найдена — FastCV" };
   return {
-    title: `${vacancy.title} — FastCV`,
+    title: `${vacancy.title}${vacancy.company_name ? ` в ${vacancy.company_name}` : ""} — FastCV`,
     description: summary(vacancy),
     alternates: { canonical: `/vacancy/${vacancy.id}` },
     openGraph: { title: vacancy.title, description: summary(vacancy), type: "article" },
@@ -59,6 +59,7 @@ function jobPostingJsonLd(v: Vacancy) {
     ...(v.city ? { jobLocation: { "@type": "Place", address: { "@type": "PostalAddress", addressLocality: v.city } } } : {}),
     ...(salaryValue && v.salary_currency ? { baseSalary: salaryValue } : {}),
     ...(v.stack?.length ? { skills: v.stack.join(", ") } : {}),
+    ...(v.company_name ? { hiringOrganization: { "@type": "Organization", name: v.company_name } } : {}),
   };
 }
 
@@ -101,6 +102,7 @@ export default async function VacancyPage({ params }: Props) {
               {vacancy.source_type === "internal" ? "Прямой работодатель" : "Telegram"}
             </span>
             <h1 className="text-2xl sm:text-3xl font-bold text-white">{vacancy.title}</h1>
+            {vacancy.company_name && <p className="text-base text-neutral-300">{vacancy.company_name}</p>}
             <p className="text-xl font-semibold text-emerald-400">
               {formatSalary(vacancy.salary_min, vacancy.salary_max, vacancy.salary_currency)}
             </p>

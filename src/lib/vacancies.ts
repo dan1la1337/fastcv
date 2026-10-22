@@ -3,6 +3,7 @@ import { supabase } from "@/lib/supabase";
 export interface Vacancy {
   id: string;
   title: string;
+  company_name: string | null;
   description: string | null;
   salary_min: number | null;
   salary_max: number | null;
@@ -79,7 +80,7 @@ export function searchCondition(search: string): string | null {
   const s = search.trim();
   if (!s) return null;
   const like = quoted(`%${s.replace(/[%_\\]/g, "\\$&")}%`);
-  return `title.ilike.${like},description.ilike.${like}`;
+  return `title.ilike.${like},description.ilike.${like},company_name.ilike.${like}`;
 }
 
 /** Условие по зарплате: верхняя граница вилки не ниже minSalary. */
