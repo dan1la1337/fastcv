@@ -626,3 +626,41 @@ update public.vacancies d
         and abs(extract(epoch from coalesce(o.posted_at, o.created_at) - coalesce(d.posted_at, d.created_at))) < 21 * 86400
         and (coalesce(o.posted_at, o.created_at), o.id) < (coalesce(d.posted_at, d.created_at), d.id)
    );
+
+-- ---------------------------------------------------------------------------
+-- Кэш сопроводительных писем
+-- ---------------------------------------------------------------------------
+-- Повторный клик «Сгенерировать» на той же вакансии с тем же профилем отдаёт
+-- готовое письмо без запроса к ИИ и без расхода лимита. input_hash — хэш данных
+-- профиля и вакансии вместе с версией промпта: изменился профиль — письмо новое.
+create table if not exists public.cover_letters (
+  id         uuid primary key default gen_random_uuid(),
+  user_id    uuid not null references auth.users (id) on delete cascade,
+  vacancy_id uuid not null references public.vacancies (id) on delete cascade,
+  input_hash text not null,
+  text       text not null check (char_length(text) <= 4000),
+  created_at timestamptz not null default now(),
+  unique (user_id, vacancy_id, input_hash)
+);
+
+create index if not exists cover_letters_vacancy_idx on public.cover_letters (vacancy_id);
+
+alter table public.cover_letters enable row level security;
+
+-- Только свои письма: читать, сохранять и заменять при «Переписать»
+do $$
+begin
+  if not exists (select 1 from pg_policies where schemaname = 'public' and tablename = 'cover_letters' and policyname = 'cover_letters_select_own') then
+    create policy cover_letters_select_own on public.cover_letters
+      for select to authenticated using (user_id = (select auth.uid()));
+  end if;
+  if not exists (select 1 from pg_policies where schemaname = 'public' and tablename = 'cover_letters' and policyname = 'cover_letters_insert_own') then
+    create policy cover_letters_insert_own on public.cover_letters
+      for insert to authenticated with check (user_id = (select auth.uid()));
+  end if;
+  if not exists (select 1 from pg_policies where schemaname = 'public' and tablename = 'cover_letters' and policyname = 'cover_letters_update_own') then
+    create policy cover_letters_update_own on public.cover_letters
+      for update to authenticated using (user_id = (select auth.uid())) with check (user_id = (select auth.uid()));
+  end if;
+end;
+$$;

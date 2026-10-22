@@ -31,6 +31,9 @@ export default function SmartApply({
   // Состояния модального окна Smart Apply
   // Письмо и ошибка привязаны к id вакансии: у другой вакансии окно чистое
   const [draft, setDraft] = useState<{ vacancyId: string; text: string; error: string | null } | null>(null);
+  // Откуда письмо: ИИ, сохранённое ранее или шаблон (ИИ не ответил). После «Переписать»
+  // для этой вакансии просим новое письмо, а не сохранённое.
+  const [letterSource, setLetterSource] = useState<{ vacancyId: string; source: string } | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
   const [isSending, setIsSending] = useState(false);
   const router = useRouter();
@@ -59,14 +62,16 @@ export default function SmartApply({
 
     try {
       // Сессия уходит в cookies сама: токен вручную передавать не нужно
+      const regenerate = letterSource?.vacancyId === vacancy.id;
       const res = await fetch("/api/cover-letter", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ vacancyId: vacancy.id }),
+        body: JSON.stringify({ vacancyId: vacancy.id, regenerate }),
       });
       const data = await res.json();
       if (res.ok && data.text) {
         setCoverLetter(data.text);
+        setLetterSource({ vacancyId: vacancy.id, source: data.source ?? "ai" });
       } else {
         setGenerationError(data.error || "Не удалось сгенерировать письмо. Попробуйте ещё раз.");
       }
@@ -136,7 +141,15 @@ export default function SmartApply({
                     onChange={(e) => setCoverLetter(e.target.value)}
                     className="w-full h-64 bg-neutral-950 border border-neutral-800 rounded-xl p-4 text-sm text-neutral-200 focus:outline-none focus:border-blue-500 leading-relaxed resize-none"
                   />
-                  <p className="text-xs text-neutral-500">Ты можешь отредактировать текст перед отправкой.</p>
+                  {letterSource?.vacancyId === vacancy.id && letterSource.source === "template" ? (
+                    <p className="text-xs text-amber-400">
+                      ИИ сейчас не отвечает, поэтому письмо собрано по шаблону из вашего профиля. Отредактируйте его или нажмите «Переписать» чуть позже.
+                    </p>
+                  ) : letterSource?.vacancyId === vacancy.id && letterSource.source === "cache" ? (
+                    <p className="text-xs text-neutral-500">Это письмо вы уже генерировали для этой вакансии. «Переписать» — новый вариант.</p>
+                  ) : (
+                    <p className="text-xs text-neutral-500">Ты можешь отредактировать текст перед отправкой.</p>
+                  )}
                 </div>
               )}
             </div>
