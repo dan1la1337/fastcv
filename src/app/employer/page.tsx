@@ -149,9 +149,6 @@ export default function EmployerDashboard() {
             <div>
               <h1 className="text-xl font-bold flex items-center gap-2">
                 Кабинет работодателя
-                <span className="text-xs bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-2 py-0.5 rounded-full font-normal">
-                  SLA & Pay-per-Interview
-                </span>
               </h1>
               <p className="text-xs text-neutral-400 mt-0.5">Организация: {profile?.name || "Не указано"}</p>
             </div>
@@ -289,8 +286,8 @@ export default function EmployerDashboard() {
                           app.status === 'interview_scheduled' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' :
                           'bg-neutral-800 text-neutral-400 border-neutral-700'
                         }`}>
-                          {app.status === 'new' ? 'Ожидает ответа (SLA)' :
-                           app.status === 'interview_scheduled' ? 'Собеседование назначено (Pay-per-Interview)' : 'Отклонено'}
+                          {app.status === 'new' ? 'Новый отклик' :
+                           app.status === 'interview_scheduled' ? 'Собеседование назначено' : 'Отклонено'}
                         </span>
                       </div>
                     </div>

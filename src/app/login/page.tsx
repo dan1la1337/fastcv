@@ -35,8 +35,7 @@ export default function LoginPage() {
       <div className="max-w-md w-full bg-neutral-900/50 border border-neutral-800 rounded-2xl p-8 shadow-2xl">
         <div className="text-center mb-8">
           <Link href="/" className="inline-flex items-center gap-2 mb-6 hover:opacity-80 transition-opacity">
-            <span className="bg-blue-600 text-white font-black px-2.5 py-1 rounded-md text-xs tracking-widest">SJT</span>
-            <span className="font-semibold text-neutral-100">Job Aggregator</span>
+            <span className="bg-blue-600 text-white font-black px-2.5 py-1 rounded-lg text-sm tracking-tight shadow-lg shadow-blue-500/25">⚡ Fast<span className="text-blue-200">CV</span></span>
           </Link>
           <h1 className="text-2xl font-bold text-white">
             С возвращением
