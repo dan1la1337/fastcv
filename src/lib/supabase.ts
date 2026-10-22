@@ -12,6 +12,27 @@ if (!supabaseUrl || !supabaseAnonKey) {
   );
 }
 
+// Секретный ключ (sb_secret_… или legacy service_role) обходит все правила
+// доступа. Если его по ошибке положить в NEXT_PUBLIC_*, он уедет в браузер
+// каждому посетителю — поэтому останавливаем сборку.
+if (supabaseAnonKey.startsWith("sb_secret_") || isServiceRoleJwt(supabaseAnonKey)) {
+  throw new Error(
+    "В NEXT_PUBLIC_SUPABASE_ANON_KEY лежит секретный ключ Supabase. " +
+      "Нужен публичный ключ (sb_publishable_… или anon) из Supabase → Project Settings → API Keys.",
+  );
+}
+
+function isServiceRoleJwt(key: string): boolean {
+  try {
+    const payload = key.split(".")[1];
+    if (!payload) return false;
+    const json = JSON.parse(atob(payload.replace(/-/g, "+").replace(/_/g, "/")));
+    return json?.role === "service_role";
+  } catch {
+    return false;
+  }
+}
+
 export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
 export type UserRole = "candidate" | "employer";

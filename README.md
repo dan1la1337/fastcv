@@ -33,6 +33,6 @@ AI-биржа вакансий. Вакансии собираются из Teleg
 
 ## Деплой
 
-- **Сайт (Vercel):** задайте `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY` и `GEMINI_API_KEY` в Environment Variables. Переменные `NEXT_PUBLIC_*` вшиваются при сборке, поэтому после их изменения нужен редеплой.
+- **Сайт (Vercel):** задайте `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY` и `GEMINI_API_KEY` в Environment Variables. В `NEXT_PUBLIC_SUPABASE_ANON_KEY` — только **публичный** ключ (`sb_publishable_…` или `anon`): всё с префиксом `NEXT_PUBLIC_` попадает в браузер. С секретным ключом сборка остановится. Переменные `NEXT_PUBLIC_*` вшиваются при сборке, поэтому после их изменения нужен редеплой.
 - **Сборщик (GitHub Actions):** секреты `NEXT_PUBLIC_SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY` и `GEMINI_API_KEY`.
 - **Supabase → Authentication → URL Configuration:** добавьте `https://<ваш-домен>/auth/callback` в Redirect URLs, чтобы работала ссылка подтверждения почты.
