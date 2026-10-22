@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { supabase } from "@/lib/supabase";
+import { supabase, getUserRole } from "@/lib/supabase";
 import { useRouter } from "next/navigation";
 import { Briefcase, Loader2, PlusCircle, CheckCircle2, XCircle, ArrowLeft, Building2 } from "lucide-react";
 import Link from "next/link";
@@ -35,9 +35,13 @@ export default function EmployerDashboard() {
       router.push("/login");
       return;
     }
+    // Кабинет только для работодателей
+    if ((await getUserRole(user)) !== "employer") {
+      router.replace("/applications");
+      return;
+    }
     setUser(user);
 
-    // Проверяем роль
     const { data: prof } = await supabase
       .from("profiles")
       .select("*")

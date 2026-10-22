@@ -50,6 +50,7 @@ export default function Home() {
   const [selectedVacancy, setSelectedVacancy] = useState<Vacancy | null>(null);
   const [coverLetter, setCoverLetter] = useState("");
   const [isGenerating, setIsGenerating] = useState(false);
+  const [generationError, setGenerationError] = useState<string | null>(null);
 
   // Состояние окна подтверждения для Email / Внешних контактов
   const [successContactModal, setSuccessContactModal] = useState<{
@@ -117,29 +118,38 @@ export default function Home() {
   const openApplyModal = (vacancy: Vacancy) => {
     setSelectedVacancy(vacancy);
     setCoverLetter("");
+    setGenerationError(null);
     setApplyModalOpen(true);
   };
 
   const generateCoverLetter = async () => {
     if (!selectedVacancy) return;
     setIsGenerating(true);
-    
-    const activeProfile = userProfile || { 
-      name: "Кандидат", 
-      skills: [], 
-      experience: "Данные не заполнены. Напиши нейтральное письмо, не придумывая опыт." 
-    };
+    setGenerationError(null);
 
     try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        setGenerationError("Войдите, чтобы сгенерировать письмо.");
+        return;
+      }
+
       const res = await fetch("/api/cover-letter", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ profile: activeProfile, vacancy: selectedVacancy }),
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${session.access_token}`,
+        },
+        body: JSON.stringify({ vacancyId: selectedVacancy.id }),
       });
       const data = await res.json();
-      if (data.text) setCoverLetter(data.text);
-    } catch (e) {
-      alert("Ошибка генерации. Проверьте консоль.");
+      if (res.ok && data.text) {
+        setCoverLetter(data.text);
+      } else {
+        setGenerationError(data.error || "Не удалось сгенерировать письмо. Попробуйте ещё раз.");
+      }
+    } catch {
+      setGenerationError("Не удалось связаться с сервером. Попробуйте ещё раз.");
     } finally {
       setIsGenerating(false);
     }
@@ -390,13 +400,25 @@ export default function Home() {
                     <h4 className="text-white font-medium mb-1">Сгенерировать идеальное письмо?</h4>
                     <p className="text-sm text-neutral-400">LLM-агент проанализирует твой профиль и требования вакансии, чтобы составить уникальное сопроводительное.</p>
                   </div>
-                  <button 
-                    onClick={generateCoverLetter} 
-                    disabled={isGenerating}
-                    className="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-500 text-white px-6 py-2.5 rounded-lg text-sm font-medium transition-colors disabled:opacity-50"
-                  >
-                    {isGenerating ? <><Loader2 className="w-4 h-4 animate-spin" /> Анализируем...</> : 'Начать магию'}
-                  </button>
+                  {user ? (
+                    <button 
+                      onClick={generateCoverLetter} 
+                      disabled={isGenerating}
+                      className="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-500 text-white px-6 py-2.5 rounded-lg text-sm font-medium transition-colors disabled:opacity-50"
+                    >
+                      {isGenerating ? <><Loader2 className="w-4 h-4 animate-spin" /> Анализируем...</> : 'Начать магию'}
+                    </button>
+                  ) : (
+                    <Link
+                      href="/login"
+                      className="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-500 text-white px-6 py-2.5 rounded-lg text-sm font-medium transition-colors"
+                    >
+                      Войдите, чтобы откликнуться
+                    </Link>
+                  )}
+                  {generationError && (
+                    <p className="text-sm text-red-400">{generationError}</p>
+                  )}
                 </div>
               ) : (
                 <div className="space-y-3 animate-in fade-in slide-in-from-bottom-2">
@@ -430,7 +452,9 @@ export default function Home() {
                     });
 
                     if (error) {
-                      alert("Ошибка отправки: " + error.message);
+                      alert(error.code === "23505"
+                        ? "Вы уже откликались на эту вакансию."
+                        : "Ошибка отправки: " + error.message);
                       return;
                     }
 

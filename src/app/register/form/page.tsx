@@ -2,23 +2,19 @@
 
 import { useState, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
-import { createClient } from '@supabase/supabase-js';
-
-// Инициализируем стандартный клиент Supabase
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
-const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
-const supabase = createClient(supabaseUrl, supabaseKey);
+import { supabase } from '@/lib/supabase';
 
 function RegisterFormContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   
-  const role = searchParams.get('role') || 'candidate';
+  const role = searchParams.get('role') === 'employer' ? 'employer' : 'candidate';
   
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [awaitingConfirmation, setAwaitingConfirmation] = useState(false);
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -40,12 +36,32 @@ function RegisterFormContent() {
       return;
     }
 
-    if (role === 'candidate') {
-      router.push('/dashboard/candidate');
-    } else {
-      router.push('/dashboard/company');
+    // Если в Supabase включено подтверждение почты, сессии ещё нет:
+    // пользователь войдёт по ссылке из письма через /auth/callback.
+    if (!data.session) {
+      setAwaitingConfirmation(true);
+      setLoading(false);
+      return;
     }
+
+    // Сразу после регистрации ведём заполнять профиль: без него
+    // Smart Apply пишет пустое письмо, а у работодателя нет названия компании.
+    router.push('/profile');
   };
+
+  if (awaitingConfirmation) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4">
+        <div className="max-w-md w-full bg-white p-8 rounded-2xl shadow-sm border border-gray-100 text-center space-y-3">
+          <h2 className="text-2xl font-bold text-gray-900">Проверьте почту</h2>
+          <p className="text-gray-500">
+            Мы отправили письмо на <span className="font-medium text-gray-900">{email}</span>.
+            Перейдите по ссылке из письма, чтобы подтвердить аккаунт.
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4">
@@ -77,6 +93,7 @@ function RegisterFormContent() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
+              minLength={6}
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-600 outline-none"
               placeholder="Минимум 6 символов"
             />
