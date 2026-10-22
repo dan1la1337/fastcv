@@ -12,14 +12,24 @@ from google import genai
 load_dotenv(".env.local")
 load_dotenv(".env")
 
-supabase_url = os.getenv("SUPABASE_URL") or os.getenv("NEXT_PUBLIC_SUPABASE_URL")
-gemini_key = os.getenv("GEMINI_API_KEY")
+def env(*names: str) -> str | None:
+    """Первое непустое значение из переменных окружения, без пробелов и переносов
+    по краям: лишний символ из копипаста ломает HTTP-заголовок и сервер рвёт соединение."""
+    for name in names:
+        value = (os.getenv(name) or "").strip()
+        if value:
+            return value
+    return None
+
+
+supabase_url = env("SUPABASE_URL", "NEXT_PUBLIC_SUPABASE_URL")
+gemini_key = env("GEMINI_API_KEY")
 
 # Сборщику нужен service-role ключ: он обходит RLS, а запись в vacancies и
 # channels для публичного (anon) ключа закрыта политиками из supabase/schema.sql.
-supabase_key = os.getenv("SUPABASE_SERVICE_ROLE_KEY")
+supabase_key = env("SUPABASE_SERVICE_ROLE_KEY")
 if not supabase_key:
-    supabase_key = os.getenv("SUPABASE_KEY") or os.getenv("NEXT_PUBLIC_SUPABASE_ANON_KEY")
+    supabase_key = env("SUPABASE_KEY", "NEXT_PUBLIC_SUPABASE_ANON_KEY")
     if supabase_key:
         print("⚠️ SUPABASE_SERVICE_ROLE_KEY не задан, используется публичный ключ. "
               "После применения supabase/schema.sql запись вакансий с ним перестанет работать.")
