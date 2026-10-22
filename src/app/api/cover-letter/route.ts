@@ -1,6 +1,8 @@
+import { createHash } from "node:crypto";
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { fence, sanitizeLetter } from "@/lib/ai-safety";
+import { templateLetter } from "@/lib/cover-letter";
 import { createSupabaseServerClient } from "@/lib/supabase-server";
 
 // Модели по очереди: если одна перегружена (503/429) или недоступна (404),
@@ -65,6 +67,11 @@ const INSTRUCTION = `Ты профессиональный IT-копирайте
 4. Язык письма — язык вакансии.
 5. Верни только текст письма, без заголовков, пояснений и разметки.`;
 
+// Меняется вместе с INSTRUCTION: старые письма в кэше не будут выдаваться за новые
+const PROMPT_VERSION = "2026-10-23";
+
+type Source = "ai" | "cache" | "template";
+
 const clip = (value: unknown, max: number) =>
   typeof value === "string" ? value.slice(0, max) : "";
 
@@ -72,7 +79,8 @@ export async function POST(req: Request) {
   const apiKey = process.env.GEMINI_API_KEY;
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-  if (!apiKey || !supabaseUrl || !supabaseAnonKey) {
+  // Без ключа Gemini письмо всё равно будет — по шаблону (например, демо-стенд)
+  if (!supabaseUrl || !supabaseAnonKey) {
     return NextResponse.json({ error: "Сервер не настроен" }, { status: 500 });
   }
 
@@ -90,6 +98,63 @@ export async function POST(req: Request) {
   const { data: auth } = token ? await supabase.auth.getUser(token) : await supabase.auth.getUser();
   if (!auth.user) {
     return NextResponse.json({ error: "Войдите, чтобы сгенерировать письмо" }, { status: 401 });
+  }
+
+  // 2. Данные берём из базы, а не из запроса: клиенту доверяем только id вакансии
+  let vacancyId: unknown;
+  let regenerate = false;
+  try {
+    const body = await req.json();
+    vacancyId = body?.vacancyId;
+    // «Переписать» — пользователь хочет другое письмо, а не то, что уже в кэше
+    regenerate = body?.regenerate === true;
+  } catch {
+    return NextResponse.json({ error: "Некорректный запрос" }, { status: 400 });
+  }
+  if (typeof vacancyId !== "string" || !UUID.test(vacancyId)) {
+    return NextResponse.json({ error: "Не указана вакансия" }, { status: 400 });
+  }
+
+  const [{ data: vacancy }, { data: profile }] = await Promise.all([
+    supabase.from("vacancies").select("title, description, company_name, stack").eq("id", vacancyId).maybeSingle(),
+    supabase.from("profiles").select("name, description, skills").eq("id", auth.user.id).maybeSingle(),
+  ]);
+
+  if (!vacancy) {
+    return NextResponse.json({ error: "Вакансия не найдена" }, { status: 404 });
+  }
+
+  const name = clip(profile?.name, 200) || "Кандидат";
+  const experience =
+    clip(profile?.description, 4000) ||
+    "Кандидат не заполнил опыт. Напиши нейтральное письмо и не придумывай опыт.";
+  const skillList: string[] = Array.isArray(profile?.skills)
+    ? profile.skills.filter((s: unknown): s is string => typeof s === "string").slice(0, 50)
+    : [];
+  const skills = skillList.join(", ").slice(0, 1000);
+
+  const data = `<candidate>
+Имя: ${fence(name)}
+Опыт и о себе: ${fence(experience)}
+Навыки: ${fence(skills) || "не указаны"}
+</candidate>
+
+<vacancy>
+Название: ${fence(clip(vacancy.title, 300))}
+Описание: ${fence(clip(vacancy.description, 4000))}
+</vacancy>`;
+
+  // Тот же профиль и та же вакансия — отдаём готовое письмо: без ИИ и без расхода лимита
+  const inputHash = createHash("sha256").update(`${PROMPT_VERSION}\n${data}`).digest("hex");
+  if (!regenerate) {
+    const { data: cached } = await supabase
+      .from("cover_letters")
+      .select("text")
+      .eq("user_id", auth.user.id)
+      .eq("vacancy_id", vacancyId)
+      .eq("input_hash", inputHash)
+      .maybeSingle();
+    if (cached?.text) return NextResponse.json({ text: cached.text, source: "cache" satisfies Source });
   }
 
   const { data: quota, error: quotaError } = await supabase.rpc("consume_ai_quota", {
@@ -110,53 +175,25 @@ export async function POST(req: Request) {
     );
   }
 
-  // 2. Данные берём из базы, а не из запроса: клиенту доверяем только id вакансии
-  let vacancyId: unknown;
-  try {
-    ({ vacancyId } = await req.json());
-  } catch {
-    return NextResponse.json({ error: "Некорректный запрос" }, { status: 400 });
-  }
-  if (typeof vacancyId !== "string" || !UUID.test(vacancyId)) {
-    return NextResponse.json({ error: "Не указана вакансия" }, { status: 400 });
-  }
-
-  const [{ data: vacancy }, { data: profile }] = await Promise.all([
-    supabase.from("vacancies").select("title, description").eq("id", vacancyId).maybeSingle(),
-    supabase.from("profiles").select("name, description, skills").eq("id", auth.user.id).maybeSingle(),
-  ]);
-
-  if (!vacancy) {
-    return NextResponse.json({ error: "Вакансия не найдена" }, { status: 404 });
-  }
-
-  const name = clip(profile?.name, 200) || "Кандидат";
-  const experience =
-    clip(profile?.description, 4000) ||
-    "Кандидат не заполнил опыт. Напиши нейтральное письмо и не придумывай опыт.";
-  const skills = Array.isArray(profile?.skills)
-    ? profile.skills.filter((s: unknown) => typeof s === "string").join(", ").slice(0, 1000)
-    : "";
-
-  const data = `<candidate>
-Имя: ${fence(name)}
-Опыт и о себе: ${fence(experience)}
-Навыки: ${fence(skills) || "не указаны"}
-</candidate>
-
-<vacancy>
-Название: ${fence(clip(vacancy.title, 300))}
-Описание: ${fence(clip(vacancy.description, 4000))}
-</vacancy>`;
-
   // 3. Генерация
-  const raw = await generate(apiKey, INSTRUCTION, data);
+  const raw = apiKey ? await generate(apiKey, INSTRUCTION, data) : null;
   const text = raw ? sanitizeLetter(raw, data) : null;
   if (!text) {
-    return NextResponse.json(
-      { error: "ИИ сейчас перегружен. Попробуйте ещё раз через минуту." },
-      { status: 503 },
+    // ИИ не ответил — письмо по шаблону из профиля, чтобы отклик не срывался.
+    // В кэш не кладём: при следующей попытке пусть снова пробует ИИ.
+    const fallback = templateLetter(
+      { name: clip(profile?.name, 200), description: clip(profile?.description, 4000), skills: skillList },
+      { title: clip(vacancy.title, 300), company_name: vacancy.company_name, description: vacancy.description, stack: vacancy.stack },
     );
+    return NextResponse.json({ text: fallback, source: "template" satisfies Source });
   }
-  return NextResponse.json({ text });
+
+  const { error: cacheError } = await supabase
+    .from("cover_letters")
+    .upsert(
+      { user_id: auth.user.id, vacancy_id: vacancyId, input_hash: inputHash, text },
+      { onConflict: "user_id,vacancy_id,input_hash" },
+    );
+  if (cacheError) console.error("Cover letter cache write failed", cacheError.message);
+  return NextResponse.json({ text, source: "ai" satisfies Source });
 }
