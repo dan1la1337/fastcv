@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { supabase } from "@/lib/supabase";
+import { supabase, getUserRole, homeForRole } from "@/lib/supabase";
 import { useRouter } from "next/navigation";
 import { Loader2 } from "lucide-react";
 import Link from "next/link";
@@ -20,13 +20,9 @@ export default function LoginPage() {
       const { data, error } = await supabase.auth.signInWithPassword({ email, password });
       if (error) throw error;
 
-      // Проверяем роль и направляем в нужный кабинет
-      const role = data.user?.user_metadata?.role;
-      if (role === 'employer') {
-        router.push('/dashboard/company');
-      } else {
-        router.push('/'); // Кандидата на главную к вакансиям
-      }
+      // Работодателя — в кабинет HR, кандидата — на главную к вакансиям
+      const role = await getUserRole(data.user);
+      router.push(homeForRole(role));
     } catch (error: any) {
       alert(error.message || "Ошибка авторизации. Проверьте логин и пароль.");
     } finally {

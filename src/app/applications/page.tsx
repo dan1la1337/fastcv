@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { supabase } from "@/lib/supabase";
+import { supabase, getUserRole } from "@/lib/supabase";
 import { useRouter } from "next/navigation";
 import { ArrowLeft, Loader2, MessageSquare, Clock, CheckCircle2, XCircle } from "lucide-react";
 import Link from "next/link";
@@ -20,6 +20,11 @@ export default function CandidateApplications() {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) {
       router.push("/login");
+      return;
+    }
+    // У работодателя свой раздел с откликами
+    if ((await getUserRole(user)) === "employer") {
+      router.replace("/employer");
       return;
     }
 

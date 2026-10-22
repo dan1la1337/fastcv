@@ -1,36 +1,38 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# FastCV
 
-## Getting Started
+AI-биржа вакансий. Вакансии собираются из Telegram-каналов и нормализуются нейросетью. Кандидат откликается в один клик с сопроводительным письмом, которое пишет ИИ под конкретную вакансию. Работодатели публикуют вакансии напрямую и разбирают отклики в своём кабинете.
 
-First, run the development server:
+## Как устроено
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+| Часть | Где | Что делает |
+|---|---|---|
+| Сайт | `src/` | Next.js 16 + Tailwind. Лента с фильтрами, Smart Apply, кабинеты кандидата и работодателя |
+| API писем | `src/app/api/cover-letter` | Генерирует сопроводительное через Gemini. Только для вошедших, с лимитом запросов |
+| Сборщик | `main.py` | Раз в 6 часов (GitHub Actions) парсит каналы из таблицы `channels`, прогоняет посты через Gemini и сохраняет вакансии |
+| База | `supabase/schema.sql` | Таблицы, триггеры и правила доступа (RLS) для Supabase |
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+**Роли.** Роль (`candidate` или `employer`) выбирается при регистрации и потом не меняется: это гарантирует триггер в базе. Работодатель попадает в `/employer`, кандидат — на главную и в `/applications`.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Запуск локально
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+1. Установите Node.js 20+ и Python 3.11+.
+2. Скопируйте `.env.example` в `.env.local` и заполните ключи.
+3. Примените схему базы: Supabase → SQL Editor → вставьте `supabase/schema.sql` → Run. Скрипт безопасно запускать повторно.
+4. Запустите сайт:
+   ```bash
+   npm install
+   npm run dev
+   ```
+   Сайт откроется на http://localhost:3000.
+5. Сборщик (по желанию):
+   ```bash
+   pip install -r requirements.txt
+   python main.py
+   ```
+   Каналы для парсинга добавляются в таблицу `channels` (`username`, `is_active = true`).
 
-## Learn More
+## Деплой
 
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- **Сайт (Vercel):** задайте `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY` и `GEMINI_API_KEY` в Environment Variables. Переменные `NEXT_PUBLIC_*` вшиваются при сборке, поэтому после их изменения нужен редеплой.
+- **Сборщик (GitHub Actions):** секреты `NEXT_PUBLIC_SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY` и `GEMINI_API_KEY`.
+- **Supabase → Authentication → URL Configuration:** добавьте `https://<ваш-домен>/auth/callback` в Redirect URLs, чтобы работала ссылка подтверждения почты.
