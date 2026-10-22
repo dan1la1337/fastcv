@@ -339,11 +339,14 @@ def test_circuit_breaker_stops_after_consecutive_ai_failures(monkeypatch):
     def down(text):
         raise AIUnavailable("503")
 
-    results = main.run(store, down)
+    summary = main.run(store, down)
+    results = summary.results
     assert len(results) == main.AI_CIRCUIT_BREAKER
     assert len(fetched) == main.AI_CIRCUIT_BREAKER
     # отложенные каналы не тронуты: их last_post_id не менялся
     assert set(store.channel_updates) == {f"ch{i}" for i in range(main.AI_CIRCUIT_BREAKER)}
+    assert summary.deferred == 6 - main.AI_CIRCUIT_BREAKER
+    assert "Gemini" in main.alert_text(summary)
 
 
 def test_post_is_fenced_from_instructions():
@@ -372,3 +375,85 @@ def test_gemini_gets_instructions_separately(monkeypatch):
     main.make_gemini_normalizer("key")("Ищем QA-инженера")
     assert seen["contents"] == "<post>\nИщем QA-инженера\n</post>"
     assert seen["config"].system_instruction == main.PROMPT
+
+
+# --- оповещения в Telegram ---------------------------------------------------------
+
+
+def ok(name, new_posts=3, saved=1):
+    return main.ChannelResult(name, new_posts=new_posts, saved=saved)
+
+
+def test_normal_run_sends_no_alert():
+    assert main.alert_text(main.RunSummary(3, [ok("a"), ok("b"), ok("c", new_posts=0, saved=0)])) is None
+
+
+def test_newly_closed_channel_is_reported_once():
+    closed = main.ChannelResult("gone", error="лента пуста", newly_unavailable=True)
+    still_closed = main.ChannelResult("old", error="лента пуста")
+    text = main.alert_text(main.RunSummary(5, [ok("a"), ok("b"), ok("c"), closed, still_closed]))
+    assert "@gone" in text and "@old" not in text
+    # уже известный закрытый канал не повод писать снова
+    assert main.alert_text(main.RunSummary(4, [ok("a"), ok("b"), ok("c"), still_closed])) is None
+
+
+def test_mass_feed_failure_looks_like_a_block():
+    down = [main.ChannelResult(f"c{i}", error="403") for i in range(3)]
+    text = main.alert_text(main.RunSummary(4, down + [ok("a")]))
+    assert "3 из 4" in text
+
+
+def test_no_new_posts_anywhere_is_suspicious():
+    text = main.alert_text(main.RunSummary(2, [ok("a", 0, 0), ok("b", 0, 0)]))
+    assert "Ни одного нового поста" in text
+
+
+def test_newly_unavailable_flag_set_only_on_first_failure():
+    store = FakeStore()
+    first = process_channel({"username": "x", "failed_runs": 0}, store, lambda t: job(),
+                            fetch=lambda url: "<html></html>", pause=lambda s: None)
+    again = process_channel({"username": "x", "failed_runs": 1}, store, lambda t: job(),
+                            fetch=lambda url: "<html></html>", pause=lambda s: None)
+    assert first.newly_unavailable and not again.newly_unavailable
+
+
+class Resp:
+    def __init__(self, ok=True, text="{}"):
+        self.ok, self.text = ok, text
+
+
+def test_notify_is_off_without_settings(monkeypatch):
+    monkeypatch.delenv("TELEGRAM_BOT_TOKEN", raising=False)
+    monkeypatch.delenv("TELEGRAM_CHAT_ID", raising=False)
+    calls = []
+    assert main.notify("x", post=lambda *a, **k: calls.append(1)) is False
+    assert not calls
+
+
+def test_notify_sends_message_with_run_link(monkeypatch):
+    monkeypatch.setenv("TELEGRAM_BOT_TOKEN", " 123:abc \n")
+    monkeypatch.setenv("TELEGRAM_CHAT_ID", "42")
+    monkeypatch.setenv("GITHUB_SERVER_URL", "https://github.com")
+    monkeypatch.setenv("GITHUB_REPOSITORY", "o/r")
+    monkeypatch.setenv("GITHUB_RUN_ID", "7")
+    sent = {}
+
+    def post(url, json, timeout):
+        sent.update(url=url, **json)
+        return Resp()
+
+    assert main.notify("Сбой", post=post)
+    assert sent["url"] == "https://api.telegram.org/bot123:abc/sendMessage"
+    assert sent["chat_id"] == "42"
+    assert sent["text"].startswith("Сбой") and "https://github.com/o/r/actions/runs/7" in sent["text"]
+
+
+def test_notify_failure_does_not_raise(monkeypatch, capsys):
+    monkeypatch.setenv("TELEGRAM_BOT_TOKEN", "123:secret")
+    monkeypatch.setenv("TELEGRAM_CHAT_ID", "42")
+
+    def boom(*a, **k):
+        raise main.requests.ConnectionError("https://api.telegram.org/bot123:secret/sendMessage")
+
+    assert main.notify("x", post=boom) is False
+    assert "secret" not in capsys.readouterr().out

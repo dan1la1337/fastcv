@@ -4,6 +4,11 @@ on:
   schedule:
     - cron: '0 */6 * * *'
   workflow_dispatch:
+    inputs:
+      test_alert:
+        description: 'Только отправить тестовое сообщение в Telegram (без сбора)'
+        type: boolean
+        default: false
 
 # Не запускать два сборщика одновременно: второй дождётся первого
 concurrency:
@@ -32,11 +37,32 @@ jobs:
           pip install -r requirements.txt
 
       - name: Run Scraper
+        id: scrape
         env:
           SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
           # Основной ключ сборщика (обходит RLS). Добавьте секрет в
           # Settings → Secrets and variables → Actions.
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          # Оповещения о сбоях владельцу (бот из @BotFather); без них сборщик просто молчит
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          ALERT_TEST: ${{ inputs.test_alert }}
         # -u: вывод сразу попадает в лог Actions, а не копится в буфере до конца
         run: python -u main.py
+
+      # Сбой до запуска сборщика (установка зависимостей) или зависание дольше лимита:
+      # сам сборщик в этих случаях написать не успевает. Его собственные падения
+      # (outcome == failure) он уже сообщил сам.
+      - name: Alert on workflow failure
+        if: (failure() || cancelled()) && steps.scrape.outcome != 'failure'
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          [ -n "$TELEGRAM_BOT_TOKEN" ] && [ -n "$TELEGRAM_CHAT_ID" ] || exit 0
+          curl -sS -o /dev/null --max-time 15 "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" \
+            --data-urlencode "chat_id=${TELEGRAM_CHAT_ID}" \
+            --data-urlencode "text=❌ FastCV: запуск сборщика прервался (ошибка установки или превышен лимит 30 минут). Лог: ${RUN_URL}" \
+            || true
