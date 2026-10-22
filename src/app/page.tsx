@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { supabase } from "@/lib/supabase";
 import { fetchVacancyPage, formatSalary, plural, PAGE_SIZE, SPECIALTIES, VACANCY_FORMS, type Vacancy, type VacancyFilters } from "@/lib/vacancies";
-import { Search, MapPin, ChevronRight, Sparkles, Loader2, ExternalLink, Globe } from "lucide-react";
+import { Search, MapPin, ChevronDown, ChevronRight, Sparkles, Loader2, ExternalLink, Globe, SlidersHorizontal } from "lucide-react";
 import type { User } from "@supabase/supabase-js";
 import Link from "next/link";
 import SmartApply from "@/components/SmartApply";
@@ -27,6 +27,8 @@ export default function Home() {
 
   const [selectedSpecialty, setSelectedSpecialty] = useState<string | null>(null);
   const [selectedStack, setSelectedStack] = useState<string[]>([]);
+  // На телефоне фильтры свёрнуты, иначе они занимают весь первый экран
+  const [filtersOpen, setFiltersOpen] = useState(false);
 
   // Вакансия, на которую сейчас откликаются (окно Smart Apply)
   const [applyVacancy, setApplyVacancy] = useState<Vacancy | null>(null);
@@ -107,15 +109,15 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-neutral-950 text-neutral-100 antialiased font-sans relative">
       <header className="border-b border-neutral-800 bg-neutral-900/80 backdrop-blur-md sticky top-0 z-20">
-        <div className="max-w-6xl mx-auto px-4 py-4 flex flex-wrap items-center justify-between gap-4">
+        <div className="max-w-6xl mx-auto px-4 py-3 sm:py-4 flex items-center justify-between gap-3">
           <div className="flex items-center gap-3">
             <span className="bg-blue-600 text-white font-black px-2.5 py-1 rounded-lg text-sm tracking-tight shadow-lg shadow-blue-500/25 flex items-center gap-1">
               ⚡ Fast<span className="text-blue-200">CV</span>
             </span>
-            <span className="font-semibold text-base tracking-tight text-neutral-200">AI Job Board</span>
+            <span className="hidden sm:inline font-semibold text-base tracking-tight text-neutral-200">AI Job Board</span>
           </div>
-          <div className="flex items-center gap-4">
-            <span className="text-xs font-medium text-emerald-400 bg-emerald-400/10 px-3 py-1.5 rounded-full border border-emerald-400/20">
+          <div className="flex items-center gap-2 sm:gap-4">
+            <span className="hidden sm:inline text-xs font-medium text-emerald-400 bg-emerald-400/10 px-3 py-1.5 rounded-full border border-emerald-400/20">
               {loading ? "…" : `${total} ${plural(total, VACANCY_FORMS)}`}
             </span>
             
@@ -149,18 +151,34 @@ export default function Home() {
             ) : (
               <Link 
                 href="/register"
-                className="px-4 py-2 bg-neutral-800 hover:bg-neutral-700 text-white rounded-lg text-sm font-medium transition-colors border border-neutral-700 relative z-50"
+                className="px-3 sm:px-4 py-2 bg-neutral-800 hover:bg-neutral-700 text-white rounded-lg text-sm font-medium transition-colors border border-neutral-700 relative z-50 whitespace-nowrap"
               >
-                Войти / Регистрация
+                Войти<span className="hidden sm:inline"> / Регистрация</span>
               </Link>
             )}
           </div>
         </div>
       </header>
 
-      <main className="max-w-6xl mx-auto px-4 py-8 grid grid-cols-1 lg:grid-cols-4 gap-8 relative z-0">
+      <main className="max-w-6xl mx-auto px-4 py-6 lg:py-8 grid grid-cols-1 lg:grid-cols-4 gap-4 lg:gap-8 relative z-0">
+        {(() => {
+          const active = [search.trim(), onlyRemote, minSalary > 0, onlyWithSalary, city.trim(), selectedSpecialty].filter(Boolean).length;
+          return (
+            <button
+              onClick={() => setFiltersOpen(open => !open)}
+              aria-expanded={filtersOpen}
+              className="lg:hidden flex items-center justify-between w-full px-4 py-3 bg-neutral-900/60 border border-neutral-800 rounded-xl text-sm font-medium text-neutral-200"
+            >
+              <span className="inline-flex items-center gap-2">
+                <SlidersHorizontal className="w-4 h-4 text-neutral-400" /> Фильтры
+                {active > 0 && <span className="text-xs px-2 py-0.5 rounded-full bg-blue-600 text-white">{active}</span>}
+              </span>
+              <ChevronDown className={`w-4 h-4 text-neutral-400 transition-transform ${filtersOpen ? "rotate-180" : ""}`} />
+            </button>
+          );
+        })()}
         {/* Sidebar Filters */}
-        <aside className="lg:col-span-1 space-y-6">
+        <aside className={`lg:col-span-1 space-y-6 ${filtersOpen ? "" : "hidden"} lg:block`}>
           <div className="bg-neutral-900/50 border border-neutral-800 rounded-xl p-5 space-y-6">
             {/* Поиск */}
             <div className="space-y-3">
