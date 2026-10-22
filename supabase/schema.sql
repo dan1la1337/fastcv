@@ -117,8 +117,7 @@ begin
 end;
 $$;
 
-drop trigger if exists on_auth_user_created on auth.users;
-create trigger on_auth_user_created
+create or replace trigger on_auth_user_created
   after insert on auth.users
   for each row execute function public.handle_new_user();
 
@@ -146,8 +145,7 @@ begin
 end;
 $$;
 
-drop trigger if exists profiles_prevent_role_change on public.profiles;
-create trigger profiles_prevent_role_change
+create or replace trigger profiles_prevent_role_change
   before update on public.profiles
   for each row execute function public.prevent_role_change();
 
@@ -257,8 +255,32 @@ create policy applications_update on public.applications
   );
 
 -- Работодатель может менять в отклике только статус и время ответа
-revoke update on public.applications from anon, authenticated;
-grant update (status, hr_replied_at) on public.applications to authenticated;
+create or replace function public.prevent_application_tamper()
+returns trigger
+language plpgsql
+set search_path = public
+as $$
+begin
+  if auth.uid() is not null and (
+       new.id, new.vacancy_id, new.candidate_id, new.cover_letter, new.created_at
+     ) is distinct from (
+       old.id, old.vacancy_id, old.candidate_id, old.cover_letter, old.created_at
+     ) then
+    raise exception 'В отклике можно менять только статус';
+  end if;
+  return new;
+end;
+$$;
+
+create or replace trigger applications_prevent_tamper
+  before update on public.applications
+  for each row execute function public.prevent_application_tamper();
+
+-- Служебные функции не должны вызываться напрямую через API (/rest/v1/rpc).
+-- app_user_role нужна вошедшим пользователям: её вызывают политики.
+revoke execute on function public.handle_new_user() from public, anon, authenticated;
+revoke execute on function public.app_user_role() from public, anon;
+grant execute on function public.app_user_role() to authenticated;
 
 -- channels и companies: политик нет — доступ только у service-role
 -- (channels читает и обновляет сборщик, companies кодом пока не используется)
