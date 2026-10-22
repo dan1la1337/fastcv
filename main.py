@@ -8,7 +8,9 @@
   3. прогоняет каждый новый пост через Gemini, который возвращает структуру
      вакансии по JSON-схеме;
   4. сохраняет вакансию со ссылкой на оригинальный пост;
-  5. отправляет в архив внешние вакансии старше ARCHIVE_AFTER_DAYS дней.
+  5. отправляет в архив внешние вакансии старше ARCHIVE_AFTER_DAYS дней;
+  6. если что-то пошло не так, пишет владельцу в Telegram (TELEGRAM_BOT_TOKEN,
+     TELEGRAM_CHAT_ID); без этих переменных оповещения просто выключены.
 
 Если Gemini недоступен, обработка канала останавливается на этом посте,
 и при следующем запуске он будет обработан снова — посты не теряются.
@@ -41,6 +43,8 @@ AI_TIMEOUT_MS = 60_000  # без таймаута зависший запрос 
 AI_CIRCUIT_BREAKER = 3  # каналов подряд без ответа Gemini — дальше не пытаемся
 AI_PAUSE_SECONDS = 2
 CHANNEL_PAUSE_SECONDS = 2
+# Доля каналов без доступной ленты, при которой это похоже на блокировку, а не на закрытые каналы
+MASS_FAILURE_SHARE = 0.5
 USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"
 
 
@@ -345,6 +349,7 @@ class ChannelResult:
     saved: int = 0
     error: Optional[str] = None
     ai_stopped: bool = False
+    newly_unavailable: bool = False  # лента пропала впервые (раньше читалась)
 
 
 def process_channel(
@@ -362,6 +367,7 @@ def process_channel(
         posts = collect_new_posts(channel, row.get("last_post_id"), fetch)
     except (ChannelUnavailable, requests.RequestException) as e:
         result.error = str(e)
+        result.newly_unavailable = not (row.get("failed_runs") or 0)
         store.update_channel(channel, {
             "last_parsed_at": now,
             "last_error": result.error[:300],
@@ -394,7 +400,96 @@ def process_channel(
     return result
 
 
-def run(store: Store, normalize: Callable[[str], VacancyAI]) -> list[ChannelResult]:
+@dataclass
+class RunSummary:
+    channels: int
+    results: list[ChannelResult]
+    archived: int = 0
+
+    @property
+    def saved(self) -> int:
+        return sum(r.saved for r in self.results)
+
+    @property
+    def new_posts(self) -> int:
+        return sum(r.new_posts for r in self.results)
+
+    @property
+    def deferred(self) -> int:
+        """Каналы, до которых не дошли из-за отказа Gemini."""
+        return self.channels - len(self.results)
+
+    @property
+    def unavailable(self) -> list[ChannelResult]:
+        return [r for r in self.results if r.error and not r.ai_stopped]
+
+
+def alert_text(summary: RunSummary) -> Optional[str]:
+    """Текст оповещения владельцу или None, если запуск прошёл штатно."""
+    problems = []
+    ai_stopped = [r for r in summary.results if r.ai_stopped]
+    if ai_stopped or summary.deferred:
+        problems.append(
+            f"Gemini не отвечал: обработка остановлена на {len(ai_stopped)} канал(ах)"
+            + (f", ещё {summary.deferred} отложено" if summary.deferred else "")
+            + ". Посты не потеряны, следующий запуск продолжит с того же места."
+        )
+    unavailable = summary.unavailable
+    if summary.results and len(unavailable) >= max(2, len(summary.results) * MASS_FAILURE_SHARE):
+        problems.append(
+            f"Лента недоступна у {len(unavailable)} из {len(summary.results)} каналов. "
+            "Похоже, Telegram ограничил доступ или поменял разметку страницы."
+        )
+    else:
+        fresh = [r.channel for r in unavailable if r.newly_unavailable]
+        if fresh:
+            problems.append(
+                "Перестала открываться лента: " + ", ".join("@" + c for c in fresh)
+                + ". Канал закрыли или удалили; если так и останется, его стоит отключить."
+            )
+    if summary.channels and summary.results and not summary.new_posts and not unavailable:
+        problems.append("Ни одного нового поста во всех каналах. Возможно, сломался разбор страницы Telegram.")
+    if not problems:
+        return None
+    lines = ["⚠️ FastCV: проблемы со сборщиком", ""]
+    lines += [f"• {p}" for p in problems]
+    lines += ["", f"Итог запуска: каналов {len(summary.results)}/{summary.channels}, "
+                  f"новых постов {summary.new_posts}, вакансий сохранено {summary.saved}."]
+    return "\n".join(lines)
+
+
+def run_link() -> Optional[str]:
+    """Ссылка на текущий запуск в GitHub Actions (в оповещении — чтобы сразу открыть лог)."""
+    server, repo, run_id = (os.getenv(k) for k in ("GITHUB_SERVER_URL", "GITHUB_REPOSITORY", "GITHUB_RUN_ID"))
+    return f"{server}/{repo}/actions/runs/{run_id}" if server and repo and run_id else None
+
+
+def notify(text: str, post: Callable[..., object] = requests.post) -> bool:
+    """Отправляет сообщение в Telegram. Ошибка оповещения не должна ронять сборщик."""
+    token = (os.getenv("TELEGRAM_BOT_TOKEN") or "").strip()
+    chat_id = (os.getenv("TELEGRAM_CHAT_ID") or "").strip()
+    if not token or not chat_id:
+        return False
+    link = run_link()
+    if link:
+        text = f"{text}\n\nЛог: {link}"
+    try:
+        response = post(
+            f"https://api.telegram.org/bot{token}/sendMessage",
+            json={"chat_id": chat_id, "text": text[:4000], "disable_web_page_preview": True},
+            timeout=15,
+        )
+        ok = getattr(response, "ok", False)
+        if not ok:
+            # Тело ответа без токена: Telegram объясняет причину (например, «chat not found»)
+            print(f"⚠️ Telegram не принял оповещение: {getattr(response, 'text', '')[:200]}")
+        return bool(ok)
+    except requests.RequestException as e:
+        print(f"⚠️ Не удалось отправить оповещение в Telegram: {type(e).__name__}")
+        return False
+
+
+def run(store: Store, normalize: Callable[[str], VacancyAI]) -> RunSummary:
     channels = store.active_channels()
     print(f"Активных каналов: {len(channels)}")
     results = []
@@ -413,7 +508,8 @@ def run(store: Store, normalize: Callable[[str], VacancyAI]) -> list[ChannelResu
         ai_failures_in_row = ai_failures_in_row + 1 if r.ai_stopped else 0
         time.sleep(CHANNEL_PAUSE_SECONDS)
 
-    archived = store.archive_stale(ARCHIVE_AFTER_DAYS)
+    summary = RunSummary(len(channels), results)
+    summary.archived = archived = store.archive_stale(ARCHIVE_AFTER_DAYS)
     total_saved = sum(r.saved for r in results)
     unavailable = [r.channel for r in results if r.error and not r.ai_stopped]
     print(f"\nИтого: новых вакансий {total_saved}, в архив отправлено {archived}.")
@@ -421,7 +517,7 @@ def run(store: Store, normalize: Callable[[str], VacancyAI]) -> list[ChannelResu
         print(f"Каналы без доступной ленты ({len(unavailable)}): {', '.join('@' + c for c in unavailable)}")
     if any(r.ai_stopped for r in results):
         print("Часть постов отложена до следующего запуска: Gemini был недоступен.")
-    return results
+    return summary
 
 
 # ---------------------------------------------------------------------------
@@ -450,12 +546,22 @@ def describe_key(key: str) -> str:
     return "неизвестный формат"
 
 
+def fail(message: str) -> None:
+    notify(f"❌ FastCV: сборщик не запустился\n\n{message}")
+    sys.exit(message)
+
+
 def main() -> None:
     from dotenv import load_dotenv
     from supabase import create_client
 
     load_dotenv(".env.local")
     load_dotenv(".env")
+
+    if (os.getenv("ALERT_TEST") or "").lower() == "true":
+        sent = notify("✅ FastCV: оповещения сборщика работают. Сюда придёт сообщение, если сбор вакансий сломается.")
+        sys.exit(0 if sent else "Тестовое сообщение не отправлено: проверьте секреты TELEGRAM_BOT_TOKEN и TELEGRAM_CHAT_ID "
+                 "и что вы нажали Start у своего бота.")
 
     supabase_url = env("SUPABASE_URL", "NEXT_PUBLIC_SUPABASE_URL")
     gemini_key = env("GEMINI_API_KEY")
@@ -469,13 +575,13 @@ def main() -> None:
                   "с публичным ключом запись в базу не пройдёт.")
 
     if not supabase_url or not supabase_key:
-        sys.exit("Не найдены ключи Supabase! Проверьте .env или .env.local")
+        fail("Не найдены ключи Supabase! Проверьте .env или .env.local")
     if not gemini_key:
-        sys.exit("Не найден GEMINI_API_KEY! Проверьте .env или .env.local")
+        fail("Не найден GEMINI_API_KEY! Проверьте .env или .env.local")
 
     print(f"Ключ Supabase: {describe_key(supabase_key)}, длина {len(supabase_key)}")
     if not supabase_key.isascii() or any(c.isspace() for c in supabase_key):
-        sys.exit(
+        fail(
             "Ключ Supabase содержит недопустимые символы (например «•» или пробелы). "
             "Похоже, скопирован замаскированный ключ с экрана: в Supabase → Project Settings → "
             "API Keys нажмите кнопку копирования у ключа и обновите секрет SUPABASE_SERVICE_ROLE_KEY."
@@ -484,7 +590,15 @@ def main() -> None:
     print("==================== ЗАПУСК СБОРА ====================")
     models = tuple(m.strip() for m in (env("GEMINI_MODELS") or "").split(",") if m.strip()) or GEMINI_MODELS
     print(f"Модели Gemini: {', '.join(models)}")
-    run(Store(create_client(supabase_url, supabase_key)), make_gemini_normalizer(gemini_key, models))
+    try:
+        summary = run(Store(create_client(supabase_url, supabase_key)), make_gemini_normalizer(gemini_key, models))
+    except Exception as e:
+        # Текст ошибки без значений ключей: они в заголовках запросов, а не в сообщении
+        notify(f"❌ FastCV: сборщик упал\n\n{type(e).__name__}: {str(e)[:500]}")
+        raise
+    text = alert_text(summary)
+    if text:
+        notify(text)
     print("==================== ЦИКЛ ЗАВЕРШЁН ====================")
 
 
