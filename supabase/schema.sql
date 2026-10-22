@@ -323,3 +323,54 @@ grant execute on function public.app_user_role() to authenticated;
 
 -- channels и companies: политик нет — доступ только у service-role
 -- (channels читает и обновляет сборщик, companies кодом пока не используется)
+
+-- ---------------------------------------------------------------------------
+-- Резюме (Supabase Storage)
+-- ---------------------------------------------------------------------------
+-- Файл кандидата лежит в приватном бакете resumes по пути <user_id>/resume.pdf.
+-- Кандидат управляет только своей папкой; работодатель может прочитать резюме
+-- только тех кандидатов, которые откликнулись на его вакансии.
+
+alter table public.profiles add column if not exists resume_path text;
+
+insert into storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
+values ('resumes', 'resumes', false, 5242880, array['application/pdf'])
+on conflict (id) do update
+  set public = false,
+      file_size_limit = excluded.file_size_limit,
+      allowed_mime_types = excluded.allowed_mime_types;
+
+-- create policy не умеет "if not exists": создаём только недостающие
+do $$
+declare
+  own_folder constant text := $c$bucket_id = 'resumes' and (storage.foldername(name))[1] = auth.uid()::text$c$;
+begin
+  if not exists (select 1 from pg_policies where schemaname = 'storage' and tablename = 'objects' and policyname = 'resumes_owner_select') then
+    execute 'create policy resumes_owner_select on storage.objects for select to authenticated using (' || own_folder || ')';
+  end if;
+  if not exists (select 1 from pg_policies where schemaname = 'storage' and tablename = 'objects' and policyname = 'resumes_owner_insert') then
+    execute 'create policy resumes_owner_insert on storage.objects for insert to authenticated with check (' || own_folder || ')';
+  end if;
+  if not exists (select 1 from pg_policies where schemaname = 'storage' and tablename = 'objects' and policyname = 'resumes_owner_update') then
+    execute 'create policy resumes_owner_update on storage.objects for update to authenticated using (' || own_folder || ') with check (' || own_folder || ')';
+  end if;
+  if not exists (select 1 from pg_policies where schemaname = 'storage' and tablename = 'objects' and policyname = 'resumes_owner_delete') then
+    execute 'create policy resumes_owner_delete on storage.objects for delete to authenticated using (' || own_folder || ')';
+  end if;
+  if not exists (select 1 from pg_policies where schemaname = 'storage' and tablename = 'objects' and policyname = 'resumes_employer_select') then
+    execute $p$
+      create policy resumes_employer_select on storage.objects for select to authenticated
+      using (
+        bucket_id = 'resumes'
+        and exists (
+          select 1
+          from public.applications a
+          join public.vacancies v on v.id = a.vacancy_id
+          where v.employer_id = auth.uid()
+            and a.candidate_id::text = (storage.foldername(name))[1]
+        )
+      )
+    $p$;
+  end if;
+end;
+$$;
