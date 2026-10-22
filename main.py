@@ -12,20 +12,50 @@ from google import genai
 load_dotenv(".env.local")
 load_dotenv(".env")
 
-supabase_url = os.getenv("SUPABASE_URL") or os.getenv("NEXT_PUBLIC_SUPABASE_URL")
-gemini_key = os.getenv("GEMINI_API_KEY")
+def env(*names: str) -> str | None:
+    """Первое непустое значение из переменных окружения, без пробелов и переносов
+    по краям: лишний символ из копипаста ломает HTTP-заголовок и сервер рвёт соединение."""
+    for name in names:
+        value = (os.getenv(name) or "").strip()
+        if value:
+            return value
+    return None
+
+
+supabase_url = env("SUPABASE_URL", "NEXT_PUBLIC_SUPABASE_URL")
+gemini_key = env("GEMINI_API_KEY")
 
 # Сборщику нужен service-role ключ: он обходит RLS, а запись в vacancies и
 # channels для публичного (anon) ключа закрыта политиками из supabase/schema.sql.
-supabase_key = os.getenv("SUPABASE_SERVICE_ROLE_KEY")
+supabase_key = env("SUPABASE_SERVICE_ROLE_KEY")
 if not supabase_key:
-    supabase_key = os.getenv("SUPABASE_KEY") or os.getenv("NEXT_PUBLIC_SUPABASE_ANON_KEY")
+    supabase_key = env("SUPABASE_KEY", "NEXT_PUBLIC_SUPABASE_ANON_KEY")
     if supabase_key:
         print("⚠️ SUPABASE_SERVICE_ROLE_KEY не задан, используется публичный ключ. "
               "После применения supabase/schema.sql запись вакансий с ним перестанет работать.")
 
 if not supabase_url or not supabase_key:
     raise ValueError("Не найдены ключи Supabase! Проверьте .env или .env.local")
+
+
+def describe_key(key: str) -> str:
+    """Тип ключа без раскрытия значения — для диагностики в логах."""
+    if key.startswith("sb_secret_"):
+        return "secret (sb_secret_)"
+    if key.startswith("sb_publishable_"):
+        return "publishable (sb_publishable_)"
+    if key.count(".") == 2:
+        return "legacy JWT"
+    return "неизвестный формат"
+
+
+print(f"Ключ Supabase: {describe_key(supabase_key)}, длина {len(supabase_key)}")
+if not supabase_key.isascii() or any(c.isspace() for c in supabase_key):
+    raise ValueError(
+        "Ключ Supabase содержит недопустимые символы (например «•» или пробелы). "
+        "Похоже, скопирован замаскированный ключ с экрана: в Supabase → Project Settings → "
+        "API Keys нажмите кнопку копирования у ключа и обновите секрет SUPABASE_SERVICE_ROLE_KEY."
+    )
 if not gemini_key:
     raise ValueError("Не найден GEMINI_API_KEY! Проверьте .env или .env.local")
 
