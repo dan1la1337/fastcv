@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { supabase, getUserRole, homeForRole } from "@/lib/supabase";
+import { authErrorText } from "@/lib/auth-errors";
 import { useRouter } from "next/navigation";
 import { Loader2 } from "lucide-react";
 import Link from "next/link";
@@ -10,24 +11,24 @@ export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const router = useRouter();
 
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+    setError(null);
 
-    try {
-      const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-      if (error) throw error;
-
-      // Работодателя — в кабинет HR, кандидата — на главную к вакансиям
-      const role = await getUserRole(data.user);
-      router.push(homeForRole(role));
-    } catch (error: any) {
-      alert(error.message || "Ошибка авторизации. Проверьте логин и пароль.");
-    } finally {
+    const { data, error } = await supabase.auth.signInWithPassword({ email: email.trim(), password });
+    if (error || !data.user) {
+      setError(authErrorText(error?.message));
       setLoading(false);
+      return;
     }
+
+    // Работодателя — в кабинет HR, кандидата — на главную к вакансиям
+    const role = await getUserRole(data.user);
+    router.push(homeForRole(role));
   };
 
   return (
@@ -69,6 +70,10 @@ export default function LoginPage() {
               placeholder="Минимум 6 символов"
             />
           </div>
+
+          {error && (
+            <p role="alert" className="text-sm text-red-400 bg-red-950/30 border border-red-500/20 rounded-xl px-4 py-3">{error}</p>
+          )}
 
           <button
             type="submit"

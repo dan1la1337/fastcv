@@ -7,6 +7,13 @@ import type { Vacancy } from "@/lib/vacancies";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Send, X, Sparkles, Loader2, Copy, Check, Mail, ExternalLink } from "lucide-react";
+import { toast } from "@/components/Toaster";
+
+/** Username Telegram из контакта вакансии; null, если это не похоже на username. */
+function telegramUsername(value: string): string | null {
+  const name = value.trim().replace(/^@/, "").replace(/^https?:\/\/t\.me\//, "");
+  return /^[A-Za-z0-9_]{4,32}$/.test(name) ? name : null;
+}
 
 /**
  * Окно Smart Apply: генерация сопроводительного письма, сохранение отклика и
@@ -25,6 +32,7 @@ export default function SmartApply({
   // Письмо и ошибка привязаны к id вакансии: у другой вакансии окно чистое
   const [draft, setDraft] = useState<{ vacancyId: string; text: string; error: string | null } | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
+  const [isSending, setIsSending] = useState(false);
   const router = useRouter();
   const current = draft && vacancy && draft.vacancyId === vacancy.id ? draft : null;
   const coverLetter = current?.text ?? "";
@@ -78,7 +86,7 @@ export default function SmartApply({
   };
 
   const handleCopy = (text: string) => {
-    navigator.clipboard.writeText(text);
+    navigator.clipboard.writeText(text).catch(() => {});
     setCopiedEmail(true);
     setTimeout(() => setCopiedEmail(false), 2000);
   };
@@ -148,57 +156,58 @@ export default function SmartApply({
                 <button 
                   onClick={async () => {
                     if (!user) {
-                      alert("Сначала войдите в систему");
+                      toast("Сначала войдите в систему.", "error");
                       return;
                     }
-
+                    setIsSending(true);
                     const { error } = await supabase.from("applications").insert({
                       vacancy_id: vacancy.id,
                       candidate_id: user.id,
                       cover_letter: coverLetter,
                       status: 'new'
                     });
+                    setIsSending(false);
 
                     if (error) {
-                      alert(error.code === "23505"
+                      toast(error.code === "23505"
                         ? "Вы уже откликались на эту вакансию."
-                        : "Ошибка отправки: " + error.message);
+                        : "Не удалось отправить отклик: " + error.message, "error");
                       return;
                     }
 
                     // Копируем сопроводительное письмо кандидату в буфер обмена для удобства
-                    navigator.clipboard.writeText(coverLetter);
+                    navigator.clipboard.writeText(coverLetter).catch(() => {});
 
                     onClose();
 
                     // Разделяем поведение контактов
-                    if (vacancy.source_type === 'external' && vacancy.contact_value) {
-                      if (vacancy.contact_type === 'email') {
-                        // Показываем модальное окно для отправки на Email без навязчивого Outlook
-                        setSuccessContactModal({
-                          open: true,
-                          type: 'email',
-                          value: vacancy.contact_value,
-                          vacancyTitle: vacancy.title
-                        });
-                      } else {
-                        // Для Telegram
-                        const contactLink = `https://t.me/${vacancy.contact_value.replace('@', '')}`;
-                        window.open(contactLink, '_blank');
-                      }
+                    const tg = vacancy.contact_type !== 'email' && vacancy.contact_value
+                      ? telegramUsername(vacancy.contact_value) : null;
+                    if (vacancy.source_type === 'external' && vacancy.contact_type === 'email' && vacancy.contact_value) {
+                      // Показываем модальное окно для отправки на Email без навязчивого Outlook
+                      setSuccessContactModal({
+                        open: true,
+                        type: 'email',
+                        value: vacancy.contact_value.trim(),
+                        vacancyTitle: vacancy.title
+                      });
+                    } else if (vacancy.source_type === 'external' && tg) {
+                      window.open(`https://t.me/${tg}`, '_blank', 'noopener');
+                      toast("Письмо скопировано. Вставьте его в чат с работодателем в Telegram.", "ok");
                     } else if (vacancy.source_type === 'external') {
                       // Контакта в посте нет — открываем оригинал, там есть ссылка на отклик
-                      if (vacancy.source_url) window.open(vacancy.source_url, '_blank');
-                      alert("Письмо скопировано. Контакта в посте нет — откликнитесь по ссылке из оригинального поста.");
+                      if (vacancy.source_url) window.open(vacancy.source_url, '_blank', 'noopener');
+                      toast("Письмо скопировано. Контакта в посте нет — откликнитесь по ссылке из оригинального поста.", "info");
                     } else {
-                      // Внутренняя вакансия — перенаправляем в диалоги платформы
-                      alert("Отклик доставлен работодателю в личный кабинет!");
+                      // Внутренняя вакансия — отклик уже у работодателя в кабинете
+                      toast("Отклик доставлен работодателю.", "ok");
                       router.push('/applications');
                     }
                   }}
-                  className="inline-flex items-center gap-2 bg-emerald-600 hover:bg-emerald-500 text-white px-6 py-2 rounded-lg text-sm font-bold transition-colors cursor-pointer"
+                  disabled={isSending}
+                  className="inline-flex items-center gap-2 bg-emerald-600 hover:bg-emerald-500 text-white px-6 py-2 rounded-lg text-sm font-bold transition-colors cursor-pointer disabled:opacity-50"
                 >
-                  <Send className="w-4 h-4" /> Отправить HR
+                  {isSending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />} Отправить HR
                 </button>
               </div>
             )}
@@ -246,7 +255,7 @@ export default function SmartApply({
               {/* Кнопки выбора способа отправки */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-2">
                 <a
-                  href={`https://mail.google.com/mail/?view=cm&fs=1&to=${successContactModal.value}&su=Отклик на вакансию: ${encodeURIComponent(successContactModal.vacancyTitle)}`}
+                  href={`https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(successContactModal.value)}&su=${encodeURIComponent("Отклик на вакансию: " + successContactModal.vacancyTitle)}`}
                   target="_blank"
                   rel="noreferrer"
                   className="flex items-center justify-center gap-2 py-2.5 px-4 bg-neutral-800 hover:bg-neutral-700 border border-neutral-700 rounded-xl text-xs font-semibold text-neutral-200 transition-colors"
@@ -255,7 +264,7 @@ export default function SmartApply({
                 </a>
 
                 <a
-                  href={`mailto:${successContactModal.value}?subject=Отклик на вакансию: ${encodeURIComponent(successContactModal.vacancyTitle)}`}
+                  href={`mailto:${encodeURIComponent(successContactModal.value)}?subject=${encodeURIComponent("Отклик на вакансию: " + successContactModal.vacancyTitle)}`}
                   className="flex items-center justify-center gap-2 py-2.5 px-4 bg-blue-600 hover:bg-blue-500 rounded-xl text-xs font-semibold text-white transition-colors"
                 >
                   <Mail className="w-3.5 h-3.5" /> Написать на почту

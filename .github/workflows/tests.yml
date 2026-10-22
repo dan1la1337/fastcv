@@ -18,3 +18,24 @@ jobs:
         run: pip install -r requirements.txt pytest
       - name: Run scraper tests
         run: python -m pytest -q tests
+
+  web:
+    runs-on: ubuntu-latest
+    env:
+      # Сборке нужны публичные переменные; настоящие ключи для проверки не требуются
+      NEXT_PUBLIC_SUPABASE_URL: https://example.supabase.co
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: sb_publishable_ci_placeholder
+      NEXT_TELEMETRY_DISABLED: 1
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - name: Lint
+        run: npx eslint src --max-warnings 0
+      - name: Type check
+        run: npx tsc --noEmit
+      - name: Build
+        run: npm run build

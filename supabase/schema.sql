@@ -93,6 +93,7 @@ alter table public.channels
   add column if not exists failed_runs  integer not null default 0; -- запусков подряд без доступа к ленте
 
 create unique index if not exists vacancies_source_post_key on public.vacancies (source_post);
+create index if not exists vacancies_company_idx on public.vacancies (company_id);
 create index if not exists vacancies_feed_idx on public.vacancies (created_at desc) where archived_at is null;
 create index if not exists vacancies_created_at_idx on public.vacancies (created_at desc);
 create index if not exists vacancies_employer_idx   on public.vacancies (employer_id);
@@ -217,25 +218,25 @@ $$;
 create policy profiles_select on public.profiles
   for select to authenticated
   using (
-    id = auth.uid()
+    id = (select auth.uid())
     or role = 'employer'
     or exists (
       select 1
       from public.applications a
       join public.vacancies v on v.id = a.vacancy_id
       where a.candidate_id = profiles.id
-        and v.employer_id = auth.uid()
+        and v.employer_id = (select auth.uid())
     )
   );
 
 create policy profiles_insert on public.profiles
   for insert to authenticated
-  with check (id = auth.uid());
+  with check (id = (select auth.uid()));
 
 create policy profiles_update on public.profiles
   for update to authenticated
-  using (id = auth.uid())
-  with check (id = auth.uid());
+  using (id = (select auth.uid()))
+  with check (id = (select auth.uid()));
 
 -- vacancies -------------------------------------------------------------------
 
@@ -246,38 +247,38 @@ create policy vacancies_select on public.vacancies
 create policy vacancies_insert on public.vacancies
   for insert to authenticated
   with check (
-    public.app_user_role() = 'employer'
-    and employer_id = auth.uid()
+    (select public.app_user_role()) = 'employer'
+    and employer_id = (select auth.uid())
     and source_type = 'internal'
     and ranking_weight <= 1.5
   );
 
 create policy vacancies_update on public.vacancies
   for update to authenticated
-  using (employer_id = auth.uid())
-  with check (employer_id = auth.uid() and source_type = 'internal' and ranking_weight <= 1.5);
+  using (employer_id = (select auth.uid()))
+  with check (employer_id = (select auth.uid()) and source_type = 'internal' and ranking_weight <= 1.5);
 
 create policy vacancies_delete on public.vacancies
   for delete to authenticated
-  using (employer_id = auth.uid());
+  using (employer_id = (select auth.uid()));
 
 -- applications ----------------------------------------------------------------
 
 create policy applications_select on public.applications
   for select to authenticated
   using (
-    candidate_id = auth.uid()
+    candidate_id = (select auth.uid())
     or exists (
       select 1 from public.vacancies v
-      where v.id = applications.vacancy_id and v.employer_id = auth.uid()
+      where v.id = applications.vacancy_id and v.employer_id = (select auth.uid())
     )
   );
 
 create policy applications_insert on public.applications
   for insert to authenticated
   with check (
-    candidate_id = auth.uid()
-    and public.app_user_role() = 'candidate'
+    candidate_id = (select auth.uid())
+    and (select public.app_user_role()) = 'candidate'
     and status = 'new'
     and hr_replied_at is null
   );
@@ -287,7 +288,7 @@ create policy applications_update on public.applications
   using (
     exists (
       select 1 from public.vacancies v
-      where v.id = applications.vacancy_id and v.employer_id = auth.uid()
+      where v.id = applications.vacancy_id and v.employer_id = (select auth.uid())
     )
   );
 
