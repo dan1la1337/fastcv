@@ -32,8 +32,12 @@ ARCHIVE_AFTER_DAYS = 30
 FIRST_RUN_POSTS = 10  # сколько последних постов брать у нового канала
 MAX_PAGES = 5  # сколько страниц истории (~20 постов каждая) листать за запуск
 MIN_TEXT_LEN = 40  # короче — точно не вакансия
-GEMINI_MODEL = "gemini-3.1-flash-lite"
-AI_ATTEMPTS = 4
+# Модели по очереди: если одна перегружена (503) или упёрлась в лимит (429),
+# запрос уходит в следующую. Переопределяется переменной GEMINI_MODELS.
+GEMINI_MODELS = ("gemini-3.1-flash-lite", "gemini-3.5-flash-lite", "gemini-3.6-flash")
+AI_ATTEMPTS = 2  # попыток на каждую модель
+AI_TIMEOUT_MS = 60_000  # без таймаута зависший запрос держал весь прогон
+AI_CIRCUIT_BREAKER = 3  # каналов подряд без ответа Gemini — дальше не пытаемся
 AI_PAUSE_SECONDS = 2
 CHANNEL_PAUSE_SECONDS = 2
 USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"
@@ -190,11 +194,12 @@ class AIUnavailable(Exception):
     """Gemini не ответил после всех попыток (перегрузка, лимит, сбой сети)."""
 
 
-def make_gemini_normalizer(api_key: str) -> Callable[[str], VacancyAI]:
+def make_gemini_normalizer(api_key: str, models: tuple[str, ...] = GEMINI_MODELS) -> Callable[[str], VacancyAI]:
+    import httpx
     from google import genai
     from google.genai import errors, types
 
-    client = genai.Client(api_key=api_key)
+    client = genai.Client(api_key=api_key, http_options=types.HttpOptions(timeout=AI_TIMEOUT_MS))
     config = types.GenerateContentConfig(
         response_mime_type="application/json",
         response_schema=VacancyAI,
@@ -202,24 +207,27 @@ def make_gemini_normalizer(api_key: str) -> Callable[[str], VacancyAI]:
     )
 
     def normalize(text: str) -> VacancyAI:
-        last_error: Exception | None = None
-        for attempt in range(AI_ATTEMPTS):
-            try:
-                response = client.models.generate_content(
-                    model=GEMINI_MODEL, contents=PROMPT + text, config=config,
-                )
-                if isinstance(response.parsed, VacancyAI):
-                    return response.parsed
-                return VacancyAI.model_validate_json(response.text)
-            except errors.APIError as e:
-                last_error = e
-                # 429 (лимит) и 5xx (перегрузка) — временные, остальное повторять бесполезно
-                if e.code != 429 and not (e.code and e.code >= 500):
-                    raise AIUnavailable(f"{e.code} {e.status}") from e
-            except (requests.RequestException, ValueError) as e:
-                last_error = e
-            time.sleep(AI_PAUSE_SECONDS * 2 ** attempt)
-        raise AIUnavailable(str(last_error)) from last_error
+        failures: list[str] = []
+        for model in models:
+            for attempt in range(AI_ATTEMPTS):
+                try:
+                    response = client.models.generate_content(model=model, contents=PROMPT + text, config=config)
+                    if isinstance(response.parsed, VacancyAI):
+                        return response.parsed
+                    return VacancyAI.model_validate_json(response.text)
+                except errors.APIError as e:
+                    if e.code == 404:  # модели нет (сняли с поддержки) — сразу к следующей
+                        failures.append(f"{model}: 404")
+                        break
+                    if e.code != 429 and not (e.code and e.code >= 500):
+                        # 400 и подобные — ошибка в запросе, другие модели не помогут
+                        raise AIUnavailable(f"{model}: {e.code} {e.status}") from e
+                    failures.append(f"{model}: {e.code}")
+                except (httpx.HTTPError, requests.RequestException, ValueError) as e:
+                    failures.append(f"{model}: {type(e).__name__}")
+                if attempt + 1 < AI_ATTEMPTS:
+                    time.sleep(AI_PAUSE_SECONDS * 2 ** attempt)
+        raise AIUnavailable("; ".join(failures[-3:]) or "нет ответа")
 
     return normalize
 
@@ -376,11 +384,19 @@ def run(store: Store, normalize: Callable[[str], VacancyAI]) -> list[ChannelResu
     channels = store.active_channels()
     print(f"Активных каналов: {len(channels)}")
     results = []
+    ai_failures_in_row = 0
     for row in channels:
+        if ai_failures_in_row >= AI_CIRCUIT_BREAKER:
+            # Gemini лежит: остальные каналы не трогаем, их last_post_id не меняется,
+            # и следующий запуск продолжит с того же места
+            print(f"⏸ Gemini недоступен на {AI_CIRCUIT_BREAKER} каналах подряд — "
+                  f"остальные каналы ({len(channels) - len(results)}) отложены до следующего запуска.")
+            break
         r = process_channel(row, store, normalize)
         status = f"⚠️ {r.error}" if r.error else "ok"
         print(f"📡 @{r.channel}: новых постов {r.new_posts}, сохранено {r.saved} — {status}")
         results.append(r)
+        ai_failures_in_row = ai_failures_in_row + 1 if r.ai_stopped else 0
         time.sleep(CHANNEL_PAUSE_SECONDS)
 
     archived = store.archive_stale(ARCHIVE_AFTER_DAYS)
@@ -452,7 +468,9 @@ def main() -> None:
         )
 
     print("==================== ЗАПУСК СБОРА ====================")
-    run(Store(create_client(supabase_url, supabase_key)), make_gemini_normalizer(gemini_key))
+    models = tuple(m.strip() for m in (env("GEMINI_MODELS") or "").split(",") if m.strip()) or GEMINI_MODELS
+    print(f"Модели Gemini: {', '.join(models)}")
+    run(Store(create_client(supabase_url, supabase_key)), make_gemini_normalizer(gemini_key, models))
     print("==================== ЦИКЛ ЗАВЕРШЁН ====================")
 
 

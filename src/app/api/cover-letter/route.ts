@@ -1,7 +1,43 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 
-const GEMINI_MODEL = "gemini-3.1-flash-lite";
+// Модели по очереди: если одна перегружена (503/429) или недоступна (404),
+// пробуем следующую. Тот же порядок, что и в сборщике вакансий (main.py).
+const GEMINI_MODELS = ["gemini-3.1-flash-lite", "gemini-3.5-flash-lite", "gemini-3.6-flash"];
+const MODEL_TIMEOUT_MS = 20_000;
+
+// Худший случай — три модели по 20 секунд
+export const maxDuration = 60;
+
+/** Текст письма от первой ответившей модели или null, если не ответила ни одна. */
+async function generate(apiKey: string, prompt: string): Promise<string | null> {
+  for (const model of GEMINI_MODELS) {
+    try {
+      const response = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`,
+        {
+          method: "POST",
+          // Ключ — в заголовке, а не в URL, чтобы не попадал в логи
+          headers: { "Content-Type": "application/json", "x-goog-api-key": apiKey },
+          body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] }),
+          signal: AbortSignal.timeout(MODEL_TIMEOUT_MS),
+        },
+      );
+      if (!response.ok) {
+        console.error("Gemini error", model, response.status, (await response.text()).slice(0, 300));
+        // Ошибка в самом запросе (400, 403) — другие модели не помогут
+        if (![404, 429].includes(response.status) && response.status < 500) return null;
+        continue;
+      }
+      const data = await response.json();
+      const text: string | undefined = data.candidates?.[0]?.content?.parts?.[0]?.text;
+      if (text?.trim()) return text.trim();
+    } catch (error) {
+      console.error("Gemini request failed", model, error); // таймаут или сеть — пробуем следующую
+    }
+  }
+  return null;
+}
 
 // Лимит генераций на пользователя. Хранится в памяти инстанса: на serverless
 // это мягкая защита (у каждого инстанса свой счётчик), но от прямого
@@ -105,30 +141,13 @@ export async function POST(req: Request) {
 4. Верни только текст письма, без дополнительных комментариев.
 `;
 
-  // 3. Генерация. Ключ — в заголовке, а не в URL, чтобы не попадал в логи
-  try {
-    const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent`,
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json", "x-goog-api-key": apiKey },
-        body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] }),
-      },
+  // 3. Генерация
+  const text = await generate(apiKey, prompt);
+  if (!text) {
+    return NextResponse.json(
+      { error: "ИИ сейчас перегружен. Попробуйте ещё раз через минуту." },
+      { status: 503 },
     );
-
-    if (!response.ok) {
-      console.error("Gemini error", response.status, await response.text());
-      return NextResponse.json({ error: "ИИ временно недоступен" }, { status: 502 });
-    }
-
-    const data = await response.json();
-    const text: string | undefined = data.candidates?.[0]?.content?.parts?.[0]?.text;
-    if (!text) {
-      return NextResponse.json({ error: "Не удалось сгенерировать текст" }, { status: 502 });
-    }
-    return NextResponse.json({ text: text.trim() });
-  } catch (error) {
-    console.error("Cover letter generation failed", error);
-    return NextResponse.json({ error: "Не удалось сгенерировать текст" }, { status: 500 });
   }
+  return NextResponse.json({ text });
 }
