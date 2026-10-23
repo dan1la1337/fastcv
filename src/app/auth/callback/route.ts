@@ -48,8 +48,9 @@ export async function GET(request: NextRequest) {
   const next = searchParams.get("next");
   const safeNext = next && next.startsWith("/") && !next.startsWith("//") ? next : null;
 
+  // Первый вход: кандидата — в онбординг «Что вы ищете?», работодателя — заполнить компанию
   const target = !profile?.name
-    ? "/profile"
+    ? (profile?.role === "employer" ? "/profile" : "/welcome")
     : safeNext ?? (profile.role === "employer" ? "/employer" : "/");
   return NextResponse.redirect(`${origin}${target}`);
 }

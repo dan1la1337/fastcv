@@ -33,6 +33,13 @@ function LoginForm() {
 
     // Работодателя — в кабинет HR, кандидата — на главную к вакансиям
     const role = await getUserRole(data.user);
+    // Кандидат, который ещё не рассказал, что ищет, — сначала в онбординг
+    const { data: profile } = await supabase.from("profiles").select("name").eq("id", data.user.id).maybeSingle();
+    if (role === "candidate" && !profile?.name) {
+      router.push("/welcome");
+      router.refresh();
+      return;
+    }
     router.push(next ?? homeForRole(role));
     router.refresh();
   };

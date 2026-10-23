@@ -72,6 +72,11 @@ export default function Feed({ initialRows, initialTotal }: { initialRows: Vacan
           .eq("id", data.user.id)
           .single();
         if (profile) setUserProfile(profile);
+        // Ссылка «/?tab=for-you» (после онбординга) сразу открывает подборку
+        if (profile?.role === "candidate" && new URLSearchParams(window.location.search).get("tab") === "for-you") {
+          setMode("for-you");
+          void loadRecommended(0);
+        }
       }
     });
   }, []);
