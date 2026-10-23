@@ -65,11 +65,32 @@ const INSTRUCTION = `Ты профессиональный IT-копирайте
 1. Без воды, клише и заискивания. Уверенный, но вежливый тон.
 2. Подчеркни ровно те навыки кандидата, которые пересекаются с вакансией.
 3. Не придумывай опыт, которого нет в профиле.
-4. Язык письма — язык вакансии.
+4. Язык письма — язык вакансии, если в параметрах не сказано иначе.
 5. Верни только текст письма, без заголовков, пояснений и разметки.`;
 
+// Настройки письма, которые выбирает кандидат. Значения — только из этих списков,
+// поэтому текст, который попадает в инструкцию модели, полностью наш.
+const TONES = {
+  neutral: "Тон деловой и дружелюбный.",
+  formal: "Тон официальный, без разговорных оборотов.",
+  friendly: "Тон тёплый и неформальный, как в переписке с командой стартапа.",
+} as const;
+const LENGTHS = {
+  short: "Длина — 3–4 предложения, одним абзацем.",
+  medium: "Длина — 2–3 коротких абзаца.",
+  long: "Длина — 3–4 абзаца с конкретными примерами из опыта.",
+} as const;
+const LANGUAGES = {
+  auto: "",
+  ru: "Пиши по-русски.",
+  en: "Пиши по-английски (English), даже если вакансия на русском.",
+} as const;
+
+const pick = <T extends Record<string, string>>(options: T, value: unknown, fallback: keyof T): keyof T =>
+  typeof value === "string" && value in options ? (value as keyof T) : fallback;
+
 // Меняется вместе с INSTRUCTION: старые письма в кэше не будут выдаваться за новые
-const PROMPT_VERSION = "2026-10-23";
+const PROMPT_VERSION = "2026-10-23b";
 
 type Source = "ai" | "cache" | "template";
 
@@ -107,11 +128,17 @@ export async function POST(req: Request) {
   // 2. Данные берём из базы, а не из запроса: клиенту доверяем только id вакансии
   let vacancyId: unknown;
   let regenerate = false;
+  let tone: keyof typeof TONES = "neutral";
+  let length: keyof typeof LENGTHS = "medium";
+  let language: keyof typeof LANGUAGES = "auto";
   try {
     const body = await req.json();
     vacancyId = body?.vacancyId;
     // «Переписать» — пользователь хочет другое письмо, а не то, что уже в кэше
     regenerate = body?.regenerate === true;
+    tone = pick(TONES, body?.tone, "neutral");
+    length = pick(LENGTHS, body?.length, "medium");
+    language = pick(LANGUAGES, body?.language, "auto");
   } catch {
     return NextResponse.json({ error: "Некорректный запрос" }, { status: 400 });
   }
@@ -143,11 +170,17 @@ export async function POST(req: Request) {
 
 <vacancy>
 Название: ${fence(clip(vacancy.title, 300))}
+Технологии: ${fence(stringList(vacancy.stack).join(", ").slice(0, 500)) || "не указаны"}
 Описание: ${fence(clip(vacancy.description, 4000))}
 </vacancy>`;
 
+  const instruction = [INSTRUCTION, "", "Параметры письма:", TONES[tone], LENGTHS[length], LANGUAGES[language]]
+    .filter(line => line !== undefined)
+    .join("\n")
+    .trim();
+
   // Тот же профиль и та же вакансия — отдаём готовое письмо: без ИИ и без расхода лимита
-  const inputHash = createHash("sha256").update(`${PROMPT_VERSION}\n${data}`).digest("hex");
+  const inputHash = createHash("sha256").update(`${PROMPT_VERSION}\n${tone}/${length}/${language}\n${data}`).digest("hex");
   if (!regenerate) {
     const { data: cached } = await supabase
       .from("cover_letters")
@@ -180,7 +213,7 @@ export async function POST(req: Request) {
   }
 
   // 3. Генерация
-  const raw = apiKey ? await generate(apiKey, INSTRUCTION, data) : null;
+  const raw = apiKey ? await generate(apiKey, instruction, data) : null;
   const text = raw ? sanitizeLetter(raw, data) : null;
   if (!text) {
     // ИИ не ответил — письмо по шаблону из профиля, чтобы отклик не срывался.
