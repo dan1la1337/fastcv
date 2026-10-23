@@ -575,3 +575,17 @@ def test_duplicate_check_skipped_without_company_or_contact():
     db = type("DB", (), {"table": lambda self, t: FakeQuery(log, data=[{"id": 1}])})()
     assert main.Store(db).find_duplicate("qa engineer", None, None) is False
     assert not log
+
+
+def test_channel_week_counts_by_source_post():
+    week = main.channel_week(["forPython", "devjobs", "quiet"], ["forpython/1", "forpython/2", "devjobs/9", None, "other/1"])
+    assert week == {"forPython": 2, "devjobs": 1, "quiet": 0}
+
+
+def test_daily_report_lists_best_and_silent_channels():
+    stats = {"vacancies_external": 1, "vacancies_employer": 0, "vacancies_in_feed": 10, "users": 0,
+             "applications": 0, "channels": 3, "unavailable_channels": [],
+             "channel_week": {"a": 5, "b": 0, "c": 12}}
+    text = main.daily_report_text(stats)
+    assert "Лучшие каналы за неделю: @c 12, @a 5" in text
+    assert "Без вакансий за неделю (1): @b" in text

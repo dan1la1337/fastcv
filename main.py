@@ -376,7 +376,13 @@ class Store:
         unavailable = (self.db.table("channels").select("username")
                        .eq("is_active", True).gt("failed_runs", 0).order("username")
                        .execute().data)
+        active = [r["username"] for r in self.db.table("channels").select("username").eq("is_active", True).execute().data]
+        week_ago = (datetime.now(timezone.utc) - timedelta(days=7)).isoformat()
+        week_posts = (self.db.table("vacancies").select("source_post")
+                      .eq("source_type", "external").gte("created_at", week_ago).limit(5000)
+                      .execute().data)
         return {
+            "channel_week": channel_week(active, [r["source_post"] for r in week_posts]),
             "vacancies_external": self.count("vacancies", gte_created_at=since, eq_source_type="external"),
             "vacancies_employer": self.count("vacancies", gte_created_at=since, eq_source_type="internal"),
             "vacancies_in_feed": self.count("vacancies", is_archived_at="null"),
@@ -560,6 +566,17 @@ def alert_text(summary: RunSummary) -> Optional[str]:
     return "\n".join(lines)
 
 
+def channel_week(active: list[str], source_posts: list[Optional[str]]) -> dict[str, int]:
+    """Сколько вакансий за неделю дал каждый активный канал (source_post = «канал/id поста»)."""
+    counts = {name.lower(): 0 for name in active}
+    names = {name.lower(): name for name in active}
+    for post in source_posts:
+        channel = (post or "").split("/", 1)[0].lower()
+        if channel in counts:
+            counts[channel] += 1
+    return {names[c]: n for c, n in counts.items()}
+
+
 def daily_report_text(stats: dict, summary: Optional[RunSummary] = None) -> str:
     """Сводка за сутки для владельца: что прибавилось и всё ли в порядке с источниками."""
     unavailable = stats["unavailable_channels"]
@@ -575,6 +592,15 @@ def daily_report_text(stats: dict, summary: Optional[RunSummary] = None) -> str:
         + (": " + ", ".join("@" + c for c in unavailable[:10]) + (" и др." if len(unavailable) > 10 else "")
            if unavailable else ""),
     ]
+    week = stats.get("channel_week") or {}
+    if week:
+        top = sorted(((n, c) for c, n in week.items() if n), reverse=True)[:5]
+        silent = sorted(c for c, n in week.items() if not n)
+        if top:
+            lines.append("Лучшие каналы за неделю: " + ", ".join(f"@{c} {n}" for n, c in top))
+        if silent:
+            lines.append(f"Без вакансий за неделю ({len(silent)}): " + ", ".join("@" + c for c in silent[:10])
+                         + (" и др." if len(silent) > 10 else "") + " — кандидаты на замену")
     if summary is not None:
         lines.append(f"Последний запуск: новых постов {summary.new_posts}, сохранено {summary.saved}"
                      + (", были проблемы (сообщение выше)" if alert_text(summary) else ", без проблем"))
