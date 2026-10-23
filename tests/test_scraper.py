@@ -42,7 +42,7 @@ def job(**overrides) -> VacancyAI:
     data = dict(is_job=True, title="Python Developer", company="Kaspi.kz", description="Описание", salary_min=200000,
                 salary_max=None, salary_currency="RUB", city=None, is_remote=True, contact_type="telegram",
                 contact_value="@hr", stack=["Python", "python", " Django "],
-                level="senior", direction="backend", work_format="remote", hiring_type=None, scope_note=None)
+                level="senior", direction="backend", work_format="remote", hiring_type=None, scope_note=None, experience_min=None)
     data.update(overrides)
     return VacancyAI(**data)
 
@@ -659,7 +659,7 @@ def test_digest_sends_matches_and_stops_for_blocked_users():
 
 class BackfillStore:
     def __init__(self, rows, cursor=None):
-        self.rows, self.settings, self.companies, self.types = rows, {}, {}, {}
+        self.rows, self.settings, self.companies, self.types, self.experience = rows, {}, {}, {}, {}
         if cursor:
             self.settings[main.BACKFILL_CURSOR_KEY] = cursor
 
@@ -678,6 +678,9 @@ class BackfillStore:
 
     def set_hiring_type(self, vacancy_id, hiring_type):
         self.types[vacancy_id] = hiring_type
+
+    def set_experience(self, vacancy_id, years, level):
+        self.experience[vacancy_id] = (years, level)
 
 
 def _backfill_rows():
@@ -802,3 +805,20 @@ def test_mixed_role_note_is_saved_trimmed():
     store2 = FakeStore()
     process_post(post(), store2, lambda t: job(scope_note="  "))
     assert store2.inserted[0]["scope_note"] is None
+
+
+def test_experience_saved_and_cleaned():
+    store = FakeStore()
+    assert process_post(post(), store, lambda t: job(experience_min=2.7, level="middle")) == "saved"
+    assert store.inserted[0]["experience_min"] == 2.5
+    assert main.clean_experience(45) is None and main.clean_experience(-1) is None and main.clean_experience(0) == 0
+
+
+def test_backfill_sets_experience_and_level_from_text():
+    rows = [{"id": "e", "source_post": None, "title": "Python Developer", "company_name": "Acme", "hiring_type": "product",
+             "experience_min": None, "description": "Опыт от 3 лет, проектирование архитектуры сервисов.",
+             "created_at": "2026-10-10T10:00:00+00:00"}]
+    store = BackfillStore(rows)
+    main.backfill_companies(store, lambda t: job(company="Acme", experience_min=3, level="senior"),
+                            limit=5, fetch=lambda url: "", pause=0)
+    assert store.experience == {"e": (3, "senior")}

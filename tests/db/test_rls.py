@@ -235,6 +235,23 @@ CHECKS: list[tuple] = [
         update profiles set skills = '["Python"]' where id = '11111111-1111-1111-1111-111111111111';
         update vacancies set stack = '["Python", "Kafka", "Docker"]' where title = 'Ext';""",
      "postgres", None, "true"),
+    ("опыт кандидата сравнивается с требуемым опытом напрямую", True,
+     """update vacancies set experience_min = 3 where title = 'Ext';
+        create temp table ex (years numeric, score int);
+        update profiles set experience_years = 4 where id = '11111111-1111-1111-1111-111111111111';
+        insert into ex select 4, (vacancy_match((select v from vacancies v where title = 'Ext'), (select p from profiles p where id = '11111111-1111-1111-1111-111111111111')) ->> 'score')::int;
+        update profiles set experience_years = 1 where id = '11111111-1111-1111-1111-111111111111';
+        insert into ex select 1, (vacancy_match((select v from vacancies v where title = 'Ext'), (select p from profiles p where id = '11111111-1111-1111-1111-111111111111')) ->> 'score')::int;
+        select ((select score from ex where years = 4) - (select score from ex where years = 1))::text;
+        update profiles set experience_years = null where id = '11111111-1111-1111-1111-111111111111';
+        update vacancies set experience_min = null where title = 'Ext';""",
+     "postgres", None, "15"),
+    ("несколько форматов: подходит любой из выбранных", True,
+     """update profiles set pref_formats = '{remote,hybrid}' where id = auth.uid();
+        select pref_formats::text from profiles where id = auth.uid()""",
+     "authenticated", C, "{remote,hybrid}"),
+    ("неизвестный формат НЕ сохраняется", False,
+     "update profiles set pref_formats = '{space}' where id = auth.uid()", "authenticated", C, None),
     ("работодателю подборка не считается", True,
      "select count(*) from recommended_vacancies(10, 0)", "authenticated", E, "0"),
     ("аноним НЕ вызывает подборку", False, "select * from recommended_vacancies(10, 0)", "anon", None, None),

@@ -8,7 +8,8 @@ import { Briefcase, FileText, Loader2, LogOut, Save, Sparkles, Trash2, Upload, U
 import type { ResumeDraft } from "@/lib/resume-draft";
 import TelegramSubscription from "@/components/TelegramSubscription";
 import { supabase, getUserRole, type UserRole } from "@/lib/supabase";
-import { DIRECTIONS, LEVELS, WORK_FORMATS, type Level, type WorkFormat } from "@/lib/vacancies";
+import { DIRECTIONS, WORK_FORMATS, experienceFields, type Level, type WorkFormat } from "@/lib/vacancies";
+import ExperienceInput from "@/components/ExperienceInput";
 
 const MAX_DIRECTIONS = 5; // как в ограничении profiles_pref_directions_check
 
@@ -37,7 +38,9 @@ export default function ProfilePage() {
   // Что ищет кандидат: по этому строится подборка «Для вас» и процент совпадения
   const [prefDirections, setPrefDirections] = useState<string[]>([]);
   const [prefLevel, setPrefLevel] = useState<Level | "">("");
-  const [prefFormat, setPrefFormat] = useState<WorkFormat | "">("");
+  const [experience, setExperience] = useState("");
+  const [leadsPeople, setLeadsPeople] = useState(false);
+  const [prefFormats, setPrefFormats] = useState<WorkFormat[]>([]);
   const [prefCity, setPrefCity] = useState("");
   const [prefSalary, setPrefSalary] = useState("");
 
@@ -58,7 +61,7 @@ export default function ProfilePage() {
 
       const { data: profile } = await supabase
         .from("profiles")
-        .select("name, description, skills, resume_path, pref_directions, pref_level, pref_format, pref_city, pref_salary")
+        .select("name, description, skills, resume_path, pref_directions, pref_level, pref_format, pref_formats, experience_years, pref_city, pref_salary")
         .eq("id", user.id)
         .maybeSingle();
       if (profile) {
@@ -68,7 +71,9 @@ export default function ProfilePage() {
         setResumePath(profile.resume_path ?? null);
         setPrefDirections(profile.pref_directions ?? []);
         setPrefLevel((profile.pref_level as Level | null) ?? "");
-        setPrefFormat((profile.pref_format as WorkFormat | null) ?? "");
+        setPrefFormats(profile.pref_formats?.length ? (profile.pref_formats as WorkFormat[]) : profile.pref_format ? [profile.pref_format as WorkFormat] : []);
+        setExperience(profile.experience_years != null ? String(profile.experience_years) : "");
+        setLeadsPeople(profile.pref_level === "lead");
         setPrefCity(profile.pref_city ?? "");
         setPrefSalary(profile.pref_salary ? String(profile.pref_salary) : "");
       }
@@ -90,8 +95,9 @@ export default function ProfilePage() {
       skills: skills.split(",").map(s => s.trim()).filter(Boolean),
       ...(role === "candidate" ? {
         pref_directions: prefDirections,
-        pref_level: prefLevel || null,
-        pref_format: prefFormat || null,
+        ...experienceFields(experience, leadsPeople, prefLevel),
+        pref_formats: prefFormats,
+        pref_format: prefFormats[0] ?? null,
         pref_city: prefCity.trim() || null,
         pref_salary: Number(prefSalary.replace(/\D/g, "")) || null,
       } : {}),
@@ -274,24 +280,16 @@ export default function ProfilePage() {
                   </div>
                 </div>
 
-                <div>
-                  <span className={labelClass}>Уровень</span>
-                  <div className="flex flex-wrap gap-2">
-                    {LEVELS.map(l => (
-                      <button key={l.id} type="button" aria-pressed={prefLevel === l.id}
-                        onClick={() => setPrefLevel(prefLevel === l.id ? "" : l.id)} className={chip(prefLevel === l.id)}>
-                        {l.label}
-                      </button>
-                    ))}
-                  </div>
-                </div>
+                <ExperienceInput years={experience} leads={leadsPeople} labelClass={labelClass}
+                  onChange={(y, l) => { setExperience(y); setLeadsPeople(l); }} />
 
                 <div>
                   <span className={labelClass}>Формат работы</span>
                   <div className="flex flex-wrap gap-2">
                     {WORK_FORMATS.map(f => (
-                      <button key={f.id} type="button" aria-pressed={prefFormat === f.id}
-                        onClick={() => setPrefFormat(prefFormat === f.id ? "" : f.id)} className={chip(prefFormat === f.id)}>
+                      <button key={f.id} type="button" aria-pressed={prefFormats.includes(f.id)}
+                        onClick={() => setPrefFormats(prev => prev.includes(f.id) ? prev.filter(x => x !== f.id) : [...prev, f.id])}
+                        className={chip(prefFormats.includes(f.id))}>
                         {f.label}
                       </button>
                     ))}

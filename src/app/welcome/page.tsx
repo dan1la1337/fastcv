@@ -6,7 +6,8 @@ import Link from "next/link";
 import { Loader2, Sparkles } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { toast } from "@/components/Toaster";
-import { DIRECTIONS, LEVELS, WORK_FORMATS, type Level, type WorkFormat } from "@/lib/vacancies";
+import { DIRECTIONS, WORK_FORMATS, experienceFields, type Level, type WorkFormat } from "@/lib/vacancies";
+import ExperienceInput from "@/components/ExperienceInput";
 
 const MAX_DIRECTIONS = 5;
 
@@ -30,7 +31,9 @@ export default function WelcomePage() {
   const [name, setName] = useState("");
   const [directions, setDirections] = useState<string[]>([]);
   const [level, setLevel] = useState<Level | "">("");
-  const [format, setFormat] = useState<WorkFormat | "">("");
+  const [experience, setExperience] = useState("");
+  const [leadsPeople, setLeadsPeople] = useState(false);
+  const [formats, setFormats] = useState<WorkFormat[]>([]);
   const [city, setCity] = useState("");
   const [skills, setSkills] = useState("");
 
@@ -41,14 +44,16 @@ export default function WelcomePage() {
       setUserId(user.id);
       const { data: profile } = await supabase
         .from("profiles")
-        .select("name, skills, pref_directions, pref_level, pref_format, pref_city")
+        .select("name, skills, pref_directions, pref_level, pref_format, pref_formats, experience_years, pref_city")
         .eq("id", user.id)
         .maybeSingle();
       if (profile) {
         setName(profile.name ?? "");
         setDirections(profile.pref_directions ?? []);
         setLevel((profile.pref_level as Level | null) ?? "");
-        setFormat((profile.pref_format as WorkFormat | null) ?? "");
+        setFormats(profile.pref_formats?.length ? (profile.pref_formats as WorkFormat[]) : profile.pref_format ? [profile.pref_format as WorkFormat] : []);
+        setExperience(profile.experience_years != null ? String(profile.experience_years) : "");
+        setLeadsPeople(profile.pref_level === "lead");
         setCity(profile.pref_city ?? "");
         setSkills(Array.isArray(profile.skills) ? profile.skills.join(", ") : "");
       }
@@ -63,8 +68,9 @@ export default function WelcomePage() {
       name: name.trim(),
       skills: [...new Set(skills.split(",").map(s => s.trim()).filter(Boolean))].slice(0, 50),
       pref_directions: directions,
-      pref_level: level || null,
-      pref_format: format || null,
+      ...experienceFields(experience, leadsPeople, level),
+      pref_formats: formats,
+      pref_format: formats[0] ?? null,
       pref_city: city.trim() || null,
     }).eq("id", userId);
     setSaving(false);
@@ -118,21 +124,15 @@ export default function WelcomePage() {
         </div>
 
         <div className="grid sm:grid-cols-2 gap-6">
-          <div>
-            <span className={labelClass}>Уровень</span>
-            <div className="flex flex-wrap gap-2">
-              {LEVELS.map(l => (
-                <button key={l.id} type="button" aria-pressed={level === l.id}
-                  onClick={() => setLevel(level === l.id ? "" : l.id)} className={chip(level === l.id)}>{l.label}</button>
-              ))}
-            </div>
-          </div>
+          <ExperienceInput years={experience} leads={leadsPeople} labelClass={labelClass}
+            onChange={(y, l) => { setExperience(y); setLeadsPeople(l); }} />
           <div>
             <span className={labelClass}>Формат</span>
             <div className="flex flex-wrap gap-2">
               {WORK_FORMATS.map(f => (
-                <button key={f.id} type="button" aria-pressed={format === f.id}
-                  onClick={() => setFormat(format === f.id ? "" : f.id)} className={chip(format === f.id)}>{f.label}</button>
+                <button key={f.id} type="button" aria-pressed={formats.includes(f.id)}
+                  onClick={() => setFormats(prev => prev.includes(f.id) ? prev.filter(x => x !== f.id) : [...prev, f.id])}
+                  className={chip(formats.includes(f.id))}>{f.label}</button>
               ))}
             </div>
           </div>

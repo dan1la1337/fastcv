@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { supabase } from "@/lib/supabase";
 import {
-  AREAS, DEFAULT_FILTERS, DIRECTIONS, freshnessLabel, LEVELS, WORK_FORMATS, fetchVacancyPage, formatLabel, formatSalary, levelLabel, plural, PAGE_SIZE,
+  AREAS, DEFAULT_FILTERS, DIRECTIONS, experienceLabel, freshnessLabel, LEVELS, WORK_FORMATS, fetchVacancyPage, formatLabel, formatSalary, levelLabel, plural, PAGE_SIZE,
   VACANCY_FORMS, type Area, type Level, type Vacancy, type VacancyFilters, type WorkFormat,
 } from "@/lib/vacancies";
 import { Clock, Search, MapPin, ChevronDown, Sparkles, Loader2, ExternalLink, Globe, SlidersHorizontal, Briefcase, Building2, Target, Bookmark, BookmarkCheck, EyeOff, Undo2 } from "lucide-react";
@@ -334,7 +334,11 @@ export default function Feed({ initialRows, initialTotal }: { initialRows: Vacan
                   <Target className="w-3.5 h-3.5" />Совпадение {match.score}%
                 </span>
               )}
-              {item.level && <span className="inline-flex items-center gap-1"><Briefcase className="w-3.5 h-3.5" />{levelLabel(item.level)}</span>}
+              {(item.level || item.experience_min != null) && (
+              <span className="inline-flex items-center gap-1"><Briefcase className="w-3.5 h-3.5" />
+                {[item.level && levelLabel(item.level), experienceLabel(item.experience_min)].filter(Boolean).join(" · ")}
+              </span>
+            )}
               {item.city && <span className="inline-flex items-center gap-1"><MapPin className="w-3.5 h-3.5" />{item.city}</span>}
               {item.work_format === "remote" || (!item.work_format && item.is_remote)
                 ? <span className="inline-flex items-center gap-1"><Globe className="w-3.5 h-3.5" />Удалённо</span>

@@ -4,7 +4,7 @@ import { notFound } from "next/navigation";
 import { cache } from "react";
 import { AlertTriangle, ArrowLeft, Briefcase, Building2, Calendar, ExternalLink, Globe, MapPin, Megaphone } from "lucide-react";
 import { supabase } from "@/lib/supabase";
-import { VACANCY_COLUMNS, formatLabel, formatSalary, levelLabel, plural, type Vacancy } from "@/lib/vacancies";
+import { VACANCY_COLUMNS, formatLabel, formatSalary, levelLabel, experienceLabel, plural, type Vacancy } from "@/lib/vacancies";
 import ApplyButton from "@/components/ApplyButton";
 import ViewCounter from "@/components/ViewCounter";
 import CompanyLine from "@/components/CompanyLine";
@@ -126,7 +126,11 @@ export default async function VacancyPage({ params }: Props) {
             </p>
             <p className="flex flex-wrap items-center gap-4 text-sm text-neutral-400">
               {vacancy.city && <span className="inline-flex items-center gap-1.5"><MapPin className="w-4 h-4" />{vacancy.city}</span>}
-              {vacancy.level && <span className="inline-flex items-center gap-1.5"><Briefcase className="w-4 h-4" />{levelLabel(vacancy.level)}</span>}
+              {(vacancy.level || vacancy.experience_min != null) && (
+                <span className="inline-flex items-center gap-1.5"><Briefcase className="w-4 h-4" />
+                  {[vacancy.level && levelLabel(vacancy.level), experienceLabel(vacancy.experience_min)].filter(Boolean).join(" · ")}
+                </span>
+              )}
               {vacancy.work_format === "remote" || (!vacancy.work_format && vacancy.is_remote)
                 ? <span className="inline-flex items-center gap-1.5"><Globe className="w-4 h-4" />Удалённо</span>
                 : vacancy.work_format && <span className="inline-flex items-center gap-1.5"><Building2 className="w-4 h-4" />{formatLabel(vacancy.work_format)}</span>}
