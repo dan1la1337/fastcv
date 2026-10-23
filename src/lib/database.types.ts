@@ -338,6 +338,8 @@ export type Database = {
           views_count: number
           work_format: string | null
           hiring_type: string | null
+          first_seen_at: string | null
+          channels_count: number
         }
         Insert: {
           archived_at?: string | null
@@ -370,6 +372,8 @@ export type Database = {
           views_count?: number
           work_format?: string | null
           hiring_type?: string | null
+          first_seen_at?: string | null
+          channels_count?: number
         }
         Update: {
           archived_at?: string | null
@@ -402,6 +406,8 @@ export type Database = {
           views_count?: number
           work_format?: string | null
           hiring_type?: string | null
+          first_seen_at?: string | null
+          channels_count?: number
         }
         Relationships: [
           {
