@@ -318,6 +318,20 @@ CHECKS: list[tuple] = [
           on conflict (key) do update set value = excluded.value;
         select value from app_settings where key = 'telegram_update_offset'""",
      "service_role", None, "9"),
+    ("16-й отклик за сутки НЕ проходит", False,
+     f"""insert into vacancies (title, source_type) select 'Limit ' || i, 'external' from generate_series(1, 16) i;
+         set role authenticated; set request.jwt.claim.sub = '{X}';
+         insert into applications (vacancy_id, candidate_id, status)
+           select id, '{X}', 'new' from vacancies where title like 'Limit %' order by title;""",
+     "postgres", None, None),
+    ("лимит НЕ мешает другим кандидатам, а отклики до лимита сохранены", True,
+     f"""insert into vacancies (title, source_type) select 'Limit ' || i, 'external' from generate_series(1, 15) i;
+         insert into applications (vacancy_id, candidate_id, status)
+           select id, '{X}', 'new' from vacancies where title like 'Limit %' order by title;
+         select count(*) from applications where candidate_id = '{X}';
+         delete from applications where candidate_id = '{X}';
+         delete from vacancies where title like 'Limit %';""",
+     "postgres", None, "15"),
     ("время просмотра отклика ставит база, а не клиент", True,
      f"""insert into applications (vacancy_id, candidate_id, status, viewed_at)
            select id, '{X}', 'new', '2000-01-01' from vacancies limit 1;
