@@ -4,7 +4,7 @@ import { notFound } from "next/navigation";
 import { cache } from "react";
 import { ArrowLeft, Briefcase, Building2, Calendar, ExternalLink, Globe, MapPin } from "lucide-react";
 import { supabase } from "@/lib/supabase";
-import { formatLabel, formatSalary, levelLabel, type Vacancy } from "@/lib/vacancies";
+import { VACANCY_COLUMNS, formatLabel, formatSalary, levelLabel, type Vacancy } from "@/lib/vacancies";
 import ApplyButton from "@/components/ApplyButton";
 
 type Props = { params: Promise<{ id: string }> };
@@ -14,7 +14,7 @@ const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 // cache(): метаданные и страница берут вакансию одним запросом
 const getVacancy = cache(async (id: string): Promise<Vacancy | null> => {
   if (!UUID.test(id)) return null;
-  const { data } = await supabase.from("vacancies").select("*").eq("id", id).maybeSingle();
+  const { data } = await supabase.from("vacancies").select(VACANCY_COLUMNS).eq("id", id).maybeSingle();
   return (data as Vacancy) ?? null;
 });
 

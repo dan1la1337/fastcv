@@ -24,6 +24,10 @@ export interface Vacancy {
   work_format?: WorkFormat | null;
 }
 
+/** Колонки для показа: без служебных (search_tsv, title_key, text_fingerprint, raw_hash) — они только раздувают ответ. */
+// Одной строкой-литералом: по ней supabase-js выводит тип строк ответа
+export const VACANCY_COLUMNS = "id, title, company_name, description, salary_min, salary_max, salary_currency, city, is_remote, contact_type, contact_value, created_at, posted_at, source_type, source_url, stack, employer_id, archived_at, level, direction, work_format";
+
 export type Level = "intern" | "junior" | "middle" | "senior" | "lead";
 export type WorkFormat = "remote" | "hybrid" | "office";
 
@@ -125,12 +129,21 @@ export function stackCondition(terms: string[]): string | null {
   return parts.length ? parts.join(",") : null;
 }
 
-/** Условие полнотекстового поиска по названию и описанию (подстрока, без учёта регистра). */
+/**
+ * Поиск по названию, компании и описанию. Два способа через ИЛИ:
+ * - по словоформам (search_tsv, словарь russian): «разработчики» находит «разработчика»,
+ *   «python разработчик» — вакансии, где есть оба слова;
+ * - по подстроке без учёта регистра: «postgres» находит «PostgreSQL».
+ * Для запросов с «+», «#» или «.» (C++, C#, .NET) — только подстрока: словарь
+ * отбрасывает эти знаки, и «C++» находил бы любое «C».
+ */
 export function searchCondition(search: string): string | null {
-  const s = search.trim();
+  const s = search.trim().slice(0, 200);
   if (!s) return null;
   const like = quoted(`%${s.replace(/[%_\\]/g, "\\$&")}%`);
-  return `title.ilike.${like},description.ilike.${like},company_name.ilike.${like}`;
+  const parts = [`title.ilike.${like}`, `description.ilike.${like}`, `company_name.ilike.${like}`];
+  if (!/[+#.]/.test(s)) parts.unshift(`search_tsv.wfts(russian).${quoted(s)}`);
+  return parts.join(",");
 }
 
 /** Условие по зарплате: верхняя граница вилки не ниже minSalary. */
@@ -150,7 +163,7 @@ export async function fetchVacancyPage(
 ): Promise<{ rows: Vacancy[]; total: number }> {
   let query = supabase
     .from("vacancies")
-    .select("*", { count: "exact" })
+    .select(VACANCY_COLUMNS, { count: "exact" })
     .is("archived_at", null);
 
   if (filters.format) query = query.eq("work_format", filters.format);
