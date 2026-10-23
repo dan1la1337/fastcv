@@ -285,6 +285,8 @@ CHECKS: list[tuple] = [
           on conflict (key) do update set value = excluded.value;
         select value from app_settings where key = 'telegram_update_offset'""",
      "service_role", None, "9"),
+    ("тип нанимателя — только из списка", False,
+     "update vacancies set hiring_type = 'friends' where title = 'Ext'", "service_role", None, None),
     ("у каждого правила RLS есть права на таблицу для его роли", True,
      """select coalesce(string_agg(c.relname || ':' || p.polname || ':' || r::regrole::text, ' '), 'ok')
           from pg_policy p

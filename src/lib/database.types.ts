@@ -334,6 +334,7 @@ export type Database = {
           title_key: string | null
           views_count: number
           work_format: string | null
+          hiring_type: string | null
         }
         Insert: {
           archived_at?: string | null
@@ -365,6 +366,7 @@ export type Database = {
           title_key?: string | null
           views_count?: number
           work_format?: string | null
+          hiring_type?: string | null
         }
         Update: {
           archived_at?: string | null
@@ -396,6 +398,7 @@ export type Database = {
           title_key?: string | null
           views_count?: number
           work_format?: string | null
+          hiring_type?: string | null
         }
         Relationships: [
           {

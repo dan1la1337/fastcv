@@ -4,9 +4,10 @@ import { notFound } from "next/navigation";
 import { cache } from "react";
 import { ArrowLeft, Briefcase, Building2, Calendar, ExternalLink, Globe, MapPin } from "lucide-react";
 import { supabase } from "@/lib/supabase";
-import { VACANCY_COLUMNS, companyHref, formatLabel, formatSalary, levelLabel, type Vacancy } from "@/lib/vacancies";
+import { VACANCY_COLUMNS, formatLabel, formatSalary, levelLabel, type Vacancy } from "@/lib/vacancies";
 import ApplyButton from "@/components/ApplyButton";
 import ViewCounter from "@/components/ViewCounter";
+import CompanyLine from "@/components/CompanyLine";
 
 type Props = { params: Promise<{ id: string }> };
 
@@ -115,11 +116,7 @@ export default async function VacancyPage({ params }: Props) {
               {vacancy.source_type === "internal" ? "Прямой работодатель" : "Telegram"}
             </span>
             <h1 className="text-2xl sm:text-3xl font-bold text-white">{vacancy.title}</h1>
-            {vacancy.company_name && (
-              <p className="text-base text-neutral-300">
-                <Link href={companyHref(vacancy.company_name)} className="hover:text-blue-400">{vacancy.company_name}</Link>
-              </p>
-            )}
+            <CompanyLine vacancy={vacancy} className="text-base text-neutral-300" />
             <p className="text-xl font-semibold text-emerald-400">
               {formatSalary(vacancy.salary_min, vacancy.salary_max, vacancy.salary_currency)}
             </p>

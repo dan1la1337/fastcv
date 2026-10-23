@@ -42,7 +42,7 @@ def job(**overrides) -> VacancyAI:
     data = dict(is_job=True, title="Python Developer", company="Kaspi.kz", description="Описание", salary_min=200000,
                 salary_max=None, salary_currency="RUB", city=None, is_remote=True, contact_type="telegram",
                 contact_value="@hr", stack=["Python", "python", " Django "],
-                level="senior", direction="backend", work_format="remote")
+                level="senior", direction="backend", work_format="remote", hiring_type=None)
     data.update(overrides)
     return VacancyAI(**data)
 
@@ -671,7 +671,7 @@ def test_digest_sends_matches_and_stops_for_blocked_users():
 
 class BackfillStore:
     def __init__(self, rows, cursor=None):
-        self.rows, self.settings, self.companies = rows, {}, {}
+        self.rows, self.settings, self.companies, self.types = rows, {}, {}, {}
         if cursor:
             self.settings[main.BACKFILL_CURSOR_KEY] = cursor
 
@@ -687,6 +687,9 @@ class BackfillStore:
 
     def set_company(self, vacancy_id, company):
         self.companies[vacancy_id] = company
+
+    def set_hiring_type(self, vacancy_id, hiring_type):
+        self.types[vacancy_id] = hiring_type
 
 
 def _backfill_rows():
@@ -761,3 +764,21 @@ def test_backfill_uses_description_when_post_link_is_missing():
     assert main.backfill_companies(store, normalize, limit=5, fetch=must_not_fetch, pause=0) == (1, 1)
     assert "Компания Runforge" in seen[0]
     assert store.companies == {"old": "Runforge"}
+
+
+def test_backfill_fills_hiring_type_but_keeps_existing_company():
+    rows = [{"id": "v", "source_post": None, "title": "Java Developer", "company_name": "VK", "hiring_type": None,
+             "description": "Ищем Java-разработчика на проект нашего клиента, крупного банка.",
+             "created_at": "2026-10-10T10:00:00+00:00"}]
+    store = BackfillStore(rows)
+    checked, filled = main.backfill_companies(store, lambda t: job(company="Банк", hiring_type="outsource"),
+                                              limit=5, fetch=lambda url: "", pause=0)
+    assert (checked, filled) == (1, 0)
+    assert store.companies == {}  # компания уже была — не перезаписываем
+    assert store.types == {"v": "outsource"}
+
+
+def test_hiring_type_saved_with_new_vacancy():
+    store = FakeStore()
+    assert process_post(post(), store, lambda t: job(hiring_type="agency")) == "saved"
+    assert store.inserted[0]["hiring_type"] == "agency"
