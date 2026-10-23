@@ -7,9 +7,9 @@ import { toast } from "@/components/Toaster";
 
 /**
  * Подписка на подборку в Telegram (профиль кандидата).
- * «Подключить» выдаёт одноразовую ссылку на бота; чат привязывает сборщик при
- * следующем запуске (раз в несколько часов) — после этого сюда приходят вакансии
- * с совпадением от 70%.
+ * «Подключить» выдаёт одноразовую ссылку на бота подборок; «Start» в боте сразу
+ * привязывает чат (webhook /api/telegram/webhook). Подборки — вакансии с совпадением
+ * от 70% — рассылает сборщик после каждого обновления.
  */
 export default function TelegramSubscription({ userId }: { userId: string }) {
   const [loaded, setLoaded] = useState(false);
@@ -30,6 +30,25 @@ export default function TelegramSubscription({ userId }: { userId: string }) {
       setLoaded(true);
     });
   }, [userId]);
+
+  // Пока открыта ссылка на бота, раз в 3 секунды проверяем, привязался ли чат (до 3 минут)
+  useEffect(() => {
+    if (!link || linked) return;
+    let tries = 0;
+    const timer = setInterval(async () => {
+      tries += 1;
+      const { data } = await supabase.from("profiles").select("telegram_chat_id, telegram_notify").eq("id", userId).maybeSingle();
+      if (data?.telegram_chat_id) {
+        setLinked(true);
+        setNotify(Boolean(data.telegram_notify));
+        toast("Telegram подключён — подборка включена.", "ok");
+        clearInterval(timer);
+      } else if (tries >= 60) {
+        clearInterval(timer);
+      }
+    }, 3000);
+    return () => clearInterval(timer);
+  }, [link, linked, userId]);
 
   async function connect() {
     setBusy(true);
@@ -90,7 +109,7 @@ export default function TelegramSubscription({ userId }: { userId: string }) {
             <Send className="w-4 h-4" /> Открыть @{bot} и нажать «Start»
           </a>
           <p className="text-xs text-neutral-500">
-            Чат подключится при ближайшем обновлении вакансий (обычно в течение нескольких часов) — бот пришлёт подтверждение.
+            Бот сразу пришлёт подтверждение, а здесь появится переключатель подборки.
           </p>
         </div>
       ) : (

@@ -57,6 +57,8 @@ jobs:
           # Оповещения о сбоях владельцу (бот из @BotFather); без них сборщик просто молчит
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          # Бот подборок для кандидатов (отдельный от оповещений); без него подборки не рассылаются
+          TELEGRAM_JOBS_BOT_TOKEN: ${{ secrets.TELEGRAM_JOBS_BOT_TOKEN }}
           ALERT_TEST: ${{ inputs.test_alert }}
           DAILY_REPORT: ${{ github.event.schedule == '0 6 * * *' || inputs.daily_report == true }}
           BACKFILL_COMPANY: ${{ inputs.backfill_company || 0 }}

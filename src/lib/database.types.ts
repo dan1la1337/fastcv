@@ -430,6 +430,8 @@ export type Database = {
       archive_stale_vacancies: { Args: { days?: number }; Returns: number }
       is_app_admin: { Args: never; Returns: boolean }
       create_telegram_link_code: { Args: never; Returns: string }
+      link_telegram_chat: { Args: { chat: number; code: string }; Returns: boolean }
+      set_telegram_bot: { Args: { username: string }; Returns: undefined }
       consume_ai_quota: {
         Args: { max_calls: number; quota_kind: string; window_seconds: number }
         Returns: Json

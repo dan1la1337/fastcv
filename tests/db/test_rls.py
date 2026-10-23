@@ -276,6 +276,17 @@ CHECKS: list[tuple] = [
          select chat_id::text || ':' || jsonb_array_length(items) from telegram_digest(50)""",
      "service_role", None, "777:1"),
     ("пользователь НЕ вызывает рассылку", False, "select * from telegram_digest(0)", "authenticated", C, None),
+    ("бот НЕ привязывает чат по чужому или неверному коду", True,
+     "select link_telegram_chat('00000000000000000000000000000000', 5)::text || link_telegram_chat('abc', 5)::text",
+     "anon", None, "falsefalse"),
+    ("бот привязывает чат по коду кандидата, код одноразовый", True,
+     f"""select from set_config('t.code', (select telegram_link_code from profiles where id = '{C}'), false);
+         set role anon;
+         select link_telegram_chat(current_setting('t.code'), 555)::text || link_telegram_chat(current_setting('t.code'), 556)::text;""",
+     "postgres", None, "truefalse"),
+    ("привязка записала чат и включила подборку", True,
+     f"select telegram_chat_id::text || ':' || telegram_notify::text from profiles where id = '{C}'", "postgres", None, "555:true"),
+    ("не администратор НЕ меняет имя бота", False, "select set_telegram_bot('evil_bot')", "authenticated", C, None),
     ("аноним читает имя бота, но не другие настройки", True,
      """insert into app_settings (key, value) values ('telegram_bot_username', 'fastcv_bot'), ('telegram_update_offset', '5') on conflict do nothing;
         set role anon; select string_agg(key, ',') from app_settings""",

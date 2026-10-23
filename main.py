@@ -409,13 +409,6 @@ class Store:
         self.db.table("app_settings").upsert({"key": key, "value": value,
                                                "updated_at": datetime.now(timezone.utc).isoformat()}).execute()
 
-    def link_telegram(self, code: str, chat_id: int) -> bool:
-        """Привязать чат к кандидату по одноразовому коду из профиля."""
-        rows = (self.db.table("profiles")
-                .update({"telegram_chat_id": chat_id, "telegram_link_code": None, "telegram_notify": True})
-                .eq("telegram_link_code", code).eq("role", "candidate").execute().data)
-        return bool(rows)
-
     def telegram_digest(self, min_score: int) -> list[dict]:
         return self.db.rpc("telegram_digest", {"min_score": min_score}).execute().data or []
 
@@ -696,7 +689,6 @@ def notify(text: str, post: Callable[..., object] = requests.post) -> bool:
 
 SITE_URL = "https://fastcv.ru"
 DIGEST_MIN_SCORE = 70  # не меньше этого совпадения — иначе рассылка превращается в спам
-_START = re.compile(r"^/start(?:@\w+)?\s+([A-Za-z0-9]{16,64})\s*$")
 
 
 class TelegramBot:
@@ -723,39 +715,6 @@ class TelegramError(Exception):
     def __init__(self, code: int, description: str):
         super().__init__(f"{code} {description}")
         self.code = code
-
-
-def process_bot_updates(store: Store, bot: TelegramBot) -> int:
-    """Читает новые сообщения боту и привязывает чаты по коду /start <код>.
-    Вебхук не нужен: сборщик забирает сообщения раз в несколько часов."""
-    me = bot.call("getMe", {})
-    if me.get("username") and store.get_setting("telegram_bot_username") != me["username"]:
-        store.set_setting("telegram_bot_username", me["username"])
-
-    offset = int(store.get_setting("telegram_update_offset") or 0)
-    updates = bot.call("getUpdates", {"offset": offset, "timeout": 0, "allowed_updates": ["message"]}) or []
-    linked = 0
-    for update in updates:
-        offset = max(offset, int(update["update_id"]) + 1)
-        message = update.get("message") or {}
-        chat_id = (message.get("chat") or {}).get("id")
-        text = (message.get("text") or "").strip()
-        if not chat_id or (message.get("chat") or {}).get("type") != "private":
-            continue
-        match = _START.match(text)
-        try:
-            if match and store.link_telegram(match.group(1), chat_id):
-                linked += 1
-                bot.send(chat_id, "✅ Готово! Сюда будут приходить новые вакансии, которые подходят вам "
-                                  f"на {DIGEST_MIN_SCORE}% и больше. Отключить можно в профиле на fastcv.ru.")
-            elif text.startswith("/start"):
-                bot.send(chat_id, "Чтобы получать подходящие вакансии, нажмите «Подключить Telegram» "
-                                  "в профиле на fastcv.ru — ссылка оттуда привяжет этот чат.")
-        except TelegramError:
-            continue
-    if updates:
-        store.set_setting("telegram_update_offset", str(offset))
-    return linked
 
 
 def digest_text(items: list[dict]) -> str:
@@ -951,15 +910,15 @@ def main() -> None:
     text = alert_text(summary)
     if text:
         notify(text)
-    token = env("TELEGRAM_BOT_TOKEN")
-    if token:
+    # Подборки кандидатам — отдельным ботом. Чаты к нему привязывает сайт (webhook),
+    # бот оповещений владельца (TELEGRAM_BOT_TOKEN) с кандидатами не общается.
+    jobs_token = env("TELEGRAM_JOBS_BOT_TOKEN")
+    if jobs_token:
         try:
-            bot = TelegramBot(token)
-            linked = process_bot_updates(store, bot)
-            sent = send_digests(store, bot)
-            print(f"Telegram: привязано чатов {linked}, отправлено подборок {sent}")
+            sent = send_digests(store, TelegramBot(jobs_token))
+            print(f"Telegram: отправлено подборок {sent}")
         except Exception as e:  # подписка не должна ронять сбор
-            print(f"⚠️ Подписка в Telegram: {type(e).__name__}: {str(e)[:200]}")
+            print(f"⚠️ Подборки в Telegram: {type(e).__name__}: {str(e)[:200]}")
     backfill = min(int(float(env("BACKFILL_COMPANY") or 0)), 600)
     if backfill > 0:
         try:

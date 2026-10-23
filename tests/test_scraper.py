@@ -620,12 +620,6 @@ class FakeTelegramStore:
     def set_setting(self, key, value):
         self.settings[key] = value
 
-    def link_telegram(self, code, chat_id):
-        user = self.codes.pop(code, None)
-        if user:
-            self.linked[user] = chat_id
-        return bool(user)
-
     def telegram_digest(self, min_score):
         return self.digest
 
@@ -638,20 +632,6 @@ class FakeTelegramStore:
 
 def message(update_id, chat_id, text, chat_type="private"):
     return {"update_id": update_id, "message": {"chat": {"id": chat_id, "type": chat_type}, "text": text}}
-
-
-def test_bot_links_chat_by_start_code_and_remembers_offset():
-    code = "a" * 32
-    store = FakeTelegramStore(codes={code: "user-1"})
-    bot = FakeBot([message(10, 555, f"/start {code}"), message(11, 556, "/start wrongcode0000000000"),
-                   message(12, 557, f"/start {code}", chat_type="group")])
-    assert main.process_bot_updates(store, bot) == 1
-    assert store.linked == {"user-1": 555}
-    assert store.settings == {"telegram_bot_username": "fastcv_bot", "telegram_update_offset": "13"}
-    assert [c for c, _ in bot.sent] == [555, 556]  # подтверждение и подсказка; группы игнорируем
-    # Следующий запуск не обрабатывает те же сообщения второй раз
-    bot.sent.clear()
-    assert main.process_bot_updates(store, bot) == 0 and not bot.sent
 
 
 def test_digest_sends_matches_and_stops_for_blocked_users():
