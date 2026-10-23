@@ -15,6 +15,10 @@ on:
         description: 'После сбора прислать сводку за сутки'
         type: boolean
         default: false
+      backfill_company:
+        description: 'После сбора дозаполнить компанию у N старых вакансий (0 — нет, до 200 за запуск)'
+        type: number
+        default: 0
 
 # Не запускать два сборщика одновременно: второй дождётся первого
 concurrency:
@@ -55,6 +59,7 @@ jobs:
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
           ALERT_TEST: ${{ inputs.test_alert }}
           DAILY_REPORT: ${{ github.event.schedule == '0 6 * * *' || inputs.daily_report == true }}
+          BACKFILL_COMPANY: ${{ inputs.backfill_company || 0 }}
         # -u: вывод сразу попадает в лог Actions, а не копится в буфере до конца
         run: python -u main.py
 

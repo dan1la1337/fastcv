@@ -664,3 +664,73 @@ def test_digest_sends_matches_and_stops_for_blocked_users():
     text = bot.sent[0][1]
     assert "Python Developer — Acme · совпадение 91%" in text
     assert "https://fastcv.ru/vacancy/v1" in text
+
+
+# --- дозаполнение компании у старых вакансий ------------------------------------
+
+
+class BackfillStore:
+    def __init__(self, rows, cursor=None):
+        self.rows, self.settings, self.companies = rows, {}, {}
+        if cursor:
+            self.settings[main.BACKFILL_CURSOR_KEY] = cursor
+
+    def get_setting(self, key):
+        return self.settings.get(key)
+
+    def set_setting(self, key, value):
+        self.settings[key] = value
+
+    def vacancies_without_company(self, before, limit):
+        rows = [r for r in self.rows if not before or r["created_at"] < before]
+        return sorted(rows, key=lambda r: r["created_at"], reverse=True)[:limit]
+
+    def set_company(self, vacancy_id, company):
+        self.companies[vacancy_id] = company
+
+
+def _backfill_rows():
+    return [
+        {"id": "a", "source_post": "jobs/12", "created_at": "2026-10-20T10:00:00+00:00"},
+        {"id": "b", "source_post": "jobs/11", "created_at": "2026-10-19T10:00:00+00:00"},
+        {"id": "c", "source_post": "jobs/10", "created_at": "2026-10-18T10:00:00+00:00"},
+    ]
+
+
+def test_backfill_fills_company_from_original_post_and_moves_cursor():
+    store = BackfillStore(_backfill_rows())
+    urls = []
+
+    def fetch(url):
+        urls.append(url)
+        return page("jobs", [8, 9, 10, 11, 12])
+
+    def normalize(text):
+        return job(company="Runforge" if "пост 12" in text else None)
+
+    checked, filled = main.backfill_companies(store, normalize, limit=2, fetch=fetch, pause=0)
+    assert (checked, filled) == (2, 1)
+    assert store.companies == {"a": "Runforge"}
+    assert urls[0] == "https://t.me/s/jobs?before=13"
+    # Следующий запуск продолжит со старых, не возвращаясь к b (у поста нет компании)
+    assert store.settings[main.BACKFILL_CURSOR_KEY] == "2026-10-19T10:00:00+00:00"
+    checked, _ = main.backfill_companies(store, normalize, limit=5, fetch=fetch, pause=0)
+    assert checked == 1
+
+
+def test_backfill_skips_missing_post_and_stops_on_ai_outage():
+    store = BackfillStore(_backfill_rows())
+
+    def fetch(url):
+        return page("jobs", [1, 2])  # поста уже нет в ленте
+
+    checked, filled = main.backfill_companies(store, lambda t: job(company="X"), limit=1, fetch=fetch, pause=0)
+    assert (checked, filled) == (1, 0)
+
+    def down(text):
+        raise AIUnavailable("503")
+
+    with pytest.raises(AIUnavailable):
+        main.backfill_companies(store, down, limit=5, fetch=lambda url: page("jobs", [10, 11]), pause=0)
+    # Курсор не ушёл дальше вакансии, на которой ИИ не ответил
+    assert store.settings[main.BACKFILL_CURSOR_KEY] == "2026-10-20T10:00:00+00:00"

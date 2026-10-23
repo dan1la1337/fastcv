@@ -423,6 +423,17 @@ class Store:
         result = self.db.rpc("archive_stale_vacancies", {"days": days}).execute()
         return int(result.data or 0)
 
+    def vacancies_without_company(self, before: Optional[str], limit: int) -> list[dict]:
+        """Активные вакансии из Telegram без компании, от новых к старым (до курсора before)."""
+        q = (self.db.table("vacancies").select("id, source_post, created_at")
+             .is_("archived_at", "null").is_("company_name", "null").not_.is_("source_post", "null"))
+        if before:
+            q = q.lt("created_at", before)
+        return q.order("created_at", desc=True).limit(limit).execute().data or []
+
+    def set_company(self, vacancy_id: str, company: str) -> None:
+        self.db.table("vacancies").update({"company_name": company}).eq("id", vacancy_id).is_("company_name", "null").execute()
+
 
 # ---------------------------------------------------------------------------
 # Обработка
@@ -757,6 +768,54 @@ def send_digests(store: Store, bot: TelegramBot) -> int:
     return sent
 
 
+# ---------------------------------------------------------------------------
+# Дозаполнение компании у старых вакансий
+# ---------------------------------------------------------------------------
+
+BACKFILL_CURSOR_KEY = "company_backfill_cursor"
+
+
+def find_post(channel: str, post_id: int, fetch: Callable[[str], str] = fetch_page) -> Optional[Post]:
+    """Текст одного поста: страница ленты, которая заканчивается на нём."""
+    posts, _ = parse_channel_page(fetch(f"https://t.me/s/{channel}?before={post_id + 1}"), channel)
+    return next((p for p in posts if p.post_id == post_id), None)
+
+
+def backfill_companies(
+    store: Store,
+    normalize: Callable[[str], VacancyAI],
+    limit: int,
+    fetch: Callable[[str], str] = fetch_page,
+    pause: float = 1.0,
+) -> tuple[int, int]:
+    """Поле «компания» появилось 22.10.2026: у вакансий старше его нет. Берём исходный пост,
+    просим ИИ разобрать его ещё раз и записываем только компанию (остальные поля не трогаем).
+    Идёт от новых к старым; курсор в app_settings, чтобы следующий запуск продолжил дальше,
+    а не разбирал заново посты, где компании нет. Возвращает (проверено, заполнено)."""
+    cursor = store.get_setting(BACKFILL_CURSOR_KEY)
+    rows = store.vacancies_without_company(cursor, limit)
+    checked = filled = 0
+    for row in rows:
+        channel, _, number = (row.get("source_post") or "").rpartition("/")
+        if channel and number.isdigit():
+            try:
+                post = find_post(channel, int(number), fetch)
+            except (requests.RequestException, ChannelUnavailable) as e:
+                print(f"⚠️ @{channel}/{number}: пост недоступен ({type(e).__name__})")
+                post = None
+            if post and len(post.text) >= MIN_TEXT_LEN:
+                vacancy = normalize(post.text)  # AIUnavailable пробрасывается: курсор не сдвинется
+                company = (vacancy.company or "").strip()[:200]
+                if company:
+                    store.set_company(row["id"], company)
+                    filled += 1
+            checked += 1
+            time.sleep(pause)
+        store.set_setting(BACKFILL_CURSOR_KEY, row["created_at"])
+    return checked, filled
+
+
+
 def run(store: Store, normalize: Callable[[str], VacancyAI]) -> RunSummary:
     channels = store.active_channels()
     print(f"Активных каналов: {len(channels)}")
@@ -881,6 +940,13 @@ def main() -> None:
             print(f"Telegram: привязано чатов {linked}, отправлено подборок {sent}")
         except Exception as e:  # подписка не должна ронять сбор
             print(f"⚠️ Подписка в Telegram: {type(e).__name__}: {str(e)[:200]}")
+    backfill = min(int(float(env("BACKFILL_COMPANY") or 0)), 200)
+    if backfill > 0:
+        try:
+            checked, filled = backfill_companies(store, make_gemini_normalizer(gemini_key, models), backfill)
+            print(f"Компании: проверено вакансий {checked}, заполнено {filled}")
+        except Exception as e:  # дозаполнение не должно ронять успешный сбор
+            print(f"⚠️ Дозаполнение компаний остановлено: {type(e).__name__}: {str(e)[:200]}")
     if (os.getenv("DAILY_REPORT") or "").lower() == "true":
         try:
             notify(daily_report_text(store.daily_stats(), summary))
