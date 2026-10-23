@@ -128,12 +128,13 @@ export const DEFAULT_FILTERS: VacancyFilters = {
   stack: [],
 };
 
-export type Area = "it" | "other";
+export type Area = "it" | "other" | "work";
 
-/** Два раздела ленты (план 2.5.1): у FastCV и разработка, и digital — показываем их честно раздельно. */
+/** Разделы ленты (план 2.5.1): у FastCV и разработка, и digital — показываем их честно раздельно. */
 export const AREAS: { id: Area; label: string; short: string }[] = [
   { id: "it", label: "Разработка и данные", short: "Разработка" },
   { id: "other", label: "Продукт, дизайн и digital", short: "Digital" },
+  { id: "work", label: "Другие профессии", short: "Профессии" },
 ];
 
 export interface Direction {
@@ -165,7 +166,16 @@ export const DIRECTIONS: Direction[] = [
   { id: "support", label: "Поддержка", group: "other" },
   { id: "finance", label: "Финансы", group: "other" },
   { id: "education", label: "Образование", group: "other" },
-  { id: "other", label: "Другое", group: "other" },
+  { id: "management", label: "Руководители", group: "work" },
+  { id: "office", label: "Офис и администрирование", group: "work" },
+  { id: "legal", label: "Юристы", group: "work" },
+  { id: "medicine", label: "Медицина и фармацевтика", group: "work" },
+  { id: "logistics", label: "Логистика, склад, водители", group: "work" },
+  { id: "construction", label: "Строительство и недвижимость", group: "work" },
+  { id: "production", label: "Производство и рабочие профессии", group: "work" },
+  { id: "hospitality", label: "Рестораны, гостиницы, туризм", group: "work" },
+  { id: "government", label: "Госслужба и охрана", group: "work" },
+  { id: "other", label: "Другое", group: "work" },
 ];
 
 export const LEVELS: { id: Level; label: string }[] = [

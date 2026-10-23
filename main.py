@@ -161,7 +161,8 @@ Level = Literal["intern", "junior", "middle", "senior", "lead"]
 Direction = Literal[
     "backend", "frontend", "fullstack", "mobile", "qa", "devops", "data_ml", "analytics", "security",
     "gamedev", "design", "product", "marketing", "content", "sales", "hr", "support", "finance",
-    "education", "other",
+    "education", "legal", "medicine", "logistics", "construction", "production", "hospitality",
+    "government", "office", "management", "other",
 ]
 WorkFormat = Literal["office", "hybrid", "remote"]
 HiringType = Literal["product", "outsource", "agency"]
@@ -230,7 +231,12 @@ PROMPT = """Ты нормализатор вакансий для доски о�
 - direction: одно из backend, frontend, fullstack, mobile, qa, devops, data_ml (data science,
   ML, AI, data engineering), analytics, security, gamedev, design, product (продакт- и
   проджект-менеджмент), marketing (маркетинг, SMM, PR, реклама), content (редакторы,
-  авторы, продюсеры, видео), sales, hr, support, finance, education, other;
+  авторы, продюсеры, видео), sales (включая продавцов и кассиров), hr, support, finance, education,
+  legal (юристы), medicine (врачи, медсёстры, фармацевты), logistics (водители, курьеры, склад),
+  construction (строительство, недвижимость), production (производство, рабочие профессии),
+  hospitality (рестораны, гостиницы, туризм), government (госслужба, силовые структуры, охрана),
+  office (секретари, администраторы, делопроизводство), management (генеральные и исполнительные
+  директора), other;
 - scope_note: только если в одной вакансии явно смешаны обязанности нескольких разных ролей
   (например, бэкенд-разработчик должен ещё с нуля настраивать Kubernetes и верстать интерфейсы,
   или тестировщик одновременно DevOps и аналитик) — одно короткое предложение по-русски,

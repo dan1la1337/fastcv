@@ -32,11 +32,19 @@ REGION_CODES = [f"{n:02d}00000000000" for n in range(1, 100)]
 # Сфера вакансии в «Работе России» → направление FastCV. ИТ-сферу не сопоставляем:
 # направление определит база по названию («Программист» → backend). Остальное — по
 # сфере, иначе «Полицейский мобильного взвода» попадал в Mobile, а охранник — в ИБ.
-_SPHERES = [("информационные технологии", None), ("маркетинг", "marketing"), ("реклам", "marketing"),
+_SPHERES = [("информационные технологии", None), ("информационная безопасность", "security"), ("маркетинг", "marketing"), ("реклам", "marketing"),
             ("продаж", "sales"), ("бухгалтер", "finance"), ("финанс", "finance"), ("банк", "finance"),
             ("страхован", "finance"), ("образовани", "education"), ("наук", "education"),
             ("персонал", "hr"), ("кадр", "hr"), ("сми", "content"), ("издатель", "content"),
-            ("искусств", "content"), ("культур", "content")]
+            ("искусств", "content"), ("культур", "content"), ("юрист", "legal"), ("юриспруд", "legal"),
+            ("здравоохран", "medicine"), ("медицин", "medicine"), ("фармац", "medicine"),
+            ("транспорт", "logistics"), ("логист", "logistics"), ("строительств", "construction"),
+            ("недвижим", "construction"), ("производств", "production"), ("промышлен", "production"),
+            ("добыва", "production"), ("жкх", "production"), ("сельск", "production"),
+            ("не требующ", "production"), ("туризм", "hospitality"), ("гостиниц", "hospitality"),
+            ("ресторан", "hospitality"), ("государствен", "government"), ("безопасност", "government"),
+            ("силов", "government"), ("административ", "office"), ("секретар", "office"),
+            ("высший менеджмент", "management")]
 
 _TAG = re.compile(r"<[^>]+>")
 _SPACE = re.compile(r"\s+")
@@ -81,7 +89,7 @@ def direction_of(v: dict) -> Optional[str]:
     for key, direction in _SPHERES:
         if key in sphere:
             return direction
-    return "other"
+    return None     # сфера без пары — направление определит база по названию
 
 
 def map_vacancy(v: dict) -> Optional[dict]:
