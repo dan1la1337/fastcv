@@ -425,8 +425,8 @@ class Store:
 
     def vacancies_without_company(self, before: Optional[str], limit: int) -> list[dict]:
         """Активные вакансии из Telegram без компании, от новых к старым (до курсора before)."""
-        q = (self.db.table("vacancies").select("id, source_post, created_at")
-             .is_("archived_at", "null").is_("company_name", "null").not_.is_("source_post", "null"))
+        q = (self.db.table("vacancies").select("id, source_post, title, description, created_at")
+             .is_("archived_at", "null").is_("company_name", "null").eq("source_type", "external"))
         if before:
             q = q.lt("created_at", before)
         return q.order("created_at", desc=True).limit(limit).execute().data or []
@@ -790,6 +790,7 @@ def backfill_companies(
 ) -> tuple[int, int]:
     """Поле «компания» появилось 22.10.2026: у вакансий старше его нет. Берём исходный пост,
     просим ИИ разобрать его ещё раз и записываем только компанию (остальные поля не трогаем).
+    У вакансий от старого сборщика нет ссылки на пост — для них разбираем заголовок и описание.
     Идёт от новых к старым; курсор в app_settings, чтобы следующий запуск продолжил дальше,
     а не разбирал заново посты, где компании нет. Возвращает (проверено, заполнено)."""
     cursor = store.get_setting(BACKFILL_CURSOR_KEY)
@@ -797,20 +798,23 @@ def backfill_companies(
     checked = filled = 0
     for row in rows:
         channel, _, number = (row.get("source_post") or "").rpartition("/")
+        text = None
         if channel and number.isdigit():
             try:
                 post = find_post(channel, int(number), fetch)
+                text = post.text if post else None
             except (requests.RequestException, ChannelUnavailable) as e:
                 print(f"⚠️ @{channel}/{number}: пост недоступен ({type(e).__name__})")
-                post = None
-            if post and len(post.text) >= MIN_TEXT_LEN:
-                vacancy = normalize(post.text)  # AIUnavailable пробрасывается: курсор не сдвинется
-                company = (vacancy.company or "").strip()[:200]
-                if company:
-                    store.set_company(row["id"], company)
-                    filled += 1
-            checked += 1
-            time.sleep(pause)
+            time.sleep(pause)  # бережём Telegram: не чаще запроса в секунду
+        if not text:
+            text = f"{row.get('title') or ''}\n\n{row.get('description') or ''}".strip()
+        if len(text) >= MIN_TEXT_LEN:
+            vacancy = normalize(text)  # AIUnavailable пробрасывается: курсор не сдвинется
+            company = (vacancy.company or "").strip()[:200]
+            if company:
+                store.set_company(row["id"], company)
+                filled += 1
+        checked += 1
         store.set_setting(BACKFILL_CURSOR_KEY, row["created_at"])
     return checked, filled
 
@@ -940,7 +944,7 @@ def main() -> None:
             print(f"Telegram: привязано чатов {linked}, отправлено подборок {sent}")
         except Exception as e:  # подписка не должна ронять сбор
             print(f"⚠️ Подписка в Telegram: {type(e).__name__}: {str(e)[:200]}")
-    backfill = min(int(float(env("BACKFILL_COMPANY") or 0)), 200)
+    backfill = min(int(float(env("BACKFILL_COMPANY") or 0)), 600)
     if backfill > 0:
         try:
             checked, filled = backfill_companies(store, make_gemini_normalizer(gemini_key, models), backfill)

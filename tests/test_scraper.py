@@ -724,8 +724,15 @@ def test_backfill_skips_missing_post_and_stops_on_ai_outage():
     def fetch(url):
         return page("jobs", [1, 2])  # поста уже нет в ленте
 
-    checked, filled = main.backfill_companies(store, lambda t: job(company="X"), limit=1, fetch=fetch, pause=0)
+    seen = []
+
+    def from_description(text):
+        seen.append(text)
+        return job(company=None)
+
+    checked, filled = main.backfill_companies(store, from_description, limit=1, fetch=fetch, pause=0)
     assert (checked, filled) == (1, 0)
+    assert seen == []  # у строки нет описания и пост не найден — ИИ не вызывается
 
     def down(text):
         raise AIUnavailable("503")
@@ -734,3 +741,23 @@ def test_backfill_skips_missing_post_and_stops_on_ai_outage():
         main.backfill_companies(store, down, limit=5, fetch=lambda url: page("jobs", [10, 11]), pause=0)
     # Курсор не ушёл дальше вакансии, на которой ИИ не ответил
     assert store.settings[main.BACKFILL_CURSOR_KEY] == "2026-10-20T10:00:00+00:00"
+
+
+def test_backfill_uses_description_when_post_link_is_missing():
+    rows = [{"id": "old", "source_post": None, "title": "Junior Frontend",
+             "description": "Компания Runforge ищет Junior Frontend-разработчика: React, удалённо.",
+             "created_at": "2026-10-01T10:00:00+00:00"}]
+    store = BackfillStore(rows)
+
+    def must_not_fetch(url):
+        raise AssertionError("без ссылки на пост в Telegram не ходим")
+
+    seen = []
+
+    def normalize(text):
+        seen.append(text)
+        return job(company="Runforge")
+
+    assert main.backfill_companies(store, normalize, limit=5, fetch=must_not_fetch, pause=0) == (1, 1)
+    assert "Компания Runforge" in seen[0]
+    assert store.companies == {"old": "Runforge"}

@@ -16,7 +16,7 @@ on:
         type: boolean
         default: false
       backfill_company:
-        description: 'После сбора дозаполнить компанию у N старых вакансий (0 — нет, до 200 за запуск)'
+        description: 'После сбора дозаполнить компанию у N старых вакансий (0 — нет, до 600 за запуск)'
         type: number
         default: 0
 
