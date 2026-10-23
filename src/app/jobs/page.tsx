@@ -8,9 +8,9 @@ import { AREAS, DIRECTIONS, plural, VACANCY_FORMS, type Direction } from "@/lib/
 export const revalidate = 1800;
 
 export const metadata: Metadata = {
-  title: "Вакансии по направлениям — разработка, продукт, дизайн и digital | FastCV",
+  title: "Вакансии по направлениям — IT, digital и другие профессии | FastCV",
   description:
-    "Свежие вакансии из Telegram-каналов и от работодателей по направлениям: backend, frontend, мобильная разработка, QA, DevOps, Data/ML, аналитика и другие.",
+    "Свежие вакансии из Telegram-каналов, «Работы России» и от работодателей по направлениям: разработка и данные, маркетинг и дизайн, продажи, медицина, логистика, производство и другие.",
   alternates: { canonical: "/jobs" },
 };
 
@@ -23,7 +23,9 @@ async function countByDirection(): Promise<Record<string, number>> {
 }
 
 function Section({ title, items, counts }: { title: string; items: Direction[]; counts: Record<string, number> }) {
-  const sorted = [...items].sort((a, b) => (counts[b.id] ?? 0) - (counts[a.id] ?? 0));
+  // По числу вакансий, но «Другое» всегда последним
+  const sorted = [...items].sort((a, b) =>
+    Number(a.id === "other") - Number(b.id === "other") || (counts[b.id] ?? 0) - (counts[a.id] ?? 0));
   return (
     <section className="space-y-3">
       <h2 className="text-sm font-semibold text-neutral-400">{title}</h2>
@@ -60,7 +62,7 @@ export default async function JobsIndexPage() {
         <header className="space-y-2">
           <h1 className="text-2xl sm:text-3xl font-bold">Вакансии по направлениям</h1>
           <p className="text-sm text-neutral-400">
-            {total} {plural(total, VACANCY_FORMS)} из Telegram-каналов и от работодателей, обновляется несколько раз в день.
+            {total} {plural(total, VACANCY_FORMS)} из Telegram-каналов, «Работы России» и от работодателей, обновляется каждые 2 часа.
           </p>
         </header>
         {AREAS.map(a => (
