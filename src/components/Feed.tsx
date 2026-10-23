@@ -15,6 +15,8 @@ import type { User } from "@supabase/supabase-js";
 import Link from "next/link";
 import SmartApply from "@/components/SmartApply";
 import CompanyLine from "@/components/CompanyLine";
+import { estimateSalary, fetchSalaryBenchmarks, type SalaryBenchmark } from "@/lib/salary";
+import SalaryEstimate from "@/components/SalaryEstimate";
 
 /**
  * Лента вакансий с фильтрами. Первую страницу без фильтров сервер отдаёт сразу
@@ -41,6 +43,11 @@ export default function Feed({ initialRows, initialTotal }: { initialRows: Vacan
   const [hiddenList, setHiddenList] = useState<Vacancy[]>([]);
   const [savedLoading, setSavedLoading] = useState(false);
   const [matches, setMatches] = useState<Record<string, Match>>({});
+  // Справочник для оценки скрытой зарплаты: десятки строк, грузим один раз
+  const [benchmarks, setBenchmarks] = useState<SalaryBenchmark[]>([]);
+  useEffect(() => {
+    fetchSalaryBenchmarks().then(setBenchmarks);
+  }, []);
   const requestedMatches = useRef(new Set<string>());
   const [recommended, setRecommended] = useState<Vacancy[]>([]);
   const [recPage, setRecPage] = useState(0);
@@ -306,7 +313,13 @@ export default function Feed({ initialRows, initialTotal }: { initialRows: Vacan
               <Link href={`/vacancy/${item.id}`} className="hover:text-blue-400 transition-colors">{item.title}</Link>
             </h2>
             <CompanyLine vacancy={item} className="text-sm text-neutral-400 mt-0.5" />
-            <p className="text-base font-semibold text-emerald-400 mt-1">{formatSalary(item.salary_min, item.salary_max, item.salary_currency)}</p>
+            <p className="text-base font-semibold text-emerald-400 mt-1 flex flex-wrap items-center gap-2">
+              {formatSalary(item.salary_min, item.salary_max, item.salary_currency)}
+              {(() => {
+                const estimate = estimateSalary(item, benchmarks);
+                return estimate && <SalaryEstimate estimate={estimate} className="text-xs" />;
+              })()}
+            </p>
             <p className="flex flex-wrap items-center gap-3 text-xs text-neutral-400 mt-2">
               {match && (
                 <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-md border font-semibold ${matchTone(match.score)}`}
