@@ -9,8 +9,8 @@ jobs:
   scraper:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
         with:
           python-version: '3.11'
           cache: pip
@@ -39,8 +39,8 @@ jobs:
       PGPASSWORD: postgres
       FASTCV_DB_TESTS: 1
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
         with:
           python-version: '3.11'
       - name: Install pytest
@@ -56,10 +56,10 @@ jobs:
       NEXT_PUBLIC_SUPABASE_ANON_KEY: sb_publishable_ci_placeholder
       NEXT_TELEMETRY_DISABLED: 1
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
         with:
-          node-version: 20
+          node-version: 22
           cache: npm
       - run: npm ci
       - name: Lint
@@ -80,10 +80,10 @@ jobs:
       NEXT_PUBLIC_SUPABASE_ANON_KEY: sb_publishable_tK5iei3B-RnmUCRmuWZBzQ_7DykeHGP
       NEXT_TELEMETRY_DISABLED: 1
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
         with:
-          node-version: 20
+          node-version: 22
           cache: npm
       - run: npm ci
       - name: Install Chromium
@@ -94,7 +94,7 @@ jobs:
         run: npx playwright test
       - name: Upload traces of failed tests
         if: failure()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: playwright-traces
           path: test-results/
