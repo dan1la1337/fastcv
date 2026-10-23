@@ -470,6 +470,18 @@ class Store:
             fields["level"] = level
         self.db.table("vacancies").update(fields).eq("id", vacancy_id).is_("experience_min", "null").execute()
 
+    def count_trudvsem(self) -> int:
+        return (self.db.table("vacancies").select("id", count="exact", head=True)
+                .like("source_post", "trudvsem/%").execute().count or 0)
+
+    def upsert_trudvsem(self, rows: list[dict]) -> int:
+        """Новые вакансии «Работы России» добавляются, изменённые — обновляются по source_post."""
+        self.db.table("vacancies").upsert(rows, on_conflict="source_post").execute()
+        return len(rows)
+
+    def prune_trudvsem(self, keep_days: int) -> dict:
+        return self.db.rpc("prune_trudvsem", {"keep_days": keep_days}).execute().data or {}
+
     def set_hiring_type(self, vacancy_id: str, hiring_type: str) -> None:
         self.db.table("vacancies").update({"hiring_type": hiring_type}).eq("id", vacancy_id).is_("hiring_type", "null").execute()
 
@@ -979,6 +991,13 @@ def main() -> None:
             print(f"Telegram: отправлено подборок {sent}")
         except Exception as e:  # подписка не должна ронять сбор
             print(f"⚠️ Подборки в Telegram: {type(e).__name__}: {str(e)[:200]}")
+    # «Работа России»: открытые данные без ИИ. Отключается переменной TRUDVSEM=off
+    if (env("TRUDVSEM") or "on").lower() != "off":
+        try:
+            from trudvsem import import_trudvsem
+            print(f"Работа России: {import_trudvsem(store)}")
+        except Exception as e:  # импорт не должен ронять сбор из Telegram
+            print(f"⚠️ Работа России: {type(e).__name__}: {str(e)[:200]}")
     backfill = min(int(float(env("BACKFILL_COMPANY") or 0)), 600)
     if backfill > 0:
         try:

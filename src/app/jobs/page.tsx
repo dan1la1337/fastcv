@@ -15,16 +15,10 @@ export const metadata: Metadata = {
 };
 
 async function countByDirection(): Promise<Record<string, number>> {
-  const { data } = await supabase
-    .from("vacancies")
-    .select("direction")
-    .is("archived_at", null)
-    .not("direction", "is", null)
-    .limit(5000);
+  // Агрегат в базе: вакансий десятки тысяч, читать строки на клиент нельзя
+  const { data } = await supabase.from("direction_counts").select("direction, vacancies");
   const counts: Record<string, number> = {};
-  for (const row of data ?? []) {
-    if (row.direction) counts[row.direction] = (counts[row.direction] ?? 0) + 1;
-  }
+  for (const row of data ?? []) counts[row.direction] = row.vacancies;
   return counts;
 }
 
