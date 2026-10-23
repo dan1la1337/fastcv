@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
 import { createSupabaseServerClient } from "@/lib/supabase-server";
 import { DIRECTIONS, plural } from "@/lib/vacancies";
+import TelegramBotSetup from "@/components/TelegramBotSetup";
 
 export const metadata: Metadata = { title: "Метрики — FastCV", robots: { index: false } };
 
@@ -43,6 +44,7 @@ export default async function AdminPage() {
   // Не администратор — страницы для него не существует
   if (error || !data) notFound();
   const m = data as unknown as Metrics;
+  const { data: botSetting } = await supabase.from("app_settings").select("value").eq("key", "telegram_bot_username").maybeSingle();
 
   const days = m.vacancies_by_day ?? [];
   const totals = days.map(d => d.external + d.internal);
@@ -161,6 +163,7 @@ export default async function AdminPage() {
             ) : <p className="text-xs text-neutral-500">За неделю вакансий из каналов не было.</p>}
           </section>
         </div>
+        <TelegramBotSetup current={botSetting?.value ?? null} />
       </div>
     </main>
   );
