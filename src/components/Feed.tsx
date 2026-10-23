@@ -3,8 +3,8 @@
 import { useEffect, useRef, useState } from "react";
 import { supabase } from "@/lib/supabase";
 import {
-  DEFAULT_FILTERS, DIRECTIONS, LEVELS, WORK_FORMATS, fetchVacancyPage, formatLabel, formatSalary, levelLabel, plural, PAGE_SIZE,
-  VACANCY_FORMS, type Level, type Vacancy, type VacancyFilters, type WorkFormat,
+  AREAS, DEFAULT_FILTERS, DIRECTIONS, LEVELS, WORK_FORMATS, fetchVacancyPage, formatLabel, formatSalary, levelLabel, plural, PAGE_SIZE,
+  VACANCY_FORMS, type Area, type Level, type Vacancy, type VacancyFilters, type WorkFormat,
 } from "@/lib/vacancies";
 import { Search, MapPin, ChevronDown, ChevronRight, Sparkles, Loader2, ExternalLink, Globe, SlidersHorizontal, Briefcase, Building2, Target, Bookmark, BookmarkCheck, EyeOff, Undo2 } from "lucide-react";
 import { fetchMarked, fetchMarks, setMark, type MarkKind } from "@/lib/marks";
@@ -55,6 +55,7 @@ export default function Feed({ initialRows, initialTotal }: { initialRows: Vacan
   const [city, setCity] = useState("");
 
   const [selectedDirection, setSelectedDirection] = useState<string | null>(null);
+  const [area, setArea] = useState<Area | "">("");
   const [selectedLevels, setSelectedLevels] = useState<Level[]>([]);
   const [selectedStack, setSelectedStack] = useState<string[]>([]);
   // На телефоне фильтры свёрнуты, иначе они занимают весь первый экран
@@ -91,6 +92,7 @@ export default function Feed({ initialRows, initialTotal }: { initialRows: Vacan
     withSalary: onlyWithSalary,
     city,
     direction: selectedDirection ?? "",
+    area,
     levels: selectedLevels,
     stack: selectedStack,
   };
@@ -126,6 +128,15 @@ export default function Feed({ initialRows, initialTotal }: { initialRows: Vacan
     }, 300);
     return () => clearTimeout(timer);
   }, [filtersKey]);
+
+  /** Раздел ленты; направление из другого раздела сбрасываем, иначе лента окажется пустой. */
+  function chooseArea(next: Area | "") {
+    setArea(next);
+    if (next && selectedDirection && DIRECTIONS.find(d => d.id === selectedDirection)?.group !== next) {
+      setSelectedDirection(null);
+      setSelectedStack([]);
+    }
+  }
 
   async function loadMore() {
     const id = requestId.current;
@@ -407,7 +418,7 @@ export default function Feed({ initialRows, initialTotal }: { initialRows: Vacan
 
       <main className="max-w-6xl mx-auto px-4 py-6 lg:py-8 grid grid-cols-1 lg:grid-cols-4 gap-4 lg:gap-8 relative z-0">
         {(() => {
-          const active = [search.trim(), format, minSalary > 0, onlyWithSalary, city.trim(), selectedDirection, selectedLevels.length > 0].filter(Boolean).length;
+          const active = [search.trim(), format, minSalary > 0, onlyWithSalary, city.trim(), selectedDirection, area, selectedLevels.length > 0].filter(Boolean).length;
           return (
             <button
               onClick={() => setFiltersOpen(open => !open)}
@@ -512,9 +523,9 @@ export default function Feed({ initialRows, initialTotal }: { initialRows: Vacan
           <div className="bg-neutral-900/50 border border-neutral-800 rounded-xl p-5 space-y-4">
             <label className="text-xs font-bold text-neutral-500 uppercase tracking-wider">Направление</label>
 
-            {(["it", "other"] as const).map(group => (
+            {AREAS.filter(a => !area || a.id === area).map(({ id: group, label }) => (
               <div key={group} className="space-y-1">
-                <p className="text-[11px] text-neutral-500 px-3 pt-1">{group === "it" ? "IT" : "Не только IT"}</p>
+                <p className="text-[11px] text-neutral-500 px-3 pt-1">{label}</p>
                 {DIRECTIONS.filter(d => d.group === group).map(d => (
                   <button
                     key={d.id}
@@ -546,6 +557,20 @@ export default function Feed({ initialRows, initialTotal }: { initialRows: Vacan
 
         {/* Vacancies Feed */}
         <section className="lg:col-span-3 space-y-4">
+          <div className="flex flex-wrap items-center gap-2" role="group" aria-label="Раздел ленты">
+            {([["", "Все разделы", "Все"], ...AREAS.map(a => [a.id, a.label, a.short])] as [Area | "", string, string][]).map(([id, label, short]) => (
+              <button
+                key={id || "all"}
+                onClick={() => chooseArea(id)}
+                aria-pressed={area === id}
+                className={`px-3 py-1.5 rounded-lg text-sm border transition-colors ${
+                  area === id ? "bg-neutral-100 border-neutral-100 text-neutral-950 font-medium" : "bg-neutral-900/60 border-neutral-800 text-neutral-300 hover:bg-neutral-800"
+                }`}
+              >
+                <span className="sm:hidden">{short}</span><span className="hidden sm:inline">{label}</span>
+              </button>
+            ))}
+          </div>
           {isCandidate && (
             <div className="flex items-center gap-2" role="tablist" aria-label="Какие вакансии показать">
               {([["all", "Все вакансии"], ["for-you", "Для вас"], ["saved", "Избранное"]] as const).map(([id, label]) => (

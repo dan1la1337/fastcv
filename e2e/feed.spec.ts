@@ -77,3 +77,12 @@ test("Smart Apply без входа предлагает войти", async ({ p
   await page.getByRole("button", { name: /Smart Apply/ }).first().click();
   await expect(page.getByRole("link", { name: "Войдите, чтобы откликнуться" })).toBeVisible();
 });
+
+test("раздел ленты ограничивает направления", async ({ page }) => {
+  await page.goto("/");
+  const area = page.getByRole("group", { name: "Раздел ленты" });
+  await area.getByRole("button", { name: /Продукт, дизайн и digital|Digital/ }).click();
+  await expect(area.getByRole("button", { name: /Продукт, дизайн и digital|Digital/ })).toHaveAttribute("aria-pressed", "true");
+  // В фильтрах (на компьютере они открыты) остаются только направления этого раздела
+  await expect(page.getByRole("button", { name: "Backend", exact: true })).toHaveCount(0);
+});

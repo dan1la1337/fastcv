@@ -61,6 +61,8 @@ export interface VacancyFilters {
   city: string;
   /** Направление (vacancies.direction); пусто — все. */
   direction: string;
+  /** Раздел ленты: разработка или продукт/дизайн/digital; пусто — все. */
+  area: Area | "";
   /** Уровни: вакансия подходит, если её уровень среди выбранных. */
   levels: Level[];
   /** Технологии: вакансия подходит, если упоминает хотя бы одну. */
@@ -77,14 +79,23 @@ export const DEFAULT_FILTERS: VacancyFilters = {
   withSalary: false,
   city: "",
   direction: "",
+  area: "",
   levels: [],
   stack: [],
 };
 
+export type Area = "it" | "other";
+
+/** Два раздела ленты (план 2.5.1): у FastCV и разработка, и digital — показываем их честно раздельно. */
+export const AREAS: { id: Area; label: string; short: string }[] = [
+  { id: "it", label: "Разработка и данные", short: "Разработка" },
+  { id: "other", label: "Продукт, дизайн и digital", short: "Digital" },
+];
+
 export interface Direction {
   id: string;
   label: string;
-  group: "it" | "other";
+  group: Area;
   /** Технологии для уточнения внутри направления. */
   tech?: string[];
 }
@@ -208,6 +219,7 @@ export async function fetchVacancyPage(
 
   if (filters.format) query = query.eq("work_format", filters.format);
   if (filters.direction) query = query.eq("direction", filters.direction);
+  else if (filters.area) query = query.in("direction", DIRECTIONS.filter(d => d.group === filters.area).map(d => d.id));
   if (filters.levels.length) query = query.in("level", filters.levels);
   const city = filters.city.trim();
   if (city) query = query.ilike("city", `%${city.replace(/[%_\\]/g, "\\$&")}%`);
