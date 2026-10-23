@@ -2,13 +2,13 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import { supabase } from "@/lib/supabase";
-import { DIRECTIONS, plural, VACANCY_FORMS, type Direction } from "@/lib/vacancies";
+import { AREAS, DIRECTIONS, plural, VACANCY_FORMS, type Direction } from "@/lib/vacancies";
 
 // Каталог направлений: сколько открытых вакансий в каждом. Пересобирается раз в полчаса.
 export const revalidate = 1800;
 
 export const metadata: Metadata = {
-  title: "Вакансии по направлениям — IT и не только | FastCV",
+  title: "Вакансии по направлениям — разработка, продукт, дизайн и digital | FastCV",
   description:
     "Свежие вакансии из Telegram-каналов и от работодателей по направлениям: backend, frontend, мобильная разработка, QA, DevOps, Data/ML, аналитика и другие.",
   alternates: { canonical: "/jobs" },
@@ -69,8 +69,9 @@ export default async function JobsIndexPage() {
             {total} {plural(total, VACANCY_FORMS)} из Telegram-каналов и от работодателей, обновляется несколько раз в день.
           </p>
         </header>
-        <Section title="IT" items={DIRECTIONS.filter(d => d.group === "it")} counts={counts} />
-        <Section title="Другие направления" items={DIRECTIONS.filter(d => d.group !== "it")} counts={counts} />
+        {AREAS.map(a => (
+          <Section key={a.id} title={a.label} items={DIRECTIONS.filter(d => d.group === a.id)} counts={counts} />
+        ))}
       </div>
     </main>
   );
