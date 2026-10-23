@@ -1,6 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { createServerClient } from "@supabase/ssr";
 import { supabaseAnonKey, supabaseUrl } from "@/lib/supabase";
+import type { Database } from "@/lib/database.types";
 
 /** Разделы только для вошедших и роль, которой они принадлежат (null — любая). */
 const PROTECTED: { prefix: string; role: "candidate" | "employer" | null; elsewhere: string }[] = [
@@ -18,7 +19,7 @@ const PROTECTED: { prefix: string; role: "candidate" | "employer" | null; elsewh
 export async function proxy(request: NextRequest) {
   let response = NextResponse.next({ request });
 
-  const supabase = createServerClient(supabaseUrl, supabaseAnonKey, {
+  const supabase = createServerClient<Database>(supabaseUrl, supabaseAnonKey, {
     cookies: {
       getAll() {
         return request.cookies.getAll();
