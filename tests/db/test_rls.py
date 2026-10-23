@@ -213,6 +213,28 @@ CHECKS: list[tuple] = [
      """update vacancies set stack = '["Python", "Kafka", "Docker"]' where title = 'Ext';
         select (m -> 'missing')::text || ' ' || (m -> 'matched')::text from vacancy_match((select v from vacancies v where title = 'Ext'), (select p from profiles p where id = '11111111-1111-1111-1111-111111111111')) m""",
      "postgres", None, '["Kafka", "Docker"] ["Python"]'),
+    ("синонимы и смежные навыки: Postgres = PostgreSQL, MySQL ≈ PostgreSQL, PostgreSQL → SQL", True,
+     """update profiles set skills = '["Postgres", "JS", "Cypress"]' where id = '11111111-1111-1111-1111-111111111111';
+        update vacancies set stack = '["PostgreSQL", "JavaScript", "SQL", "Playwright", "Go"]' where title = 'Ext';
+        select (m -> 'matched')::text || ' ' || (m -> 'missing')::text from vacancy_match((select v from vacancies v where title = 'Ext'), (select p from profiles p where id = '11111111-1111-1111-1111-111111111111')) m""",
+     "postgres", None, '["PostgreSQL", "JavaScript", "SQL"] ["Go", {"via": "Cypress", "skill": "Playwright"}]'),
+    ("смежный навык поднимает оценку, но меньше точного", True,
+     """update vacancies set stack = '["Playwright"]' where title = 'Ext';
+        create temp table scores (skills text, score int);
+        update profiles set skills = '[]' where id = '11111111-1111-1111-1111-111111111111';
+        insert into scores select 'none', (vacancy_match((select v from vacancies v where title = 'Ext'), (select p from profiles p where id = '11111111-1111-1111-1111-111111111111')) ->> 'score')::int;
+        update profiles set skills = '["Go"]' where id = '11111111-1111-1111-1111-111111111111';
+        insert into scores select 'other', (vacancy_match((select v from vacancies v where title = 'Ext'), (select p from profiles p where id = '11111111-1111-1111-1111-111111111111')) ->> 'score')::int;
+        update profiles set skills = '["Cypress"]' where id = '11111111-1111-1111-1111-111111111111';
+        insert into scores select 'related', (vacancy_match((select v from vacancies v where title = 'Ext'), (select p from profiles p where id = '11111111-1111-1111-1111-111111111111')) ->> 'score')::int;
+        update profiles set skills = '["playwright"]' where id = '11111111-1111-1111-1111-111111111111';
+        insert into scores select 'exact', (vacancy_match((select v from vacancies v where title = 'Ext'), (select p from profiles p where id = '11111111-1111-1111-1111-111111111111')) ->> 'score')::int;
+        select ((select score from scores where skills = 'other') < (select score from scores where skills = 'related')
+            and (select score from scores where skills = 'related') < (select score from scores where skills = 'exact'))::text;
+        -- вернуть данные, на которые опираются следующие проверки
+        update profiles set skills = '["Python"]' where id = '11111111-1111-1111-1111-111111111111';
+        update vacancies set stack = '["Python", "Kafka", "Docker"]' where title = 'Ext';""",
+     "postgres", None, "true"),
     ("работодателю подборка не считается", True,
      "select count(*) from recommended_vacancies(10, 0)", "authenticated", E, "0"),
     ("аноним НЕ вызывает подборку", False, "select * from recommended_vacancies(10, 0)", "anon", None, None),

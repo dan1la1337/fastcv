@@ -347,10 +347,19 @@ export default function Feed({ initialRows, initialTotal }: { initialRows: Vacan
         </div>
         <p className="text-sm text-neutral-400 leading-relaxed line-clamp-3">{item.description}</p>
 
-        {match && (match.matched.length > 0 || match.missing.length > 0) && (
+        {match && (match.matched.length > 0 || match.missing.length > 0 || match.related.length > 0) && (
           <p className="text-xs text-neutral-500">
             {match.matched.length > 0 && <>Есть у вас: <span className="text-emerald-400">{match.matched.join(", ")}</span></>}
-            {match.matched.length > 0 && match.missing.length > 0 && " · "}
+            {match.related.length > 0 && (
+              <>
+                {match.matched.length > 0 && " · "}
+                Близко:{" "}
+                <span className="text-sky-300" title="Засчитано наполовину: у вас есть смежный опыт">
+                  {match.related.map(r => `${r.skill} (у вас ${r.via})`).join(", ")}
+                </span>
+              </>
+            )}
+            {(match.matched.length > 0 || match.related.length > 0) && match.missing.length > 0 && " · "}
             {match.missing.length > 0 && (
               <>
                 Не хватает:{" "}

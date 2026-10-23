@@ -7,7 +7,7 @@ import Link from "next/link";
 import {
   Archive, ArrowLeft, Briefcase, CheckCircle2, Eye, FileText, Loader2, Pencil, PlusCircle, RotateCcw, Send, Sparkles, Target, XCircle,
 } from "lucide-react";
-import { matchTone, type Match } from "@/lib/matching";
+import { matchTone, toMatch, type Match } from "@/lib/matching";
 import type { VacancyDraft } from "@/lib/vacancy-draft";
 import { supabase, getUserRole } from "@/lib/supabase";
 import { formatSalary, plural, type Vacancy } from "@/lib/vacancies";
@@ -113,8 +113,7 @@ export default function EmployerDashboard() {
     setVacancies((own ?? []) as Vacancy[]);
 
     const { data: scored } = await supabase.rpc("my_application_matches");
-    const strings = (v: unknown) => (Array.isArray(v) ? v.filter((x): x is string => typeof x === "string") : []);
-    setMatches(Object.fromEntries((scored ?? []).map(r => [r.application_id, { score: r.score, matched: strings(r.matched), missing: strings(r.missing) }])));
+    setMatches(Object.fromEntries((scored ?? []).map(r => [r.application_id, toMatch(r)])));
 
     // Работодатель открыл кабинет — кандидаты видят, что отклик просмотрен.
     // На экране оставляем «Новый отклик», чтобы было видно, что пришло с прошлого раза.
@@ -522,6 +521,11 @@ export default function EmployerDashboard() {
                         <Target className="w-3.5 h-3.5" />Совпадение {matches[app.id].score}%
                       </span>
                       {matches[app.id].matched.length > 0 && <span>Есть: <span className="text-emerald-400">{matches[app.id].matched.join(", ")}</span></span>}
+                      {matches[app.id].related.length > 0 && (
+                        <span title="Засчитано наполовину: у кандидата смежный опыт">
+                          Смежное: <span className="text-sky-300">{matches[app.id].related.map(r => `${r.skill} (есть ${r.via})`).join(", ")}</span>
+                        </span>
+                      )}
                       {matches[app.id].missing.length > 0 && <span>Нет: <span className="text-amber-300">{matches[app.id].missing.join(", ")}</span></span>}
                     </p>
                   )}
