@@ -100,7 +100,9 @@ def test_direction_from_sphere():
     assert d("Маркетинг, реклама, PR") == "marketing"
     assert d("Продажи, закупки, снабжение, торговля") == "sales"
     assert d("Бухгалтерия, налоги, управленческий учет") == "finance"
-    assert d("Государственная служба, некоммерческие организации") == "other"
+    assert d("Государственная служба, некоммерческие организации") == "government"
+    assert d("Здравоохранение и социальное обеспечение") == "medicine"
+    assert d("Какая-то новая сфера") is None
     assert trudvsem.map_vacancy(SAMPLE)["direction"] is None
 
 
