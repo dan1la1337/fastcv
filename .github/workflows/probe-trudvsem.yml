@@ -7,12 +7,12 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
-      - name: Offset semantics and order
+      - name: Region endpoint with modifiedFrom
         run: |
-          base="https://opendata.trudvsem.ru/api/v1/vacancies"
-          since=$(date -u -d '1 day ago' +%Y-%m-%dT%H:%M:%SZ)
-          for off in 0 1 2 4; do
-            curl -s --max-time 40 "$base?modifiedFrom=$since&limit=2&offset=$off" | python3 -c "
-          import sys,json; d=json.load(sys.stdin); v=[x['vacancy'] for x in d['results']['vacancies']]; print('off=$off', [(x['id'][:8], x['date_modify']) for x in v], 'exp=', [x.get('requirement') for x in v])" | sed 's/^/::notice title=page::/'
+          base="https://opendata.trudvsem.ru/api/v1/vacancies/region"
+          since=$(date -u -d '6 hours ago' +%Y-%m-%dT%H:%M:%SZ)
+          for code in 7700000000000 5500000000000 0100000000000 9900000000000; do
+            curl -s --max-time 40 "$base/$code?modifiedFrom=$since&limit=100&offset=0" | python3 -c "
+          import sys,json; d=json.load(sys.stdin); v=(d.get('results') or {}).get('vacancies') or []; print('$code', d.get('status'), 'total', d.get('meta',{}).get('total'), 'page', len(v), 'oldest', v[-1]['vacancy']['date_modify'] if v else None)" | sed 's/^/::notice title=region::/'
           done
-          curl -s --max-time 40 "$base?modifiedFrom=$since&limit=100&offset=300" | python3 -c "import sys,json; d=json.load(sys.stdin); print('off300', d.get('status'), len((d.get('results') or {}).get('vacancies') or []))" | sed 's/^/::notice title=deep::/'
+          curl -s --max-time 40 "$base/7700000000000?modifiedFrom=$since&limit=100&offset=29" | python3 -c "import sys,json; d=json.load(sys.stdin); print('moscow p29', d.get('status'))" | sed 's/^/::notice title=deep::/'
