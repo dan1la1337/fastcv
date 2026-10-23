@@ -172,6 +172,30 @@ export default function Feed({ initialRows, initialTotal }: { initialRows: Vacan
     });
   }, [isCandidate, hasPrefs, vacancies]);
 
+  // «У меня есть этот опыт»: навык из «Не хватает» одним нажатием попадает в профиль,
+  // совпадение пересчитывается, а письмо Smart Apply берёт навыки из профиля
+  const [addingSkill, setAddingSkill] = useState<string | null>(null);
+  async function addSkill(skill: string) {
+    if (!user || !userProfile || addingSkill) return;
+    const next = [...new Set([...profileSkills, skill])].slice(0, 50);
+    setAddingSkill(skill);
+    const { error } = await supabase.from("profiles").update({ skills: next }).eq("id", user.id);
+    setAddingSkill(null);
+    if (error) {
+      toast("Не удалось обновить профиль. Попробуйте ещё раз.", "error");
+      return;
+    }
+    setUserProfile({ ...userProfile, skills: next });
+    const ids = vacancies.map(v => v.id);
+    try {
+      const found = await fetchMatches(ids);
+      setMatches(prev => ({ ...prev, ...found }));
+    } catch {
+      // старые проценты останутся до следующей загрузки
+    }
+    toast(`«${skill}» добавлен в профиль — совпадение пересчитано.`, "ok");
+  }
+
   // Отметки загружаем один раз после входа; дальше меняем локально вместе с базой
   useEffect(() => {
     if (!isCandidate) return;
@@ -313,7 +337,26 @@ export default function Feed({ initialRows, initialTotal }: { initialRows: Vacan
           <p className="text-xs text-neutral-500">
             {match.matched.length > 0 && <>Есть у вас: <span className="text-emerald-400">{match.matched.join(", ")}</span></>}
             {match.matched.length > 0 && match.missing.length > 0 && " · "}
-            {match.missing.length > 0 && <>Не хватает: <span className="text-amber-300">{match.missing.join(", ")}</span></>}
+            {match.missing.length > 0 && (
+              <>
+                Не хватает:{" "}
+                {match.missing.map((skill, i) => (
+                  <span key={skill}>
+                    {i > 0 && ", "}
+                    <button
+                      onClick={() => addSkill(skill)}
+                      disabled={addingSkill !== null}
+                      title="У меня есть этот опыт — добавить в профиль"
+                      aria-label={`У меня есть опыт с ${skill} — добавить в профиль`}
+                      className="text-amber-300 underline decoration-dotted underline-offset-2 hover:text-amber-200 disabled:opacity-60"
+                    >
+                      {addingSkill === skill ? "добавляем…" : `+ ${skill}`}
+                    </button>
+                  </span>
+                ))}
+                <span className="text-neutral-600"> — нажмите на навык, если он у вас есть</span>
+              </>
+            )}
           </p>
         )}
 
