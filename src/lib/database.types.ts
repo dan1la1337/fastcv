@@ -78,6 +78,7 @@ export type Database = {
           created_at: string | null
           hr_message: string | null
           hr_replied_at: string | null
+          viewed_at: string | null
           id: string
           status: string | null
           vacancy_id: string | null
@@ -88,6 +89,7 @@ export type Database = {
           created_at?: string | null
           hr_message?: string | null
           hr_replied_at?: string | null
+          viewed_at?: string | null
           id?: string
           status?: string | null
           vacancy_id?: string | null
@@ -98,6 +100,7 @@ export type Database = {
           created_at?: string | null
           hr_message?: string | null
           hr_replied_at?: string | null
+          viewed_at?: string | null
           id?: string
           status?: string | null
           vacancy_id?: string | null
