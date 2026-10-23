@@ -29,8 +29,9 @@ concurrency:
 jobs:
   scrape:
     runs-on: ubuntu-latest
-    # Обычный прогон — несколько минут; лимит страхует от зависания
-    timeout-minutes: 30
+    # Каналы — до 14 мин, «Работа России» — до 10 мин, плюс установка и подборки;
+    # лимит с запасом страхует от зависания
+    timeout-minutes: 45
 
     steps:
       - name: Checkout repository
