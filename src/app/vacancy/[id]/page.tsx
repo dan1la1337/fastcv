@@ -4,7 +4,7 @@ import { notFound } from "next/navigation";
 import { cache } from "react";
 import { AlertTriangle, ArrowLeft, Briefcase, Building2, Calendar, ExternalLink, Globe, MapPin, Megaphone } from "lucide-react";
 import { supabase } from "@/lib/supabase";
-import { VACANCY_COLUMNS, formatLabel, formatSalary, levelLabel, experienceLabel, plural, type Vacancy } from "@/lib/vacancies";
+import { VACANCY_COLUMNS, formatLabel, formatSalary, levelLabel, experienceLabel, plural, sourceOf, type Vacancy } from "@/lib/vacancies";
 import ApplyButton from "@/components/ApplyButton";
 import ViewCounter from "@/components/ViewCounter";
 import CompanyLine from "@/components/CompanyLine";
@@ -116,7 +116,7 @@ export default async function VacancyPage({ params }: Props) {
                 ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
                 : "bg-blue-500/10 text-blue-400 border-blue-500/20"
             }`}>
-              {vacancy.source_type === "internal" ? "Прямой работодатель" : "Telegram"}
+              {sourceOf(vacancy).badge}
             </span>
             <h1 className="text-2xl sm:text-3xl font-bold text-white">{vacancy.title}</h1>
             <CompanyLine vacancy={vacancy} className="text-base text-neutral-300" />
@@ -175,7 +175,7 @@ export default async function VacancyPage({ params }: Props) {
                 rel="noreferrer"
                 className="inline-flex items-center gap-1.5 text-sm text-neutral-400 hover:text-blue-400 transition-colors"
               >
-                Оригинальный пост в Telegram <ExternalLink className="w-4 h-4" />
+                {sourceOf(vacancy).link === "Пост в Telegram" ? "Оригинальный пост в Telegram" : sourceOf(vacancy).link} <ExternalLink className="w-4 h-4" />
               </a>
             )}
           </footer>

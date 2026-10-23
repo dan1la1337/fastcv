@@ -379,6 +379,19 @@ CHECKS: list[tuple] = [
         select string_agg(direction || ':' || coalesce(level, '*') || ':' || sample, ',' order by all_levels)
           from salary_benchmarks where direction in ('design', 'hr')""",
      "postgres", None, "design:middle:10,design:*:10"),
+    ("ротация «Работы России»: старые удаляются, с откликами — в архив, свежие остаются", True,
+     f"""insert into vacancies (title, source_type, source_post, posted_at) values
+          ('TV old', 'external', 'trudvsem/old', now() - interval '5 days'),
+          ('TV applied', 'external', 'trudvsem/applied', now() - interval '5 days'),
+          ('TV fresh', 'external', 'trudvsem/fresh', now());
+        insert into applications (vacancy_id, candidate_id, status) select id, '{C}', 'new' from vacancies where title = 'TV applied';
+        create temp table pr as select prune_trudvsem(2)::text as r;
+        select (select r from pr) || ' ' ||
+               (select string_agg(title || ':' || (archived_at is not null)::text, ',' order by title) from vacancies where title like 'TV %');
+        delete from applications where vacancy_id in (select id from vacancies where title like 'TV %');
+        delete from vacancies where title like 'TV %';""",
+     "service_role", None, '{"removed": 1, "archived": 1} TV applied:true,TV fresh:false'),
+    ("сайт НЕ вызывает ротацию", False, "select prune_trudvsem(2)", "authenticated", C, None),
     ("тип нанимателя — только из списка", False,
      "update vacancies set hiring_type = 'friends' where title = 'Ext'", "service_role", None, None),
     ("у каждого правила RLS есть права на таблицу для его роли", True,

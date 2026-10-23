@@ -444,6 +444,10 @@ export type Database = {
         Row: { city: string; vacancies: number }
         Relationships: []
       }
+      direction_counts: {
+        Row: { direction: string; vacancies: number }
+        Relationships: []
+      }
       salary_benchmarks: {
         Row: {
           all_levels: boolean

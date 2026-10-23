@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { supabase } from "@/lib/supabase";
 import {
-  AREAS, DEFAULT_FILTERS, DIRECTIONS, experienceLabel, freshnessLabel, LEVELS, WORK_FORMATS, fetchVacancyPage, formatLabel, formatSalary, levelLabel, plural, PAGE_SIZE,
+  AREAS, DEFAULT_FILTERS, DIRECTIONS, experienceLabel, sourceOf, freshnessLabel, LEVELS, WORK_FORMATS, fetchVacancyPage, formatLabel, formatSalary, levelLabel, plural, PAGE_SIZE,
   VACANCY_FORMS, type Area, type Level, type Vacancy, type VacancyFilters, type WorkFormat,
 } from "@/lib/vacancies";
 import { Clock, Search, MapPin, ChevronDown, Sparkles, Loader2, ExternalLink, Globe, SlidersHorizontal, Briefcase, Building2, Target, Bookmark, BookmarkCheck, EyeOff, Undo2 } from "lucide-react";
@@ -305,7 +305,7 @@ export default function Feed({ initialRows, initialTotal }: { initialRows: Vacan
         {/* Бейджи источников */}
         {item.source_type === 'external' ? (
            <div className="absolute top-0 right-0 bg-blue-500/10 text-blue-400 text-[10px] uppercase font-bold px-3 py-1 rounded-bl-lg border-b border-l border-blue-500/20 z-10">
-             Telegram
+             {sourceOf(item).badge}
            </div>
         ) : (
            <div className="absolute top-0 right-0 bg-emerald-500/10 text-emerald-400 text-[10px] uppercase font-bold px-3 py-1 rounded-bl-lg border-b border-l border-emerald-500/20 z-10 flex items-center gap-1">
@@ -429,7 +429,7 @@ export default function Feed({ initialRows, initialTotal }: { initialRows: Vacan
                   rel="noreferrer"
                   className="inline-flex items-center gap-1 text-xs text-neutral-500 hover:text-blue-400 transition-colors"
                 >
-                  Пост в Telegram <ExternalLink className="w-3 h-3" />
+                  {sourceOf(item).link} <ExternalLink className="w-3 h-3" />
                 </a>
               )}
             </span>

@@ -43,6 +43,13 @@ export type Level = "intern" | "junior" | "middle" | "senior" | "lead";
 export type WorkFormat = "remote" | "hybrid" | "office";
 export type HiringType = "product" | "outsource" | "agency";
 
+/** Откуда вакансия: для подписи на карточке и ссылки на оригинал. */
+export function sourceOf(v: Pick<Vacancy, "source_type" | "source_url">): { badge: string; link: string } {
+  if (v.source_type === "internal") return { badge: "Прямой работодатель", link: "" };
+  if (v.source_url?.includes("trudvsem.ru")) return { badge: "Работа России", link: "Вакансия на trudvsem.ru" };
+  return { badge: "Telegram", link: "Пост в Telegram" };
+}
+
 /** Грейд по опыту (шкала FastCV): до 2 лет — junior, 2–5 — middle, от 5 — senior; руководство людьми — lead. */
 export function levelForExperience(years: number, leadsPeople = false): Level {
   if (leadsPeople) return "lead";
