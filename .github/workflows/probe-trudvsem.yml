@@ -1,0 +1,18 @@
+name: Probe trudvsem
+on:
+  push:
+    branches: ["probe/**"]
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Categories
+        run: |
+          curl -s --max-time 40 "https://opendata.trudvsem.ru/api/v1/vacancies/region/7700000000000?limit=100&offset=0" | python3 -c "
+          import sys,json,collections
+          d=json.load(sys.stdin); v=[x['vacancy'] for x in d['results']['vacancies']]
+          print('keys', sorted(v[0].keys()))
+          print('cat', json.dumps(v[0].get('category'), ensure_ascii=False))
+          c=collections.Counter(json.dumps(x.get('category'),ensure_ascii=False)[:90] for x in v)
+          for k,n in c.most_common(25): print(n,k)" | sed 's/^/::notice title=cat::/'
