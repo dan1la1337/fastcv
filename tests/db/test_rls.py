@@ -181,7 +181,7 @@ CHECKS: list[tuple] = [
      "authenticated", C, "true,true,true,false"),
     ("лимит ИИ у другого пользователя свой", True,
      "select public.consume_ai_quota('cover_letter', 3, 3600)->>'allowed'", "authenticated", X, "true"),
-    ("пользователь НЕ читает журнал вызовов ИИ", True, "select count(*) from ai_usage", "authenticated", C, "0"),
+    ("пользователь НЕ читает журнал вызовов ИИ", False, "select count(*) from ai_usage", "authenticated", C, None),
 
     # --- кэш сопроводительных писем ---
     ("кандидат сохраняет своё письмо", True,
@@ -256,7 +256,7 @@ CHECKS: list[tuple] = [
     # --- метрики для администратора ---
     ("обычный пользователь НЕ видит метрики", False, "select admin_metrics()", "authenticated", C, None),
     ("аноним НЕ видит метрики", False, "select admin_metrics()", "anon", None, None),
-    ("пользователь НЕ читает список администраторов", True, "select count(*) from app_admins", "authenticated", C, "0"),
+    ("пользователь НЕ читает список администраторов", False, "select count(*) from app_admins", "authenticated", C, None),
     ("администратор видит метрики", True,
      """insert into app_admins (email) values ('owner@example.com');
         set role authenticated; set request.jwt.claims = '{"email": "Owner@Example.com"}';
@@ -280,6 +280,20 @@ CHECKS: list[tuple] = [
      """insert into app_settings (key, value) values ('telegram_bot_username', 'fastcv_bot'), ('telegram_update_offset', '5') on conflict do nothing;
         set role anon; select string_agg(key, ',') from app_settings""",
      "postgres", None, "telegram_bot_username"),
+    ("сборщик сохраняет настройки бота", True,
+     """insert into app_settings (key, value) values ('telegram_update_offset', '9')
+          on conflict (key) do update set value = excluded.value;
+        select value from app_settings where key = 'telegram_update_offset'""",
+     "service_role", None, "9"),
+    ("у каждого правила RLS есть права на таблицу для его роли", True,
+     """select coalesce(string_agg(c.relname || ':' || p.polname || ':' || r::regrole::text, ' '), 'ok')
+          from pg_policy p
+          join pg_class c on c.oid = p.polrelid
+          join pg_namespace n on n.oid = c.relnamespace and n.nspname = 'public'
+          cross join lateral unnest(p.polroles) r
+         where not has_table_privilege(r, c.oid,
+                 case p.polcmd when 'a' then 'insert' when 'w' then 'update' when 'd' then 'delete' else 'select' end)""",
+     "postgres", None, "ok"),
     ("кандидат отвязывает Telegram", True,
      "select unlink_telegram(); select coalesce(telegram_chat_id::text, 'нет') from profiles where id = auth.uid()",
      "authenticated", C, "нет"),
