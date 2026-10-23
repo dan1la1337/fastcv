@@ -53,6 +53,13 @@ test("страница направления отдаёт список вака
   await expect(page).toHaveURL(/\/jobs\/frontend$/);
 });
 
+test("каталог направлений ведёт на страницу направления", async ({ page }) => {
+  await page.goto("/jobs");
+  await expect(page.getByRole("heading", { level: 1 })).toHaveText("Вакансии по направлениям");
+  await page.locator('a[href="/jobs/qa"]').click();
+  await expect(page).toHaveURL(/\/jobs\/qa$/);
+});
+
 test("неизвестное направление — 404", async ({ request }) => {
   expect((await request.get("/jobs/astronaut")).status()).toBe(404);
 });
