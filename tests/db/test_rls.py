@@ -216,6 +216,21 @@ CHECKS: list[tuple] = [
     ("работодателю подборка не считается", True,
      "select count(*) from recommended_vacancies(10, 0)", "authenticated", E, "0"),
     ("аноним НЕ вызывает подборку", False, "select * from recommended_vacancies(10, 0)", "anon", None, None),
+
+    # --- избранное и скрытые ---
+    ("кандидат сохраняет вакансию в избранное", True,
+     f"insert into vacancy_marks (user_id, vacancy_id, kind) select '{C}', id, 'saved' from vacancies where title = 'Ext'",
+     "authenticated", C, None),
+    ("отметка НЕ ставится от чужого имени", False,
+     f"insert into vacancy_marks (user_id, vacancy_id, kind) select '{X}', id, 'saved' from vacancies where title = 'Ext'",
+     "authenticated", C, None),
+    ("другой пользователь НЕ видит чужое избранное", True, "select count(*) from vacancy_marks", "authenticated", X, "0"),
+    ("скрытая вакансия пропадает из подборки", True,
+     f"""insert into vacancy_marks (user_id, vacancy_id, kind) select '{C}', id, 'hidden' from vacancies where title like 'Int%';
+         select count(*) from recommended_vacancies(50, 0) r join vacancies v on v.id = r.id where v.title like 'Int%'""",
+     "authenticated", C, "0"),
+    ("кандидат снимает отметку", True,
+     "delete from vacancy_marks where user_id = auth.uid() and kind = 'hidden' returning kind", "authenticated", C, "hidden"),
 ]
 
 
