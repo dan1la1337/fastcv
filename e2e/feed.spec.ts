@@ -23,14 +23,15 @@ test("лента показывает карточки и счётчик", async
   expect(await total(page)).toBeGreaterThan(0);
 });
 
-test("фильтр по направлению сужает ленту и снимается повторным нажатием", async ({ page }) => {
+test("фильтр по направлению сужает ленту и сбрасывается", async ({ page }) => {
   await page.goto("/");
   await openFilters(page);
   const all = await total(page);
-  await page.getByRole("button", { name: "QA и тестирование", exact: true }).click();
+  await page.getByRole("button", { name: "Направление" }).click();
+  await page.getByRole("listbox", { name: "Направление" }).getByRole("option", { name: "QA и тестирование" }).click();
   await expect.poll(() => total(page)).toBeLessThan(all);
   await expect(page.locator("section h2").first()).toBeVisible();
-  await page.getByRole("button", { name: "QA и тестирование", exact: true }).click();
+  await page.getByRole("button", { name: "Сбросить" }).click();
   await expect.poll(() => total(page)).toBe(all);
 });
 

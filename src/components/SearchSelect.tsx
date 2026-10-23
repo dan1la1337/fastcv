@@ -74,16 +74,16 @@ export default function SearchSelect({
   return (
     <div ref={root} className="relative">
       <button type="button" onClick={toggle} aria-haspopup="listbox" aria-expanded={open} aria-label={label}
-        className="w-full flex items-center justify-between gap-2 px-3 py-2.5 bg-neutral-950 border border-neutral-800 rounded-lg text-sm text-left hover:border-neutral-700 focus:outline-none focus:border-blue-500 transition-colors">
+        className="w-full flex items-center justify-between gap-2 pl-3 pr-14 py-2.5 bg-neutral-950 border border-neutral-800 rounded-lg text-sm text-left hover:border-neutral-700 focus:outline-none focus:border-blue-500 transition-colors">
         <span className={selected ? "text-neutral-100" : "text-neutral-500"}>{selected?.label ?? emptyLabel}</span>
-        <span className="flex items-center gap-1 shrink-0">
-          {selected && (
-            <span role="button" tabIndex={-1} aria-label="Сбросить" onClick={e => { e.stopPropagation(); onChange(""); }}
-              className="p-0.5 rounded hover:bg-neutral-800 text-neutral-500 hover:text-white"><X className="w-3.5 h-3.5" /></span>
-          )}
-          <ChevronDown className={`w-4 h-4 text-neutral-500 transition-transform duration-200 ${open ? "rotate-180" : ""}`} />
-        </span>
       </button>
+      <span className="absolute right-2 top-0 h-[42px] flex items-center gap-1 pointer-events-none">
+        {selected && (
+          <button type="button" aria-label="Сбросить" onClick={() => onChange("")}
+            className="pointer-events-auto p-0.5 rounded hover:bg-neutral-800 text-neutral-500 hover:text-white"><X className="w-3.5 h-3.5" /></button>
+        )}
+        <ChevronDown className={`w-4 h-4 text-neutral-500 transition-transform duration-200 ${open ? "rotate-180" : ""}`} />
+      </span>
 
       <div
         className={`absolute z-30 mt-1.5 w-full origin-top rounded-xl border border-neutral-800 bg-neutral-900 shadow-2xl shadow-black/50 transition-all duration-150 ease-out ${
