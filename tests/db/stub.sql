@@ -1,5 +1,5 @@
 -- Минимальная замена того, что в Supabase есть «из коробки»: роли, схема auth
--- с auth.uid(), схема storage. Нужна, чтобы прогнать supabase/schema.sql на
+-- с auth.uid(), схема storage. Нужна, чтобы прогнать миграции supabase/migrations на
 -- чистом Postgres в CI и проверить правила доступа.
 create role anon nologin;
 create role authenticated nologin;

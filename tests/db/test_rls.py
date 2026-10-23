@@ -1,4 +1,4 @@
-"""Правила доступа к базе (RLS) на чистом Postgres со схемой supabase/schema.sql.
+"""Правила доступа к базе (RLS) на чистом Postgres со всеми миграциями supabase/migrations.
 
 Каждая проверка — запрос от имени роли Supabase (anon, authenticated с id
 пользователя, service_role) и ожидаемый результат. Проверки идут по порядку
@@ -61,9 +61,12 @@ def database():
         assert ok, out
     finally:
         tmp.unlink()
-    for attempt in (1, 2):
-        ok, out = psql("", file=ROOT / "supabase/schema.sql")
-        assert ok, f"schema.sql, запуск {attempt}: {out}"
+    migrations = sorted((ROOT / "supabase/migrations").glob("*.sql"))
+    assert migrations, "нет миграций в supabase/migrations"
+    # Базовую миграцию — дважды: она обязана быть повторяемой (её применяли к рабочей базе)
+    for migration in [migrations[0], *migrations]:
+        ok, out = psql("", file=migration)
+        assert ok, f"{migration.name}: {out}"
     yield
 
 

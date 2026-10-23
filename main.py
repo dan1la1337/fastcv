@@ -154,7 +154,7 @@ Currency = Literal["RUB", "USD", "EUR", "KZT", "BYN", "UAH", "UZS", "GEL", "AMD"
 
 
 Level = Literal["intern", "junior", "middle", "senior", "lead"]
-# Совпадает с ограничением vacancies.direction в supabase/schema.sql
+# Совпадает с ограничением vacancies.direction в supabase/migrations
 Direction = Literal[
     "backend", "frontend", "fullstack", "mobile", "qa", "devops", "data_ml", "analytics", "security",
     "gamedev", "design", "product", "marketing", "content", "sales", "hr", "support", "finance",
@@ -684,7 +684,7 @@ def main() -> None:
     supabase_url = env("SUPABASE_URL", "NEXT_PUBLIC_SUPABASE_URL")
     gemini_key = env("GEMINI_API_KEY")
     # Сборщику нужен service-role ключ: запись в vacancies и channels для
-    # публичного ключа закрыта правилами доступа (supabase/schema.sql).
+    # публичного ключа закрыта правилами доступа (supabase/migrations).
     supabase_key = env("SUPABASE_SERVICE_ROLE_KEY")
     if not supabase_key:
         supabase_key = env("SUPABASE_KEY", "NEXT_PUBLIC_SUPABASE_ANON_KEY")
