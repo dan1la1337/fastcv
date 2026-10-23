@@ -78,3 +78,19 @@ test("карта сайта содержит направления и комп�
   expect(xml).toContain("/jobs/backend");
   expect(xml).toMatch(/\/company\//);
 });
+
+test("разметка JobPosting выводится только полной", async ({ page, request }) => {
+  await page.goto("/");
+  const hrefs = await page.locator('a[href^="/vacancy/"]').evaluateAll(els =>
+    [...new Set(els.map(a => a.getAttribute("href")!))].slice(0, 8),
+  );
+  expect(hrefs.length).toBeGreaterThan(0);
+  for (const href of hrefs) {
+    const html = await (await request.get(href)).text();
+    const match = html.match(/<script type="application\/ld\+json">(.*?)<\/script>/s);
+    if (!match) continue;
+    const data = JSON.parse(match[1]);
+    expect(data.hiringOrganization?.name, href).toBeTruthy();
+    expect(data.jobLocation?.address?.addressLocality, href).toBeTruthy();
+  }
+});

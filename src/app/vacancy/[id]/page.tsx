@@ -43,8 +43,14 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   };
 }
 
-/** Разметка schema.org/JobPosting: по ней Google показывает вакансии в поиске. */
+/**
+ * Разметка schema.org/JobPosting: по ней Google показывает вакансии в поиске.
+ * Обязательны компания и место работы (город; для удалёнки Google ещё требует страну
+ * кандидата, а её в постах нет). Без них разметка не выводится: неполная только
+ * копит ошибки в Search Console и всё равно не попадает в выдачу вакансий.
+ */
 function jobPostingJsonLd(v: Vacancy) {
+  if (!v.company_name?.trim() || !v.city) return null;
   const posted = v.posted_at ?? v.created_at;
   const validThrough = new Date(Date.parse(posted) + 30 * 864e5).toISOString();
   const salaryValue = v.salary_min || v.salary_max
@@ -62,16 +68,17 @@ function jobPostingJsonLd(v: Vacancy) {
     datePosted: posted,
     validThrough,
     ...(v.work_format === "remote" || (!v.work_format && v.is_remote) ? { jobLocationType: "TELECOMMUTE" } : {}),
-    ...(v.city ? { jobLocation: { "@type": "Place", address: { "@type": "PostalAddress", addressLocality: v.city } } } : {}),
+    jobLocation: { "@type": "Place", address: { "@type": "PostalAddress", addressLocality: v.city } },
     ...(salaryValue && v.salary_currency ? { baseSalary: salaryValue } : {}),
     ...(v.stack?.length ? { skills: v.stack.join(", ") } : {}),
-    ...(v.company_name ? { hiringOrganization: { "@type": "Organization", name: v.company_name } } : {}),
+    hiringOrganization: { "@type": "Organization", name: v.company_name.trim() },
   };
 }
 
 export default async function VacancyPage({ params }: Props) {
   const vacancy = await getVacancy((await params).id);
   if (!vacancy) notFound();
+  const jsonLd = jobPostingJsonLd(vacancy);
 
   const posted = new Date(vacancy.posted_at ?? vacancy.created_at).toLocaleDateString("ru-RU", {
     day: "numeric", month: "long", year: "numeric",
@@ -79,11 +86,11 @@ export default async function VacancyPage({ params }: Props) {
 
   return (
     <div className="min-h-screen bg-neutral-950 text-neutral-100 font-sans">
-      {!vacancy.archived_at && (
+      {!vacancy.archived_at && jsonLd && (
         <script
           type="application/ld+json"
           // JSON.stringify экранирует строки; "<" заменяем, чтобы текст вакансии не мог закрыть тег
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(jobPostingJsonLd(vacancy)).replace(/</g, "\\u003c") }}
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, "\\u003c") }}
         />
       )}
 
