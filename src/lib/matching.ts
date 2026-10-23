@@ -8,6 +8,8 @@ export interface Match {
   matched: string[];
   /** Навыки из вакансии, которых нет в профиле. */
   missing: string[];
+  /** Засчитаны наполовину по смежному опыту: навык вакансии и навык кандидата (PostgreSQL ← MySQL). */
+  related: { skill: string; via: string }[];
 }
 
 type MatchRow = { id: string; score: number; matched: unknown; missing: unknown };
@@ -15,7 +17,20 @@ type MatchRow = { id: string; score: number; matched: unknown; missing: unknown 
 const strings = (value: unknown): string[] =>
   Array.isArray(value) ? value.filter((s): s is string => typeof s === "string") : [];
 
-const toMatch = (row: MatchRow): Match => ({ score: row.score, matched: strings(row.matched), missing: strings(row.missing) });
+// В missing база кладёт и строки (навыка нет), и объекты {skill, via} (есть смежный)
+const related = (value: unknown): Match["related"] =>
+  Array.isArray(value)
+    ? value.filter((x): x is { skill: string; via: string } =>
+        Boolean(x) && typeof x === "object" && typeof (x as { skill?: unknown }).skill === "string" && typeof (x as { via?: unknown }).via === "string")
+    : [];
+
+/** Разбор ответа функций совпадения (score, matched, missing) — общий для кандидата и работодателя. */
+export const toMatch = (row: Omit<MatchRow, "id">): Match => ({
+  score: row.score,
+  matched: strings(row.matched),
+  missing: strings(row.missing),
+  related: related(row.missing),
+});
 
 /** Совпадение для вакансий на экране. Не кандидату или без входа — пусто. */
 export async function fetchMatches(ids: string[]): Promise<Record<string, Match>> {
