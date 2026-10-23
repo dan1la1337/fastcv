@@ -392,6 +392,33 @@ class Store:
             "unavailable_channels": [r["username"] for r in unavailable],
         }
 
+    # --- подписка кандидатов в Telegram ---------------------------------------
+
+    def get_setting(self, key: str) -> Optional[str]:
+        rows = self.db.table("app_settings").select("value").eq("key", key).limit(1).execute().data
+        return rows[0]["value"] if rows else None
+
+    def set_setting(self, key: str, value: str) -> None:
+        self.db.table("app_settings").upsert({"key": key, "value": value,
+                                               "updated_at": datetime.now(timezone.utc).isoformat()}).execute()
+
+    def link_telegram(self, code: str, chat_id: int) -> bool:
+        """Привязать чат к кандидату по одноразовому коду из профиля."""
+        rows = (self.db.table("profiles")
+                .update({"telegram_chat_id": chat_id, "telegram_link_code": None, "telegram_notify": True})
+                .eq("telegram_link_code", code).eq("role", "candidate").execute().data)
+        return bool(rows)
+
+    def telegram_digest(self, min_score: int) -> list[dict]:
+        return self.db.rpc("telegram_digest", {"min_score": min_score}).execute().data or []
+
+    def mark_notified(self, user_id: str) -> None:
+        self.db.table("profiles").update({"telegram_notified_at": datetime.now(timezone.utc).isoformat()}).eq("id", user_id).execute()
+
+    def stop_notifications(self, chat_id: int) -> None:
+        """Пользователь заблокировал бота — больше ему не пишем."""
+        self.db.table("profiles").update({"telegram_notify": False, "telegram_chat_id": None}).eq("telegram_chat_id", chat_id).execute()
+
     def archive_stale(self, days: int) -> int:
         result = self.db.rpc("archive_stale_vacancies", {"days": days}).execute()
         return int(result.data or 0)
@@ -638,6 +665,98 @@ def notify(text: str, post: Callable[..., object] = requests.post) -> bool:
         return False
 
 
+# ---------------------------------------------------------------------------
+# Подборка для кандидатов в Telegram
+# ---------------------------------------------------------------------------
+
+SITE_URL = "https://fastcv.ru"
+DIGEST_MIN_SCORE = 70  # не меньше этого совпадения — иначе рассылка превращается в спам
+_START = re.compile(r"^/start(?:@\w+)?\s+([A-Za-z0-9]{16,64})\s*$")
+
+
+class TelegramBot:
+    """Минимальный клиент Bot API. Токен — из секретов, в логи не попадает."""
+
+    def __init__(self, token: str, post: Callable[..., object] = requests.post):
+        self.token, self.post = token, post
+
+    def call(self, method: str, payload: dict) -> dict:
+        response = self.post(f"https://api.telegram.org/bot{self.token}/{method}", json=payload, timeout=20)
+        try:
+            body = response.json()  # type: ignore[attr-defined]
+        except ValueError:
+            body = {}
+        if not body.get("ok"):
+            raise TelegramError(int(body.get("error_code") or 0), str(body.get("description") or "")[:200])
+        return body.get("result")
+
+    def send(self, chat_id: int, text: str) -> None:
+        self.call("sendMessage", {"chat_id": chat_id, "text": text[:4000], "disable_web_page_preview": True})
+
+
+class TelegramError(Exception):
+    def __init__(self, code: int, description: str):
+        super().__init__(f"{code} {description}")
+        self.code = code
+
+
+def process_bot_updates(store: Store, bot: TelegramBot) -> int:
+    """Читает новые сообщения боту и привязывает чаты по коду /start <код>.
+    Вебхук не нужен: сборщик забирает сообщения раз в несколько часов."""
+    me = bot.call("getMe", {})
+    if me.get("username") and store.get_setting("telegram_bot_username") != me["username"]:
+        store.set_setting("telegram_bot_username", me["username"])
+
+    offset = int(store.get_setting("telegram_update_offset") or 0)
+    updates = bot.call("getUpdates", {"offset": offset, "timeout": 0, "allowed_updates": ["message"]}) or []
+    linked = 0
+    for update in updates:
+        offset = max(offset, int(update["update_id"]) + 1)
+        message = update.get("message") or {}
+        chat_id = (message.get("chat") or {}).get("id")
+        text = (message.get("text") or "").strip()
+        if not chat_id or (message.get("chat") or {}).get("type") != "private":
+            continue
+        match = _START.match(text)
+        try:
+            if match and store.link_telegram(match.group(1), chat_id):
+                linked += 1
+                bot.send(chat_id, "✅ Готово! Сюда будут приходить новые вакансии, которые подходят вам "
+                                  f"на {DIGEST_MIN_SCORE}% и больше. Отключить можно в профиле на fastcv.ru.")
+            elif text.startswith("/start"):
+                bot.send(chat_id, "Чтобы получать подходящие вакансии, нажмите «Подключить Telegram» "
+                                  "в профиле на fastcv.ru — ссылка оттуда привяжет этот чат.")
+        except TelegramError:
+            continue
+    if updates:
+        store.set_setting("telegram_update_offset", str(offset))
+    return linked
+
+
+def digest_text(items: list[dict]) -> str:
+    lines = ["🔎 Новые вакансии для вас", ""]
+    for item in items:
+        company = f" — {item['company']}" if item.get("company") else ""
+        lines.append(f"• {item['title']}{company} · совпадение {item['score']}%")
+        lines.append(f"{SITE_URL}/vacancy/{item['id']}")
+    lines += ["", f"Все подходящие: {SITE_URL}/?tab=for-you"]
+    return "\n".join(lines)
+
+
+def send_digests(store: Store, bot: TelegramBot) -> int:
+    sent = 0
+    for row in store.telegram_digest(DIGEST_MIN_SCORE):
+        try:
+            bot.send(row["chat_id"], digest_text(row["items"]))
+            store.mark_notified(row["user_id"])
+            sent += 1
+        except TelegramError as e:
+            if e.code == 403:  # бот заблокирован пользователем
+                store.stop_notifications(row["chat_id"])
+            print(f"⚠️ Подборка не доставлена: {e}")
+    return sent
+
+
 def run(store: Store, normalize: Callable[[str], VacancyAI]) -> RunSummary:
     channels = store.active_channels()
     print(f"Активных каналов: {len(channels)}")
@@ -753,6 +872,15 @@ def main() -> None:
     text = alert_text(summary)
     if text:
         notify(text)
+    token = env("TELEGRAM_BOT_TOKEN")
+    if token:
+        try:
+            bot = TelegramBot(token)
+            linked = process_bot_updates(store, bot)
+            sent = send_digests(store, bot)
+            print(f"Telegram: привязано чатов {linked}, отправлено подборок {sent}")
+        except Exception as e:  # подписка не должна ронять сбор
+            print(f"⚠️ Подписка в Telegram: {type(e).__name__}: {str(e)[:200]}")
     if (os.getenv("DAILY_REPORT") or "").lower() == "true":
         try:
             notify(daily_report_text(store.daily_stats(), summary))
