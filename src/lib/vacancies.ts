@@ -59,8 +59,8 @@ export function hiringLabel(v: Pick<Vacancy, "company_name" | "hiring_type" | "s
 
 export interface VacancyFilters {
   search: string;
-  /** Формат работы; пусто — любой. */
-  format: WorkFormat | "";
+  /** Форматы работы (можно несколько); пусто — любой. */
+  formats: WorkFormat[];
   minSalary: number;
   withSalary: boolean;
   city: string;
@@ -79,7 +79,7 @@ export const PAGE_SIZE = 30;
 /** Фильтры ленты при открытии страницы. Порядок ключей — как в Feed: по нему сравниваются JSON-строки. */
 export const DEFAULT_FILTERS: VacancyFilters = {
   search: "",
-  format: "",
+  formats: [],
   minSalary: 0,
   withSalary: false,
   city: "",
@@ -222,7 +222,7 @@ export async function fetchVacancyPage(
   const exclude = excludeIds.filter(id => UUID.test(id)).slice(0, 300);
   if (exclude.length) query = query.not("id", "in", `(${exclude.join(",")})`);
 
-  if (filters.format) query = query.eq("work_format", filters.format);
+  if (filters.formats.length) query = query.in("work_format", filters.formats);
   if (filters.direction) query = query.eq("direction", filters.direction);
   else if (filters.area) query = query.in("direction", DIRECTIONS.filter(d => d.group === filters.area).map(d => d.id));
   if (filters.levels.length) query = query.in("level", filters.levels);

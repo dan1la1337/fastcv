@@ -431,6 +431,10 @@ export type Database = {
       }
     }
     Views: {
+      vacancy_cities: {
+        Row: { city: string; vacancies: number }
+        Relationships: []
+      }
       salary_benchmarks: {
         Row: {
           all_levels: boolean
