@@ -184,6 +184,7 @@ class VacancyAI(BaseModel):
     direction: Optional[Direction]
     work_format: Optional[WorkFormat]
     hiring_type: Optional[HiringType]
+    scope_note: Optional[str]
 
 
 PROMPT = """Ты нормализатор вакансий для доски объявлений о работе.
@@ -216,6 +217,12 @@ PROMPT = """Ты нормализатор вакансий для доски о�
   ML, AI, data engineering), analytics, security, gamedev, design, product (продакт- и
   проджект-менеджмент), marketing (маркетинг, SMM, PR, реклама), content (редакторы,
   авторы, продюсеры, видео), sales, hr, support, finance, education, other;
+- scope_note: только если в одной вакансии явно смешаны обязанности нескольких разных ролей
+  (например, бэкенд-разработчик должен ещё с нуля настраивать Kubernetes и верстать интерфейсы,
+  или тестировщик одновременно DevOps и аналитик) — одно короткое предложение по-русски,
+  что именно смешано: «Кроме бэкенда — настройка Kubernetes с нуля и вёрстка на Vue».
+  Обычные смежные требования (бэкенд + SQL + Docker, фронтенд + немного Node.js) — не повод;
+  в сомнении — null;
 - contact_type и contact_value: "telegram" и username без @, либо "email" и адрес;
   если контакта нет или это только ссылка на сайт — оба null;
 - stack: ключевые технологии и инструменты из текста (Python, React, PostgreSQL, Figma…),
@@ -501,6 +508,7 @@ def process_post(post: Post, store: Store, normalize: Callable[[str], VacancyAI]
         "direction": vacancy.direction,
         "work_format": vacancy.work_format,
         "hiring_type": vacancy.hiring_type,
+        "scope_note": (vacancy.scope_note or "").strip()[:300] or None,
         "ranking_weight": 1.0,
         "source_type": "external",
     })
