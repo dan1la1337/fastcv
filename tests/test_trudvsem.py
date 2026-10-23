@@ -90,3 +90,36 @@ def test_import_stops_at_storage_cap_and_survives_region_errors():
 
     stats = trudvsem.import_trudvsem(Store(), fetch=flaky)
     assert stats["failed_regions"] == 99 and stats["saved"] == 0
+
+
+def test_direction_from_sphere():
+    def d(sphere):
+        return trudvsem.map_vacancy({**SAMPLE, "category": {"specialisation": sphere}})["direction"]
+
+    assert d("Информационные технологии, телекоммуникации, связь") is None   # решит база по названию
+    assert d("Маркетинг, реклама, PR") == "marketing"
+    assert d("Продажи, закупки, снабжение, торговля") == "sales"
+    assert d("Бухгалтерия, налоги, управленческий учет") == "finance"
+    assert d("Государственная служба, некоммерческие организации") == "other"
+    assert trudvsem.map_vacancy(SAMPLE)["direction"] is None
+
+
+def test_walk_resumes_from_region_where_budget_ran_out():
+    store, now = Store(), datetime(2026, 10, 24, 12, tzinfo=timezone.utc)
+    calls = []
+
+    def fetch(url, params):
+        calls.append((url.rsplit("/", 1)[1], params["modifiedFrom"]))
+        return {"results": {"vacancies": [{"vacancy": {**SAMPLE, "id": f"{len(calls)}-{i}"}} for i in range(100)]
+                            if len(calls) % 2 else [{"vacancy": SAMPLE}]}}
+
+    first = trudvsem.import_trudvsem(store, fetch=fetch, now=now, max_rows=303)
+    assert first["resume_region"] == 3 and trudvsem.SYNC_KEY not in store.settings
+    since = calls[0][1]
+
+    later = datetime(2026, 10, 24, 18, tzinfo=timezone.utc)
+    calls.clear()
+    second = trudvsem.import_trudvsem(store, fetch=fetch, now=later, max_rows=10_000)
+    assert calls[0] == ("0400000000000", since)          # тот же регион и та же точка отсчёта
+    assert second["resume_region"] is None
+    assert store.settings[trudvsem.SYNC_KEY] == now.isoformat() and store.settings[trudvsem.CURSOR_KEY] == ""
