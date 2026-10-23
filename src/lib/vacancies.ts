@@ -22,16 +22,35 @@ export interface Vacancy {
   level?: Level | null;
   direction?: string | null;
   work_format?: WorkFormat | null;
+  /** Кто нанимает (определяет ИИ сборщика): своя команда, аутстафф или агентство. */
+  hiring_type?: HiringType | null;
   /** Просмотры страницы вакансии (видит работодатель в своём кабинете). */
   views_count?: number;
 }
 
 /** Колонки для показа: без служебных (search_tsv, title_key, text_fingerprint, raw_hash) — они только раздувают ответ. */
 // Одной строкой-литералом: по ней supabase-js выводит тип строк ответа
-export const VACANCY_COLUMNS = "id, title, company_name, description, salary_min, salary_max, salary_currency, city, is_remote, contact_type, contact_value, created_at, posted_at, source_type, source_url, stack, employer_id, archived_at, level, direction, work_format";
+export const VACANCY_COLUMNS = "id, title, company_name, description, salary_min, salary_max, salary_currency, city, is_remote, contact_type, contact_value, created_at, posted_at, source_type, source_url, stack, employer_id, archived_at, level, direction, work_format, hiring_type";
 
 export type Level = "intern" | "junior" | "middle" | "senior" | "lead";
 export type WorkFormat = "remote" | "hybrid" | "office";
+export type HiringType = "product" | "outsource" | "agency";
+
+const HIRING_LABELS: Record<HiringType, { alone: string; withCompany: string | null }> = {
+  product: { alone: "Продуктовая компания", withCompany: null },
+  outsource: { alone: "Аутстафф или интегратор", withCompany: "аутстафф" },
+  agency: { alone: "Кадровое агентство", withCompany: "через агентство" },
+};
+
+/**
+ * Подпись «кто нанимает» под названием вакансии. Без компании — вместо неё
+ * («Кадровое агентство»), с компанией — короткое уточнение, если это не прямой наём.
+ */
+export function hiringLabel(v: Pick<Vacancy, "company_name" | "hiring_type" | "source_type">): string | null {
+  if (v.source_type === "internal" || !v.hiring_type) return null;
+  const labels = HIRING_LABELS[v.hiring_type];
+  return v.company_name ? labels.withCompany : labels.alone;
+}
 
 export interface VacancyFilters {
   search: string;

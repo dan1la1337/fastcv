@@ -161,6 +161,7 @@ Direction = Literal[
     "education", "other",
 ]
 WorkFormat = Literal["office", "hybrid", "remote"]
+HiringType = Literal["product", "outsource", "agency"]
 
 
 class VacancyAI(BaseModel):
@@ -182,6 +183,7 @@ class VacancyAI(BaseModel):
     level: Optional[Level]
     direction: Optional[Direction]
     work_format: Optional[WorkFormat]
+    hiring_type: Optional[HiringType]
 
 
 PROMPT = """Ты нормализатор вакансий для доски объявлений о работе.
@@ -194,6 +196,11 @@ PROMPT = """Ты нормализатор вакансий для доски о�
 - title: название должности, коротко;
 - company: название компании-работодателя, если оно есть в тексте, иначе null
   (не путай с названием канала или кадрового агентства, если оно не нанимает само);
+- hiring_type: кто нанимает — "product" (компания ищет человека к себе: свой продукт,
+  сервис, внутренняя команда), "outsource" (аутстафф, аутсорс, интегратор, IT-подрядчик:
+  «на проект заказчика», «на проект нашего клиента», выделенная команда под заказчика),
+  "agency" (кадровое агентство или рекрутер подбирает в другую компанию: «наш клиент
+  ищет», «для компании-партнёра»); null, если из текста не понять;
 - description: 2–3 предложения о требованиях, обязанностях и условиях, по-русски;
 - salary_min / salary_max: числа в месяц в валюте поста, если указаны, иначе null;
   «$5k» = 5000, «300к» = 300000; если указана почасовая или годовая ставка — пересчитай в месяц;
@@ -424,15 +431,21 @@ class Store:
         return int(result.data or 0)
 
     def vacancies_without_company(self, before: Optional[str], limit: int) -> list[dict]:
-        """Активные вакансии из Telegram без компании, от новых к старым (до курсора before)."""
-        q = (self.db.table("vacancies").select("id, source_post, title, description, created_at")
-             .is_("archived_at", "null").is_("company_name", "null").eq("source_type", "external"))
+        """Активные вакансии из Telegram без компании или типа нанимателя, от новых к старым
+        (до курсора before)."""
+        q = (self.db.table("vacancies")
+             .select("id, source_post, title, description, company_name, hiring_type, created_at")
+             .is_("archived_at", "null").eq("source_type", "external")
+             .or_("company_name.is.null,hiring_type.is.null"))
         if before:
             q = q.lt("created_at", before)
         return q.order("created_at", desc=True).limit(limit).execute().data or []
 
     def set_company(self, vacancy_id: str, company: str) -> None:
         self.db.table("vacancies").update({"company_name": company}).eq("id", vacancy_id).is_("company_name", "null").execute()
+
+    def set_hiring_type(self, vacancy_id: str, hiring_type: str) -> None:
+        self.db.table("vacancies").update({"hiring_type": hiring_type}).eq("id", vacancy_id).is_("hiring_type", "null").execute()
 
 
 # ---------------------------------------------------------------------------
@@ -482,6 +495,7 @@ def process_post(post: Post, store: Store, normalize: Callable[[str], VacancyAI]
         "level": vacancy.level,
         "direction": vacancy.direction,
         "work_format": vacancy.work_format,
+        "hiring_type": vacancy.hiring_type,
         "ranking_weight": 1.0,
         "source_type": "external",
     })
@@ -788,8 +802,8 @@ def backfill_companies(
     fetch: Callable[[str], str] = fetch_page,
     pause: float = 1.0,
 ) -> tuple[int, int]:
-    """Поле «компания» появилось 22.10.2026: у вакансий старше его нет. Берём исходный пост,
-    просим ИИ разобрать его ещё раз и записываем только компанию (остальные поля не трогаем).
+    """Поля «компания» (22.10.2026) и «тип нанимателя» (23.10.2026) есть не у всех вакансий. Берём исходный пост,
+    просим ИИ разобрать его ещё раз и записываем только эти два поля, если они пусты.
     У вакансий от старого сборщика нет ссылки на пост — для них разбираем заголовок и описание.
     Идёт от новых к старым; курсор в app_settings, чтобы следующий запуск продолжил дальше,
     а не разбирал заново посты, где компании нет. Возвращает (проверено, заполнено)."""
@@ -811,9 +825,11 @@ def backfill_companies(
         if len(text) >= MIN_TEXT_LEN:
             vacancy = normalize(text)  # AIUnavailable пробрасывается: курсор не сдвинется
             company = (vacancy.company or "").strip()[:200]
-            if company:
+            if company and not row.get("company_name"):
                 store.set_company(row["id"], company)
                 filled += 1
+            if vacancy.hiring_type and not row.get("hiring_type"):
+                store.set_hiring_type(row["id"], vacancy.hiring_type)
         checked += 1
         store.set_setting(BACKFILL_CURSOR_KEY, row["created_at"])
     return checked, filled
