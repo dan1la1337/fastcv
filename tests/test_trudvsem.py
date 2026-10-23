@@ -83,7 +83,10 @@ def test_import_walks_regions_with_shallow_pages_and_prunes():
 
 
 def test_import_stops_at_storage_cap_and_survives_region_errors():
-    assert "skipped" in trudvsem.import_trudvsem(Store(stored=trudvsem.MAX_STORED), fetch=lambda u, p: {})
+    full = Store(stored=trudvsem.MAX_STORED)
+    stats = trudvsem.import_trudvsem(full, fetch=lambda u, p: {})
+    # На потолке новые не берём, но устаревшие всё равно убираем — иначе застряли бы навсегда
+    assert "skipped" in stats and full.pruned == trudvsem.KEEP_DAYS and stats["removed"] == 3
 
     def flaky(url, params):
         raise trudvsem.requests.ConnectionError("down")
