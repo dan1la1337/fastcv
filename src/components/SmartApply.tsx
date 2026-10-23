@@ -202,7 +202,10 @@ export default function SmartApply({
                     if (error) {
                       toast(error.code === "23505"
                         ? "Вы уже откликались на эту вакансию."
-                        : "Не удалось отправить отклик: " + error.message, "error");
+                        : error.message.includes("apply_limit")
+                          ? "Сегодня уже 15 откликов — это лимит FastCV против рассылок. Письмо сохранено в буфере, отправить можно завтра."
+                          : "Не удалось отправить отклик: " + error.message, "error");
+                      if (error.message.includes("apply_limit")) navigator.clipboard.writeText(coverLetter).catch(() => {});
                       return;
                     }
 
