@@ -13,6 +13,8 @@ interface Application {
   cover_letter: string | null;
   hr_message: string | null;
   created_at: string;
+  /** Когда работодатель впервые открыл отклик (ставит база). */
+  viewed_at: string | null;
   vacancies: { id: string; title: string; company_name: string | null; source_type: string; source_url: string | null } | null;
 }
 
@@ -44,7 +46,7 @@ export default function CandidateApplications() {
 
       const { data } = await supabase
         .from("applications")
-        .select("id, status, hr_message, cover_letter, created_at, vacancies (id, title, company_name, source_type, source_url)")
+        .select("id, status, hr_message, cover_letter, created_at, viewed_at, vacancies (id, title, company_name, source_type, source_url)")
         .eq("candidate_id", user.id)
         .order("created_at", { ascending: false });
 
@@ -110,9 +112,16 @@ export default function CandidateApplications() {
                         {new Date(app.created_at).toLocaleDateString("ru-RU", { day: "numeric", month: "long" })}
                       </p>
                     </div>
-                    <span className={`text-xs px-3 py-1 rounded-full font-medium border w-fit shrink-0 ${status.style}`}>
-                      {status.text}
-                    </span>
+                    <div className="flex flex-col sm:items-end gap-1 shrink-0">
+                      <span className={`text-xs px-3 py-1 rounded-full font-medium border w-fit ${status.style}`}>
+                        {status.text}
+                      </span>
+                      {app.viewed_at && (
+                        <span className="text-[11px] text-neutral-500">
+                          Открыт работодателем {new Date(app.viewed_at).toLocaleString("ru-RU", { day: "numeric", month: "long", hour: "2-digit", minute: "2-digit" })}
+                        </span>
+                      )}
+                    </div>
                   </div>
 
                   {app.hr_message && (

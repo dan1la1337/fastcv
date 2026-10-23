@@ -285,6 +285,16 @@ CHECKS: list[tuple] = [
           on conflict (key) do update set value = excluded.value;
         select value from app_settings where key = 'telegram_update_offset'""",
      "service_role", None, "9"),
+    ("время просмотра отклика ставит база, а не клиент", True,
+     f"""insert into applications (vacancy_id, candidate_id, status, viewed_at)
+           select id, '{X}', 'new', '2000-01-01' from vacancies limit 1;
+         select (viewed_at is null)::text from applications where candidate_id = '{X}'""",
+     "postgres", None, "true"),
+    ("просмотр фиксируется один раз", True,
+     f"""update applications set status = 'viewed' where candidate_id = '{X}';
+         update applications set status = 'rejected', viewed_at = '2000-01-01' where candidate_id = '{X}';
+         select (viewed_at > now() - interval '1 minute')::text from applications where candidate_id = '{X}'""",
+     "postgres", None, "true"),
     ("тип нанимателя — только из списка", False,
      "update vacancies set hiring_type = 'friends' where title = 'Ext'", "service_role", None, None),
     ("у каждого правила RLS есть права на таблицу для его роли", True,

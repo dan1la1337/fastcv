@@ -57,6 +57,14 @@ const REPLY_TEMPLATES: Record<"interview_scheduled" | "rejected", (vacancy: stri
     "чей опыт ближе к задачам. Желаем удачи в поиске!",
 };
 
+/** Причина отказа в один клик (план 2.5.1): кандидат получает полезный ответ, а не безликий шаблон. */
+const REJECT_REASONS: { label: string; text: string }[] = [
+  { label: "Не хватило опыта со стеком", text: "Причина: нам нужен больше практического опыта с основным стеком вакансии." },
+  { label: "Вилка выше бюджета", text: "Причина: ваши ожидания по зарплате выше бюджета этой позиции." },
+  { label: "Взяли кандидата", text: "Причина: мы уже выбрали кандидата на эту позицию." },
+  { label: "Формат или часовой пояс", text: "Причина: не совпали формат работы или часовой пояс." },
+];
+
 const inputClass =
   "w-full px-4 py-3 bg-neutral-950 border border-neutral-800 rounded-xl text-sm text-neutral-100 focus:outline-none focus:border-blue-500";
 const labelClass = "block text-xs font-bold text-neutral-500 uppercase tracking-wider mb-2";
@@ -535,6 +543,21 @@ export default function EmployerDashboard() {
                       <p className="text-xs font-bold text-neutral-400 uppercase tracking-wider">
                         {reply.status === "interview_scheduled" ? "Приглашение на собеседование" : "Отказ"} — кандидат увидит этот текст
                       </p>
+                      {reply.status === "rejected" && (
+                        <div className="flex flex-wrap gap-2" role="group" aria-label="Причина отказа">
+                          {REJECT_REASONS.map(reason => {
+                            const base = REPLY_TEMPLATES.rejected(app.vacancies.title);
+                            const active = reply.text === `${base}\n\n${reason.text}`;
+                            return (
+                              <button key={reason.label} type="button" aria-pressed={active}
+                                onClick={() => setReply({ ...reply, text: active ? base : `${base}\n\n${reason.text}` })}
+                                className={`px-3 py-1 rounded-lg text-xs border transition-colors ${active ? "bg-blue-600 border-blue-500 text-white" : "border-neutral-700 text-neutral-300 hover:bg-neutral-800"}`}>
+                                {reason.label}
+                              </button>
+                            );
+                          })}
+                        </div>
+                      )}
                       <textarea value={reply.text} maxLength={2000} rows={4}
                         onChange={e => setReply({ ...reply, text: e.target.value })}
                         className={`${inputClass} leading-relaxed resize-y`} />
