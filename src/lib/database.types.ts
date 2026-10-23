@@ -428,7 +428,17 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      salary_benchmarks: {
+        Row: {
+          all_levels: boolean
+          direction: string
+          level: string | null
+          p25: number
+          p75: number
+          sample: number
+        }
+        Relationships: []
+      }
     }
     Functions: {
       admin_metrics: { Args: never; Returns: Json }

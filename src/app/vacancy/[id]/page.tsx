@@ -8,6 +8,8 @@ import { VACANCY_COLUMNS, formatLabel, formatSalary, levelLabel, plural, type Va
 import ApplyButton from "@/components/ApplyButton";
 import ViewCounter from "@/components/ViewCounter";
 import CompanyLine from "@/components/CompanyLine";
+import { estimateSalary, fetchSalaryBenchmarks } from "@/lib/salary";
+import SalaryEstimate from "@/components/SalaryEstimate";
 
 type Props = { params: Promise<{ id: string }> };
 
@@ -80,6 +82,7 @@ export default async function VacancyPage({ params }: Props) {
   const vacancy = await getVacancy((await params).id);
   if (!vacancy) notFound();
   const jsonLd = jobPostingJsonLd(vacancy);
+  const estimate = estimateSalary(vacancy, await fetchSalaryBenchmarks());
 
   const posted = new Date(vacancy.first_seen_at ?? vacancy.posted_at ?? vacancy.created_at).toLocaleDateString("ru-RU", {
     day: "numeric", month: "long", year: "numeric",
@@ -117,8 +120,9 @@ export default async function VacancyPage({ params }: Props) {
             </span>
             <h1 className="text-2xl sm:text-3xl font-bold text-white">{vacancy.title}</h1>
             <CompanyLine vacancy={vacancy} className="text-base text-neutral-300" />
-            <p className="text-xl font-semibold text-emerald-400">
+            <p className="text-xl font-semibold text-emerald-400 flex flex-wrap items-center gap-3">
               {formatSalary(vacancy.salary_min, vacancy.salary_max, vacancy.salary_currency)}
+              {estimate && <SalaryEstimate estimate={estimate} className="text-sm" />}
             </p>
             <p className="flex flex-wrap items-center gap-4 text-sm text-neutral-400">
               {vacancy.city && <span className="inline-flex items-center gap-1.5"><MapPin className="w-4 h-4" />{vacancy.city}</span>}

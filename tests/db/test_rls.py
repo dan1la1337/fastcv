@@ -315,6 +315,17 @@ CHECKS: list[tuple] = [
           from vacancies where title = 'Ext'""",
      "service_role", None, "2:true"),
     ("сайт НЕ читает журнал публикаций напрямую", False, "select count(*) from vacancy_sightings", "anon", None, None),
+    ("оценка зарплаты — только при 10+ похожих вакансиях с небольшим разбросом", True,
+     """insert into vacancies (title, source_type, direction, level, salary_min, salary_max, salary_currency)
+          select 'Bench ' || i, 'external', 'design', 'middle', 100000 + i * 5000, 140000 + i * 5000, 'RUB'
+            from generate_series(1, 10) i;
+        insert into vacancies (title, source_type, direction, level, salary_min, salary_currency)
+          select 'Wide ' || i, 'external', 'hr', 'junior', case when i % 2 = 0 then 30000 else 400000 end, 'RUB'
+            from generate_series(1, 12) i;
+        set role anon;
+        select string_agg(direction || ':' || coalesce(level, '*') || ':' || sample, ',' order by all_levels)
+          from salary_benchmarks where direction in ('design', 'hr')""",
+     "postgres", None, "design:middle:10,design:*:10"),
     ("тип нанимателя — только из списка", False,
      "update vacancies set hiring_type = 'friends' where title = 'Ext'", "service_role", None, None),
     ("у каждого правила RLS есть права на таблицу для его роли", True,
