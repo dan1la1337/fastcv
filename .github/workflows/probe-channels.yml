@@ -1,0 +1,44 @@
+name: Probe channels
+on:
+  push:
+    branches: ["probe/**"]
+permissions:
+  contents: write
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v7
+      - name: Probe
+        run: |
+          pip install -q requests beautifulsoup4
+          python3 - <<'PY'
+          import re, time, json, requests
+          from datetime import datetime, timezone, timedelta
+          from bs4 import BeautifulSoup
+          names = open("probe_channels.txt").read().split()
+          now = datetime.now(timezone.utc); out = []
+          for n in names:
+              row = {"u": n}
+              try:
+                  r = requests.get(f"https://t.me/s/{n}", timeout=20, allow_redirects=False, headers={"User-Agent": "Mozilla/5.0"})
+                  row["status"] = r.status_code
+                  if r.status_code == 200:
+                      s = BeautifulSoup(r.text, "html.parser")
+                      t = s.find("meta", property="og:title"); row["title"] = t["content"][:60] if t else ""
+                      times = [datetime.fromisoformat(x["datetime"]) for x in s.select(".tgme_widget_message_date time")]
+                      texts = [x.get_text(" ", strip=True) for x in s.select(".tgme_widget_message_text")]
+                      row["posts"] = len(times)
+                      row["week"] = sum(1 for x in times if now - x < timedelta(days=7))
+                      row["last"] = max(times).date().isoformat() if times else None
+                      txt = " ".join(texts)
+                      row["cyr"] = round(len(re.findall("[а-яё]", txt.lower())) / max(1, len(re.findall("[a-zа-яё]", txt.lower()))), 2)
+                      row["sample"] = (texts[-1] if texts else "")[:120]
+              except Exception as e:
+                  row["err"] = str(e)[:80]
+              out.append(row); time.sleep(0.7)
+          json.dump(out, open("probe_result.json", "w"), ensure_ascii=False, indent=0)
+          PY
+          git config user.name probe && git config user.email probe@users.noreply.github.com
+          git add probe_result.json && git commit -qm "probe result" && git push -q
