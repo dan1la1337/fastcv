@@ -20,6 +20,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   return [
     { url: SITE, changeFrequency: "hourly", priority: 1 },
+    { url: `${SITE}/jobs`, changeFrequency: "daily", priority: 0.8 },
     ...DIRECTIONS.map(d => ({ url: `${SITE}/jobs/${d.id.replace("_", "-")}`, changeFrequency: "daily" as const, priority: 0.8 })),
     ...companies.map(name => ({ url: `${SITE}/company/${encodeURIComponent(name)}`, changeFrequency: "daily" as const, priority: 0.5 })),
     ...(data ?? []).map(v => ({

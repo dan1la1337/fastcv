@@ -77,7 +77,9 @@ export default async function DirectionPage({ params }: Props) {
         )}
 
         <nav className="pt-6 border-t border-neutral-800" aria-label="Другие направления">
-          <p className="text-xs text-neutral-500 mb-3">Другие направления</p>
+          <p className="text-xs text-neutral-500 mb-3">
+            Другие направления · <Link href="/jobs" className="underline hover:text-neutral-300">все направления</Link>
+          </p>
           <div className="flex flex-wrap gap-2">
             {DIRECTIONS.filter(d => d.id !== direction.id).map(d => (
               <Link key={d.id} href={`/jobs/${d.id.replace("_", "-")}`}
