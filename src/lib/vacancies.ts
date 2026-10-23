@@ -48,6 +48,18 @@ export interface VacancyFilters {
 
 export const PAGE_SIZE = 30;
 
+/** Фильтры ленты при открытии страницы. Порядок ключей — как в Feed: по нему сравниваются JSON-строки. */
+export const DEFAULT_FILTERS: VacancyFilters = {
+  search: "",
+  format: "",
+  minSalary: 0,
+  withSalary: false,
+  city: "",
+  direction: "",
+  levels: [],
+  stack: [],
+};
+
 export interface Direction {
   id: string;
   label: string;
