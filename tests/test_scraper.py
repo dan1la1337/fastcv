@@ -589,3 +589,78 @@ def test_daily_report_lists_best_and_silent_channels():
     text = main.daily_report_text(stats)
     assert "Лучшие каналы за неделю: @c 12, @a 5" in text
     assert "Без вакансий за неделю (1): @b" in text
+# --- подборка в Telegram -------------------------------------------------------------
+
+
+class FakeBot:
+    def __init__(self, updates=None, fail_for=None):
+        self.updates, self.sent, self.fail_for = updates or [], [], fail_for or {}
+
+    def call(self, method, payload):
+        if method == "getMe":
+            return {"username": "fastcv_bot"}
+        if method == "getUpdates":
+            return [u for u in self.updates if u["update_id"] >= payload["offset"]]
+        raise AssertionError(method)
+
+    def send(self, chat_id, text):
+        if chat_id in self.fail_for:
+            raise main.TelegramError(self.fail_for[chat_id], "blocked")
+        self.sent.append((chat_id, text))
+
+
+class FakeTelegramStore:
+    def __init__(self, codes=None, digest=None):
+        self.settings, self.codes, self.linked, self.notified, self.stopped = {}, dict(codes or {}), {}, [], []
+        self.digest = digest or []
+
+    def get_setting(self, key):
+        return self.settings.get(key)
+
+    def set_setting(self, key, value):
+        self.settings[key] = value
+
+    def link_telegram(self, code, chat_id):
+        user = self.codes.pop(code, None)
+        if user:
+            self.linked[user] = chat_id
+        return bool(user)
+
+    def telegram_digest(self, min_score):
+        return self.digest
+
+    def mark_notified(self, user_id):
+        self.notified.append(user_id)
+
+    def stop_notifications(self, chat_id):
+        self.stopped.append(chat_id)
+
+
+def message(update_id, chat_id, text, chat_type="private"):
+    return {"update_id": update_id, "message": {"chat": {"id": chat_id, "type": chat_type}, "text": text}}
+
+
+def test_bot_links_chat_by_start_code_and_remembers_offset():
+    code = "a" * 32
+    store = FakeTelegramStore(codes={code: "user-1"})
+    bot = FakeBot([message(10, 555, f"/start {code}"), message(11, 556, "/start wrongcode0000000000"),
+                   message(12, 557, f"/start {code}", chat_type="group")])
+    assert main.process_bot_updates(store, bot) == 1
+    assert store.linked == {"user-1": 555}
+    assert store.settings == {"telegram_bot_username": "fastcv_bot", "telegram_update_offset": "13"}
+    assert [c for c, _ in bot.sent] == [555, 556]  # подтверждение и подсказка; группы игнорируем
+    # Следующий запуск не обрабатывает те же сообщения второй раз
+    bot.sent.clear()
+    assert main.process_bot_updates(store, bot) == 0 and not bot.sent
+
+
+def test_digest_sends_matches_and_stops_for_blocked_users():
+    items = [{"id": "v1", "title": "Python Developer", "company": "Acme", "score": 91}]
+    store = FakeTelegramStore(digest=[{"user_id": "u1", "chat_id": 1, "items": items},
+                                      {"user_id": "u2", "chat_id": 2, "items": items}])
+    bot = FakeBot(fail_for={2: 403})
+    assert main.send_digests(store, bot) == 1
+    assert store.notified == ["u1"] and store.stopped == [2]
+    text = bot.sent[0][1]
+    assert "Python Developer — Acme · совпадение 91%" in text
+    assert "https://fastcv.ru/vacancy/v1" in text

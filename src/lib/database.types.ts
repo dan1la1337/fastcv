@@ -32,6 +32,24 @@ export type Database = {
         }
         Relationships: []
       }
+      app_settings: {
+        Row: {
+          key: string
+          updated_at: string
+          value: string
+        }
+        Insert: {
+          key: string
+          updated_at?: string
+          value: string
+        }
+        Update: {
+          key?: string
+          updated_at?: string
+          value?: string
+        }
+        Relationships: []
+      }
       ai_usage: {
         Row: {
           created_at: string
@@ -210,6 +228,10 @@ export type Database = {
           resume_path: string | null
           role: string
           skills: Json | null
+          telegram_chat_id: number | null
+          telegram_link_code: string | null
+          telegram_notified_at: string | null
+          telegram_notify: boolean
           trust_score: number | null
         }
         Insert: {
@@ -225,6 +247,10 @@ export type Database = {
           resume_path?: string | null
           role: string
           skills?: Json | null
+          telegram_chat_id?: number | null
+          telegram_link_code?: string | null
+          telegram_notified_at?: string | null
+          telegram_notify?: boolean
           trust_score?: number | null
         }
         Update: {
@@ -240,6 +266,10 @@ export type Database = {
           resume_path?: string | null
           role?: string
           skills?: Json | null
+          telegram_chat_id?: number | null
+          telegram_link_code?: string | null
+          telegram_notified_at?: string | null
+          telegram_notify?: boolean
           trust_score?: number | null
         }
         Relationships: []
@@ -393,6 +423,7 @@ export type Database = {
       app_user_role: { Args: never; Returns: string }
       archive_stale_vacancies: { Args: { days?: number }; Returns: number }
       is_app_admin: { Args: never; Returns: boolean }
+      create_telegram_link_code: { Args: never; Returns: string }
       consume_ai_quota: {
         Args: { max_calls: number; quota_kind: string; window_seconds: number }
         Returns: Json
@@ -426,6 +457,11 @@ export type Database = {
         }[]
       }
       register_vacancy_view: { Args: { vacancy: string }; Returns: undefined }
+      telegram_digest: {
+        Args: { min_score?: number }
+        Returns: { chat_id: number; items: Json; user_id: string }[]
+      }
+      unlink_telegram: { Args: never; Returns: undefined }
       vacancy_direction: {
         Args: { stack?: Json; title: string }
         Returns: string

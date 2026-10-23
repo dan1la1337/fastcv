@@ -262,6 +262,27 @@ CHECKS: list[tuple] = [
         set role authenticated; set request.jwt.claims = '{"email": "Owner@Example.com"}';
         select (admin_metrics() ->> 'vacancies_total')::int > 0 and jsonb_array_length(admin_metrics() -> 'vacancies_by_day') = 14""",
      "postgres", None, "t"),
+    # --- подписка в Telegram ---
+    ("кандидат НЕ вписывает себе чужой chat_id", False,
+     "update profiles set telegram_chat_id = 42 where id = auth.uid()", "authenticated", C, None),
+    ("кандидат получает код привязки", True,
+     "select length(create_telegram_link_code())", "authenticated", C, "32"),
+    ("работодатель НЕ получает код привязки", False, "select create_telegram_link_code()", "authenticated", E, None),
+    ("кандидат включает рассылку (свой флаг можно)", True,
+     "update profiles set telegram_notify = true where id = auth.uid() returning telegram_notify", "authenticated", C, "t"),
+    ("сборщик привязывает чат по коду, рассылка собирается", True,
+     f"""update profiles set telegram_chat_id = 777 where telegram_link_code is not null;
+         update vacancies set created_at = now() where title like 'Int%';
+         select chat_id::text || ':' || jsonb_array_length(items) from telegram_digest(50)""",
+     "service_role", None, "777:1"),
+    ("пользователь НЕ вызывает рассылку", False, "select * from telegram_digest(0)", "authenticated", C, None),
+    ("аноним читает имя бота, но не другие настройки", True,
+     """insert into app_settings (key, value) values ('telegram_bot_username', 'fastcv_bot'), ('telegram_update_offset', '5') on conflict do nothing;
+        set role anon; select string_agg(key, ',') from app_settings""",
+     "postgres", None, "telegram_bot_username"),
+    ("кандидат отвязывает Telegram", True,
+     "select unlink_telegram(); select coalesce(telegram_chat_id::text, 'нет') from profiles where id = auth.uid()",
+     "authenticated", C, "нет"),
 ]
 
 

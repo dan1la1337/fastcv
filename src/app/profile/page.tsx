@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Briefcase, FileText, Loader2, LogOut, Save, Sparkles, Trash2, Upload, UserCircle } from "lucide-react";
 import type { ResumeDraft } from "@/lib/resume-draft";
+import TelegramSubscription from "@/components/TelegramSubscription";
 import { supabase, getUserRole, type UserRole } from "@/lib/supabase";
 import { DIRECTIONS, LEVELS, WORK_FORMATS, type Level, type WorkFormat } from "@/lib/vacancies";
 
@@ -372,6 +373,8 @@ export default function ProfilePage() {
               onChange={e => { const f = e.target.files?.[0]; if (f) void uploadResume(f); }} />
           </div>
         )}
+
+        {isCandidate && user && <TelegramSubscription userId={user.id} />}
       </div>
     </div>
   );
