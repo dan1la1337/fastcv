@@ -5,9 +5,10 @@ import type { User } from "@supabase/supabase-js";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import {
-  Archive, ArrowLeft, Briefcase, CheckCircle2, Eye, FileText, Loader2, Pencil, PlusCircle, RotateCcw, Send, Target, XCircle,
+  Archive, ArrowLeft, Briefcase, CheckCircle2, Eye, FileText, Loader2, Pencil, PlusCircle, RotateCcw, Send, Sparkles, Target, XCircle,
 } from "lucide-react";
 import { matchTone, type Match } from "@/lib/matching";
+import type { VacancyDraft } from "@/lib/vacancy-draft";
 import { supabase, getUserRole } from "@/lib/supabase";
 import { formatSalary, plural, type Vacancy } from "@/lib/vacancies";
 
@@ -31,10 +32,12 @@ interface VacancyForm {
   currency: string;
   city: string;
   isRemote: boolean;
+  /** Технологии через запятую. */
+  stack: string;
 }
 
 const EMPTY_FORM: VacancyForm = {
-  title: "", description: "", salaryMin: "", salaryMax: "", currency: "RUB", city: "", isRemote: false,
+  title: "", description: "", salaryMin: "", salaryMax: "", currency: "RUB", city: "", isRemote: false, stack: "",
 };
 
 const STATUS_LABELS: Record<string, string> = {
@@ -77,6 +80,10 @@ export default function EmployerDashboard() {
   // Ответ кандидату: какой отклик, какой статус и текст письма
   const [reply, setReply] = useState<{ appId: string; status: "interview_scheduled" | "rejected"; text: string } | null>(null);
   const [replying, setReplying] = useState(false);
+
+  // ИИ-помощник: заметки работодателя → черновик вакансии в форме
+  const [notes, setNotes] = useState("");
+  const [drafting, setDrafting] = useState(false);
 
   const loadData = useCallback(async (currentUser: User) => {
     const [{ data: prof }, { data: apps }, { data: own }] = await Promise.all([
@@ -137,6 +144,7 @@ export default function EmployerDashboard() {
         currency: vacancy.salary_currency ?? "RUB",
         city: vacancy.city ?? "",
         isRemote: Boolean(vacancy.is_remote),
+        stack: (vacancy.stack ?? []).join(", "),
       });
     } else {
       setEditingId(null);
@@ -166,6 +174,7 @@ export default function EmployerDashboard() {
       city: form.city.trim() || null,
       is_remote: form.isRemote,
       company_name: companyName,
+      stack: [...new Set(form.stack.split(",").map(s => s.trim()).filter(Boolean))].slice(0, 15),
     };
 
     const { error } = editingId
@@ -187,6 +196,39 @@ export default function EmployerDashboard() {
     setEditingId(null);
     setForm(EMPTY_FORM);
     setActiveTab("vacancies");
+  }
+
+  async function draftWithAi() {
+    setDrafting(true);
+    setNotice(null);
+    try {
+      const res = await fetch("/api/vacancy-draft", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ notes }),
+      });
+      const data = await res.json();
+      if (!res.ok || !data.draft) {
+        setNotice({ kind: "error", text: data.error || "Не удалось написать черновик." });
+        return;
+      }
+      const draft = data.draft as VacancyDraft;
+      setForm(prev => ({
+        ...prev,
+        title: draft.title,
+        description: draft.description,
+        salaryMin: draft.salary_min ? String(draft.salary_min) : prev.salaryMin,
+        salaryMax: draft.salary_max ? String(draft.salary_max) : prev.salaryMax,
+        city: draft.city ?? prev.city,
+        isRemote: draft.is_remote || prev.isRemote,
+        stack: draft.stack.join(", ") || prev.stack,
+      }));
+      setNotice({ kind: "ok", text: "Черновик готов — проверьте текст и опубликуйте." });
+    } catch {
+      setNotice({ kind: "error", text: "Не удалось связаться с сервером. Попробуйте ещё раз." });
+    } finally {
+      setDrafting(false);
+    }
   }
 
   async function setArchived(vacancy: Vacancy, archived: boolean) {
@@ -288,6 +330,20 @@ export default function EmployerDashboard() {
         {activeTab === "form" && (
           <div className="bg-neutral-900/50 border border-neutral-800 rounded-2xl p-6 sm:p-8 space-y-6">
             <h2 className="text-lg font-bold">{editingId ? "Редактирование вакансии" : "Новая вакансия"}</h2>
+            {!editingId && (
+              <div className="rounded-xl border border-blue-500/20 bg-blue-950/20 p-4 space-y-3">
+                <p className="text-sm text-neutral-300 flex items-center gap-2">
+                  <Sparkles className="w-4 h-4 text-blue-400" /> Опишите вакансию парой фраз — ИИ напишет полный текст
+                </p>
+                <textarea rows={3} maxLength={2000} value={notes} onChange={e => setNotes(e.target.value)}
+                  placeholder="Ищем мидл-бэкендера на Python в финтех, Django + Postgres, удалёнка, 250–300к"
+                  className={`${inputClass} resize-y`} />
+                <button type="button" onClick={draftWithAi} disabled={drafting || notes.trim().length < 15}
+                  className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold disabled:opacity-50">
+                  {drafting ? <><Loader2 className="w-4 h-4 animate-spin" /> Пишем…</> : "Написать черновик"}
+                </button>
+              </div>
+            )}
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
                 <label className={labelClass}>Название должности</label>
@@ -325,6 +381,12 @@ export default function EmployerDashboard() {
                     className="w-5 h-5 rounded bg-neutral-950 border-neutral-800 text-blue-600 focus:ring-0" />
                   <span className="text-sm text-neutral-300">Возможна удалённая работа</span>
                 </label>
+              </div>
+
+              <div>
+                <label className={labelClass}>Технологии (через запятую)</label>
+                <input type="text" placeholder="Python, Django, PostgreSQL" value={form.stack}
+                  onChange={e => setForm({ ...form, stack: e.target.value })} className={inputClass} />
               </div>
 
               <div>
