@@ -11,6 +11,15 @@ updates:
       # Мелкие обновления одним PR, мажорные — по одному
       minor-and-patch:
         update-types: [minor, patch]
+    ignore:
+      # Мажорные версии, которые ломают сборку или опережают среду: переходим вручную.
+      # TypeScript 7 и ESLint 10 не проходят lint/tsc; @types/node держим под Node 22 (Vercel, CI).
+      - dependency-name: typescript
+        update-types: [version-update:semver-major]
+      - dependency-name: eslint
+        update-types: [version-update:semver-major]
+      - dependency-name: "@types/node"
+        update-types: [version-update:semver-major]
 
   - package-ecosystem: pip
     directory: /
