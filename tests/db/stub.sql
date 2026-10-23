@@ -18,7 +18,9 @@ create function auth.jwt() returns jsonb language sql stable as $$
 $$;
 grant usage on schema public, auth to anon, authenticated, service_role;
 grant execute on function auth.uid(), auth.jwt() to anon, authenticated;
-alter default privileges in schema public grant all on tables to anon, authenticated, service_role;
+-- Как в рабочем проекте: новые таблицы получают только REFERENCES, TRIGGER, TRUNCATE —
+-- всё остальное миграции выдают явно (см. 20261023130000_explicit_table_grants.sql)
+alter default privileges in schema public grant references, trigger, truncate on tables to anon, authenticated, service_role;
 alter default privileges in schema public grant all on sequences to anon, authenticated, service_role;
 
 create schema storage;
