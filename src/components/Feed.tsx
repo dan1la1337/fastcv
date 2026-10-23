@@ -3,10 +3,10 @@
 import { useEffect, useRef, useState } from "react";
 import { supabase } from "@/lib/supabase";
 import {
-  AREAS, DEFAULT_FILTERS, DIRECTIONS, LEVELS, WORK_FORMATS, fetchVacancyPage, formatLabel, formatSalary, levelLabel, plural, PAGE_SIZE,
+  AREAS, DEFAULT_FILTERS, DIRECTIONS, freshnessLabel, LEVELS, WORK_FORMATS, fetchVacancyPage, formatLabel, formatSalary, levelLabel, plural, PAGE_SIZE,
   VACANCY_FORMS, type Area, type Level, type Vacancy, type VacancyFilters, type WorkFormat,
 } from "@/lib/vacancies";
-import { Search, MapPin, ChevronDown, ChevronRight, Sparkles, Loader2, ExternalLink, Globe, SlidersHorizontal, Briefcase, Building2, Target, Bookmark, BookmarkCheck, EyeOff, Undo2 } from "lucide-react";
+import { Clock, Search, MapPin, ChevronDown, ChevronRight, Sparkles, Loader2, ExternalLink, Globe, SlidersHorizontal, Briefcase, Building2, Target, Bookmark, BookmarkCheck, EyeOff, Undo2 } from "lucide-react";
 import { fetchMarked, fetchMarks, setMark, type MarkKind } from "@/lib/marks";
 import { toast } from "@/components/Toaster";
 import { fetchMatches, fetchRecommended, matchTone, type Match } from "@/lib/matching";
@@ -307,21 +307,22 @@ export default function Feed({ initialRows, initialTotal }: { initialRows: Vacan
             </h2>
             <CompanyLine vacancy={item} className="text-sm text-neutral-400 mt-0.5" />
             <p className="text-base font-semibold text-emerald-400 mt-1">{formatSalary(item.salary_min, item.salary_max, item.salary_currency)}</p>
-            {(item.city || item.work_format || item.is_remote || item.level || match) && (
-              <p className="flex flex-wrap items-center gap-3 text-xs text-neutral-400 mt-2">
-                {match && (
-                  <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-md border font-semibold ${matchTone(match.score)}`}
-                    title="Насколько вакансия подходит вашему профилю">
-                    <Target className="w-3.5 h-3.5" />Совпадение {match.score}%
-                  </span>
-                )}
-                {item.level && <span className="inline-flex items-center gap-1"><Briefcase className="w-3.5 h-3.5" />{levelLabel(item.level)}</span>}
-                {item.city && <span className="inline-flex items-center gap-1"><MapPin className="w-3.5 h-3.5" />{item.city}</span>}
-                {item.work_format === "remote" || (!item.work_format && item.is_remote)
-                  ? <span className="inline-flex items-center gap-1"><Globe className="w-3.5 h-3.5" />Удалённо</span>
-                  : item.work_format && <span className="inline-flex items-center gap-1"><Building2 className="w-3.5 h-3.5" />{formatLabel(item.work_format)}</span>}
-              </p>
-            )}
+            <p className="flex flex-wrap items-center gap-3 text-xs text-neutral-400 mt-2">
+              {match && (
+                <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-md border font-semibold ${matchTone(match.score)}`}
+                  title="Насколько вакансия подходит вашему профилю">
+                  <Target className="w-3.5 h-3.5" />Совпадение {match.score}%
+                </span>
+              )}
+              {item.level && <span className="inline-flex items-center gap-1"><Briefcase className="w-3.5 h-3.5" />{levelLabel(item.level)}</span>}
+              {item.city && <span className="inline-flex items-center gap-1"><MapPin className="w-3.5 h-3.5" />{item.city}</span>}
+              {item.work_format === "remote" || (!item.work_format && item.is_remote)
+                ? <span className="inline-flex items-center gap-1"><Globe className="w-3.5 h-3.5" />Удалённо</span>
+                : item.work_format && <span className="inline-flex items-center gap-1"><Building2 className="w-3.5 h-3.5" />{formatLabel(item.work_format)}</span>}
+              <span className="inline-flex items-center gap-1" title="Когда вакансию впервые опубликовали и во скольких каналах" suppressHydrationWarning>
+                <Clock className="w-3.5 h-3.5" />{freshnessLabel(item)}
+              </span>
+            </p>
           </div>
 
           <button

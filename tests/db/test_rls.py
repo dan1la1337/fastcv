@@ -306,6 +306,15 @@ CHECKS: list[tuple] = [
          update applications set status = 'rejected', viewed_at = '2000-01-01' where candidate_id = '{X}';
          select (viewed_at > now() - interval '1 minute')::text from applications where candidate_id = '{X}'""",
      "postgres", None, "true"),
+    ("повторная публикация в другом канале учитывается в свежести", True,
+     """insert into vacancy_sightings (source_post, vacancy_id, channel, posted_at)
+          select 'chan_a/1', id, 'chan_a', now() - interval '3 days' from vacancies where title = 'Ext';
+        insert into vacancy_sightings (source_post, vacancy_id, channel, posted_at)
+          select 'chan_b/7', id, 'chan_b', now() from vacancies where title = 'Ext';
+        select channels_count::text || ':' || (first_seen_at < now() - interval '2 days')::text
+          from vacancies where title = 'Ext'""",
+     "service_role", None, "2:true"),
+    ("сайт НЕ читает журнал публикаций напрямую", False, "select count(*) from vacancy_sightings", "anon", None, None),
     ("тип нанимателя — только из списка", False,
      "update vacancies set hiring_type = 'friends' where title = 'Ext'", "service_role", None, None),
     ("у каждого правила RLS есть права на таблицу для его роли", True,

@@ -54,26 +54,34 @@ class FakeStore:
         self.inserted: list[dict] = []
         self.channel_updates: dict[str, dict] = {}
         self.rows = rows or []
+        self.sightings: list[tuple[str, str]] = []
 
     def active_channels(self):
         return self.rows
 
     def is_known(self, post, raw_hash, fingerprint):
-        return post.key in self.known or raw_hash in self.known or fingerprint in self.known
+        if post.key in self.known or raw_hash in self.known or fingerprint in self.known:
+            return "known-vacancy"
+        return None
 
     def find_duplicate(self, key, company, contact):
         self.dup_checks.append((key, company, contact))
-        return any(v["title_key"] == key and ((company and (v["company_name"] or "").lower() == company.lower())
-                                              or (contact and (v["contact_value"] or "").lower() == contact.lower()))
-                   for v in self.inserted)
+        return next((v["id"] for v in self.inserted
+                     if v["title_key"] == key and ((company and (v["company_name"] or "").lower() == company.lower())
+                                                   or (contact and (v["contact_value"] or "").lower() == contact.lower()))),
+                    None)
 
     def insert_vacancy(self, payload):
         if payload["source_post"] in self.known:
-            return False
+            return None
         self.known.add(payload["source_post"])
         self.known.add(payload["text_fingerprint"])
-        self.inserted.append({**payload, "title_key": main.title_key(payload["title"])})
-        return True
+        vacancy_id = f"v{len(self.inserted) + 1}"
+        self.inserted.append({**payload, "id": vacancy_id, "title_key": main.title_key(payload["title"])})
+        return vacancy_id
+
+    def add_sighting(self, vacancy_id, post):
+        self.sightings.append((vacancy_id, post.key))
 
     def update_channel(self, username, fields):
         self.channel_updates[username] = fields
@@ -565,7 +573,7 @@ def test_normalized_fields_are_saved():
 def test_duplicate_query_escapes_values():
     log = []
     db = type("DB", (), {"table": lambda self, t: FakeQuery(log, data=[])})()
-    assert main.Store(db).find_duplicate("qa", 'Acme_100%, "Ltd"', None) is False
+    assert main.Store(db).find_duplicate("qa", 'Acme_100%, "Ltd"', None) is None
     or_args = [args[0] for name, args in log if name == "or_"]
     assert or_args == [r'company_name.ilike."Acme\\_100\\%, \"Ltd\""']
 
@@ -573,7 +581,7 @@ def test_duplicate_query_escapes_values():
 def test_duplicate_check_skipped_without_company_or_contact():
     log = []
     db = type("DB", (), {"table": lambda self, t: FakeQuery(log, data=[{"id": 1}])})()
-    assert main.Store(db).find_duplicate("qa engineer", None, None) is False
+    assert main.Store(db).find_duplicate("qa engineer", None, None) is None
     assert not log
 
 
@@ -762,3 +770,25 @@ def test_hiring_type_saved_with_new_vacancy():
     store = FakeStore()
     assert process_post(post(), store, lambda t: job(hiring_type="agency")) == "saved"
     assert store.inserted[0]["hiring_type"] == "agency"
+
+
+def test_every_publication_is_recorded_for_freshness():
+    store = FakeStore()
+    text = "Ищем Python-разработчика в команду Acme, удалённо, пишите @hr_lead"
+    first = Post("chan_a", 1, text, "2026-10-20T10:00:00+00:00", "https://t.me/chan_a/1")
+    same_text = Post("chan_b", 7, text, "2026-10-22T10:00:00+00:00", "https://t.me/chan_b/7")
+    reworded = Post("chan_c", 3, "Acme ищет Python-разработчика, удалёнка. Контакт @hr_lead", None, "https://t.me/chan_c/3")
+    assert process_post(first, store, lambda t: job(company="Acme")) == "saved"
+    assert process_post(same_text, store, lambda t: job(company="Acme")) == "duplicate"
+    assert process_post(reworded, store, lambda t: job(company="Acme")) == "duplicate"
+    assert store.sightings == [("v1", "chan_a/1"), ("known-vacancy", "chan_b/7"), ("v1", "chan_c/3")]
+
+
+def test_sighting_failure_does_not_lose_the_vacancy():
+    class Flaky(FakeStore):
+        def add_sighting(self, vacancy_id, post):
+            raise RuntimeError("db down")
+
+    store = Flaky()
+    assert process_post(post(), store, lambda t: job()) == "saved"
+    assert len(store.inserted) == 1

@@ -22,6 +22,9 @@ export interface Vacancy {
   level?: Level | null;
   direction?: string | null;
   work_format?: WorkFormat | null;
+  /** Когда вакансию впервые заметили (самая ранняя публикация) и во скольких каналах она выходила. */
+  first_seen_at?: string | null;
+  channels_count?: number;
   /** Кто нанимает (определяет ИИ сборщика): своя команда, аутстафф или агентство. */
   hiring_type?: HiringType | null;
   /** Просмотры страницы вакансии (видит работодатель в своём кабинете). */
@@ -30,7 +33,7 @@ export interface Vacancy {
 
 /** Колонки для показа: без служебных (search_tsv, title_key, text_fingerprint, raw_hash) — они только раздувают ответ. */
 // Одной строкой-литералом: по ней supabase-js выводит тип строк ответа
-export const VACANCY_COLUMNS = "id, title, company_name, description, salary_min, salary_max, salary_currency, city, is_remote, contact_type, contact_value, created_at, posted_at, source_type, source_url, stack, employer_id, archived_at, level, direction, work_format, hiring_type";
+export const VACANCY_COLUMNS = "id, title, company_name, description, salary_min, salary_max, salary_currency, city, is_remote, contact_type, contact_value, created_at, posted_at, source_type, source_url, stack, employer_id, archived_at, level, direction, work_format, hiring_type, first_seen_at, channels_count";
 
 export type Level = "intern" | "junior" | "middle" | "senior" | "lead";
 export type WorkFormat = "remote" | "hybrid" | "office";
@@ -275,6 +278,25 @@ export function plural(count: number, forms: [string, string, string]): string {
 }
 
 export const VACANCY_FORMS: [string, string, string] = ["вакансия", "вакансии", "вакансий"];
+
+const DAY_MS = 864e5;
+
+/**
+ * Индекс свежести (план 2.5.1): «сегодня · в 3 каналах». Возраст — от самой ранней
+ * публикации, каналы — только для вакансий из Telegram.
+ */
+export function freshnessLabel(
+  v: Pick<Vacancy, "first_seen_at" | "posted_at" | "created_at" | "channels_count" | "source_type">,
+  now: number = Date.now(),
+): string {
+  const since = Date.parse(v.first_seen_at ?? v.posted_at ?? v.created_at);
+  const days = Number.isFinite(since) ? Math.max(0, Math.floor((now - since) / DAY_MS)) : 0;
+  const age = days === 0 ? "сегодня" : days === 1 ? "вчера" : `${days} ${plural(days, ["день", "дня", "дней"])} назад`;
+  const channels = v.source_type === "external" && (v.channels_count ?? 1) > 1
+    ? ` · в ${v.channels_count} ${plural(v.channels_count!, ["канале", "каналах", "каналах"])}`
+    : "";
+  return age + channels;
+}
 
 /** Ссылка на страницу компании по её названию. */
 export function companyHref(name: string): string {

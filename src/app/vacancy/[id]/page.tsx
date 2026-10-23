@@ -2,9 +2,9 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { cache } from "react";
-import { ArrowLeft, Briefcase, Building2, Calendar, ExternalLink, Globe, MapPin } from "lucide-react";
+import { ArrowLeft, Briefcase, Building2, Calendar, ExternalLink, Globe, MapPin, Megaphone } from "lucide-react";
 import { supabase } from "@/lib/supabase";
-import { VACANCY_COLUMNS, formatLabel, formatSalary, levelLabel, type Vacancy } from "@/lib/vacancies";
+import { VACANCY_COLUMNS, formatLabel, formatSalary, levelLabel, plural, type Vacancy } from "@/lib/vacancies";
 import ApplyButton from "@/components/ApplyButton";
 import ViewCounter from "@/components/ViewCounter";
 import CompanyLine from "@/components/CompanyLine";
@@ -81,7 +81,7 @@ export default async function VacancyPage({ params }: Props) {
   if (!vacancy) notFound();
   const jsonLd = jobPostingJsonLd(vacancy);
 
-  const posted = new Date(vacancy.posted_at ?? vacancy.created_at).toLocaleDateString("ru-RU", {
+  const posted = new Date(vacancy.first_seen_at ?? vacancy.posted_at ?? vacancy.created_at).toLocaleDateString("ru-RU", {
     day: "numeric", month: "long", year: "numeric",
   });
 
@@ -127,6 +127,11 @@ export default async function VacancyPage({ params }: Props) {
                 ? <span className="inline-flex items-center gap-1.5"><Globe className="w-4 h-4" />Удалённо</span>
                 : vacancy.work_format && <span className="inline-flex items-center gap-1.5"><Building2 className="w-4 h-4" />{formatLabel(vacancy.work_format)}</span>}
               <span className="inline-flex items-center gap-1.5"><Calendar className="w-4 h-4" />{posted}</span>
+              {vacancy.source_type === "external" && (vacancy.channels_count ?? 1) > 1 && (
+                <span className="inline-flex items-center gap-1.5" title="Одну вакансию часто публикуют в нескольких каналах — мы показываем её один раз">
+                  <Megaphone className="w-4 h-4" />в {vacancy.channels_count} {plural(vacancy.channels_count!, ["канале", "каналах", "каналах"])}
+                </span>
+              )}
             </p>
           </header>
 

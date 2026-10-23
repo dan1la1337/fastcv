@@ -335,13 +335,14 @@ class Store:
                 .order("last_parsed_at", nullsfirst=True).order("username")
                 .execute().data)
 
-    def is_known(self, post: Post, raw_hash: str, fingerprint: str) -> bool:
+    def is_known(self, post: Post, raw_hash: str, fingerprint: str) -> Optional[str]:
+        """id уже сохранённой вакансии с этим постом или тем же текстом, иначе None."""
         rows = (self.db.table("vacancies").select("id")
                 .or_(f'source_post.eq."{post.key}",raw_hash.eq.{raw_hash},text_fingerprint.eq.{fingerprint}')
                 .limit(1).execute().data)
-        return bool(rows)
+        return rows[0]["id"] if rows else None
 
-    def find_duplicate(self, key: str, company: Optional[str], contact: Optional[str]) -> bool:
+    def find_duplicate(self, key: str, company: Optional[str], contact: Optional[str]) -> Optional[str]:
         """Та же должность у той же компании или с тем же контактом за последние DUPLICATE_DAYS:
         одну вакансию часто публикуют в нескольких каналах разным текстом."""
         conditions = []
@@ -350,22 +351,29 @@ class Store:
         if contact:
             conditions.append(f"contact_value.ilike.{_quoted(_like_escape(contact))}")
         if not key or not conditions:
-            return False
+            return None
         since = (datetime.now(timezone.utc) - timedelta(days=DUPLICATE_DAYS)).isoformat()
         rows = (self.db.table("vacancies").select("id")
                 .is_("archived_at", "null").eq("title_key", key).gte("created_at", since)
                 .or_(",".join(conditions)).limit(1).execute().data)
-        return bool(rows)
+        return rows[0]["id"] if rows else None
 
-    def insert_vacancy(self, payload: dict) -> bool:
-        """False, если такая вакансия уже есть (гонка или повторный пост)."""
+    def insert_vacancy(self, payload: dict) -> Optional[str]:
+        """id новой вакансии; None, если такая уже есть (гонка или повторный пост)."""
         try:
-            self.db.table("vacancies").insert(payload).execute()
-            return True
+            rows = self.db.table("vacancies").insert(payload).execute().data
+            return rows[0]["id"] if rows else None
         except Exception as e:  # postgrest.APIError
             if getattr(e, "code", None) == "23505":
-                return False
+                return None
             raise
+
+    def add_sighting(self, vacancy_id: str, post: Post) -> None:
+        """Отметить, что вакансия появилась в этом посте (индекс свежести). Повтор — без ошибки."""
+        self.db.table("vacancy_sightings").upsert(
+            {"source_post": post.key, "vacancy_id": vacancy_id, "channel": post.channel, "posted_at": post.posted_at},
+            on_conflict="source_post", ignore_duplicates=True,
+        ).execute()
 
     def update_channel(self, username: str, fields: dict) -> None:
         self.db.table("channels").update(fields).eq("username", username).execute()
@@ -454,7 +462,9 @@ def process_post(post: Post, store: Store, normalize: Callable[[str], VacancyAI]
 
     raw_hash = hashlib.sha256(post.text.encode("utf-8")).hexdigest()
     fingerprint = text_fingerprint(post.text)
-    if store.is_known(post, raw_hash, fingerprint):
+    known = store.is_known(post, raw_hash, fingerprint)
+    if known:
+        note_sighting(store, known, post)
         return "duplicate"
 
     vacancy = normalize(post.text)  # AIUnavailable пробрасывается наверх
@@ -464,7 +474,9 @@ def process_post(post: Post, store: Store, normalize: Callable[[str], VacancyAI]
     title = vacancy.title.strip()[:200]
     company = (vacancy.company or "").strip()[:200] or None
     contact = (vacancy.contact_value or "").lstrip("@") or None
-    if store.find_duplicate(title_key(title), company, contact):
+    duplicate = store.find_duplicate(title_key(title), company, contact)
+    if duplicate:
+        note_sighting(store, duplicate, post)
         return "duplicate"
 
     saved = store.insert_vacancy({
@@ -492,7 +504,18 @@ def process_post(post: Post, store: Store, normalize: Callable[[str], VacancyAI]
         "ranking_weight": 1.0,
         "source_type": "external",
     })
-    return "saved" if saved else "duplicate"
+    if not saved:
+        return "duplicate"
+    note_sighting(store, saved, post)
+    return "saved"
+
+
+def note_sighting(store: Store, vacancy_id: str, post: Post) -> None:
+    """Запись для индекса свежести. Её сбой не должен терять саму вакансию."""
+    try:
+        store.add_sighting(vacancy_id, post)
+    except Exception as e:  # noqa: BLE001 — сеть, права, гонка
+        print(f"⚠️ Не удалось отметить публикацию {post.key}: {type(e).__name__}")
 
 
 @dataclass
