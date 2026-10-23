@@ -5,6 +5,7 @@ import type { Database } from "@/lib/database.types";
 
 /** Разделы только для вошедших и роль, которой они принадлежат (null — любая). */
 const PROTECTED: { prefix: string; role: "candidate" | "employer" | null; elsewhere: string }[] = [
+  { prefix: "/admin", role: null, elsewhere: "/" },
   { prefix: "/employer", role: "employer", elsewhere: "/applications" },
   { prefix: "/applications", role: "candidate", elsewhere: "/employer" },
   { prefix: "/profile", role: null, elsewhere: "/" },

@@ -17,6 +17,21 @@ export type Database = {
   }
   public: {
     Tables: {
+      app_admins: {
+        Row: {
+          created_at: string
+          email: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+        }
+        Relationships: []
+      }
       ai_usage: {
         Row: {
           created_at: string
@@ -374,8 +389,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      admin_metrics: { Args: never; Returns: Json }
       app_user_role: { Args: never; Returns: string }
       archive_stale_vacancies: { Args: { days?: number }; Returns: number }
+      is_app_admin: { Args: never; Returns: boolean }
       consume_ai_quota: {
         Args: { max_calls: number; quota_kind: string; window_seconds: number }
         Returns: Json

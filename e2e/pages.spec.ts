@@ -13,7 +13,7 @@ test("несуществующая вакансия — 404", async ({ page }) =
   expect(response?.status()).toBe(404);
 });
 
-for (const path of ["/profile", "/applications", "/employer", "/welcome"]) {
+for (const path of ["/profile", "/applications", "/employer", "/welcome", "/admin"]) {
   test(`${path} без входа ведёт на вход и запоминает, куда шли`, async ({ page }) => {
     await page.goto(path);
     await expect(page).toHaveURL(new RegExp(`/login\\?next=${encodeURIComponent(path)}$`));
