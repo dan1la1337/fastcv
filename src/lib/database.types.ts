@@ -184,6 +184,11 @@ export type Database = {
           description: string | null
           id: string
           name: string
+          pref_city: string | null
+          pref_directions: string[]
+          pref_format: string | null
+          pref_level: string | null
+          pref_salary: number | null
           resume_path: string | null
           role: string
           skills: Json | null
@@ -194,6 +199,11 @@ export type Database = {
           description?: string | null
           id?: string
           name: string
+          pref_city?: string | null
+          pref_directions?: string[]
+          pref_format?: string | null
+          pref_level?: string | null
+          pref_salary?: number | null
           resume_path?: string | null
           role: string
           skills?: Json | null
@@ -204,6 +214,11 @@ export type Database = {
           description?: string | null
           id?: string
           name?: string
+          pref_city?: string | null
+          pref_directions?: string[]
+          pref_format?: string | null
+          pref_level?: string | null
+          pref_salary?: number | null
           resume_path?: string | null
           role?: string
           skills?: Json | null
@@ -330,7 +345,25 @@ export type Database = {
         Args: { max_calls: number; quota_kind: string; window_seconds: number }
         Returns: Json
       }
+      my_vacancy_matches: {
+        Args: { ids: string[] }
+        Returns: {
+          id: string
+          matched: Json
+          missing: Json
+          score: number
+        }[]
+      }
       normalize_city: { Args: { city: string }; Returns: string }
+      recommended_vacancies: {
+        Args: { page?: number; page_size?: number }
+        Returns: {
+          id: string
+          matched: Json
+          missing: Json
+          score: number
+        }[]
+      }
       vacancy_direction: {
         Args: { stack?: Json; title: string }
         Returns: string
@@ -338,6 +371,13 @@ export type Database = {
       vacancy_level: {
         Args: { description?: string; title: string }
         Returns: string
+      }
+      vacancy_match: {
+        Args: {
+          p: Database["public"]["Tables"]["profiles"]["Row"]
+          v: Database["public"]["Tables"]["vacancies"]["Row"]
+        }
+        Returns: Json
       }
       vacancy_work_format: {
         Args: {
