@@ -226,6 +226,35 @@ export type Database = {
         }
         Relationships: []
       }
+      vacancy_marks: {
+        Row: {
+          created_at: string
+          kind: string
+          user_id: string
+          vacancy_id: string
+        }
+        Insert: {
+          created_at?: string
+          kind: string
+          user_id: string
+          vacancy_id: string
+        }
+        Update: {
+          created_at?: string
+          kind?: string
+          user_id?: string
+          vacancy_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vacancy_marks_vacancy_id_fkey"
+            columns: ["vacancy_id"]
+            isOneToOne: false
+            referencedRelation: "vacancies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       vacancies: {
         Row: {
           archived_at: string | null

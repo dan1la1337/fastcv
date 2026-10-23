@@ -169,14 +169,21 @@ export function salaryCondition(minSalary: number, withSalary: boolean): string 
 
 // --- запросы ----------------------------------------------------------------
 
+const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
 export async function fetchVacancyPage(
   filters: VacancyFilters,
   page: number,
+  /** Вакансии, которые пользователь скрыл из ленты. */
+  excludeIds: string[] = [],
 ): Promise<{ rows: Vacancy[]; total: number }> {
   let query = supabase
     .from("vacancies")
     .select(VACANCY_COLUMNS, { count: "exact" })
     .is("archived_at", null);
+
+  const exclude = excludeIds.filter(id => UUID.test(id)).slice(0, 300);
+  if (exclude.length) query = query.not("id", "in", `(${exclude.join(",")})`);
 
   if (filters.format) query = query.eq("work_format", filters.format);
   if (filters.direction) query = query.eq("direction", filters.direction);

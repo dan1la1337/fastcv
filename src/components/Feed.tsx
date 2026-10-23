@@ -6,7 +6,9 @@ import {
   DEFAULT_FILTERS, DIRECTIONS, LEVELS, WORK_FORMATS, fetchVacancyPage, formatLabel, formatSalary, levelLabel, plural, PAGE_SIZE,
   VACANCY_FORMS, type Level, type Vacancy, type VacancyFilters, type WorkFormat,
 } from "@/lib/vacancies";
-import { Search, MapPin, ChevronDown, ChevronRight, Sparkles, Loader2, ExternalLink, Globe, SlidersHorizontal, Briefcase, Building2, Target } from "lucide-react";
+import { Search, MapPin, ChevronDown, ChevronRight, Sparkles, Loader2, ExternalLink, Globe, SlidersHorizontal, Briefcase, Building2, Target, Bookmark, BookmarkCheck, EyeOff, Undo2 } from "lucide-react";
+import { fetchMarked, fetchMarks, setMark, type MarkKind } from "@/lib/marks";
+import { toast } from "@/components/Toaster";
 import { fetchMatches, fetchRecommended, matchTone, type Match } from "@/lib/matching";
 import type { Tables } from "@/lib/database.types";
 import type { User } from "@supabase/supabase-js";
@@ -29,7 +31,14 @@ export default function Feed({ initialRows, initialTotal }: { initialRows: Vacan
   const [userProfile, setUserProfile] = useState<Tables<"profiles"> | null>(null);
 
   // «Для вас»: подборка по профилю кандидата и процент совпадения на карточках
-  const [mode, setMode] = useState<"all" | "for-you">("all");
+  const [mode, setMode] = useState<"all" | "for-you" | "saved">("all");
+
+  // Избранное и скрытые: отметки пользователя на вакансиях
+  const [marks, setMarks] = useState<Map<string, MarkKind>>(new Map());
+  const hiddenRef = useRef<string[]>([]);
+  const [savedList, setSavedList] = useState<Vacancy[]>([]);
+  const [hiddenList, setHiddenList] = useState<Vacancy[]>([]);
+  const [savedLoading, setSavedLoading] = useState(false);
   const [matches, setMatches] = useState<Record<string, Match>>({});
   const requestedMatches = useRef(new Set<string>());
   const [recommended, setRecommended] = useState<Vacancy[]>([]);
@@ -98,7 +107,7 @@ export default function Feed({ initialRows, initialTotal }: { initialRows: Vacan
       setLoading(true);
       setLoadError(null);
       try {
-        const { rows, total } = await fetchVacancyPage(JSON.parse(filtersKey), 0);
+        const { rows, total } = await fetchVacancyPage(JSON.parse(filtersKey), 0, hiddenRef.current);
         if (id !== requestId.current) return; // пришёл ответ на устаревшие фильтры
         setVacancies(rows);
         setTotal(total);
@@ -116,7 +125,7 @@ export default function Feed({ initialRows, initialTotal }: { initialRows: Vacan
     const id = requestId.current;
     setLoadingMore(true);
     try {
-      const { rows, total } = await fetchVacancyPage(filters, page + 1);
+      const { rows, total } = await fetchVacancyPage(filters, page + 1, hiddenRef.current);
       if (id !== requestId.current) return;
       setVacancies(prev => [...prev, ...rows.filter(r => !prev.some(p => p.id === r.id))]);
       setTotal(total);
@@ -145,6 +154,53 @@ export default function Feed({ initialRows, initialTotal }: { initialRows: Vacan
       ids.forEach(id => requestedMatches.current.delete(id));
     });
   }, [isCandidate, hasPrefs, vacancies]);
+
+  // Отметки загружаем один раз после входа; дальше меняем локально вместе с базой
+  useEffect(() => {
+    if (!isCandidate) return;
+    fetchMarks().then(found => {
+      setMarks(found);
+      hiddenRef.current = [...found].filter(([, kind]) => kind === "hidden").map(([id]) => id);
+    }).catch(() => {});
+  }, [isCandidate]);
+
+  async function toggleMark(item: Vacancy, kind: MarkKind) {
+    if (!user) return;
+    const next = marks.get(item.id) === kind ? null : kind;
+    const before = marks;
+    const updated = new Map(marks);
+    if (next) updated.set(item.id, next); else updated.delete(item.id);
+    setMarks(updated);
+    hiddenRef.current = [...updated].filter(([, k]) => k === "hidden").map(([id]) => id);
+    if (next === "saved") setSavedList(prev => [item, ...prev.filter(v => v.id !== item.id)]);
+    if (next !== "saved") setSavedList(prev => prev.filter(v => v.id !== item.id));
+    if (next === "hidden") setHiddenList(prev => [item, ...prev.filter(v => v.id !== item.id)]);
+    if (next !== "hidden") setHiddenList(prev => prev.filter(v => v.id !== item.id));
+    try {
+      await setMark(user.id, item.id, next);
+      if (next === "hidden") toast("Вакансия скрыта. Вернуть можно во вкладке «Избранное».", "info");
+      if (next === "saved") toast("Добавлено в избранное.", "ok");
+    } catch {
+      setMarks(before);
+      hiddenRef.current = [...before].filter(([, k]) => k === "hidden").map(([id]) => id);
+      toast("Не удалось сохранить отметку. Попробуйте ещё раз.", "error");
+    }
+  }
+
+  async function showSaved() {
+    setMode("saved");
+    setSavedLoading(true);
+    setLoadError(null);
+    try {
+      const [saved, hidden] = await Promise.all([fetchMarked("saved"), fetchMarked("hidden")]);
+      setSavedList(saved);
+      setHiddenList(hidden);
+    } catch {
+      setLoadError("Не удалось загрузить избранное. Обновите страницу.");
+    } finally {
+      setSavedLoading(false);
+    }
+  }
 
   async function loadRecommended(nextPage: number) {
     setRecLoading(true);
@@ -180,8 +236,10 @@ export default function Feed({ initialRows, initialTotal }: { initialRows: Vacan
       : "bg-neutral-950 border-neutral-700 text-neutral-400 hover:border-neutral-500 hover:text-neutral-200"}`;
 
   const forYou = mode === "for-you";
-  const list = forYou ? recommended : vacancies;
-  const listLoading = forYou ? recLoading && recommended.length === 0 : loading;
+  const savedMode = mode === "saved";
+  const notHidden = (v: Vacancy) => marks.get(v.id) !== "hidden";
+  const list = savedMode ? savedList : (forYou ? recommended : vacancies).filter(notHidden);
+  const listLoading = savedMode ? savedLoading : forYou ? recLoading && recommended.length === 0 : loading;
 
   const card = (item: Vacancy) => {
     // Без заполненного профиля оценка у всех одинаковая — не показываем её
@@ -242,23 +300,45 @@ export default function Feed({ initialRows, initialTotal }: { initialRows: Vacan
           </p>
         )}
 
-        {(item.stack?.length || item.source_url) ? (
+        {(item.stack?.length || item.source_url || isCandidate) ? (
           <div className="flex flex-wrap items-center gap-2">
             {item.stack?.slice(0, 8).map(tech => (
               <span key={tech} className="text-[11px] px-2 py-0.5 rounded-md bg-neutral-800/80 border border-neutral-700/60 text-neutral-300">
                 {tech}
               </span>
             ))}
-            {item.source_url && (
-              <a
-                href={item.source_url}
-                target="_blank"
-                rel="noreferrer"
-                className="ml-auto inline-flex items-center gap-1 text-xs text-neutral-500 hover:text-blue-400 transition-colors"
-              >
-                Пост в Telegram <ExternalLink className="w-3 h-3" />
-              </a>
-            )}
+            <span className="ml-auto inline-flex items-center gap-3">
+              {isCandidate && (
+                <>
+                  <button
+                    onClick={() => toggleMark(item, "saved")}
+                    aria-pressed={marks.get(item.id) === "saved"}
+                    className={`inline-flex items-center gap-1 text-xs transition-colors ${marks.get(item.id) === "saved" ? "text-amber-300" : "text-neutral-500 hover:text-amber-300"}`}
+                  >
+                    {marks.get(item.id) === "saved" ? <BookmarkCheck className="w-3.5 h-3.5" /> : <Bookmark className="w-3.5 h-3.5" />}
+                    {marks.get(item.id) === "saved" ? "В избранном" : "В избранное"}
+                  </button>
+                  {!savedMode && (
+                    <button
+                      onClick={() => toggleMark(item, "hidden")}
+                      className="inline-flex items-center gap-1 text-xs text-neutral-500 hover:text-neutral-300 transition-colors"
+                    >
+                      <EyeOff className="w-3.5 h-3.5" /> Скрыть
+                    </button>
+                  )}
+                </>
+              )}
+              {item.source_url && (
+                <a
+                  href={item.source_url}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="inline-flex items-center gap-1 text-xs text-neutral-500 hover:text-blue-400 transition-colors"
+                >
+                  Пост в Telegram <ExternalLink className="w-3 h-3" />
+                </a>
+              )}
+            </span>
           </div>
         ) : null}
       </div>
@@ -462,17 +542,19 @@ export default function Feed({ initialRows, initialTotal }: { initialRows: Vacan
         <section className="lg:col-span-3 space-y-4">
           {isCandidate && (
             <div className="flex items-center gap-2" role="tablist" aria-label="Какие вакансии показать">
-              {([["all", "Все вакансии"], ["for-you", "Для вас"]] as const).map(([id, label]) => (
+              {([["all", "Все вакансии"], ["for-you", "Для вас"], ["saved", "Избранное"]] as const).map(([id, label]) => (
                 <button
                   key={id}
                   role="tab"
                   aria-selected={mode === id}
-                  onClick={() => (id === "for-you" ? showForYou() : setMode("all"))}
+                  onClick={() => (id === "for-you" ? showForYou() : id === "saved" ? showSaved() : setMode("all"))}
                   className={`inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-medium border transition-colors ${
                     mode === id ? "bg-blue-600 border-blue-500 text-white" : "bg-neutral-900/60 border-neutral-800 text-neutral-300 hover:bg-neutral-800"
                   }`}
                 >
-                  {id === "for-you" && <Target className="w-4 h-4" />}{label}
+                  {id === "for-you" && <Target className="w-4 h-4" />}
+                  {id === "saved" && <Bookmark className="w-4 h-4" />}
+                  {label}
                 </button>
               ))}
             </div>
@@ -504,13 +586,16 @@ export default function Feed({ initialRows, initialTotal }: { initialRows: Vacan
           ) : list.length === 0 ? (
             <div className="text-center py-20 bg-neutral-900/30 border border-dashed border-neutral-800 rounded-2xl">
               <p className="text-neutral-300 text-sm font-medium">Ничего не нашлось</p>
-              <p className="text-neutral-500 text-xs mt-1">{forYou ? "Свежих вакансий пока нет — загляните позже" : "Попробуйте ослабить фильтры"}</p>
+              <p className="text-neutral-500 text-xs mt-1">
+                {savedMode ? "Нажмите «В избранное» на карточке, чтобы вернуться к вакансии позже"
+                  : forYou ? "Свежих вакансий пока нет — загляните позже" : "Попробуйте ослабить фильтры"}
+              </p>
             </div>
           ) : (
             <div className="flex flex-col gap-4">
               {list.map(card)}
 
-              {forYou ? (
+              {savedMode ? null : forYou ? (
                 recHasMore && (
                   <button
                     onClick={() => loadRecommended(recPage + 1)}
@@ -532,6 +617,22 @@ export default function Feed({ initialRows, initialTotal }: { initialRows: Vacan
                 </button>
               )}
             </div>
+          )}
+
+          {savedMode && hiddenList.length > 0 && (
+            <details className="rounded-xl border border-neutral-800 bg-neutral-900/40 px-4 py-3">
+              <summary className="cursor-pointer text-sm text-neutral-300">Скрытые вакансии ({hiddenList.length})</summary>
+              <ul className="mt-3 space-y-2">
+                {hiddenList.map(v => (
+                  <li key={v.id} className="flex items-center justify-between gap-3 text-sm">
+                    <Link href={`/vacancy/${v.id}`} className="text-neutral-300 hover:text-blue-400 truncate">{v.title}</Link>
+                    <button onClick={() => toggleMark(v, "hidden")} className="inline-flex items-center gap-1 text-xs text-blue-400 hover:underline shrink-0">
+                      <Undo2 className="w-3.5 h-3.5" /> Вернуть в ленту
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            </details>
           )}
         </section>
       </main>
