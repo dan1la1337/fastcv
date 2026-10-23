@@ -1,7 +1,7 @@
 name: Probe trudvsem
 on:
   push:
-    branches: [probe/trudvsem]
+    branches: ["probe/**"]
 jobs:
   probe:
     runs-on: ubuntu-latest
