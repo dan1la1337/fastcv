@@ -68,3 +68,34 @@ jobs:
         run: npx tsc --noEmit
       - name: Build
         run: npm run build
+
+  # Сквозные тесты в браузере (Playwright, десктоп и телефон): собранный сайт против
+  # тестовой базы fastcv-staging. Публичный ключ тестовой базы не секрет — он и так
+  # уходит в браузер каждого посетителя превью.
+  e2e:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      NEXT_PUBLIC_SUPABASE_URL: https://zcyccnlweanhcsumplbx.supabase.co
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: sb_publishable_tK5iei3B-RnmUCRmuWZBzQ_7DykeHGP
+      NEXT_TELEMETRY_DISABLED: 1
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+      - name: Build
+        run: npx next build
+      - name: End-to-end tests
+        run: npx playwright test
+      - name: Upload traces of failed tests
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-traces
+          path: test-results/
+          retention-days: 7
