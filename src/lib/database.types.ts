@@ -226,6 +226,8 @@ export type Database = {
           pref_city: string | null
           pref_directions: string[]
           pref_format: string | null
+          pref_formats: string[]
+          experience_years: number | null
           pref_level: string | null
           pref_salary: number | null
           resume_path: string | null
@@ -245,6 +247,8 @@ export type Database = {
           pref_city?: string | null
           pref_directions?: string[]
           pref_format?: string | null
+          pref_formats?: string[]
+          experience_years?: number | null
           pref_level?: string | null
           pref_salary?: number | null
           resume_path?: string | null
@@ -264,6 +268,8 @@ export type Database = {
           pref_city?: string | null
           pref_directions?: string[]
           pref_format?: string | null
+          pref_formats?: string[]
+          experience_years?: number | null
           pref_level?: string | null
           pref_salary?: number | null
           resume_path?: string | null
@@ -341,6 +347,7 @@ export type Database = {
           first_seen_at: string | null
           channels_count: number
           scope_note: string | null
+          experience_min: number | null
         }
         Insert: {
           archived_at?: string | null
@@ -376,6 +383,7 @@ export type Database = {
           first_seen_at?: string | null
           channels_count?: number
           scope_note?: string | null
+          experience_min?: number | null
         }
         Update: {
           archived_at?: string | null
@@ -411,6 +419,7 @@ export type Database = {
           first_seen_at?: string | null
           channels_count?: number
           scope_note?: string | null
+          experience_min?: number | null
         }
         Relationships: [
           {

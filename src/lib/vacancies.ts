@@ -25,6 +25,8 @@ export interface Vacancy {
   /** Когда вакансию впервые заметили (самая ранняя публикация) и во скольких каналах она выходила. */
   first_seen_at?: string | null;
   channels_count?: number;
+  /** Требуемый опыт в годах из текста вакансии (ИИ сборщика); null — не указан. */
+  experience_min?: number | null;
   /** Если в вакансии смешаны обязанности нескольких ролей — что именно (ИИ сборщика). */
   scope_note?: string | null;
   /** Кто нанимает (определяет ИИ сборщика): своя команда, аутстафф или агентство. */
@@ -35,11 +37,41 @@ export interface Vacancy {
 
 /** Колонки для показа: без служебных (search_tsv, title_key, text_fingerprint, raw_hash) — они только раздувают ответ. */
 // Одной строкой-литералом: по ней supabase-js выводит тип строк ответа
-export const VACANCY_COLUMNS = "id, title, company_name, description, salary_min, salary_max, salary_currency, city, is_remote, contact_type, contact_value, created_at, posted_at, source_type, source_url, stack, employer_id, archived_at, level, direction, work_format, hiring_type, first_seen_at, channels_count, scope_note";
+export const VACANCY_COLUMNS = "id, title, company_name, description, salary_min, salary_max, salary_currency, city, is_remote, contact_type, contact_value, created_at, posted_at, source_type, source_url, stack, employer_id, archived_at, level, direction, work_format, hiring_type, first_seen_at, channels_count, scope_note, experience_min";
 
 export type Level = "intern" | "junior" | "middle" | "senior" | "lead";
 export type WorkFormat = "remote" | "hybrid" | "office";
 export type HiringType = "product" | "outsource" | "agency";
+
+/** Грейд по опыту (шкала FastCV): до 2 лет — junior, 2–5 — middle, от 5 — senior; руководство людьми — lead. */
+export function levelForExperience(years: number, leadsPeople = false): Level {
+  if (leadsPeople) return "lead";
+  if (years < 2) return "junior";
+  if (years < 5) return "middle";
+  return "senior";
+}
+
+/**
+ * Поля профиля из «опыта работы»: годы и грейд по шкале. Опыт не указан — уровень
+ * остаётся прежним (например, заполненным из резюме).
+ */
+export function experienceFields(years: string, leadsPeople: boolean, fallback: Level | ""): { experience_years: number | null; pref_level: Level | null } {
+  const value = Number(years.replace(",", "."));
+  if (years.trim() === "" || !Number.isFinite(value) || value < 0 || value > 60) {
+    return { experience_years: null, pref_level: leadsPeople ? "lead" : fallback || null };
+  }
+  const rounded = Math.round(value * 2) / 2;
+  return { experience_years: rounded, pref_level: levelForExperience(rounded, leadsPeople) };
+}
+
+/** «опыт от 3 лет», «опыт от 1,5 года», «без опыта» */
+export function experienceLabel(years: number | null | undefined): string | null {
+  if (years === null || years === undefined) return null;
+  if (years <= 0) return "без опыта";
+  const n = Number.isInteger(years) ? String(years) : years.toLocaleString("ru-RU");
+  const word = !Number.isInteger(years) ? "года" : plural(years, ["года", "лет", "лет"]);
+  return `опыт от ${n} ${word}`;
+}
 
 const HIRING_LABELS: Record<HiringType, { alone: string; withCompany: string | null }> = {
   product: { alone: "Продуктовая компания", withCompany: null },

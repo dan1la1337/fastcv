@@ -185,6 +185,7 @@ class VacancyAI(BaseModel):
     work_format: Optional[WorkFormat]
     hiring_type: Optional[HiringType]
     scope_note: Optional[str]
+    experience_min: Optional[float]
 
 
 PROMPT = """Ты нормализатор вакансий для доски объявлений о работе.
@@ -211,8 +212,18 @@ PROMPT = """Ты нормализатор вакансий для доски о�
   если городов несколько — первый; если указана только страна или города нет — null;
 - is_remote: true, если можно работать удалённо;
 - work_format: "remote" — удалённо, "hybrid" — гибрид, "office" — только офис; null, если неясно;
-- level: intern (стажёр), junior, middle, senior, lead (тимлид, руководитель, head, директор);
-  если указано несколько («Middle/Senior») — нижний; null, если не указан и не следует из опыта;
+- experience_min: требуемый опыт работы в годах числом: «от 3 лет» → 3, «1–3 года» → 1,
+  «от полугода» → 0.5, «без опыта» → 0; null, если опыт в тексте не указан;
+- level: intern (стажёр), junior, middle, senior, lead. Определяй по совокупности, внимательно
+  читая требования и обязанности:
+  1) требуемый опыт — главный ориентир: до 2 лет — junior, от 2 до 5 лет — middle, от 5 лет — senior;
+  2) обязанности уточняют: архитектура, принятие технических решений, менторство, ответственность
+     за систему — признаки senior даже при меньшем опыте; простые задачи под присмотром — junior;
+  3) lead — только если человек руководит людьми (тимлид, руководитель отдела, head, директор);
+     intern — стажировка или «без опыта»;
+  4) грейд из названия («Senior Python») учитывай, но если он явно противоречит опыту и обязанностям,
+     опирайся на опыт и обязанности; если указано несколько («Middle/Senior») — нижний;
+  null, если не указан ни грейд, ни опыт и обязанности не позволяют его определить;
 - direction: одно из backend, frontend, fullstack, mobile, qa, devops, data_ml (data science,
   ML, AI, data engineering), analytics, security, gamedev, design, product (продакт- и
   проджект-менеджмент), marketing (маркетинг, SMM, PR, реклама), content (редакторы,
@@ -442,15 +453,22 @@ class Store:
         """Активные вакансии из Telegram без компании или типа нанимателя, от новых к старым
         (до курсора before)."""
         q = (self.db.table("vacancies")
-             .select("id, source_post, title, description, company_name, hiring_type, created_at")
+             .select("id, source_post, title, description, company_name, hiring_type, experience_min, created_at")
              .is_("archived_at", "null").eq("source_type", "external")
-             .or_("company_name.is.null,hiring_type.is.null"))
+             .or_("company_name.is.null,hiring_type.is.null,experience_min.is.null"))
         if before:
             q = q.lt("created_at", before)
         return q.order("created_at", desc=True).limit(limit).execute().data or []
 
     def set_company(self, vacancy_id: str, company: str) -> None:
         self.db.table("vacancies").update({"company_name": company}).eq("id", vacancy_id).is_("company_name", "null").execute()
+
+    def set_experience(self, vacancy_id: str, years: float, level: Optional[str]) -> None:
+        """Опыт из текста и грейд, определённый по нему (шкала: до 2 лет / 2–5 / от 5)."""
+        fields: dict = {"experience_min": years}
+        if level:
+            fields["level"] = level
+        self.db.table("vacancies").update(fields).eq("id", vacancy_id).is_("experience_min", "null").execute()
 
     def set_hiring_type(self, vacancy_id: str, hiring_type: str) -> None:
         self.db.table("vacancies").update({"hiring_type": hiring_type}).eq("id", vacancy_id).is_("hiring_type", "null").execute()
@@ -509,6 +527,7 @@ def process_post(post: Post, store: Store, normalize: Callable[[str], VacancyAI]
         "work_format": vacancy.work_format,
         "hiring_type": vacancy.hiring_type,
         "scope_note": (vacancy.scope_note or "").strip()[:300] or None,
+        "experience_min": clean_experience(vacancy.experience_min),
         "ranking_weight": 1.0,
         "source_type": "external",
     })
@@ -516,6 +535,13 @@ def process_post(post: Post, store: Store, normalize: Callable[[str], VacancyAI]
         return "duplicate"
     note_sighting(store, saved, post)
     return "saved"
+
+
+def clean_experience(years: Optional[float]) -> Optional[float]:
+    """Опыт в годах с шагом полгода; явно невозможные значения отбрасываем."""
+    if years is None or years < 0 or years > 30:
+        return None
+    return round(years * 2) / 2
 
 
 def note_sighting(store: Store, vacancy_id: str, post: Post) -> None:
@@ -820,6 +846,9 @@ def backfill_companies(
                 filled += 1
             if vacancy.hiring_type and not row.get("hiring_type"):
                 store.set_hiring_type(row["id"], vacancy.hiring_type)
+            years = clean_experience(vacancy.experience_min)
+            if years is not None and row.get("experience_min") is None:
+                store.set_experience(row["id"], years, vacancy.level)
         checked += 1
         store.set_setting(BACKFILL_CURSOR_KEY, row["created_at"])
     return checked, filled
