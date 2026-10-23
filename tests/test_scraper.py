@@ -42,7 +42,7 @@ def job(**overrides) -> VacancyAI:
     data = dict(is_job=True, title="Python Developer", company="Kaspi.kz", description="Описание", salary_min=200000,
                 salary_max=None, salary_currency="RUB", city=None, is_remote=True, contact_type="telegram",
                 contact_value="@hr", stack=["Python", "python", " Django "],
-                level="senior", direction="backend", work_format="remote", hiring_type=None)
+                level="senior", direction="backend", work_format="remote", hiring_type=None, scope_note=None)
     data.update(overrides)
     return VacancyAI(**data)
 
@@ -792,3 +792,13 @@ def test_sighting_failure_does_not_lose_the_vacancy():
     store = Flaky()
     assert process_post(post(), store, lambda t: job()) == "saved"
     assert len(store.inserted) == 1
+
+
+def test_mixed_role_note_is_saved_trimmed():
+    store = FakeStore()
+    note = "  Кроме бэкенда — настройка Kubernetes с нуля и вёрстка на Vue  "
+    assert process_post(post(), store, lambda t: job(scope_note=note)) == "saved"
+    assert store.inserted[0]["scope_note"] == note.strip()
+    store2 = FakeStore()
+    process_post(post(), store2, lambda t: job(scope_note="  "))
+    assert store2.inserted[0]["scope_note"] is None

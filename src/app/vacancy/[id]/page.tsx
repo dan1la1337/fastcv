@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { cache } from "react";
-import { ArrowLeft, Briefcase, Building2, Calendar, ExternalLink, Globe, MapPin, Megaphone } from "lucide-react";
+import { AlertTriangle, ArrowLeft, Briefcase, Building2, Calendar, ExternalLink, Globe, MapPin, Megaphone } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { VACANCY_COLUMNS, formatLabel, formatSalary, levelLabel, plural, type Vacancy } from "@/lib/vacancies";
 import ApplyButton from "@/components/ApplyButton";
@@ -141,6 +141,16 @@ export default async function VacancyPage({ params }: Props) {
 
           {vacancy.description && (
             <p className="text-neutral-300 leading-relaxed whitespace-pre-line">{vacancy.description}</p>
+          )}
+
+          {vacancy.scope_note && (
+            <div className="flex gap-3 rounded-xl border border-amber-500/30 bg-amber-500/5 p-4 text-sm text-amber-100">
+              <AlertTriangle className="w-5 h-5 text-amber-400 shrink-0" />
+              <p>
+                <span className="font-semibold">Широкий круг задач.</span> {vacancy.scope_note}
+                <span className="block text-xs text-amber-200/60 mt-1">Так отметил ИИ FastCV по тексту вакансии — уточните объём работы на собеседовании.</span>
+              </p>
+            </div>
           )}
 
           {vacancy.stack && vacancy.stack.length > 0 && (

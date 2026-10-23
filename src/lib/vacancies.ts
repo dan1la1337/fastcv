@@ -25,6 +25,8 @@ export interface Vacancy {
   /** Когда вакансию впервые заметили (самая ранняя публикация) и во скольких каналах она выходила. */
   first_seen_at?: string | null;
   channels_count?: number;
+  /** Если в вакансии смешаны обязанности нескольких ролей — что именно (ИИ сборщика). */
+  scope_note?: string | null;
   /** Кто нанимает (определяет ИИ сборщика): своя команда, аутстафф или агентство. */
   hiring_type?: HiringType | null;
   /** Просмотры страницы вакансии (видит работодатель в своём кабинете). */
@@ -33,7 +35,7 @@ export interface Vacancy {
 
 /** Колонки для показа: без служебных (search_tsv, title_key, text_fingerprint, raw_hash) — они только раздувают ответ. */
 // Одной строкой-литералом: по ней supabase-js выводит тип строк ответа
-export const VACANCY_COLUMNS = "id, title, company_name, description, salary_min, salary_max, salary_currency, city, is_remote, contact_type, contact_value, created_at, posted_at, source_type, source_url, stack, employer_id, archived_at, level, direction, work_format, hiring_type, first_seen_at, channels_count";
+export const VACANCY_COLUMNS = "id, title, company_name, description, salary_min, salary_max, salary_currency, city, is_remote, contact_type, contact_value, created_at, posted_at, source_type, source_url, stack, employer_id, archived_at, level, direction, work_format, hiring_type, first_seen_at, channels_count, scope_note";
 
 export type Level = "intern" | "junior" | "middle" | "senior" | "lead";
 export type WorkFormat = "remote" | "hybrid" | "office";

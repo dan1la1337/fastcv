@@ -340,6 +340,7 @@ export type Database = {
           hiring_type: string | null
           first_seen_at: string | null
           channels_count: number
+          scope_note: string | null
         }
         Insert: {
           archived_at?: string | null
@@ -374,6 +375,7 @@ export type Database = {
           hiring_type?: string | null
           first_seen_at?: string | null
           channels_count?: number
+          scope_note?: string | null
         }
         Update: {
           archived_at?: string | null
@@ -408,6 +410,7 @@ export type Database = {
           hiring_type?: string | null
           first_seen_at?: string | null
           channels_count?: number
+          scope_note?: string | null
         }
         Relationships: [
           {
