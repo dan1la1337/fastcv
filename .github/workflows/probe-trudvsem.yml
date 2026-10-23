@@ -1,0 +1,17 @@
+name: Probe trudvsem
+on:
+  push:
+    branches: [probe/trudvsem]
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Request open data API
+        run: |
+          for url in "https://opendata.trudvsem.ru/api/v1/vacancies?offset=0&limit=2" "http://opendata.trudvsem.ru/api/v1/vacancies?offset=0&limit=2"; do
+            code=$(curl -s -o body.json -w "%{http_code} %{time_total}s %{size_download}B" --max-time 40 "$url" || echo "curl-failed")
+            echo "::notice title=$url::$code"
+            head -c 1500 body.json | tr '\n' ' ' | sed 's/::/: :/g' > head.txt || true
+            echo "::notice title=body::$(cat head.txt)"
+          done
