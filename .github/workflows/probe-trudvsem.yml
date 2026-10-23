@@ -7,11 +7,13 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
-      - name: Request open data API
+      - name: Volume by modification date and keyword
         run: |
-          for url in "https://opendata.trudvsem.ru/api/v1/vacancies?offset=0&limit=2" "http://opendata.trudvsem.ru/api/v1/vacancies?offset=0&limit=2"; do
-            code=$(curl -s -o body.json -w "%{http_code} %{time_total}s %{size_download}B" --max-time 40 "$url" || echo "curl-failed")
-            echo "::notice title=$url::$code"
-            head -c 1500 body.json | tr '\n' ' ' | sed 's/::/: :/g' > head.txt || true
-            echo "::notice title=body::$(cat head.txt)"
+          base="https://opendata.trudvsem.ru/api/v1/vacancies"
+          for q in "modifiedFrom=$(date -u -d '1 day ago' +%Y-%m-%dT%H:%M:%SZ)" "modifiedFrom=$(date -u -d '7 days ago' +%Y-%m-%dT%H:%M:%SZ)" "text=программист" "text=разработчик" "text=маркетолог"; do
+            total=$(curl -s --max-time 40 "$base?offset=0&limit=1&$q" | python3 -c "import sys,json; print(json.load(sys.stdin)['meta']['total'])" 2>&1 | tail -1)
+            echo "::notice title=$q::total=$total"
           done
+          curl -s --max-time 40 "$base/region/7700000000000?offset=0&limit=1" | python3 -c "import sys,json; print('moscow', json.load(sys.stdin)['meta']['total'])" | sed 's/^/::notice title=region::/'
+          curl -s --max-time 40 "$base?offset=0&limit=1" | python3 -c "
+          import sys,json; v=json.load(sys.stdin)['results']['vacancies'][0]['vacancy']; print(sorted(v.keys()))" | sed 's/^/::notice title=keys::/'
