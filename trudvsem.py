@@ -143,9 +143,11 @@ def import_trudvsem(store, fetch: Callable[[str, dict], dict] = fetch_json, now:
                     time_budget: float = TIME_BUDGET_SECONDS) -> dict:
     """Новые и изменённые с прошлого запуска вакансии → vacancies. Возвращает статистику."""
     now = now or datetime.now(timezone.utc)
+    # Сначала убираем устаревшие: иначе на потолке импорт выходил бы раньше чистки и застревал навсегда
+    pruned = store.prune_trudvsem(KEEP_DAYS) or {}
     stored = store.count_trudvsem()
     if stored >= MAX_STORED:
-        return {"skipped": f"в базе уже {stored} вакансий «Работы России» — потолок бесплатного тарифа"}
+        return {"skipped": f"в базе уже {stored} вакансий «Работы России» — потолок бесплатного тарифа", **pruned}
 
     # Обход регионов может не уложиться в один запуск (лимит строк): тогда следующий
     # запуск продолжает с того же региона и с той же точки отсчёта
@@ -190,6 +192,5 @@ def import_trudvsem(store, fetch: Callable[[str, dict], dict] = fetch_json, now:
         store.set_setting(CURSOR_KEY, "")
     else:
         store.set_setting(CURSOR_KEY, json.dumps({"since": since.isoformat(), "started": started, "region": stopped_at}))
-    pruned = store.prune_trudvsem(KEEP_DAYS)
     return {"seen": seen, "saved": saved, "failed_regions": failed,
-            "resume_region": stopped_at, **(pruned or {})}
+            "resume_region": stopped_at, **pruned}
