@@ -10,7 +10,7 @@ jobs:
       - name: Region endpoint with modifiedFrom
         run: |
           base="https://opendata.trudvsem.ru/api/v1/vacancies/region"
-          since=$(date -u -d '6 hours ago' +%Y-%m-%dT%H:%M:%SZ)
+          since=$(date -u -d '1 day ago' +%Y-%m-%dT%H:%M:%SZ)
           for code in 7700000000000 5500000000000 0100000000000 9900000000000; do
             curl -s --max-time 40 "$base/$code?modifiedFrom=$since&limit=100&offset=0" | python3 -c "
           import sys,json; d=json.load(sys.stdin); v=(d.get('results') or {}).get('vacancies') or []; print('$code', d.get('status'), 'total', d.get('meta',{}).get('total'), 'page', len(v), 'oldest', v[-1]['vacancy']['date_modify'] if v else None)" | sed 's/^/::notice title=region::/'
