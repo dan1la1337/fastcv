@@ -9,6 +9,7 @@
 from __future__ import annotations
 
 import html
+import time
 import json
 import re
 from datetime import datetime, timedelta, timezone
@@ -25,6 +26,7 @@ MAX_PER_RUN = 15_000      # ~150 запросов, несколько минут
 MAX_STORED = 50_000       # потолок для бесплатного тарифа базы (~240 МБ)
 RANKING_WEIGHT = 0.9
 MAX_PAGES_PER_REGION = 30
+TIME_BUDGET_SECONDS = 10 * 60   # дальше обход продолжит следующий запуск
 # Коды регионов в API: две цифры региона и одиннадцать нулей (7700000000000 — Москва)
 REGION_CODES = [f"{n:02d}00000000000" for n in range(1, 100)]
 # Сфера вакансии в «Работе России» → направление FastCV. ИТ-сферу не сопоставляем:
@@ -129,7 +131,8 @@ def fetch_json(url: str, params: dict) -> dict:
 
 
 def import_trudvsem(store, fetch: Callable[[str, dict], dict] = fetch_json, now: Optional[datetime] = None,
-                    max_rows: int = MAX_PER_RUN) -> dict:
+                    max_rows: int = MAX_PER_RUN, clock: Callable[[], float] = time.monotonic,
+                    time_budget: float = TIME_BUDGET_SECONDS) -> dict:
     """Новые и изменённые с прошлого запуска вакансии → vacancies. Возвращает статистику."""
     now = now or datetime.now(timezone.utc)
     stored = store.count_trudvsem()
@@ -149,10 +152,11 @@ def import_trudvsem(store, fetch: Callable[[str, dict], dict] = fetch_json, now:
     saved = seen = failed = 0
     budget = min(max_rows, MAX_STORED - stored)
     stopped_at = None
+    started_clock = clock()
     # API не отдаёт глубокие страницы (offset — номер страницы, на сотнях — ошибка 500),
     # поэтому идём по регионам: в каждом за несколько часов изменений немного
     for index in range(start, len(REGION_CODES)):
-        if seen >= budget:
+        if seen >= budget or clock() - started_clock > time_budget:
             stopped_at = index
             break
         for page in range(MAX_PAGES_PER_REGION):

@@ -123,3 +123,10 @@ def test_walk_resumes_from_region_where_budget_ran_out():
     assert calls[0] == ("0400000000000", since)          # тот же регион и та же точка отсчёта
     assert second["resume_region"] is None
     assert store.settings[trudvsem.SYNC_KEY] == now.isoformat() and store.settings[trudvsem.CURSOR_KEY] == ""
+
+
+def test_walk_stops_on_time_and_resumes_later():
+    store, ticks = Store(), iter(range(0, 10_000, 60))
+    stats = trudvsem.import_trudvsem(store, fetch=lambda u, p: {"results": {"vacancies": []}},
+                                     clock=lambda: next(ticks), time_budget=150)
+    assert stats["resume_region"] == 2 and trudvsem.SYNC_KEY not in store.settings

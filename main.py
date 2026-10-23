@@ -44,6 +44,9 @@ AI_TIMEOUT_MS = 60_000  # без таймаута зависший запрос 
 AI_CIRCUIT_BREAKER = 3  # каналов подряд без ответа Gemini — дальше не пытаемся
 AI_PAUSE_SECONDS = 2
 CHANNEL_PAUSE_SECONDS = 2
+# Время на каналы за один запуск: остальное — «Работа России» и подборки, а у всего
+# задания лимит 30 минут. Недошедшие каналы первыми пойдут в следующий запуск.
+CHANNELS_TIME_BUDGET_SECONDS = 14 * 60
 # Доля каналов без доступной ленты, при которой это похоже на блокировку, а не на закрытые каналы
 MASS_FAILURE_SHARE = 0.5
 USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"
@@ -627,6 +630,7 @@ class RunSummary:
     channels: int
     results: list[ChannelResult]
     archived: int = 0
+    out_of_time: bool = False  # каналы отложены по времени — это штатно, не сбой Gemini
 
     @property
     def saved(self) -> int:
@@ -639,7 +643,7 @@ class RunSummary:
     @property
     def deferred(self) -> int:
         """Каналы, до которых не дошли из-за отказа Gemini."""
-        return self.channels - len(self.results)
+        return 0 if self.out_of_time else self.channels - len(self.results)
 
     @property
     def unavailable(self) -> list[ChannelResult]:
@@ -867,12 +871,21 @@ def backfill_companies(
 
 
 
-def run(store: Store, normalize: Callable[[str], VacancyAI]) -> RunSummary:
+def run(store: Store, normalize: Callable[[str], VacancyAI],
+        clock: Callable[[], float] = time.monotonic,
+        time_budget: float = CHANNELS_TIME_BUDGET_SECONDS) -> RunSummary:
     channels = store.active_channels()
     print(f"Активных каналов: {len(channels)}")
     results = []
     ai_failures_in_row = 0
+    started = clock()
+    out_of_time = False
     for row in channels:
+        if clock() - started > time_budget:
+            out_of_time = True
+            print(f"⏱ Время на каналы вышло — остальные ({len(channels) - len(results)}) "
+                  f"первыми пойдут в следующий запуск.")
+            break
         if ai_failures_in_row >= AI_CIRCUIT_BREAKER:
             # Gemini лежит: остальные каналы не трогаем, их last_post_id не меняется,
             # и следующий запуск продолжит с того же места
@@ -886,7 +899,7 @@ def run(store: Store, normalize: Callable[[str], VacancyAI]) -> RunSummary:
         ai_failures_in_row = ai_failures_in_row + 1 if r.ai_stopped else 0
         time.sleep(CHANNEL_PAUSE_SECONDS)
 
-    summary = RunSummary(len(channels), results)
+    summary = RunSummary(len(channels), results, out_of_time=out_of_time)
     summary.archived = archived = store.archive_stale(ARCHIVE_AFTER_DAYS)
     total_saved = sum(r.saved for r in results)
     unavailable = [r.channel for r in results if r.error and not r.ai_stopped]
