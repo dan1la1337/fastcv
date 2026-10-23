@@ -244,3 +244,8 @@ export function plural(count: number, forms: [string, string, string]): string {
 }
 
 export const VACANCY_FORMS: [string, string, string] = ["вакансия", "вакансии", "вакансий"];
+
+/** Ссылка на страницу компании по её названию. */
+export function companyHref(name: string): string {
+  return `/company/${encodeURIComponent(name.trim())}`;
+}
