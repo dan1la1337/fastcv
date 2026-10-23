@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { supabase } from "@/lib/supabase";
 import {
-  DEFAULT_FILTERS, DIRECTIONS, LEVELS, WORK_FORMATS, fetchVacancyPage, formatLabel, formatSalary, levelLabel, plural, PAGE_SIZE,
+  companyHref, DEFAULT_FILTERS, DIRECTIONS, LEVELS, WORK_FORMATS, fetchVacancyPage, formatLabel, formatSalary, levelLabel, plural, PAGE_SIZE,
   VACANCY_FORMS, type Level, type Vacancy, type VacancyFilters, type WorkFormat,
 } from "@/lib/vacancies";
 import { Search, MapPin, ChevronDown, ChevronRight, Sparkles, Loader2, ExternalLink, Globe, SlidersHorizontal, Briefcase, Building2, Target, Bookmark, BookmarkCheck, EyeOff, Undo2 } from "lucide-react";
@@ -264,7 +264,11 @@ export default function Feed({ initialRows, initialTotal }: { initialRows: Vacan
             <h2 className="text-xl font-bold text-neutral-100">
               <Link href={`/vacancy/${item.id}`} className="hover:text-blue-400 transition-colors">{item.title}</Link>
             </h2>
-            {item.company_name && <p className="text-sm text-neutral-400 mt-0.5">{item.company_name}</p>}
+            {item.company_name && (
+              <p className="text-sm text-neutral-400 mt-0.5">
+                <Link href={companyHref(item.company_name)} className="hover:text-blue-400 transition-colors">{item.company_name}</Link>
+              </p>
+            )}
             <p className="text-base font-semibold text-emerald-400 mt-1">{formatSalary(item.salary_min, item.salary_max, item.salary_currency)}</p>
             {(item.city || item.work_format || item.is_remote || item.level || match) && (
               <p className="flex flex-wrap items-center gap-3 text-xs text-neutral-400 mt-2">

@@ -43,3 +43,31 @@ test("заголовки безопасности на месте", async ({ req
   expect(headers["x-content-type-options"]).toBe("nosniff");
   expect(headers["x-powered-by"]).toBeUndefined();
 });
+
+test("страница направления отдаёт список вакансий в HTML", async ({ page, request }) => {
+  const html = await (await request.get("/jobs/qa")).text();
+  expect(html).toContain("Вакансии: QA и тестирование");
+  await page.goto("/jobs/qa");
+  await expect(page.getByRole("heading", { level: 1 })).toHaveText("Вакансии: QA и тестирование");
+  await page.getByRole("link", { name: "Frontend", exact: true }).click();
+  await expect(page).toHaveURL(/\/jobs\/frontend$/);
+});
+
+test("неизвестное направление — 404", async ({ request }) => {
+  expect((await request.get("/jobs/astronaut")).status()).toBe(404);
+});
+
+test("название компании ведёт на её страницу", async ({ page }) => {
+  await page.goto("/");
+  const company = page.locator('section a[href^="/company/"]').first();
+  const name = (await company.textContent())!.trim();
+  await company.click();
+  await expect(page.getByRole("heading", { level: 1 })).toHaveText(name);
+  await expect(page.locator('a[href^="/vacancy/"]').first()).toBeVisible();
+});
+
+test("карта сайта содержит направления и компании", async ({ request }) => {
+  const xml = await (await request.get("/sitemap.xml")).text();
+  expect(xml).toContain("/jobs/backend");
+  expect(xml).toMatch(/\/company\//);
+});
