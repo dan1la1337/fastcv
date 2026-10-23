@@ -252,6 +252,16 @@ CHECKS: list[tuple] = [
      "select count(*) from my_application_matches() where score between 0 and 100", "authenticated", E, "1"),
     ("чужой работодатель НЕ видит совпадение чужих откликов", True,
      "select count(*) from my_application_matches()", "authenticated", E2, "0"),
+
+    # --- метрики для администратора ---
+    ("обычный пользователь НЕ видит метрики", False, "select admin_metrics()", "authenticated", C, None),
+    ("аноним НЕ видит метрики", False, "select admin_metrics()", "anon", None, None),
+    ("пользователь НЕ читает список администраторов", True, "select count(*) from app_admins", "authenticated", C, "0"),
+    ("администратор видит метрики", True,
+     """insert into app_admins (email) values ('owner@example.com');
+        set role authenticated; set request.jwt.claims = '{"email": "Owner@Example.com"}';
+        select (admin_metrics() ->> 'vacancies_total')::int > 0 and jsonb_array_length(admin_metrics() -> 'vacancies_by_day') = 14""",
+     "postgres", None, "t"),
 ]
 
 
