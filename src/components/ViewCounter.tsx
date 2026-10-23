@@ -13,7 +13,10 @@ export default function ViewCounter({ vacancyId }: { vacancyId: string }) {
     } catch {
       // Хранилище недоступно (приватный режим) — просто считаем просмотр
     }
-    void supabase.rpc("register_vacancy_view", { vacancy: vacancyId });
+    // Запрос supabase-js уходит только при await/then — без этого его нет
+    supabase.rpc("register_vacancy_view", { vacancy: vacancyId }).then(({ error }) => {
+      if (error) console.warn("view not counted", error.message);
+    });
   }, [vacancyId]);
   return null;
 }
