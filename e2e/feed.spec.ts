@@ -23,14 +23,15 @@ test("лента показывает карточки и счётчик", async
   expect(await total(page)).toBeGreaterThan(0);
 });
 
-test("фильтр по направлению сужает ленту и снимается повторным нажатием", async ({ page }) => {
+test("фильтр по направлению сужает ленту и сбрасывается", async ({ page }) => {
   await page.goto("/");
   await openFilters(page);
   const all = await total(page);
-  await page.getByRole("button", { name: "QA и тестирование", exact: true }).click();
+  await page.getByRole("button", { name: "Направление" }).click();
+  await page.getByRole("listbox", { name: "Направление" }).getByRole("option", { name: "QA и тестирование" }).click();
   await expect.poll(() => total(page)).toBeLessThan(all);
   await expect(page.locator("section h2").first()).toBeVisible();
-  await page.getByRole("button", { name: "QA и тестирование", exact: true }).click();
+  await page.getByRole("button", { name: "Сбросить" }).click();
   await expect.poll(() => total(page)).toBe(all);
 });
 
@@ -83,6 +84,27 @@ test("раздел ленты ограничивает направления", 
   const area = page.getByRole("group", { name: "Раздел ленты" });
   await area.getByRole("button", { name: /Продукт, дизайн и digital|Digital/ }).click();
   await expect(area.getByRole("button", { name: /Продукт, дизайн и digital|Digital/ })).toHaveAttribute("aria-pressed", "true");
-  // В фильтрах (на компьютере они открыты) остаются только направления этого раздела
-  await expect(page.getByRole("button", { name: "Backend", exact: true })).toHaveCount(0);
+  // В списке направлений остаются только направления этого раздела
+  await openFilters(page);
+  await page.getByRole("button", { name: "Направление" }).click();
+  const list = page.getByRole("listbox", { name: "Направление" });
+  await expect(list.getByRole("option", { name: "Маркетинг и SMM" })).toBeVisible();
+  await expect(list.getByRole("option", { name: "Backend" })).toHaveCount(0);
+});
+
+test("выпадающий список направлений ищет по технологиям и форматы выбираются вместе", async ({ page }) => {
+  await page.goto("/");
+  await openFilters(page);
+  await page.getByRole("button", { name: "Направление" }).click();
+  await page.getByPlaceholder("Например: frontend, маркетинг, React…").fill("react");
+  const list = page.getByRole("listbox", { name: "Направление" });
+  await expect(list.getByRole("option", { name: "Frontend" })).toBeVisible();
+  await expect(list.getByRole("option", { name: "Маркетинг и SMM" })).toHaveCount(0);
+  await page.keyboard.press("Escape");
+  const remote = page.getByRole("button", { name: "Удалённо", exact: true });
+  const hybrid = page.getByRole("button", { name: "Гибрид", exact: true });
+  await remote.click();
+  await hybrid.click();
+  await expect(remote).toHaveAttribute("aria-pressed", "true");
+  await expect(hybrid).toHaveAttribute("aria-pressed", "true");
 });

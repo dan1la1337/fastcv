@@ -6,7 +6,7 @@ import {
   AREAS, DEFAULT_FILTERS, DIRECTIONS, freshnessLabel, LEVELS, WORK_FORMATS, fetchVacancyPage, formatLabel, formatSalary, levelLabel, plural, PAGE_SIZE,
   VACANCY_FORMS, type Area, type Level, type Vacancy, type VacancyFilters, type WorkFormat,
 } from "@/lib/vacancies";
-import { Clock, Search, MapPin, ChevronDown, ChevronRight, Sparkles, Loader2, ExternalLink, Globe, SlidersHorizontal, Briefcase, Building2, Target, Bookmark, BookmarkCheck, EyeOff, Undo2 } from "lucide-react";
+import { Clock, Search, MapPin, ChevronDown, Sparkles, Loader2, ExternalLink, Globe, SlidersHorizontal, Briefcase, Building2, Target, Bookmark, BookmarkCheck, EyeOff, Undo2 } from "lucide-react";
 import { fetchMarked, fetchMarks, setMark, type MarkKind } from "@/lib/marks";
 import { toast } from "@/components/Toaster";
 import { fetchMatches, fetchRecommended, matchTone, type Match } from "@/lib/matching";
@@ -17,6 +17,7 @@ import SmartApply from "@/components/SmartApply";
 import CompanyLine from "@/components/CompanyLine";
 import { estimateSalary, fetchSalaryBenchmarks, type SalaryBenchmark } from "@/lib/salary";
 import SalaryEstimate from "@/components/SalaryEstimate";
+import SearchSelect, { type SelectOption } from "@/components/SearchSelect";
 
 /**
  * Лента вакансий с фильтрами. Первую страницу без фильтров сервер отдаёт сразу
@@ -43,6 +44,12 @@ export default function Feed({ initialRows, initialTotal }: { initialRows: Vacan
   const [hiddenList, setHiddenList] = useState<Vacancy[]>([]);
   const [savedLoading, setSavedLoading] = useState(false);
   const [matches, setMatches] = useState<Record<string, Match>>({});
+  // Города для фильтра — только те, где есть вакансии, по убыванию числа вакансий
+  const [cityOptions, setCityOptions] = useState<SelectOption[]>([]);
+  useEffect(() => {
+    supabase.from("vacancy_cities").select("city, vacancies").order("vacancies", { ascending: false }).limit(300)
+      .then(({ data }) => setCityOptions((data ?? []).map(c => ({ value: c.city, label: c.city, count: c.vacancies }))));
+  }, []);
   // Справочник для оценки скрытой зарплаты: десятки строк, грузим один раз
   const [benchmarks, setBenchmarks] = useState<SalaryBenchmark[]>([]);
   useEffect(() => {
@@ -56,7 +63,7 @@ export default function Feed({ initialRows, initialTotal }: { initialRows: Vacan
 
   // Фильтры
   const [search, setSearch] = useState("");
-  const [format, setFormat] = useState<WorkFormat | "">("");
+  const [formats, setFormats] = useState<WorkFormat[]>([]);
   const [minSalary, setMinSalary] = useState<number>(0);
   const [onlyWithSalary, setOnlyWithSalary] = useState<boolean>(false);
   const [city, setCity] = useState("");
@@ -94,7 +101,7 @@ export default function Feed({ initialRows, initialTotal }: { initialRows: Vacan
   // первой тысяче, и страница грузит только PAGE_SIZE карточек за раз.
   const filters: VacancyFilters = {
     search,
-    format,
+    formats,
     minSalary,
     withSalary: onlyWithSalary,
     city,
@@ -484,7 +491,7 @@ export default function Feed({ initialRows, initialTotal }: { initialRows: Vacan
 
       <main className="max-w-6xl mx-auto px-4 py-6 lg:py-8 grid grid-cols-1 lg:grid-cols-4 gap-4 lg:gap-8 relative z-0">
         {(() => {
-          const active = [search.trim(), format, minSalary > 0, onlyWithSalary, city.trim(), selectedDirection, area, selectedLevels.length > 0].filter(Boolean).length;
+          const active = [search.trim(), formats.length > 0, minSalary > 0, onlyWithSalary, city.trim(), selectedDirection, area, selectedLevels.length > 0].filter(Boolean).length;
           return (
             <button
               onClick={() => setFiltersOpen(open => !open)}
@@ -554,9 +561,11 @@ export default function Feed({ initialRows, initialTotal }: { initialRows: Vacan
             <div className="space-y-3 pt-2 border-t border-neutral-800/60">
               <label className="text-xs font-bold text-neutral-500 uppercase tracking-wider">Формат</label>
               <div className="flex flex-wrap gap-2">
-                <button onClick={() => setFormat("")} className={chip(format === "")} aria-pressed={format === ""}>Любой</button>
+                <button onClick={() => setFormats([])} className={chip(formats.length === 0)} aria-pressed={formats.length === 0}>Любой</button>
                 {WORK_FORMATS.map(f => (
-                  <button key={f.id} onClick={() => setFormat(format === f.id ? "" : f.id)} className={chip(format === f.id)} aria-pressed={format === f.id}>
+                  <button key={f.id}
+                    onClick={() => setFormats(prev => prev.includes(f.id) ? prev.filter(x => x !== f.id) : [...prev, f.id])}
+                    className={chip(formats.includes(f.id))} aria-pressed={formats.includes(f.id)}>
                     {f.label}
                   </button>
                 ))}
@@ -578,10 +587,8 @@ export default function Feed({ initialRows, initialTotal }: { initialRows: Vacan
             {/* Город */}
             <div className="space-y-3 pt-2 border-t border-neutral-800/60">
               <label className="text-xs font-bold text-neutral-500 uppercase tracking-wider">Город</label>
-              <div className="relative">
-                <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400" />
-                <input type="text" placeholder="Москва, Алматы..." value={city} onChange={(e) => setCity(e.target.value)} className="w-full pl-9 pr-4 py-2.5 bg-neutral-950 border border-neutral-800 rounded-lg text-sm text-neutral-100 focus:outline-none focus:border-blue-500 transition-colors" />
-              </div>
+              <SearchSelect label="Город" placeholder="Начните вводить город…" emptyLabel="Любой город"
+                options={cityOptions} value={city} onChange={setCity} />
             </div>
           </div>
 
@@ -589,22 +596,12 @@ export default function Feed({ initialRows, initialTotal }: { initialRows: Vacan
           <div className="bg-neutral-900/50 border border-neutral-800 rounded-xl p-5 space-y-4">
             <label className="text-xs font-bold text-neutral-500 uppercase tracking-wider">Направление</label>
 
-            {AREAS.filter(a => !area || a.id === area).map(({ id: group, label }) => (
-              <div key={group} className="space-y-1">
-                <p className="text-[11px] text-neutral-500 px-3 pt-1">{label}</p>
-                {DIRECTIONS.filter(d => d.group === group).map(d => (
-                  <button
-                    key={d.id}
-                    onClick={() => { setSelectedDirection(selectedDirection === d.id ? null : d.id); setSelectedStack([]); }}
-                    aria-pressed={selectedDirection === d.id}
-                    className={`w-full flex items-center justify-between text-sm px-3 py-1.5 rounded-md transition-colors ${selectedDirection === d.id ? "bg-blue-600/10 text-blue-400 font-medium" : "text-neutral-300 hover:bg-neutral-800/50"}`}
-                  >
-                    {d.label}
-                    {selectedDirection === d.id && <ChevronRight className="w-4 h-4" />}
-                  </button>
-                ))}
-              </div>
-            ))}
+            <SearchSelect label="Направление" placeholder="Например: frontend, маркетинг, React…" emptyLabel="Все направления"
+              options={AREAS.filter(a => !area || a.id === area).flatMap(a => DIRECTIONS.filter(d => d.group === a.id).map(d => ({
+                value: d.id, label: d.label, group: a.label, keywords: d.tech,
+              })))}
+              value={selectedDirection ?? ""}
+              onChange={v => { setSelectedDirection(v || null); setSelectedStack([]); }} />
 
             {direction?.tech && (
               <div className="pt-4 border-t border-neutral-800">
