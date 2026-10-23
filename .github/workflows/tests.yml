@@ -19,14 +19,14 @@ jobs:
       - name: Run scraper tests
         run: python -m pytest -q tests --ignore=tests/db
 
-  # Правила доступа к базе: supabase/schema.sql на чистом Postgres (дважды —
-  # скрипт должен быть повторяемым) и ~50 проверок от имени anon, кандидата,
+  # Правила доступа к базе: все миграции supabase/migrations на чистом Postgres той же
+  # версии, что в Supabase (базовая — дважды: она должна быть повторяемой), и ~50 проверок от имени anon, кандидата,
   # работодателя и сборщика. Ломается правило — красный CI до мержа.
   database:
     runs-on: ubuntu-latest
     services:
       postgres:
-        image: postgres:16
+        image: postgres:17
         env:
           POSTGRES_PASSWORD: postgres
         ports: ['5432:5432']

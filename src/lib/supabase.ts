@@ -55,7 +55,7 @@ export type UserRole = "candidate" | "employer";
 
 /**
  * Роль пользователя. Источник истины — таблица profiles (роль там защищена
- * от изменения триггером, см. supabase/schema.sql). Метаданные регистрации —
+ * от изменения триггером, см. supabase/migrations). Метаданные регистрации —
  * только запасной вариант, пока строка профиля ещё не создана.
  */
 export async function getUserRole(user: User): Promise<UserRole> {

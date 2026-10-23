@@ -68,7 +68,7 @@ export interface Direction {
   tech?: string[];
 }
 
-/** Направления — те же значения, что в ограничении vacancies.direction (supabase/schema.sql). */
+/** Направления — те же значения, что в ограничении vacancies.direction (supabase/migrations). */
 export const DIRECTIONS: Direction[] = [
   { id: "backend", label: "Backend", group: "it", tech: ["Java", "Python", "Go", "Node.js", "PHP", "C#", ".NET", "1С", "SQL", "Spring", "Django"] },
   { id: "frontend", label: "Frontend", group: "it", tech: ["React", "Vue", "Angular", "TypeScript", "JavaScript", "Next.js"] },
