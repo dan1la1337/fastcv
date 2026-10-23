@@ -1,6 +1,7 @@
 import { cookies } from "next/headers";
 import { createServerClient } from "@supabase/ssr";
 import { supabaseAnonKey, supabaseUrl } from "@/lib/supabase";
+import type { Database } from "@/lib/database.types";
 
 /**
  * Клиент Supabase для серверного кода (route handlers, server components) от имени
@@ -9,7 +10,7 @@ import { supabaseAnonKey, supabaseUrl } from "@/lib/supabase";
  */
 export async function createSupabaseServerClient() {
   const cookieStore = await cookies();
-  return createServerClient(supabaseUrl, supabaseAnonKey, {
+  return createServerClient<Database>(supabaseUrl, supabaseAnonKey, {
     cookies: {
       getAll() {
         return cookieStore.getAll();

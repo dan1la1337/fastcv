@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { fence, sanitizeLetter } from "@/lib/ai-safety";
 import { templateLetter } from "@/lib/cover-letter";
+import type { Database } from "@/lib/database.types";
 import { createSupabaseServerClient } from "@/lib/supabase-server";
 
 // Модели по очереди: если одна перегружена (503/429) или недоступна (404),
@@ -72,6 +73,9 @@ const PROMPT_VERSION = "2026-10-23";
 
 type Source = "ai" | "cache" | "template";
 
+const stringList = (value: unknown): string[] =>
+  Array.isArray(value) ? value.filter((s): s is string => typeof s === "string") : [];
+
 const clip = (value: unknown, max: number) =>
   typeof value === "string" ? value.slice(0, max) : "";
 
@@ -89,7 +93,7 @@ export async function POST(req: Request) {
   const token = req.headers.get("authorization")?.replace(/^Bearer\s+/i, "");
   // Клиент от имени пользователя: запросы ниже проходят через его правила доступа
   const supabase = token
-    ? createClient(supabaseUrl, supabaseAnonKey, {
+    ? createClient<Database>(supabaseUrl, supabaseAnonKey, {
         global: { headers: { Authorization: `Bearer ${token}` } },
         auth: { persistSession: false, autoRefreshToken: false },
       })
@@ -128,9 +132,7 @@ export async function POST(req: Request) {
   const experience =
     clip(profile?.description, 4000) ||
     "Кандидат не заполнил опыт. Напиши нейтральное письмо и не придумывай опыт.";
-  const skillList: string[] = Array.isArray(profile?.skills)
-    ? profile.skills.filter((s: unknown): s is string => typeof s === "string").slice(0, 50)
-    : [];
+  const skillList = stringList(profile?.skills).slice(0, 50);
   const skills = skillList.join(", ").slice(0, 1000);
 
   const data = `<candidate>
@@ -167,11 +169,13 @@ export async function POST(req: Request) {
     console.error("AI quota check failed", quotaError.message);
     return NextResponse.json({ error: "Сервис временно недоступен. Попробуйте позже." }, { status: 503 });
   }
-  if (!quota?.allowed) {
-    const minutes = Math.max(1, Math.ceil((quota?.retry_after ?? 3600) / 60));
+  // consume_ai_quota возвращает jsonb: { allowed, retry_after }
+  const { allowed, retry_after: retryAfter = 3600 } = (quota ?? {}) as { allowed?: boolean; retry_after?: number };
+  if (!allowed) {
+    const minutes = Math.max(1, Math.ceil(retryAfter / 60));
     return NextResponse.json(
       { error: `Лимит: ${RATE_LIMIT} писем в час. Следующее можно сгенерировать через ${minutes} мин.` },
-      { status: 429, headers: { "Retry-After": String(quota?.retry_after ?? 3600) } },
+      { status: 429, headers: { "Retry-After": String(retryAfter) } },
     );
   }
 
@@ -183,7 +187,7 @@ export async function POST(req: Request) {
     // В кэш не кладём: при следующей попытке пусть снова пробует ИИ.
     const fallback = templateLetter(
       { name: clip(profile?.name, 200), description: clip(profile?.description, 4000), skills: skillList },
-      { title: clip(vacancy.title, 300), company_name: vacancy.company_name, description: vacancy.description, stack: vacancy.stack },
+      { title: clip(vacancy.title, 300), company_name: vacancy.company_name, description: vacancy.description, stack: stringList(vacancy.stack) },
     );
     return NextResponse.json({ text: fallback, source: "template" satisfies Source });
   }

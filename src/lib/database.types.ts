@@ -1,0 +1,486 @@
+// Сгенерировано из схемы Supabase (generate_typescript_types). Не править вручную:
+// после изменения схемы обновить: npm run db:types (см. README, «Типы базы»).
+
+export type Json =
+  | string
+  | number
+  | boolean
+  | null
+  | { [key: string]: Json | undefined }
+  | Json[]
+
+export type Database = {
+  // Allows to automatically instantiate createClient with right options
+  // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
+  __InternalSupabase: {
+    PostgrestVersion: "14.17"
+  }
+  public: {
+    Tables: {
+      ai_usage: {
+        Row: {
+          created_at: string
+          id: number
+          kind: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: number
+          kind: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: number
+          kind?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      applications: {
+        Row: {
+          candidate_id: string | null
+          cover_letter: string | null
+          created_at: string | null
+          hr_replied_at: string | null
+          id: string
+          status: string | null
+          vacancy_id: string | null
+        }
+        Insert: {
+          candidate_id?: string | null
+          cover_letter?: string | null
+          created_at?: string | null
+          hr_replied_at?: string | null
+          id?: string
+          status?: string | null
+          vacancy_id?: string | null
+        }
+        Update: {
+          candidate_id?: string | null
+          cover_letter?: string | null
+          created_at?: string | null
+          hr_replied_at?: string | null
+          id?: string
+          status?: string | null
+          vacancy_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "applications_candidate_id_fkey"
+            columns: ["candidate_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "applications_vacancy_id_fkey"
+            columns: ["vacancy_id"]
+            isOneToOne: false
+            referencedRelation: "vacancies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      channels: {
+        Row: {
+          category: string | null
+          failed_runs: number
+          id: number
+          is_active: boolean | null
+          last_error: string | null
+          last_parsed_at: string | null
+          last_post_id: number | null
+          username: string
+        }
+        Insert: {
+          category?: string | null
+          failed_runs?: number
+          id?: number
+          is_active?: boolean | null
+          last_error?: string | null
+          last_parsed_at?: string | null
+          last_post_id?: number | null
+          username: string
+        }
+        Update: {
+          category?: string | null
+          failed_runs?: number
+          id?: number
+          is_active?: boolean | null
+          last_error?: string | null
+          last_parsed_at?: string | null
+          last_post_id?: number | null
+          username?: string
+        }
+        Relationships: []
+      }
+      companies: {
+        Row: {
+          domain: string | null
+          id: string
+          is_claimed: boolean | null
+          name: string
+          owner_id: string | null
+          trust_score: number | null
+        }
+        Insert: {
+          domain?: string | null
+          id?: string
+          is_claimed?: boolean | null
+          name: string
+          owner_id?: string | null
+          trust_score?: number | null
+        }
+        Update: {
+          domain?: string | null
+          id?: string
+          is_claimed?: boolean | null
+          name?: string
+          owner_id?: string | null
+          trust_score?: number | null
+        }
+        Relationships: []
+      }
+      cover_letters: {
+        Row: {
+          created_at: string
+          id: string
+          input_hash: string
+          text: string
+          user_id: string
+          vacancy_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          input_hash: string
+          text: string
+          user_id: string
+          vacancy_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          input_hash?: string
+          text?: string
+          user_id?: string
+          vacancy_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cover_letters_vacancy_id_fkey"
+            columns: ["vacancy_id"]
+            isOneToOne: false
+            referencedRelation: "vacancies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          id: string
+          name: string
+          resume_path: string | null
+          role: string
+          skills: Json | null
+          trust_score: number | null
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          name: string
+          resume_path?: string | null
+          role: string
+          skills?: Json | null
+          trust_score?: number | null
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          name?: string
+          resume_path?: string | null
+          role?: string
+          skills?: Json | null
+          trust_score?: number | null
+        }
+        Relationships: []
+      }
+      vacancies: {
+        Row: {
+          archived_at: string | null
+          city: string | null
+          company_id: string | null
+          company_name: string | null
+          contact_type: string | null
+          contact_value: string | null
+          created_at: string | null
+          description: string | null
+          direction: string | null
+          employer_id: string | null
+          id: string
+          is_remote: boolean | null
+          level: string | null
+          posted_at: string | null
+          ranking_weight: number | null
+          raw_hash: string | null
+          salary_currency: string | null
+          salary_max: number | null
+          salary_min: number | null
+          search_tsv: unknown
+          source_post: string | null
+          source_type: string | null
+          source_url: string | null
+          stack: Json
+          text_fingerprint: string | null
+          title: string
+          title_key: string | null
+          work_format: string | null
+        }
+        Insert: {
+          archived_at?: string | null
+          city?: string | null
+          company_id?: string | null
+          company_name?: string | null
+          contact_type?: string | null
+          contact_value?: string | null
+          created_at?: string | null
+          description?: string | null
+          direction?: string | null
+          employer_id?: string | null
+          id?: string
+          is_remote?: boolean | null
+          level?: string | null
+          posted_at?: string | null
+          ranking_weight?: number | null
+          raw_hash?: string | null
+          salary_currency?: string | null
+          salary_max?: number | null
+          salary_min?: number | null
+          search_tsv?: unknown
+          source_post?: string | null
+          source_type?: string | null
+          source_url?: string | null
+          stack?: Json
+          text_fingerprint?: string | null
+          title: string
+          title_key?: string | null
+          work_format?: string | null
+        }
+        Update: {
+          archived_at?: string | null
+          city?: string | null
+          company_id?: string | null
+          company_name?: string | null
+          contact_type?: string | null
+          contact_value?: string | null
+          created_at?: string | null
+          description?: string | null
+          direction?: string | null
+          employer_id?: string | null
+          id?: string
+          is_remote?: boolean | null
+          level?: string | null
+          posted_at?: string | null
+          ranking_weight?: number | null
+          raw_hash?: string | null
+          salary_currency?: string | null
+          salary_max?: number | null
+          salary_min?: number | null
+          search_tsv?: unknown
+          source_post?: string | null
+          source_type?: string | null
+          source_url?: string | null
+          stack?: Json
+          text_fingerprint?: string | null
+          title?: string
+          title_key?: string | null
+          work_format?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vacancies_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vacancies_employer_id_fkey"
+            columns: ["employer_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+    }
+    Views: {
+      [_ in never]: never
+    }
+    Functions: {
+      app_user_role: { Args: never; Returns: string }
+      archive_stale_vacancies: { Args: { days?: number }; Returns: number }
+      consume_ai_quota: {
+        Args: { max_calls: number; quota_kind: string; window_seconds: number }
+        Returns: Json
+      }
+      normalize_city: { Args: { city: string }; Returns: string }
+      vacancy_direction: {
+        Args: { stack?: Json; title: string }
+        Returns: string
+      }
+      vacancy_level: {
+        Args: { description?: string; title: string }
+        Returns: string
+      }
+      vacancy_work_format: {
+        Args: {
+          city: string
+          description: string
+          is_remote: boolean
+          title: string
+        }
+        Returns: string
+      }
+    }
+    Enums: {
+      app_status: "pending" | "interview_scheduled" | "rejected" | "expired"
+      user_role: "candidate" | "employer"
+    }
+    CompositeTypes: {
+      [_ in never]: never
+    }
+  }
+}
+
+type DatabaseWithoutInternals = Omit<Database, "__InternalSupabase">
+
+type DefaultSchema = DatabaseWithoutInternals[Extract<keyof Database, "public">]
+
+export type Tables<
+  DefaultSchemaTableNameOrOptions extends
+    | keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
+    | { schema: keyof DatabaseWithoutInternals },
+  TableName extends (DefaultSchemaTableNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals
+  }
+    ? keyof (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
+        DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])
+    : never) = never,
+> = DefaultSchemaTableNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
+      DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])[TableName] extends {
+      Row: infer R
+    }
+    ? R
+    : never
+  : DefaultSchemaTableNameOrOptions extends keyof (DefaultSchema["Tables"] &
+        DefaultSchema["Views"])
+    ? (DefaultSchema["Tables"] &
+        DefaultSchema["Views"])[DefaultSchemaTableNameOrOptions] extends {
+        Row: infer R
+      }
+      ? R
+      : never
+    : never
+
+export type TablesInsert<
+  DefaultSchemaTableNameOrOptions extends
+    | keyof DefaultSchema["Tables"]
+    | { schema: keyof DatabaseWithoutInternals },
+  TableName extends (DefaultSchemaTableNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals
+  }
+    ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
+    : never) = never,
+> = DefaultSchemaTableNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
+      Insert: infer I
+    }
+    ? I
+    : never
+  : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"]
+    ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
+        Insert: infer I
+      }
+      ? I
+      : never
+    : never
+
+export type TablesUpdate<
+  DefaultSchemaTableNameOrOptions extends
+    | keyof DefaultSchema["Tables"]
+    | { schema: keyof DatabaseWithoutInternals },
+  TableName extends (DefaultSchemaTableNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals
+  }
+    ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
+    : never) = never,
+> = DefaultSchemaTableNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
+      Update: infer U
+    }
+    ? U
+    : never
+  : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"]
+    ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
+        Update: infer U
+      }
+      ? U
+      : never
+    : never
+
+export type Enums<
+  DefaultSchemaEnumNameOrOptions extends
+    | keyof DefaultSchema["Enums"]
+    | { schema: keyof DatabaseWithoutInternals },
+  EnumName extends (DefaultSchemaEnumNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals
+  }
+    ? keyof DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"]
+    : never) = never,
+> = DefaultSchemaEnumNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"][EnumName]
+  : DefaultSchemaEnumNameOrOptions extends keyof DefaultSchema["Enums"]
+    ? DefaultSchema["Enums"][DefaultSchemaEnumNameOrOptions]
+    : never
+
+export type CompositeTypes<
+  PublicCompositeTypeNameOrOptions extends
+    | keyof DefaultSchema["CompositeTypes"]
+    | { schema: keyof DatabaseWithoutInternals },
+  CompositeTypeName extends (PublicCompositeTypeNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals
+  }
+    ? keyof DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
+    : never) = never,
+> = PublicCompositeTypeNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"][CompositeTypeName]
+  : PublicCompositeTypeNameOrOptions extends keyof DefaultSchema["CompositeTypes"]
+    ? DefaultSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]
+    : never
+
+export const Constants = {
+  public: {
+    Enums: {
+      app_status: ["pending", "interview_scheduled", "rejected", "expired"],
+      user_role: ["candidate", "employer"],
+    },
+  },
+} as const

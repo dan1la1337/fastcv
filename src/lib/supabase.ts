@@ -1,5 +1,6 @@
 import { createClient, type User } from "@supabase/supabase-js";
 import { createBrowserClient } from "@supabase/ssr";
+import type { Database } from "@/lib/database.types";
 
 // NEXT_PUBLIC_* переменные подставляются в бандл во время `next build`,
 // поэтому обращаться к ним нужно только напрямую, без динамических ключей.
@@ -47,8 +48,8 @@ export const supabaseAnonKey: string = anonKey;
  */
 export const supabase =
   typeof window === "undefined"
-    ? createClient(supabaseUrl, supabaseAnonKey, { auth: { persistSession: false, autoRefreshToken: false } })
-    : createBrowserClient(supabaseUrl, supabaseAnonKey);
+    ? createClient<Database>(supabaseUrl, supabaseAnonKey, { auth: { persistSession: false, autoRefreshToken: false } })
+    : createBrowserClient<Database>(supabaseUrl, supabaseAnonKey);
 
 export type UserRole = "candidate" | "employer";
 
