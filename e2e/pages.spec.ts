@@ -87,7 +87,7 @@ test("разметка JobPosting выводится только полной",
   expect(hrefs.length).toBeGreaterThan(0);
   for (const href of hrefs) {
     const html = await (await request.get(href)).text();
-    const match = html.match(/<script type="application\/ld\+json">(.*?)<\/script>/s);
+    const match = html.match(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/);
     if (!match) continue;
     const data = JSON.parse(match[1]);
     expect(data.hiringOrganization?.name, href).toBeTruthy();
