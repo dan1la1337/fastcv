@@ -63,7 +63,10 @@ test("карточка ведёт на страницу вакансии", async
   await page.goto("/");
   const link = page.locator('section h2 a[href^="/vacancy/"]').first();
   const title = (await link.textContent())!.trim();
+  // Страница вакансии засчитывает просмотр (воронка в кабинете работодателя)
+  const view = page.waitForResponse(r => r.url().includes("/rpc/register_vacancy_view"));
   await link.click();
+  expect((await view).ok()).toBe(true);
   await expect(page).toHaveURL(/\/vacancy\/[0-9a-f-]{36}$/);
   await expect(page.getByRole("heading", { level: 1 })).toHaveText(title);
   await expect(page.getByRole("button", { name: /Откликнуться/ })).toBeVisible();

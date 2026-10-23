@@ -22,6 +22,8 @@ export interface Vacancy {
   level?: Level | null;
   direction?: string | null;
   work_format?: WorkFormat | null;
+  /** Просмотры страницы вакансии (видит работодатель в своём кабинете). */
+  views_count?: number;
 }
 
 /** Колонки для показа: без служебных (search_tsv, title_key, text_fingerprint, raw_hash) — они только раздувают ответ. */
