@@ -6,7 +6,9 @@ import {
   DEFAULT_FILTERS, DIRECTIONS, LEVELS, WORK_FORMATS, fetchVacancyPage, formatLabel, formatSalary, levelLabel, plural, PAGE_SIZE,
   VACANCY_FORMS, type Level, type Vacancy, type VacancyFilters, type WorkFormat,
 } from "@/lib/vacancies";
-import { Search, MapPin, ChevronDown, ChevronRight, Sparkles, Loader2, ExternalLink, Globe, SlidersHorizontal, Briefcase, Building2 } from "lucide-react";
+import { Search, MapPin, ChevronDown, ChevronRight, Sparkles, Loader2, ExternalLink, Globe, SlidersHorizontal, Briefcase, Building2, Target } from "lucide-react";
+import { fetchMatches, fetchRecommended, matchTone, type Match } from "@/lib/matching";
+import type { Tables } from "@/lib/database.types";
 import type { User } from "@supabase/supabase-js";
 import Link from "next/link";
 import SmartApply from "@/components/SmartApply";
@@ -24,7 +26,16 @@ export default function Feed({ initialRows, initialTotal }: { initialRows: Vacan
   const [loadingMore, setLoadingMore] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [user, setUser] = useState<User | null>(null);
-  const [userProfile, setUserProfile] = useState<{ role?: string } | null>(null);
+  const [userProfile, setUserProfile] = useState<Tables<"profiles"> | null>(null);
+
+  // «Для вас»: подборка по профилю кандидата и процент совпадения на карточках
+  const [mode, setMode] = useState<"all" | "for-you">("all");
+  const [matches, setMatches] = useState<Record<string, Match>>({});
+  const requestedMatches = useRef(new Set<string>());
+  const [recommended, setRecommended] = useState<Vacancy[]>([]);
+  const [recPage, setRecPage] = useState(0);
+  const [recHasMore, setRecHasMore] = useState(false);
+  const [recLoading, setRecLoading] = useState(false);
 
   // Фильтры
   const [search, setSearch] = useState("");
@@ -79,6 +90,8 @@ export default function Feed({ initialRows, initialTotal }: { initialRows: Vacan
       return;
     }
     serverDataFor.current = null;
+    // Фильтры относятся к общей ленте: тронули фильтр — показываем её
+    setMode("all");
     const id = ++requestId.current;
     // Ждём, пока пользователь допечатает, чтобы не слать запрос на каждую букву
     const timer = setTimeout(async () => {
@@ -115,6 +128,45 @@ export default function Feed({ initialRows, initialTotal }: { initialRows: Vacan
     }
   }
 
+  // Надежное определение роли: проверяем и метаданные аутентификации, и таблицу profiles
+  const userRole = userProfile?.role || user?.user_metadata?.role;
+  const isEmployer = userRole === 'employer';
+  const isCandidate = Boolean(user) && userProfile?.role === "candidate";
+  const profileSkills = Array.isArray(userProfile?.skills) ? userProfile.skills : [];
+  const hasPrefs = Boolean(userProfile?.pref_directions?.length || profileSkills.length || userProfile?.pref_level);
+
+  // Процент совпадения для карточек общей ленты (подборка приходит уже с ним)
+  useEffect(() => {
+    if (!isCandidate || !hasPrefs) return;
+    const ids = vacancies.map(v => v.id).filter(id => !requestedMatches.current.has(id));
+    if (!ids.length) return;
+    ids.forEach(id => requestedMatches.current.add(id));
+    fetchMatches(ids).then(found => setMatches(prev => ({ ...prev, ...found }))).catch(() => {
+      ids.forEach(id => requestedMatches.current.delete(id));
+    });
+  }, [isCandidate, hasPrefs, vacancies]);
+
+  async function loadRecommended(nextPage: number) {
+    setRecLoading(true);
+    setLoadError(null);
+    try {
+      const { rows, matches: found, hasMore } = await fetchRecommended(nextPage, PAGE_SIZE);
+      setRecommended(prev => nextPage === 0 ? rows : [...prev, ...rows.filter(r => !prev.some(p => p.id === r.id))]);
+      setMatches(prev => ({ ...prev, ...found }));
+      setRecPage(nextPage);
+      setRecHasMore(hasMore);
+    } catch {
+      setLoadError("Не удалось собрать подборку. Обновите страницу.");
+    } finally {
+      setRecLoading(false);
+    }
+  }
+
+  function showForYou() {
+    setMode("for-you");
+    void loadRecommended(0);
+  }
+
   const toggleStack = (tech: string) => {
     setSelectedStack(prev => prev.includes(tech) ? prev.filter(t => t !== tech) : [...prev, tech]);
   };
@@ -127,9 +179,91 @@ export default function Feed({ initialRows, initialTotal }: { initialRows: Vacan
       ? "bg-blue-600 border-blue-500 text-white"
       : "bg-neutral-950 border-neutral-700 text-neutral-400 hover:border-neutral-500 hover:text-neutral-200"}`;
 
-  // Надежное определение роли: проверяем и метаданные аутентификации, и таблицу profiles
-  const userRole = userProfile?.role || user?.user_metadata?.role;
-  const isEmployer = userRole === 'employer';
+  const forYou = mode === "for-you";
+  const list = forYou ? recommended : vacancies;
+  const listLoading = forYou ? recLoading && recommended.length === 0 : loading;
+
+  const card = (item: Vacancy) => {
+    // Без заполненного профиля оценка у всех одинаковая — не показываем её
+    const match = hasPrefs ? matches[item.id] : undefined;
+    return (
+      <div key={item.id} className="bg-neutral-900/60 border border-neutral-800/80 rounded-2xl p-6 flex flex-col gap-4 relative overflow-hidden group">
+
+        {/* Бейджи источников */}
+        {item.source_type === 'external' ? (
+           <div className="absolute top-0 right-0 bg-blue-500/10 text-blue-400 text-[10px] uppercase font-bold px-3 py-1 rounded-bl-lg border-b border-l border-blue-500/20 z-10">
+             Telegram
+           </div>
+        ) : (
+           <div className="absolute top-0 right-0 bg-emerald-500/10 text-emerald-400 text-[10px] uppercase font-bold px-3 py-1 rounded-bl-lg border-b border-l border-emerald-500/20 z-10 flex items-center gap-1">
+             <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+             Прямой работодатель
+           </div>
+        )}
+
+        <div className="flex flex-col sm:flex-row justify-between gap-4">
+          <div className="pr-12">
+            <h2 className="text-xl font-bold text-neutral-100">
+              <Link href={`/vacancy/${item.id}`} className="hover:text-blue-400 transition-colors">{item.title}</Link>
+            </h2>
+            {item.company_name && <p className="text-sm text-neutral-400 mt-0.5">{item.company_name}</p>}
+            <p className="text-base font-semibold text-emerald-400 mt-1">{formatSalary(item.salary_min, item.salary_max, item.salary_currency)}</p>
+            {(item.city || item.work_format || item.is_remote || item.level || match) && (
+              <p className="flex flex-wrap items-center gap-3 text-xs text-neutral-400 mt-2">
+                {match && (
+                  <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-md border font-semibold ${matchTone(match.score)}`}
+                    title="Насколько вакансия подходит вашему профилю">
+                    <Target className="w-3.5 h-3.5" />Совпадение {match.score}%
+                  </span>
+                )}
+                {item.level && <span className="inline-flex items-center gap-1"><Briefcase className="w-3.5 h-3.5" />{levelLabel(item.level)}</span>}
+                {item.city && <span className="inline-flex items-center gap-1"><MapPin className="w-3.5 h-3.5" />{item.city}</span>}
+                {item.work_format === "remote" || (!item.work_format && item.is_remote)
+                  ? <span className="inline-flex items-center gap-1"><Globe className="w-3.5 h-3.5" />Удалённо</span>
+                  : item.work_format && <span className="inline-flex items-center gap-1"><Building2 className="w-3.5 h-3.5" />{formatLabel(item.work_format)}</span>}
+              </p>
+            )}
+          </div>
+
+          <button
+            onClick={() => setApplyVacancy(item)}
+            className="inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-sm font-semibold transition-colors shrink-0 shadow-lg shadow-blue-500/20 relative z-10"
+          >
+            <Sparkles className="w-4 h-4" /> Smart Apply
+          </button>
+        </div>
+        <p className="text-sm text-neutral-400 leading-relaxed line-clamp-3">{item.description}</p>
+
+        {match && (match.matched.length > 0 || match.missing.length > 0) && (
+          <p className="text-xs text-neutral-500">
+            {match.matched.length > 0 && <>Есть у вас: <span className="text-emerald-400">{match.matched.join(", ")}</span></>}
+            {match.matched.length > 0 && match.missing.length > 0 && " · "}
+            {match.missing.length > 0 && <>Не хватает: <span className="text-amber-300">{match.missing.join(", ")}</span></>}
+          </p>
+        )}
+
+        {(item.stack?.length || item.source_url) ? (
+          <div className="flex flex-wrap items-center gap-2">
+            {item.stack?.slice(0, 8).map(tech => (
+              <span key={tech} className="text-[11px] px-2 py-0.5 rounded-md bg-neutral-800/80 border border-neutral-700/60 text-neutral-300">
+                {tech}
+              </span>
+            ))}
+            {item.source_url && (
+              <a
+                href={item.source_url}
+                target="_blank"
+                rel="noreferrer"
+                className="ml-auto inline-flex items-center gap-1 text-xs text-neutral-500 hover:text-blue-400 transition-colors"
+              >
+                Пост в Telegram <ExternalLink className="w-3 h-3" />
+              </a>
+            )}
+          </div>
+        ) : null}
+      </div>
+    );
+  };
 
   return (
     <div className="min-h-screen bg-neutral-950 text-neutral-100 antialiased font-sans relative">
@@ -325,83 +459,68 @@ export default function Feed({ initialRows, initialTotal }: { initialRows: Vacan
         </aside>
 
         {/* Vacancies Feed */}
-        <section className="lg:col-span-3">
-          {loading ? (
+        <section className="lg:col-span-3 space-y-4">
+          {isCandidate && (
+            <div className="flex items-center gap-2" role="tablist" aria-label="Какие вакансии показать">
+              {([["all", "Все вакансии"], ["for-you", "Для вас"]] as const).map(([id, label]) => (
+                <button
+                  key={id}
+                  role="tab"
+                  aria-selected={mode === id}
+                  onClick={() => (id === "for-you" ? showForYou() : setMode("all"))}
+                  className={`inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-medium border transition-colors ${
+                    mode === id ? "bg-blue-600 border-blue-500 text-white" : "bg-neutral-900/60 border-neutral-800 text-neutral-300 hover:bg-neutral-800"
+                  }`}
+                >
+                  {id === "for-you" && <Target className="w-4 h-4" />}{label}
+                </button>
+              ))}
+            </div>
+          )}
+
+          {isCandidate && !hasPrefs && !forYou && (
+            <div className="rounded-xl border border-neutral-800 bg-neutral-900/60 px-4 py-3 text-sm text-neutral-300">
+              Расскажите, что ищете — направления, уровень и навыки, — и у каждой вакансии появится процент совпадения.{" "}
+              <Link href="/profile#prefs" className="text-blue-400 hover:underline">Заполнить профиль</Link>
+            </div>
+          )}
+
+          {forYou && (
+            <div className="rounded-xl border border-blue-500/20 bg-blue-950/20 px-4 py-3 text-sm text-neutral-300">
+              {hasPrefs ? (
+                <>Вакансии отсортированы по совпадению с вашим профилем: направления, навыки, уровень, формат и город.{" "}
+                  <Link href="/profile#prefs" className="text-blue-400 hover:underline">Изменить, что ищу</Link></>
+              ) : (
+                <>Подборка пока общая: укажите в профиле направления, уровень и навыки — и вакансии выстроятся под вас.{" "}
+                  <Link href="/profile#prefs" className="text-blue-400 hover:underline">Заполнить за минуту</Link></>
+              )}
+            </div>
+          )}
+
+          {listLoading ? (
             <div className="flex items-center justify-center h-64"><div className="w-6 h-6 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"></div></div>
           ) : loadError ? (
             <div className="text-center py-20 text-sm text-red-400">{loadError}</div>
-          ) : vacancies.length === 0 ? (
+          ) : list.length === 0 ? (
             <div className="text-center py-20 bg-neutral-900/30 border border-dashed border-neutral-800 rounded-2xl">
               <p className="text-neutral-300 text-sm font-medium">Ничего не нашлось</p>
-              <p className="text-neutral-500 text-xs mt-1">Попробуйте ослабить фильтры</p>
+              <p className="text-neutral-500 text-xs mt-1">{forYou ? "Свежих вакансий пока нет — загляните позже" : "Попробуйте ослабить фильтры"}</p>
             </div>
           ) : (
             <div className="flex flex-col gap-4">
-              {vacancies.map((item) => (
-                <div key={item.id} className="bg-neutral-900/60 border border-neutral-800/80 rounded-2xl p-6 flex flex-col gap-4 relative overflow-hidden group">
-                  
-                  {/* Бейджи источников */}
-                  {item.source_type === 'external' ? (
-                     <div className="absolute top-0 right-0 bg-blue-500/10 text-blue-400 text-[10px] uppercase font-bold px-3 py-1 rounded-bl-lg border-b border-l border-blue-500/20 z-10">
-                       Telegram
-                     </div>
-                  ) : (
-                     <div className="absolute top-0 right-0 bg-emerald-500/10 text-emerald-400 text-[10px] uppercase font-bold px-3 py-1 rounded-bl-lg border-b border-l border-emerald-500/20 z-10 flex items-center gap-1">
-                       <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
-                       Прямой работодатель
-                     </div>
-                  )}
+              {list.map(card)}
 
-                  <div className="flex flex-col sm:flex-row justify-between gap-4">
-                    <div className="pr-12">
-                      <h2 className="text-xl font-bold text-neutral-100">
-                        <Link href={`/vacancy/${item.id}`} className="hover:text-blue-400 transition-colors">{item.title}</Link>
-                      </h2>
-                      {item.company_name && <p className="text-sm text-neutral-400 mt-0.5">{item.company_name}</p>}
-                      <p className="text-base font-semibold text-emerald-400 mt-1">{formatSalary(item.salary_min, item.salary_max, item.salary_currency)}</p>
-                      {(item.city || item.work_format || item.is_remote || item.level) && (
-                        <p className="flex flex-wrap items-center gap-3 text-xs text-neutral-400 mt-2">
-                          {item.level && <span className="inline-flex items-center gap-1"><Briefcase className="w-3.5 h-3.5" />{levelLabel(item.level)}</span>}
-                          {item.city && <span className="inline-flex items-center gap-1"><MapPin className="w-3.5 h-3.5" />{item.city}</span>}
-                          {item.work_format === "remote" || (!item.work_format && item.is_remote)
-                            ? <span className="inline-flex items-center gap-1"><Globe className="w-3.5 h-3.5" />Удалённо</span>
-                            : item.work_format && <span className="inline-flex items-center gap-1"><Building2 className="w-3.5 h-3.5" />{formatLabel(item.work_format)}</span>}
-                        </p>
-                      )}
-                    </div>
-                    
-                    <button
-                      onClick={() => setApplyVacancy(item)}
-                      className="inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-sm font-semibold transition-colors shrink-0 shadow-lg shadow-blue-500/20 relative z-10"
-                    >
-                      <Sparkles className="w-4 h-4" /> Smart Apply
-                    </button>
-                  </div>
-                  <p className="text-sm text-neutral-400 leading-relaxed line-clamp-3">{item.description}</p>
-
-                  {(item.stack?.length || item.source_url) ? (
-                    <div className="flex flex-wrap items-center gap-2">
-                      {item.stack?.slice(0, 8).map(tech => (
-                        <span key={tech} className="text-[11px] px-2 py-0.5 rounded-md bg-neutral-800/80 border border-neutral-700/60 text-neutral-300">
-                          {tech}
-                        </span>
-                      ))}
-                      {item.source_url && (
-                        <a
-                          href={item.source_url}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="ml-auto inline-flex items-center gap-1 text-xs text-neutral-500 hover:text-blue-400 transition-colors"
-                        >
-                          Пост в Telegram <ExternalLink className="w-3 h-3" />
-                        </a>
-                      )}
-                    </div>
-                  ) : null}
-                </div>
-              ))}
-
-              {vacancies.length < total && (
+              {forYou ? (
+                recHasMore && (
+                  <button
+                    onClick={() => loadRecommended(recPage + 1)}
+                    disabled={recLoading}
+                    className="mx-auto mt-2 inline-flex items-center gap-2 px-6 py-2.5 bg-neutral-900 hover:bg-neutral-800 border border-neutral-800 rounded-xl text-sm text-neutral-200 transition-colors disabled:opacity-50"
+                  >
+                    {recLoading ? <><Loader2 className="w-4 h-4 animate-spin" /> Загружаем…</> : "Показать ещё"}
+                  </button>
+                )
+              ) : vacancies.length < total && (
                 <button
                   onClick={loadMore}
                   disabled={loadingMore}

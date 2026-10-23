@@ -196,6 +196,26 @@ CHECKS: list[tuple] = [
      f"""insert into cover_letters (user_id, vacancy_id, input_hash, text) select '{C}', id, 'h', 'v2' from vacancies where title = 'Ext'
          on conflict (user_id, vacancy_id, input_hash) do update set text = excluded.text returning text""",
      "authenticated", C, "v2"),
+
+    # --- предпочтения кандидата и совпадение ---
+    ("кандидат указывает, что ищет", True,
+     "update profiles set pref_directions = '{backend}', pref_level = 'junior', pref_format = 'office', pref_city = 'Санкт-Петербург' where id = auth.uid()",
+     "authenticated", C, None),
+    ("неизвестное направление НЕ сохраняется", False,
+     "update profiles set pref_directions = '{astronaut}' where id = auth.uid()", "authenticated", C, None),
+    ("совпадение: подходящая вакансия высоко, чужое направление низко", True,
+     "select string_agg(score::text, ',' order by score desc) from my_vacancy_matches(array(select id from vacancies where title in ('Ext') or title like 'Int%'))",
+     "authenticated", C, "91,28"),
+    ("подборка «Для вас»: лучшая вакансия первой", True,
+     "select v.title from recommended_vacancies(1, 0) r join vacancies v on v.id = r.id", "authenticated", C,
+     "Int Junior Python developer"),
+    ("недостающие навыки берутся из стека вакансии", True,
+     """update vacancies set stack = '["Python", "Kafka", "Docker"]' where title = 'Ext';
+        select (m -> 'missing')::text || ' ' || (m -> 'matched')::text from vacancy_match((select v from vacancies v where title = 'Ext'), (select p from profiles p where id = '11111111-1111-1111-1111-111111111111')) m""",
+     "postgres", None, '["Kafka", "Docker"] ["Python"]'),
+    ("работодателю подборка не считается", True,
+     "select count(*) from recommended_vacancies(10, 0)", "authenticated", E, "0"),
+    ("аноним НЕ вызывает подборку", False, "select * from recommended_vacancies(10, 0)", "anon", None, None),
 ]
 
 

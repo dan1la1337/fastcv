@@ -6,12 +6,19 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Briefcase, FileText, Loader2, LogOut, Save, Trash2, Upload, UserCircle } from "lucide-react";
 import { supabase, getUserRole, type UserRole } from "@/lib/supabase";
+import { DIRECTIONS, LEVELS, WORK_FORMATS, type Level, type WorkFormat } from "@/lib/vacancies";
+
+const MAX_DIRECTIONS = 5; // как в ограничении profiles_pref_directions_check
 
 const RESUME_MAX_BYTES = 5 * 1024 * 1024; // совпадает с лимитом бакета resumes
 
 const inputClass =
   "w-full bg-neutral-950 border border-neutral-800 rounded-xl px-4 py-3 text-sm text-neutral-200 focus:outline-none focus:border-blue-500 transition-colors";
 const labelClass = "block text-xs font-bold text-neutral-500 uppercase tracking-wider mb-2";
+const chip = (active: boolean) =>
+  `text-xs px-3 py-1.5 rounded-lg border transition-colors ${active
+    ? "bg-blue-600 border-blue-500 text-white"
+    : "bg-neutral-950 border-neutral-700 text-neutral-400 hover:border-neutral-500 hover:text-neutral-200"}`;
 
 export default function ProfilePage() {
   const router = useRouter();
@@ -24,6 +31,13 @@ export default function ProfilePage() {
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [skills, setSkills] = useState("");
+
+  // Что ищет кандидат: по этому строится подборка «Для вас» и процент совпадения
+  const [prefDirections, setPrefDirections] = useState<string[]>([]);
+  const [prefLevel, setPrefLevel] = useState<Level | "">("");
+  const [prefFormat, setPrefFormat] = useState<WorkFormat | "">("");
+  const [prefCity, setPrefCity] = useState("");
+  const [prefSalary, setPrefSalary] = useState("");
 
   const [resumePath, setResumePath] = useState<string | null>(null);
   const [resumeBusy, setResumeBusy] = useState(false);
@@ -41,7 +55,7 @@ export default function ProfilePage() {
 
       const { data: profile } = await supabase
         .from("profiles")
-        .select("name, description, skills, resume_path")
+        .select("name, description, skills, resume_path, pref_directions, pref_level, pref_format, pref_city, pref_salary")
         .eq("id", user.id)
         .maybeSingle();
       if (profile) {
@@ -49,6 +63,11 @@ export default function ProfilePage() {
         setDescription(profile.description || "");
         setSkills(Array.isArray(profile.skills) ? profile.skills.join(", ") : "");
         setResumePath(profile.resume_path ?? null);
+        setPrefDirections(profile.pref_directions ?? []);
+        setPrefLevel((profile.pref_level as Level | null) ?? "");
+        setPrefFormat((profile.pref_format as WorkFormat | null) ?? "");
+        setPrefCity(profile.pref_city ?? "");
+        setPrefSalary(profile.pref_salary ? String(profile.pref_salary) : "");
       }
       setLoading(false);
     })();
@@ -66,12 +85,19 @@ export default function ProfilePage() {
       name: name.trim(),
       description: description.trim(),
       skills: skills.split(",").map(s => s.trim()).filter(Boolean),
+      ...(role === "candidate" ? {
+        pref_directions: prefDirections,
+        pref_level: prefLevel || null,
+        pref_format: prefFormat || null,
+        pref_city: prefCity.trim() || null,
+        pref_salary: Number(prefSalary.replace(/\D/g, "")) || null,
+      } : {}),
     });
 
     setSaving(false);
     setNotice(error
       ? { kind: "error", text: "Не удалось сохранить профиль: " + error.message }
-      : { kind: "ok", text: "Профиль сохранён." });
+      : { kind: "ok", text: role === "candidate" ? "Профиль сохранён. Подборка «Для вас» на главной обновлена." : "Профиль сохранён." });
   }
 
   async function uploadResume(file: File) {
@@ -189,6 +215,68 @@ export default function ProfilePage() {
                 <input type="text" value={skills} onChange={e => setSkills(e.target.value)}
                   placeholder="React, Node.js, Python..." className={inputClass} />
               </div>
+            )}
+
+            {isCandidate && (
+              <fieldset id="prefs" className="space-y-5 border-t border-neutral-800 pt-6">
+                <legend className="text-base font-semibold text-white">Что ищу</legend>
+                <p className="text-xs text-neutral-500 -mt-2">По этим ответам и навыкам считается совпадение с вакансиями и подборка «Для вас».</p>
+
+                <div>
+                  <span className={labelClass}>Направления (до {MAX_DIRECTIONS})</span>
+                  <div className="flex flex-wrap gap-2">
+                    {DIRECTIONS.map(d => {
+                      const on = prefDirections.includes(d.id);
+                      const full = !on && prefDirections.length >= MAX_DIRECTIONS;
+                      return (
+                        <button key={d.id} type="button" disabled={full} aria-pressed={on}
+                          onClick={() => setPrefDirections(prev => on ? prev.filter(x => x !== d.id) : [...prev, d.id])}
+                          className={chip(on) + (full ? " opacity-40 cursor-not-allowed" : "")}>
+                          {d.label}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                <div>
+                  <span className={labelClass}>Уровень</span>
+                  <div className="flex flex-wrap gap-2">
+                    {LEVELS.map(l => (
+                      <button key={l.id} type="button" aria-pressed={prefLevel === l.id}
+                        onClick={() => setPrefLevel(prefLevel === l.id ? "" : l.id)} className={chip(prefLevel === l.id)}>
+                        {l.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div>
+                  <span className={labelClass}>Формат работы</span>
+                  <div className="flex flex-wrap gap-2">
+                    {WORK_FORMATS.map(f => (
+                      <button key={f.id} type="button" aria-pressed={prefFormat === f.id}
+                        onClick={() => setPrefFormat(prefFormat === f.id ? "" : f.id)} className={chip(prefFormat === f.id)}>
+                        {f.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="grid sm:grid-cols-2 gap-4">
+                  <div>
+                    <label htmlFor="pref-city" className={labelClass}>Город</label>
+                    <input id="pref-city" type="text" maxLength={100} value={prefCity} onChange={e => setPrefCity(e.target.value)}
+                      placeholder="Москва" className={inputClass} />
+                  </div>
+                  <div>
+                    <label htmlFor="pref-salary" className={labelClass}>Зарплата от, ₽ в месяц</label>
+                    <input id="pref-salary" type="text" inputMode="numeric" value={prefSalary}
+                      onChange={e => setPrefSalary(e.target.value.replace(/[^\d ]/g, ""))}
+                      placeholder="150 000" className={inputClass} />
+                  </div>
+                </div>
+              </fieldset>
             )}
 
             <div>
