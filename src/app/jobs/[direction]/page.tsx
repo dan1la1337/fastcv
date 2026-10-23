@@ -36,7 +36,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   if (!direction) return {};
   const count = (await getVacancies(direction.id)).length;
   const title = `Вакансии: ${direction.label} — удалённо и в офисе | FastCV`;
-  const description = `${count} свежих ${plural(count, VACANCY_FORMS)} по направлению «${direction.label}» из Telegram-каналов и от работодателей. Отклик с сопроводительным письмом от ИИ.`;
+  const description = `${count} свежих ${plural(count, VACANCY_FORMS)} по направлению «${direction.label}» из Telegram-каналов, «Работы России» и от работодателей. Отклик с сопроводительным письмом от ИИ.`;
   return { title, description, alternates: { canonical: `/jobs/${(await params).direction}` }, openGraph: { title, description } };
 }
 
