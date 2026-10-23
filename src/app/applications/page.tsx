@@ -11,6 +11,7 @@ interface Application {
   id: string;
   status: string;
   cover_letter: string | null;
+  hr_message: string | null;
   created_at: string;
   vacancies: { id: string; title: string; company_name: string | null; source_type: string; source_url: string | null } | null;
 }
@@ -43,7 +44,7 @@ export default function CandidateApplications() {
 
       const { data } = await supabase
         .from("applications")
-        .select("id, status, cover_letter, created_at, vacancies (id, title, company_name, source_type, source_url)")
+        .select("id, status, hr_message, cover_letter, created_at, vacancies (id, title, company_name, source_type, source_url)")
         .eq("candidate_id", user.id)
         .order("created_at", { ascending: false });
 
@@ -113,6 +114,15 @@ export default function CandidateApplications() {
                       {status.text}
                     </span>
                   </div>
+
+                  {app.hr_message && (
+                    <div className={`rounded-xl border p-4 text-sm leading-relaxed ${
+                      app.status === "interview_scheduled" ? "border-emerald-500/30 bg-emerald-500/5 text-emerald-100" : "border-neutral-800 bg-neutral-950 text-neutral-300"
+                    }`}>
+                      <p className="text-xs font-bold text-neutral-500 uppercase tracking-wider mb-2">Ответ работодателя</p>
+                      <p className="whitespace-pre-line">{app.hr_message}</p>
+                    </div>
+                  )}
 
                   {app.cover_letter && (
                     <details className="bg-neutral-950 border border-neutral-800 rounded-xl p-4 text-sm text-neutral-300 group">

@@ -43,6 +43,7 @@ export type Database = {
           candidate_id: string | null
           cover_letter: string | null
           created_at: string | null
+          hr_message: string | null
           hr_replied_at: string | null
           id: string
           status: string | null
@@ -52,6 +53,7 @@ export type Database = {
           candidate_id?: string | null
           cover_letter?: string | null
           created_at?: string | null
+          hr_message?: string | null
           hr_replied_at?: string | null
           id?: string
           status?: string | null
@@ -61,6 +63,7 @@ export type Database = {
           candidate_id?: string | null
           cover_letter?: string | null
           created_at?: string | null
+          hr_message?: string | null
           hr_replied_at?: string | null
           id?: string
           status?: string | null
@@ -284,6 +287,7 @@ export type Database = {
           text_fingerprint: string | null
           title: string
           title_key: string | null
+          views_count: number
           work_format: string | null
         }
         Insert: {
@@ -314,6 +318,7 @@ export type Database = {
           text_fingerprint?: string | null
           title: string
           title_key?: string | null
+          views_count?: number
           work_format?: string | null
         }
         Update: {
@@ -344,6 +349,7 @@ export type Database = {
           text_fingerprint?: string | null
           title?: string
           title_key?: string | null
+          views_count?: number
           work_format?: string | null
         }
         Relationships: [
@@ -374,6 +380,15 @@ export type Database = {
         Args: { max_calls: number; quota_kind: string; window_seconds: number }
         Returns: Json
       }
+      my_application_matches: {
+        Args: never
+        Returns: {
+          application_id: string
+          matched: Json
+          missing: Json
+          score: number
+        }[]
+      }
       my_vacancy_matches: {
         Args: { ids: string[] }
         Returns: {
@@ -393,6 +408,7 @@ export type Database = {
           score: number
         }[]
       }
+      register_vacancy_view: { Args: { vacancy: string }; Returns: undefined }
       vacancy_direction: {
         Args: { stack?: Json; title: string }
         Returns: string

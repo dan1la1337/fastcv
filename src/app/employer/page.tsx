@@ -5,8 +5,9 @@ import type { User } from "@supabase/supabase-js";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import {
-  Archive, ArrowLeft, Briefcase, CheckCircle2, Eye, FileText, Loader2, Pencil, PlusCircle, RotateCcw, XCircle,
+  Archive, ArrowLeft, Briefcase, CheckCircle2, Eye, FileText, Loader2, Pencil, PlusCircle, RotateCcw, Send, Target, XCircle,
 } from "lucide-react";
+import { matchTone, type Match } from "@/lib/matching";
 import { supabase, getUserRole } from "@/lib/supabase";
 import { formatSalary, plural, type Vacancy } from "@/lib/vacancies";
 
@@ -15,6 +16,7 @@ type Tab = "applications" | "vacancies" | "form";
 interface Application {
   id: string;
   status: string;
+  hr_message: string | null;
   cover_letter: string | null;
   created_at: string;
   vacancies: { id: string; title: string; employer_id: string };
@@ -42,6 +44,16 @@ const STATUS_LABELS: Record<string, string> = {
   rejected: "Отклонено",
 };
 
+// Черновики ответа кандидату; работодатель правит их перед отправкой
+const REPLY_TEMPLATES: Record<"interview_scheduled" | "rejected", (vacancy: string) => string> = {
+  interview_scheduled: vacancy =>
+    `Здравствуйте! Спасибо за отклик на вакансию «${vacancy}». Ваш опыт нам интересен — приглашаем на собеседование. ` +
+    "Напишите, пожалуйста, когда вам удобно поговорить на этой неделе.",
+  rejected: vacancy =>
+    `Здравствуйте! Спасибо за интерес к вакансии «${vacancy}». Сейчас мы продолжим общение с другими кандидатами, ` +
+    "чей опыт ближе к задачам. Желаем удачи в поиске!",
+};
+
 const inputClass =
   "w-full px-4 py-3 bg-neutral-950 border border-neutral-800 rounded-xl text-sm text-neutral-100 focus:outline-none focus:border-blue-500";
 const labelClass = "block text-xs font-bold text-neutral-500 uppercase tracking-wider mb-2";
@@ -60,12 +72,18 @@ export default function EmployerDashboard() {
   const [saving, setSaving] = useState(false);
   const [notice, setNotice] = useState<{ kind: "ok" | "error"; text: string } | null>(null);
 
+  const [matches, setMatches] = useState<Record<string, Match>>({});
+  const [sortBy, setSortBy] = useState<"new" | "match">("new");
+  // Ответ кандидату: какой отклик, какой статус и текст письма
+  const [reply, setReply] = useState<{ appId: string; status: "interview_scheduled" | "rejected"; text: string } | null>(null);
+  const [replying, setReplying] = useState(false);
+
   const loadData = useCallback(async (currentUser: User) => {
     const [{ data: prof }, { data: apps }, { data: own }] = await Promise.all([
       supabase.from("profiles").select("name").eq("id", currentUser.id).maybeSingle(),
       supabase
         .from("applications")
-        .select("id, status, cover_letter, created_at, vacancies!inner (id, title, employer_id), profiles (name, skills, resume_path)")
+        .select("id, status, hr_message, cover_letter, created_at, vacancies!inner (id, title, employer_id), profiles (name, skills, resume_path)")
         .eq("vacancies.employer_id", currentUser.id)
         .order("created_at", { ascending: false }),
       supabase
@@ -75,8 +93,18 @@ export default function EmployerDashboard() {
         .order("created_at", { ascending: false }),
     ]);
     setCompanyName(prof?.name || null);
-    setApplications((apps ?? []) as unknown as Application[]);
+    const loaded = (apps ?? []) as unknown as Application[];
+    setApplications(loaded);
     setVacancies((own ?? []) as Vacancy[]);
+
+    const { data: scored } = await supabase.rpc("my_application_matches");
+    const strings = (v: unknown) => (Array.isArray(v) ? v.filter((x): x is string => typeof x === "string") : []);
+    setMatches(Object.fromEntries((scored ?? []).map(r => [r.application_id, { score: r.score, matched: strings(r.matched), missing: strings(r.missing) }])));
+
+    // Работодатель открыл кабинет — кандидаты видят, что отклик просмотрен.
+    // На экране оставляем «Новый отклик», чтобы было видно, что пришло с прошлого раза.
+    const unseen = loaded.filter(a => a.status === "new").map(a => a.id);
+    if (unseen.length) await supabase.from("applications").update({ status: "viewed" }).in("id", unseen);
   }, []);
 
   useEffect(() => {
@@ -182,16 +210,22 @@ export default function EmployerDashboard() {
     else setNotice({ kind: "error", text: "Не удалось открыть резюме: " + (error?.message ?? "нет ссылки") });
   }
 
-  async function updateStatus(appId: string, status: string) {
+  async function sendReply() {
+    if (!reply) return;
+    setReplying(true);
+    const message = reply.text.trim().slice(0, 2000) || null;
     const { error } = await supabase
       .from("applications")
-      .update({ status, hr_replied_at: new Date().toISOString() })
-      .eq("id", appId);
+      .update({ status: reply.status, hr_message: message, hr_replied_at: new Date().toISOString() })
+      .eq("id", reply.appId);
+    setReplying(false);
     if (error) {
-      setNotice({ kind: "error", text: "Не удалось обновить статус: " + error.message });
+      setNotice({ kind: "error", text: "Не удалось отправить ответ: " + error.message });
       return;
     }
-    setApplications(prev => prev.map(app => app.id === appId ? { ...app, status } : app));
+    setApplications(prev => prev.map(app => app.id === reply.appId ? { ...app, status: reply.status, hr_message: message } : app));
+    setNotice({ kind: "ok", text: reply.status === "interview_scheduled" ? "Приглашение отправлено — кандидат увидит его в «Моих откликах»." : "Ответ отправлен кандидату." });
+    setReply(null);
   }
 
   if (loading) {
@@ -327,7 +361,9 @@ export default function EmployerDashboard() {
           ) : (
             <div className="grid gap-3">
               {vacancies.map(v => {
-                const count = applications.filter(a => a.vacancies.id === v.id).length;
+                const forVacancy = applications.filter(a => a.vacancies.id === v.id);
+                const count = forVacancy.length;
+                const invited = forVacancy.filter(a => a.status === "interview_scheduled").length;
                 return (
                   <div key={v.id} className={`bg-neutral-900/60 border border-neutral-800 rounded-2xl p-5 flex flex-col sm:flex-row sm:items-center gap-4 ${v.archived_at ? "opacity-60" : ""}`}>
                     <div className="flex-1 min-w-0">
@@ -338,7 +374,11 @@ export default function EmployerDashboard() {
                       <p className="text-xs text-neutral-400 mt-1">
                         {formatSalary(v.salary_min, v.salary_max, v.salary_currency)}
                         {v.city ? ` · ${v.city}` : ""}{v.is_remote ? " · удалённо" : ""}
-                        {` · ${count} ${plural(count, ["отклик", "отклика", "откликов"])}`}
+                      </p>
+                      <p className="text-xs text-neutral-500 mt-1" title="Воронка вакансии">
+                        {v.views_count ?? 0} {plural(v.views_count ?? 0, ["просмотр", "просмотра", "просмотров"])}
+                        {" → "}{count} {plural(count, ["отклик", "отклика", "откликов"])}
+                        {" → "}{invited} {plural(invited, ["приглашение", "приглашения", "приглашений"])}
                       </p>
                     </div>
                     <div className="flex items-center gap-2 shrink-0">
@@ -375,7 +415,19 @@ export default function EmployerDashboard() {
             </div>
           ) : (
             <div className="grid gap-4">
-              {applications.map(app => (
+              <div className="flex items-center gap-2 text-xs text-neutral-400">
+                Сортировка:
+                {([["new", "Сначала новые"], ["match", "По совпадению"]] as const).map(([id, label]) => (
+                  <button key={id} onClick={() => setSortBy(id)} aria-pressed={sortBy === id}
+                    className={`px-3 py-1.5 rounded-lg border transition-colors ${sortBy === id ? "bg-neutral-800 border-neutral-700 text-white" : "border-neutral-800 hover:bg-neutral-900"}`}>
+                    {label}
+                  </button>
+                ))}
+              </div>
+              {(sortBy === "match"
+                ? [...applications].sort((a, b) => (matches[b.id]?.score ?? -1) - (matches[a.id]?.score ?? -1))
+                : applications
+              ).map(app => (
                 <div key={app.id} className="bg-neutral-900/60 border border-neutral-800 rounded-2xl p-6 space-y-4">
                   <div className="flex flex-col sm:flex-row justify-between gap-2">
                     <div>
@@ -394,10 +446,45 @@ export default function EmployerDashboard() {
                     </span>
                   </div>
 
+                  {matches[app.id] && (
+                    <p className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-neutral-500">
+                      <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-md border font-semibold ${matchTone(matches[app.id].score)}`}>
+                        <Target className="w-3.5 h-3.5" />Совпадение {matches[app.id].score}%
+                      </span>
+                      {matches[app.id].matched.length > 0 && <span>Есть: <span className="text-emerald-400">{matches[app.id].matched.join(", ")}</span></span>}
+                      {matches[app.id].missing.length > 0 && <span>Нет: <span className="text-amber-300">{matches[app.id].missing.join(", ")}</span></span>}
+                    </p>
+                  )}
+
                   <div className="bg-neutral-950 border border-neutral-800/80 rounded-xl p-4 text-sm text-neutral-300 leading-relaxed whitespace-pre-line">
                     <p className="text-xs font-bold text-neutral-500 uppercase tracking-wider mb-2">Сопроводительное письмо</p>
                     {app.cover_letter || "Письмо не сохранено"}
                   </div>
+
+                  {app.hr_message && reply?.appId !== app.id && (
+                    <div className="rounded-xl border border-neutral-800 px-4 py-3 text-sm text-neutral-400">
+                      <p className="text-xs font-bold text-neutral-500 uppercase tracking-wider mb-1">Ваш ответ</p>
+                      <p className="whitespace-pre-line">{app.hr_message}</p>
+                    </div>
+                  )}
+
+                  {reply?.appId === app.id && (
+                    <div className="space-y-3 rounded-xl border border-blue-500/30 bg-blue-950/20 p-4">
+                      <p className="text-xs font-bold text-neutral-400 uppercase tracking-wider">
+                        {reply.status === "interview_scheduled" ? "Приглашение на собеседование" : "Отказ"} — кандидат увидит этот текст
+                      </p>
+                      <textarea value={reply.text} maxLength={2000} rows={4}
+                        onChange={e => setReply({ ...reply, text: e.target.value })}
+                        className={`${inputClass} leading-relaxed resize-y`} />
+                      <div className="flex justify-end gap-2">
+                        <button onClick={() => setReply(null)} className="px-3 py-1.5 text-xs text-neutral-400 hover:text-white">Отмена</button>
+                        <button onClick={sendReply} disabled={replying}
+                          className="px-4 py-1.5 bg-blue-600 hover:bg-blue-500 text-white rounded-lg text-xs font-bold flex items-center gap-1.5 disabled:opacity-50">
+                          {replying ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Send className="w-3.5 h-3.5" />} Отправить
+                        </button>
+                      </div>
+                    </div>
+                  )}
 
                   <div className="flex items-center justify-end gap-3 pt-2 border-t border-neutral-800/60">
                     {app.profiles?.resume_path && (
@@ -406,11 +493,11 @@ export default function EmployerDashboard() {
                         <FileText className="w-3.5 h-3.5" /> Резюме (PDF)
                       </button>
                     )}
-                    <button onClick={() => updateStatus(app.id, "rejected")}
+                    <button onClick={() => setReply({ appId: app.id, status: "rejected", text: REPLY_TEMPLATES.rejected(app.vacancies.title) })}
                       className="px-3 py-1.5 bg-neutral-800 hover:bg-red-950/40 text-neutral-300 hover:text-red-400 rounded-lg text-xs font-medium border border-neutral-700 transition-colors flex items-center gap-1.5">
                       <XCircle className="w-3.5 h-3.5" /> Отказать
                     </button>
-                    <button onClick={() => updateStatus(app.id, "interview_scheduled")}
+                    <button onClick={() => setReply({ appId: app.id, status: "interview_scheduled", text: REPLY_TEMPLATES.interview_scheduled(app.vacancies.title) })}
                       className="px-4 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-xs font-bold transition-colors flex items-center gap-1.5 shadow-lg shadow-emerald-600/20">
                       <CheckCircle2 className="w-3.5 h-3.5" /> Пригласить на собеседование
                     </button>

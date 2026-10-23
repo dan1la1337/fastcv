@@ -6,6 +6,7 @@ import { ArrowLeft, Briefcase, Building2, Calendar, ExternalLink, Globe, MapPin 
 import { supabase } from "@/lib/supabase";
 import { VACANCY_COLUMNS, formatLabel, formatSalary, levelLabel, type Vacancy } from "@/lib/vacancies";
 import ApplyButton from "@/components/ApplyButton";
+import ViewCounter from "@/components/ViewCounter";
 
 type Props = { params: Promise<{ id: string }> };
 
@@ -135,6 +136,7 @@ export default async function VacancyPage({ params }: Props) {
 
           <footer className="flex flex-wrap items-center gap-4 pt-4 border-t border-neutral-800">
             {!vacancy.archived_at && <ApplyButton vacancy={vacancy} />}
+            {!vacancy.archived_at && <ViewCounter vacancyId={vacancy.id} />}
             {vacancy.source_url && (
               <a
                 href={vacancy.source_url}

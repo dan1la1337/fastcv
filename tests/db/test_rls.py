@@ -231,6 +231,27 @@ CHECKS: list[tuple] = [
      "authenticated", C, "0"),
     ("кандидат снимает отметку", True,
      "delete from vacancy_marks where user_id = auth.uid() and kind = 'hidden' returning kind", "authenticated", C, "hidden"),
+
+    # --- кабинет работодателя: ответ, просмотры, совпадение откликов ---
+    ("работодатель отвечает кандидату текстом", True,
+     "update applications set status = 'interview_scheduled', hr_message = 'Ждём вас во вторник' returning hr_message",
+     "authenticated", E, "Ждём вас во вторник"),
+    ("чужой работодатель НЕ пишет ответ", True,
+     "update applications set hr_message = 'x' returning id", "authenticated", E2, ""),
+    ("кандидат видит ответ работодателя", True,
+     "select hr_message from applications", "authenticated", C, "Ждём вас во вторник"),
+    ("аноним засчитывает просмотр вакансии", True,
+     "select register_vacancy_view(id) from vacancies where title = 'Ext'; select views_count from vacancies where title = 'Ext'",
+     "anon", None, "1"),
+    ("свои просмотры работодатель НЕ накручивает", True,
+     "select register_vacancy_view(id) from vacancies where title like 'Int%'; select views_count from vacancies where title like 'Int%'",
+     "authenticated", E, "0"),
+    ("аноним НЕ меняет счётчик напрямую", True,
+     "update vacancies set views_count = 1000 returning id", "anon", None, ""),
+    ("работодатель видит совпадение откликов на свои вакансии", True,
+     "select count(*) from my_application_matches() where score between 0 and 100", "authenticated", E, "1"),
+    ("чужой работодатель НЕ видит совпадение чужих откликов", True,
+     "select count(*) from my_application_matches()", "authenticated", E2, "0"),
 ]
 
 
