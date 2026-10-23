@@ -4,7 +4,8 @@ import { useEffect, useRef, useState } from "react";
 import type { User } from "@supabase/supabase-js";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { Briefcase, FileText, Loader2, LogOut, Save, Trash2, Upload, UserCircle } from "lucide-react";
+import { Briefcase, FileText, Loader2, LogOut, Save, Sparkles, Trash2, Upload, UserCircle } from "lucide-react";
+import type { ResumeDraft } from "@/lib/resume-draft";
 import { supabase, getUserRole, type UserRole } from "@/lib/supabase";
 import { DIRECTIONS, LEVELS, WORK_FORMATS, type Level, type WorkFormat } from "@/lib/vacancies";
 
@@ -41,6 +42,7 @@ export default function ProfilePage() {
 
   const [resumePath, setResumePath] = useState<string | null>(null);
   const [resumeBusy, setResumeBusy] = useState(false);
+  const [autofilling, setAutofilling] = useState(false);
   const fileInput = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -153,6 +155,38 @@ export default function ProfilePage() {
       setNotice({ kind: "error", text: "Не удалось удалить резюме: " + error.message });
     }
     setResumeBusy(false);
+  }
+
+  // ИИ читает резюме и предлагает поля; пустые заполняем, навыки дополняем,
+  // заполненное кандидатом не трогаем. Сохраняет он сам — после проверки.
+  async function autofillFromResume() {
+    setAutofilling(true);
+    setNotice(null);
+    try {
+      const res = await fetch("/api/resume-autofill", { method: "POST" });
+      const data = await res.json();
+      if (!res.ok || !data.draft) {
+        setNotice({ kind: "error", text: data.error || "Не удалось разобрать резюме." });
+        return;
+      }
+      const draft = data.draft as ResumeDraft;
+      if (!name.trim() && draft.name) setName(draft.name);
+      if (!description.trim() && draft.about) setDescription(draft.about);
+      if (draft.skills.length) {
+        const current = skills.split(",").map(s => s.trim()).filter(Boolean);
+        const lower = new Set(current.map(s => s.toLowerCase()));
+        setSkills([...current, ...draft.skills.filter(s => !lower.has(s.toLowerCase()))].join(", "));
+      }
+      if (!prefDirections.length && draft.directions.length) setPrefDirections(draft.directions.slice(0, MAX_DIRECTIONS));
+      if (!prefLevel && draft.level) setPrefLevel(draft.level as Level);
+      if (!prefCity.trim() && draft.city) setPrefCity(draft.city);
+      if (!prefSalary && draft.salary) setPrefSalary(String(draft.salary));
+      setNotice({ kind: "ok", text: "Поля заполнены по резюме. Проверьте их и нажмите «Сохранить профиль»." });
+    } catch {
+      setNotice({ kind: "error", text: "Не удалось связаться с сервером. Попробуйте ещё раз." });
+    } finally {
+      setAutofilling(false);
+    }
   }
 
   async function handleLogout() {
@@ -300,6 +334,15 @@ export default function ProfilePage() {
                 PDF до 5 МБ. Его увидят только работодатели, на чьи вакансии вы откликнулись.
               </p>
             </div>
+
+            {resumePath && (
+              <button onClick={autofillFromResume} disabled={autofilling}
+                className="w-full flex items-center justify-center gap-2 bg-blue-600/10 hover:bg-blue-600/20 border border-blue-500/30 text-blue-300 rounded-xl py-3 text-sm font-medium transition-colors disabled:opacity-50">
+                {autofilling
+                  ? <><Loader2 className="w-4 h-4 animate-spin" /> ИИ читает резюме…</>
+                  : <><Sparkles className="w-4 h-4" /> Заполнить профиль по резюме</>}
+              </button>
+            )}
 
             {resumePath ? (
               <div className="flex flex-wrap items-center gap-3 bg-neutral-950 border border-neutral-800 rounded-xl p-4">
