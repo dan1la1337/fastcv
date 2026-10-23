@@ -33,6 +33,8 @@ function summary(v: Vacancy): string {
   return `${head}. ${v.description ?? ""}`.slice(0, 200);
 }
 
+const isMirrored = (v: { source_url?: string | null }) => Boolean(v.source_url?.includes("trudvsem.ru"));
+
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const vacancy = await getVacancy((await params).id);
   if (!vacancy) return { title: "Вакансия не найдена — FastCV" };
@@ -41,8 +43,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     description: summary(vacancy),
     alternates: { canonical: `/vacancy/${vacancy.id}` },
     openGraph: { title: vacancy.title, description: summary(vacancy), type: "article" },
-    // Архивные вакансии открываются по старым ссылкам, но в поиск не попадают
-    robots: vacancy.archived_at ? { index: false } : undefined,
+    // В поиск не попадают архивные вакансии (открываются по старым ссылкам) и вакансии
+    // «Работы России»: они живут 2 дня и повторяют trudvsem.ru — в выдаче были бы дубли и 404
+    robots: vacancy.archived_at || isMirrored(vacancy) ? { index: false } : undefined,
   };
 }
 
@@ -90,7 +93,7 @@ export default async function VacancyPage({ params }: Props) {
 
   return (
     <div className="min-h-screen bg-neutral-950 text-neutral-100 font-sans">
-      {!vacancy.archived_at && jsonLd && (
+      {!vacancy.archived_at && !isMirrored(vacancy) && jsonLd && (
         <script
           type="application/ld+json"
           // JSON.stringify экранирует строки; "<" заменяем, чтобы текст вакансии не мог закрыть тег
