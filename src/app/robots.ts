@@ -6,7 +6,7 @@ export default function robots(): MetadataRoute.Robots {
       userAgent: "*",
       allow: "/",
       // Личные кабинеты и служебные страницы индексировать незачем
-      disallow: ["/api/", "/profile", "/applications", "/employer", "/auth/", "/login", "/register"],
+      disallow: ["/api/", "/profile", "/applications", "/employer", "/admin", "/welcome", "/auth/", "/login", "/register"],
     },
     sitemap: "https://fastcv.ru/sitemap.xml",
   };
