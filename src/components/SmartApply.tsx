@@ -9,6 +9,14 @@ import { useRouter } from "next/navigation";
 import { Send, X, Sparkles, Loader2, Copy, Check, Mail, ExternalLink } from "lucide-react";
 import { toast } from "@/components/Toaster";
 
+// Настройки письма (значения совпадают с /api/cover-letter)
+const LETTER_OPTIONS = {
+  tone: [["neutral", "Деловой"], ["formal", "Официальный"], ["friendly", "Неформальный"]],
+  length: [["short", "Коротко"], ["medium", "Обычно"], ["long", "Подробно"]],
+  language: [["auto", "Как в вакансии"], ["ru", "Русский"], ["en", "English"]],
+} as const;
+type LetterSettings = { tone: string; length: string; language: string };
+
 /** Username Telegram из контакта вакансии; null, если это не похоже на username. */
 function telegramUsername(value: string): string | null {
   const name = value.trim().replace(/^@/, "").replace(/^https?:\/\/t\.me\//, "");
@@ -35,6 +43,7 @@ export default function SmartApply({
   // для этой вакансии просим новое письмо, а не сохранённое.
   const [letterSource, setLetterSource] = useState<{ vacancyId: string; source: string } | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
+  const [settings, setSettings] = useState<LetterSettings>({ tone: "neutral", length: "medium", language: "auto" });
   const [isSending, setIsSending] = useState(false);
   const router = useRouter();
   const current = draft && vacancy && draft.vacancyId === vacancy.id ? draft : null;
@@ -66,7 +75,7 @@ export default function SmartApply({
       const res = await fetch("/api/cover-letter", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ vacancyId: vacancy.id, regenerate }),
+        body: JSON.stringify({ vacancyId: vacancy.id, regenerate, ...settings }),
       });
       const data = await res.json();
       if (res.ok && data.text) {
@@ -113,6 +122,23 @@ export default function SmartApply({
                     <h4 className="text-white font-medium mb-1">Сгенерировать идеальное письмо?</h4>
                     <p className="text-sm text-neutral-400">LLM-агент проанализирует твой профиль и требования вакансии, чтобы составить уникальное сопроводительное.</p>
                   </div>
+                  {user && (
+                    <div className="space-y-2 text-left">
+                      {(Object.keys(LETTER_OPTIONS) as (keyof typeof LETTER_OPTIONS)[]).map(key => (
+                        <div key={key} className="flex flex-wrap items-center justify-center gap-1.5">
+                          {LETTER_OPTIONS[key].map(([value, label]) => (
+                            <button key={value} type="button" aria-pressed={settings[key] === value}
+                              onClick={() => setSettings(prev => ({ ...prev, [key]: value }))}
+                              className={`text-xs px-2.5 py-1 rounded-md border transition-colors ${settings[key] === value
+                                ? "bg-blue-600 border-blue-500 text-white"
+                                : "bg-neutral-950 border-neutral-700 text-neutral-400 hover:text-neutral-200"}`}>
+                              {label}
+                            </button>
+                          ))}
+                        </div>
+                      ))}
+                    </div>
+                  )}
                   {user ? (
                     <button 
                       onClick={generateCoverLetter} 
