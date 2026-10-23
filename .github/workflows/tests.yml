@@ -17,7 +17,36 @@ jobs:
       - name: Install dependencies
         run: pip install -r requirements.txt pytest
       - name: Run scraper tests
-        run: python -m pytest -q tests
+        run: python -m pytest -q tests --ignore=tests/db
+
+  # Правила доступа к базе: supabase/schema.sql на чистом Postgres (дважды —
+  # скрипт должен быть повторяемым) и ~50 проверок от имени anon, кандидата,
+  # работодателя и сборщика. Ломается правило — красный CI до мержа.
+  database:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_PASSWORD: postgres
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd pg_isready --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      PGHOST: localhost
+      PGPORT: 5432
+      PGUSER: postgres
+      PGPASSWORD: postgres
+      FASTCV_DB_TESTS: 1
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install pytest
+        run: pip install pytest
+      - name: Access rules (RLS) tests
+        run: python -m pytest -v tests/db
 
   web:
     runs-on: ubuntu-latest

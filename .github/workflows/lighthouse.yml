@@ -1,0 +1,55 @@
+name: Lighthouse
+
+# Скорость и доступность рабочего сайта глазами мобильного Lighthouse.
+# Запускается после каждого выката в продакшн (событие от Vercel), раз в неделю
+# и вручную. Превью Vercel закрыты паролем, поэтому меряем fastcv.ru.
+# Итог (баллы и ссылка на полный отчёт) пишется комментарием к коммиту.
+on:
+  deployment_status:
+  schedule:
+    - cron: '0 5 * * 1'
+  workflow_dispatch:
+
+permissions:
+  contents: write  # комментарий к коммиту с результатами
+
+concurrency:
+  group: lighthouse
+  cancel-in-progress: true
+
+jobs:
+  lighthouse:
+    if: >-
+      github.event_name != 'deployment_status' ||
+      (github.event.deployment_status.state == 'success' && github.event.deployment.environment == 'Production')
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Pick pages
+        id: pages
+        run: |
+          # Главная, вход и одна живая вакансия из карты сайта
+          vacancy=$(curl -fsS https://fastcv.ru/sitemap.xml | grep -o 'https://fastcv.ru/vacancy/[^<]*' | head -1)
+          echo "urls=https://fastcv.ru/ https://fastcv.ru/login ${vacancy}" >> "$GITHUB_OUTPUT"
+
+      - name: Run Lighthouse (mobile, 3 runs per page)
+        run: |
+          args=""
+          for url in ${{ steps.pages.outputs.urls }}; do args="$args --collect.url=$url"; done
+          npx --yes @lhci/cli@0.14.0 autorun --config=lighthouserc.json $args
+        continue-on-error: true
+
+      - name: Post scores as a commit comment
+        env:
+          GH_TOKEN: ${{ github.token }}
+          SHA: ${{ github.event.deployment.sha || github.sha }}
+        run: |
+          node .github/scripts/lighthouse-summary.mjs > summary.md
+          cat summary.md >> "$GITHUB_STEP_SUMMARY"
+          gh api "repos/${GITHUB_REPOSITORY}/commits/${SHA}/comments" -F body=@summary.md > /dev/null

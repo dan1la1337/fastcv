@@ -31,6 +31,13 @@ AI-биржа вакансий. Вакансии собираются из Teleg
    ```
    Каналы для парсинга добавляются в таблицу `channels` (`username`, `is_active = true`).
    Тесты сборщика (без сети): `python -m pytest -q tests`.
+6. Тесты правил доступа к базе (нужны Postgres 15+ и `psql`; база `fastcv_test` пересоздаётся):
+   ```bash
+   FASTCV_DB_TESTS=1 PGHOST=localhost PGUSER=postgres PGPASSWORD=postgres python -m pytest -v tests/db
+   ```
+   В CI они идут на каждый PR вместе с тестами сборщика и сборкой сайта.
+   Lighthouse (скорость и доступность fastcv.ru на мобильном) запускается после каждого
+   выката в продакшн; баллы приходят комментарием к коммиту.
 
 ### Типы базы
 
