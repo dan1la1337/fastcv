@@ -1,0 +1,5 @@
+mts https://job.mts.ru/
+tbank https://www.tbank.ru/
+alfa https://job.alfabank.ru/
+vk https://team.vk.company/
+sber https://rabota.sber.ru/
