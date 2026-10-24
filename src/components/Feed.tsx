@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { supabase } from "@/lib/supabase";
 import {
   AREAS, DEFAULT_FILTERS, DIRECTIONS, experienceLabel, sourceOf, freshnessLabel, LEVELS, WORK_FORMATS, fetchVacancyPage, formatLabel, formatSalary, levelLabel, plural, PAGE_SIZE,
-  VACANCY_FORMS, type Area, type Level, type Vacancy, type VacancyFilters, type WorkFormat,
+  VACANCY_FORMS, SOURCES, type SourceKind, type Area, type Level, type Vacancy, type VacancyFilters, type WorkFormat,
 } from "@/lib/vacancies";
 import { Clock, Search, MapPin, ChevronDown, Sparkles, Loader2, ExternalLink, Globe, SlidersHorizontal, Briefcase, Building2, Target, Bookmark, BookmarkCheck, EyeOff, Undo2 } from "lucide-react";
 import { fetchMarked, fetchMarks, setMark, type MarkKind } from "@/lib/marks";
@@ -66,6 +66,7 @@ export default function Feed({ initialRows, initialTotal }: { initialRows: Vacan
   // Фильтры
   const [search, setSearch] = useState("");
   const [formats, setFormats] = useState<WorkFormat[]>([]);
+  const [sources, setSources] = useState<SourceKind[]>([]);
   const [minSalary, setMinSalary] = useState<number>(0);
   const [onlyWithSalary, setOnlyWithSalary] = useState<boolean>(false);
   const [city, setCity] = useState("");
@@ -111,6 +112,7 @@ export default function Feed({ initialRows, initialTotal }: { initialRows: Vacan
     area,
     levels: selectedLevels,
     stack: selectedStack,
+    sources,
   };
   const filtersKey = JSON.stringify(filters);
   const requestId = useRef(0);
@@ -502,7 +504,7 @@ export default function Feed({ initialRows, initialTotal }: { initialRows: Vacan
 
       <main className="max-w-6xl mx-auto px-4 py-6 lg:py-8 grid grid-cols-1 lg:grid-cols-4 gap-4 lg:gap-8 relative z-0">
         {(() => {
-          const active = [search.trim(), formats.length > 0, minSalary > 0, onlyWithSalary, city.trim(), selectedDirection, area, selectedLevels.length > 0].filter(Boolean).length;
+          const active = [search.trim(), formats.length > 0, minSalary > 0, onlyWithSalary, city.trim(), selectedDirection, area, selectedLevels.length > 0, sources.length > 0].filter(Boolean).length;
           return (
             <button
               onClick={() => setFiltersOpen(open => !open)}
@@ -578,6 +580,21 @@ export default function Feed({ initialRows, initialTotal }: { initialRows: Vacan
                     onClick={() => setFormats(prev => prev.includes(f.id) ? prev.filter(x => x !== f.id) : [...prev, f.id])}
                     className={chip(formats.includes(f.id))} aria-pressed={formats.includes(f.id)}>
                     {f.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Источник */}
+            <div className="space-y-3 pt-2 border-t border-neutral-800/60">
+              <label className="text-xs font-bold text-neutral-500 uppercase tracking-wider">Источник</label>
+              <div className="flex flex-wrap gap-2">
+                <button onClick={() => setSources([])} className={chip(sources.length === 0)} aria-pressed={sources.length === 0}>Все</button>
+                {SOURCES.map(s => (
+                  <button key={s.id}
+                    onClick={() => setSources(prev => prev.includes(s.id) ? prev.filter(x => x !== s.id) : [...prev, s.id])}
+                    className={chip(sources.includes(s.id))} aria-pressed={sources.includes(s.id)}>
+                    {s.label}
                   </button>
                 ))}
               </div>
