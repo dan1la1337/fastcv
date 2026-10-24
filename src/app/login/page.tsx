@@ -97,10 +97,13 @@ function LoginForm() {
           </button>
         </form>
 
-        <div className="mt-6 text-center">
+        <div className="mt-6 flex items-center justify-between text-sm">
+          <Link href="/reset-password" className="text-neutral-400 hover:text-white transition-colors">
+            Забыли пароль?
+          </Link>
           <Link
             href="/register"
-            className="text-sm text-neutral-400 hover:text-white transition-colors"
+            className="text-neutral-400 hover:text-white transition-colors"
           >
             Нет аккаунта? Создать
           </Link>

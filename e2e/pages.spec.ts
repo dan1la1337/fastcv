@@ -111,3 +111,12 @@ test("регистрация недоступна без согласия с с�
   await page.getByRole("checkbox").check();
   await expect(submit).toBeEnabled();
 });
+
+test("сброс пароля: ссылка со входа, форма запроса, без ссылки из письма — подсказка", async ({ page }) => {
+  await page.goto("/login");
+  await page.getByRole("link", { name: "Забыли пароль?" }).click();
+  await expect(page.getByRole("heading", { name: "Сброс пароля" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Отправить ссылку" })).toBeVisible();
+  await page.goto("/reset-password/new");
+  await expect(page.getByText("Ссылка устарела или уже использована")).toBeVisible();
+});
