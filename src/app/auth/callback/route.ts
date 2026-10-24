@@ -35,8 +35,9 @@ export async function GET(request: NextRequest) {
   const { data: auth } = await supabase.auth.getUser();
   if (!auth.user) return toLogin("Не удалось войти. Попробуйте ещё раз.");
 
-  // Ссылка из письма сброса пароля — сразу в профиль, где пароль можно сменить
-  if (type === "recovery") return NextResponse.redirect(`${origin}/profile`);
+  // Ссылка из письма сброса пароля — сразу на форму нового пароля
+  const next = searchParams.get("next");
+  if (type === "recovery" || next === "/reset-password/new") return NextResponse.redirect(`${origin}/reset-password/new`);
 
   const { data: profile } = await supabase
     .from("profiles")
@@ -45,7 +46,6 @@ export async function GET(request: NextRequest) {
     .maybeSingle();
 
   // Внутренний адрес возврата (?next=/vacancy/…) — только путь на нашем сайте
-  const next = searchParams.get("next");
   const safeNext = next && next.startsWith("/") && !next.startsWith("//") ? next : null;
 
   // Первый вход: кандидата — в онбординг «Что вы ищете?», работодателя — заполнить компанию
