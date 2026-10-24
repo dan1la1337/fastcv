@@ -303,7 +303,7 @@ def import_careers(store, normalize: Callable[[str], object], fetcher: Optional[
                     try:
                         row = row_from_ai(normalize(page_text(page)), company, vid, url)
                     except Exception as e:      # ИИ недоступен — остальное дочитаем в следующий раз
-                        info["ai"] = type(e).__name__
+                        info["ai"] = f"{type(e).__name__}: {str(e)[:120]}"
                         break
                 # Страница не про вакансию (промо, мероприятие) — запоминаем архивной, чтобы не читать снова
                 store.upsert_imported([row or {
@@ -314,5 +314,7 @@ def import_careers(store, normalize: Callable[[str], object], fetcher: Optional[
         except Blocked as e:
             info["blocked"] = str(e)
         except requests.RequestException as e:
-            info["error"] = type(e).__name__
+            info["error"] = f"{type(e).__name__}: {str(e)[:120]}"
+        if clock() - started > time_budget:
+            info["stopped"] = "time budget"
     return stats
