@@ -64,3 +64,18 @@ def test_sender_posts_to_resend_with_key():
     url, kw = calls[0]
     assert url == notifications.API and kw["headers"]["Authorization"] == "Bearer re_test"
     assert kw["json"]["from"] == notifications.SENDER and kw["json"]["to"] == ["me@example.com"]
+
+
+def test_employer_reminder_is_one_letter_per_employer():
+    store = Store([
+        row("employer_reminder", "r1", "hr@acme.ru", candidate_name="Анна"),
+        row("employer_reminder", "r2", "hr@acme.ru", candidate_name="Иван", title="QA"),
+        row("employer_new", "n1", "hr@acme.ru"),
+    ])
+    sent = []
+    notifications.send_notifications(store, lambda to, mail: sent.append((to, mail)))
+    subjects = sorted(m["subject"] for _, m in sent)
+    assert subjects == ["1 новый отклик на FastCV", "2 отклика ждут вашего ответа"]
+    reminder = next(m for _, m in sent if "ждут" in m["subject"])
+    assert "Анна — Python-разработчик" in reminder["html"] and "Иван — QA" in reminder["html"]
+    assert ("employer_reminder", ["r1", "r2"]) in store.marked

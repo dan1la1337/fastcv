@@ -1,6 +1,7 @@
 """Письма об откликах через Resend (ключ — секрет RESEND_API_KEY). Запускается сборщиком
-раз в 2 часа: работодателю — сводка новых откликов одним письмом, кандидату — письмо,
-когда его пригласили на собеседование или отказали. Очередь и отметки — в базе
+раз в 2 часа: работодателю — сводка новых откликов одним письмом и напоминание об
+откликах без ответа дольше недели, кандидату — письмо, когда его пригласили на
+собеседование или отказали. Очередь и отметки — в базе
 (pending_notifications / mark_notified), так что письмо не уйдёт дважды.
 """
 
@@ -44,6 +45,20 @@ def employer_email(rows: list[dict]) -> dict:
             "html": _page("Новые отклики", body)}
 
 
+def reminder_email(rows: list[dict]) -> dict:
+    """Anti-ghosting: отклики, на которые работодатель не ответил неделю."""
+    total = len(rows)
+    items = "".join(f"<li>{html.escape(r.get('candidate_name') or 'Кандидат')} — {html.escape(r['vacancy_title'])}</li>"
+                    for r in rows[:20])
+    more = f"<p>…и ещё {total - 20}.</p>" if total > 20 else ""
+    body = (f"<p>{total} {plural(total, ('кандидат ждёт', 'кандидата ждут', 'кандидатов ждут'))} ответа больше недели:</p>"
+            f"<ul>{items}</ul>{more}"
+            "<p>Даже короткий отказ помогает кандидату и поднимает доверие к вашей компании. "
+            f'Ответить можно в один клик: <a href="{SITE}/employer">открыть отклики</a>.</p>')
+    return {"subject": f"{total} {plural(total, ('отклик ждёт', 'отклика ждут', 'откликов ждут'))} вашего ответа",
+            "html": _page("Кандидаты ждут ответа", body)}
+
+
 def candidate_email(row: dict) -> dict:
     title = html.escape(row["vacancy_title"] or "вакансия")
     company = f" в {html.escape(row['company'])}" if row.get("company") else ""
@@ -71,22 +86,23 @@ def make_sender(api_key: str, post: Callable[..., requests.Response] = requests.
 def send_notifications(store, send: Callable[[str, dict], None]) -> dict:
     queue = store.pending_notifications()
     sent = failed = 0
-    employer: dict[str, list[dict]] = defaultdict(list)
+    grouped: dict[tuple[str, str], list[dict]] = defaultdict(list)   # (вид, адрес) → отклики
     candidate = []
     for row in queue:
         if not row.get("email"):
             continue
-        (employer[row["email"]].append(row) if row["kind"] == "employer_new" else candidate.append(row))
+        (candidate.append(row) if row["kind"] == "candidate_status" else grouped[(row["kind"], row["email"])].append(row))
 
-    for email, rows in employer.items():
-        if sent >= MAX_PER_RUN:
-            break
+    letters = {"employer_new": employer_email, "employer_reminder": reminder_email}
+    for (kind, email), rows in grouped.items():
+        if sent >= MAX_PER_RUN or kind not in letters:
+            continue
         try:
-            send(email, employer_email(rows))
+            send(email, letters[kind](rows))
         except requests.RequestException:
             failed += 1      # отметку не ставим — попробуем в следующий запуск
             continue
-        store.mark_notified("employer_new", [r["application_id"] for r in rows])
+        store.mark_notified(kind, [r["application_id"] for r in rows])
         sent += 1
 
     for row in candidate:
