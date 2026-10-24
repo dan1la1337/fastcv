@@ -432,6 +432,19 @@ CHECKS: list[tuple] = [
         delete from vacancies where title = 'NQ vacancy';""",
      "postgres", None, "candidate_status:c@example.com,employer_new:e@example.com / 0"),
     ("сборщик (service_role) читает очередь писем", True, "select count(*) >= 0 from pending_notifications()", "service_role", None, "t"),
+    ("напоминание работодателю: отклик без ответа неделю — один раз; отвеченный — нет", True,
+     f"""update auth.users set email = 'e@example.com' where id = '{E}';
+        insert into vacancies (title, source_type, employer_id) values ('RM vacancy', 'internal', '{E}');
+        insert into applications (vacancy_id, candidate_id, status, created_at, employer_notified_at)
+          select id, '{C}', 'viewed', now() - interval '8 days', now() from vacancies where title = 'RM vacancy';
+        insert into applications (vacancy_id, candidate_id, status, created_at, employer_notified_at, hr_replied_at)
+          select id, '{C}', 'rejected', now() - interval '8 days', now(), now() - interval '7 days' from vacancies where title = 'RM vacancy';
+        create temp table q as select * from pending_notifications() where vacancy_title = 'RM vacancy' and kind = 'employer_reminder';
+        create temp table m as select mark_notified('employer_reminder', array(select application_id from q)) n;
+        select (select count(*) from q) || ' ' || (select count(*) from pending_notifications() where vacancy_title = 'RM vacancy' and kind = 'employer_reminder');
+        delete from applications where vacancy_id in (select id from vacancies where title = 'RM vacancy');
+        delete from vacancies where title = 'RM vacancy';""",
+     "postgres", None, "1 0"),
     ("сайт НЕ читает очередь писем с адресами", False, "select * from pending_notifications()", "authenticated", C, None),
     ("аноним не может удалить аккаунт", False, "select delete_my_account()", "anon", None, None),
     ("пользователь удаляет свой аккаунт целиком, чужие данные на месте", True,
