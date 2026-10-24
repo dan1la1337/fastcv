@@ -23,7 +23,7 @@ import os
 import re
 import sys
 import time
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from datetime import datetime, timedelta, timezone
 from typing import Callable, Literal, Optional
 
@@ -47,6 +47,10 @@ CHANNEL_PAUSE_SECONDS = 2
 # Время на каналы за один запуск: остальное — «Работа России» и подборки, а у всего
 # задания лимит 30 минут. Недошедшие каналы первыми пойдут в следующий запуск.
 CHANNELS_TIME_BUDGET_SECONDS = 14 * 60
+# Источники без ИИ, которые тоже source_type = external (source_post = «источник/id»)
+IMPORTED_SOURCES = ("trudvsem", "superjob")
+# Лента не открывается столько запусков подряд (≈3 дня при запуске раз в 2 часа) — канал выключаем
+DEAD_AFTER_FAILED_RUNS = 36
 # Доля каналов без доступной ленты, при которой это похоже на блокировку, а не на закрытые каналы
 MASS_FAILURE_SHARE = 0.5
 USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"
@@ -413,6 +417,26 @@ class Store:
             query = getattr(query, "is_" if op == "is" else op)(column, value)
         return int(query.execute().count or 0)
 
+    def telegram_vacancies(self, columns: str = "source_post", **select_options):
+        """Вакансии из Telegram: внешние, но не из API «Работы России» и SuperJob."""
+        query = self.db.table("vacancies").select(columns, **select_options).eq("source_type", "external")
+        for source in IMPORTED_SOURCES:
+            query = query.filter("source_post", "not.like", f"{source}/%")
+        return query
+
+    def imported_since(self, source: str, since: str) -> int:
+        return (self.db.table("vacancies").select("id", count="exact", head=True)
+                .like("source_post", f"{source}/%").gte("created_at", since).execute().count or 0)
+
+    def deactivate_dead_channels(self, failed_runs: int) -> list[str]:
+        """Каналы, чья лента не открывается много запусков подряд, — выключить (вернуть можно в /admin)."""
+        rows = (self.db.table("channels").select("username")
+                .eq("is_active", True).gte("failed_runs", failed_runs).execute().data)
+        names = [r["username"] for r in rows]
+        if names:
+            self.db.table("channels").update({"is_active": False}).in_("username", names).execute()
+        return names
+
     def daily_stats(self) -> dict:
         since = (datetime.now(timezone.utc) - timedelta(days=1)).isoformat()
         unavailable = (self.db.table("channels").select("username")
@@ -420,12 +444,15 @@ class Store:
                        .execute().data)
         active = [r["username"] for r in self.db.table("channels").select("username").eq("is_active", True).execute().data]
         week_ago = (datetime.now(timezone.utc) - timedelta(days=7)).isoformat()
-        week_posts = (self.db.table("vacancies").select("source_post")
-                      .eq("source_type", "external").gte("created_at", week_ago).limit(5000)
+        # Только посты из Telegram: «Работа России» и SuperJob — десятки тысяч строк в сутки,
+        # с ними лимит выборки заполнялся целиком и все каналы выглядели «без вакансий»
+        week_posts = (self.telegram_vacancies().select("source_post").gte("created_at", week_ago).limit(5000)
                       .execute().data)
         return {
             "channel_week": channel_week(active, [r["source_post"] for r in week_posts]),
-            "vacancies_external": self.count("vacancies", gte_created_at=since, eq_source_type="external"),
+            "vacancies_external": self.telegram_vacancies("id", count="exact", head=True).gte("created_at", since).execute().count or 0,
+            "vacancies_trudvsem": self.imported_since("trudvsem", since),
+            "vacancies_superjob": self.imported_since("superjob", since),
             "vacancies_employer": self.count("vacancies", gte_created_at=since, eq_source_type="internal"),
             "vacancies_in_feed": self.count("vacancies", is_archived_at="null"),
             "users": self.count("profiles", gte_created_at=since),
@@ -649,6 +676,7 @@ class RunSummary:
     results: list[ChannelResult]
     archived: int = 0
     out_of_time: bool = False  # каналы отложены по времени — это штатно, не сбой Gemini
+    deactivated: list[str] = field(default_factory=list)  # выключенные мёртвые каналы
 
     @property
     def saved(self) -> int:
@@ -693,6 +721,9 @@ def alert_text(summary: RunSummary) -> Optional[str]:
             )
     if summary.channels and summary.results and not summary.new_posts and not unavailable:
         problems.append("Ни одного нового поста во всех каналах. Возможно, сломался разбор страницы Telegram.")
+    if summary.deactivated:
+        problems.append("Выключены каналы, лента которых не открывается ~3 дня: "
+                        + ", ".join("@" + c for c in summary.deactivated) + ". Включить обратно — is_active в таблице channels (Supabase).")
     if not problems:
         return None
     lines = ["⚠️ FastCV: проблемы со сборщиком", ""]
@@ -719,8 +750,8 @@ def daily_report_text(stats: dict, summary: Optional[RunSummary] = None) -> str:
     lines = [
         "📊 FastCV: сводка за сутки",
         "",
-        f"Новых вакансий: {stats['vacancies_external'] + stats['vacancies_employer']} "
-        f"(из каналов {stats['vacancies_external']}, от работодателей {stats['vacancies_employer']})",
+        f"Новых вакансий: из Telegram {stats['vacancies_external']}, от работодателей {stats['vacancies_employer']}, "
+        f"«Работа России» {stats.get('vacancies_trudvsem', 0)}, SuperJob {stats.get('vacancies_superjob', 0)}",
         f"Всего в ленте: {stats['vacancies_in_feed']}",
         f"Новых пользователей: {stats['users']}",
         f"Откликов: {stats['applications']}",
@@ -918,6 +949,9 @@ def run(store: Store, normalize: Callable[[str], VacancyAI],
         time.sleep(CHANNEL_PAUSE_SECONDS)
 
     summary = RunSummary(len(channels), results, out_of_time=out_of_time)
+    summary.deactivated = store.deactivate_dead_channels(DEAD_AFTER_FAILED_RUNS)
+    if summary.deactivated:
+        print(f"Выключены каналы без ленты {DEAD_AFTER_FAILED_RUNS} запусков подряд: {', '.join(summary.deactivated)}")
     summary.archived = archived = store.archive_stale(ARCHIVE_AFTER_DAYS)
     total_saved = sum(r.saved for r in results)
     unavailable = [r.channel for r in results if r.error and not r.ai_stopped]
