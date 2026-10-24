@@ -1,0 +1,582 @@
+[
+ {
+  "name": "yandex",
+  "url": "https://yandex.ru/jobs/vacancies",
+  "robots_ok": false,
+  "status": 200,
+  "final": "https://yandex.ru/jobs/vacancies",
+  "size": 427817,
+  "title": "Все вакансии Яндекса",
+  "jobposting": 0,
+  "next_data": false,
+  "nuxt": false,
+  "vacancy_links": 37,
+  "link_sample": [
+   "/jobs/vacancies/analitikrazrabotchik-49422",
+   "/jobs/vacancies/city_moscow",
+   "/jobs/vacancies/middleseniorrazrabotchik-na-golang-v-fintehstartap-vnutri-ekosistemi-yandeks-id-46761"
+  ],
+  "api": [
+   "http://be.publication-service.yandex-team.ru/_api/jobs/publications/?page_size=20\\u0026cursor=cD0wJnQ9MjAyNi0xMC0yMiZpPTQ5NDIyJnI9MA\\"
+  ],
+  "captcha": false
+ },
+ {
+  "name": "sber",
+  "url": "https://rabota.sber.ru/search/",
+  "robots_ok": true,
+  "status": 200,
+  "final": "https://rabota.sber.ru/search/",
+  "size": 114410,
+  "title": "Поиск вакансий",
+  "jobposting": 0,
+  "next_data": true,
+  "nuxt": false,
+  "vacancy_links": 0,
+  "link_sample": [],
+  "api": [],
+  "captcha": false
+ },
+ {
+  "name": "tbank",
+  "url": "https://www.tbank.ru/career/vacancies/",
+  "robots_ok": "err URLError",
+  "err": "SSLError: HTTPSConnectionPool(host='www.tbank.ru', port=443): Max retries exceeded with url: /career/vacancies"
+ },
+ {
+  "name": "vk",
+  "url": "https://team.vk.company/vacancy/",
+  "robots_ok": true,
+  "status": 200,
+  "final": "https://team.vk.company/vacancy/",
+  "size": 57570,
+  "title": "Вакансии",
+  "jobposting": 0,
+  "next_data": true,
+  "nuxt": false,
+  "vacancy_links": 26,
+  "link_sample": [
+   "/vacancy/",
+   "/vacancy/45598/",
+   "/vacancy/45747/"
+  ],
+  "api": [],
+  "captcha": true
+ },
+ {
+  "name": "ozon",
+  "url": "https://career.ozon.ru/vacancy/",
+  "robots_ok": false,
+  "status": 403,
+  "final": "https://career.ozon.ru/vacancy/?__rr=1",
+  "size": 5181,
+  "title": "ÐÐ¾ÑÐ¾Ð¶Ðµ, Ð½ÐµÑ ÑÐ¾ÐµÐ´Ð¸Ð½ÐµÐ½Ð¸Ñ",
+  "jobposting": 0,
+  "next_data": false,
+  "nuxt": false,
+  "vacancy_links": 0,
+  "link_sample": [],
+  "api": [],
+  "captcha": false
+ },
+ {
+  "name": "avito",
+  "url": "https://career.avito.com/vacancies/",
+  "robots_ok": true,
+  "status": 200,
+  "final": "https://career.avito.com/vacancies/",
+  "size": 224130,
+  "title": "Вакансии в Авито",
+  "jobposting": 0,
+  "next_data": false,
+  "nuxt": false,
+  "vacancy_links": 65,
+  "link_sample": [
+   "/vacancies/",
+   "/vacancies/analitika-dannykh/",
+   "/vacancies/analitika-dannykh/19266/"
+  ],
+  "api": [],
+  "captcha": false
+ },
+ {
+  "name": "wildberries",
+  "url": "https://career.rwb.ru/vacancies",
+  "robots_ok": true,
+  "status": 200,
+  "final": "https://career.rwb.ru/vacancies",
+  "size": 3275,
+  "title": "ÐÐ°ÑÑÐµÑÐ° Ð¸ Ð²Ð°ÐºÐ°Ð½ÑÐ¸Ð¸ Ð² RWB",
+  "jobposting": 0,
+  "next_data": false,
+  "nuxt": false,
+  "vacancy_links": 0,
+  "link_sample": [],
+  "api": [],
+  "captcha": false
+ },
+ {
+  "name": "x5",
+  "url": "https://rabota.x5.ru/",
+  "robots_ok": true,
+  "status": 200,
+  "final": "https://rabota.x5.ru/",
+  "size": 145504,
+  "title": "Работа в Х5",
+  "jobposting": 0,
+  "next_data": false,
+  "nuxt": false,
+  "vacancy_links": 6,
+  "link_sample": [
+   "/vacancies",
+   "/vacancies?vacancy_categories=it",
+   "/vacancies?vacancy_categories=курьеры"
+  ],
+  "api": [],
+  "captcha": false
+ },
+ {
+  "name": "mts",
+  "url": "https://job.mts.ru/vacancies",
+  "robots_ok": true,
+  "status": 200,
+  "final": "https://job.mts.ru/vacancies",
+  "size": 189887,
+  "title": "Все вакансии МТС — Работа в цифровой экосистеме по всей России",
+  "jobposting": 0,
+  "next_data": false,
+  "nuxt": true,
+  "vacancy_links": 31,
+  "link_sample": [
+   "/vacancies",
+   "/vacancies?cat=administrativnyj-personal",
+   "/vacancies?cat=analitika"
+  ],
+  "api": [
+   "https://job.mts.ru/api/v2"
+  ],
+  "captcha": false
+ },
+ {
+  "name": "alfa",
+  "url": "https://job.alfabank.ru/vacancies",
+  "robots_ok": "err URLError",
+  "err": "SSLError: HTTPSConnectionPool(host='job.alfabank.ru', port=443): Max retries exceeded with url: /vacancies (Ca"
+ },
+ {
+  "name": "vtb",
+  "url": "https://www.vtb.ru/o-banke/karera/",
+  "robots_ok": "err URLError",
+  "err": "SSLError: HTTPSConnectionPool(host='www.vtb.ru', port=443): Max retries exceeded with url: /o-banke/karera/ (C"
+ },
+ {
+  "name": "kaspersky",
+  "url": "https://careers.kaspersky.ru/vacancies",
+  "robots_ok": true,
+  "status": 200,
+  "final": "https://careers.kaspersky.ru/vacancies",
+  "size": 173861,
+  "title": "Работа в «Лаборатории Касперского»",
+  "jobposting": 0,
+  "next_data": false,
+  "nuxt": false,
+  "vacancy_links": 21,
+  "link_sample": [
+   "/vacancies",
+   "/vacancies?category=32627",
+   "/vacancies?category=32637"
+  ],
+  "api": [],
+  "captcha": false
+ },
+ {
+  "name": "ptsecurity",
+  "url": "https://www.ptsecurity.com/ru-ru/about/vacancy/",
+  "robots_ok": "err URLError",
+  "err": "SSLError: HTTPSConnectionPool(host='www.ptsecurity.com', port=443): Max retries exceeded with url: /ru-ru/abou"
+ },
+ {
+  "name": "2gis",
+  "url": "https://job.2gis.ru/vacancies",
+  "robots_ok": true,
+  "status": 200,
+  "final": "https://job.2gis.ru/vacancies",
+  "size": 157251,
+  "title": "Вакансии — Работа в 2ГИС",
+  "jobposting": 0,
+  "next_data": false,
+  "nuxt": false,
+  "vacancy_links": 16,
+  "link_sample": [
+   "/vacancies",
+   "/vacancies/data_science_ai/594",
+   "/vacancies/data_science_ai/600"
+  ],
+  "api": [],
+  "captcha": false
+ },
+ {
+  "name": "kontur",
+  "url": "https://kontur.ru/career/vacancies",
+  "robots_ok": false,
+  "status": 403,
+  "final": "https://kontur.ru/career/vacancies",
+  "size": 13866,
+  "title": "ÐÐ¾Ð½ÑÑÑ | ÐÐ¾ÑÑÑÐ¿ Ð·Ð°Ð¿ÑÐµÑÐµÐ½",
+  "jobposting": 0,
+  "next_data": false,
+  "nuxt": false,
+  "vacancy_links": 0,
+  "link_sample": [],
+  "api": [],
+  "captcha": false
+ },
+ {
+  "name": "raiffeisen",
+  "url": "https://www.raiffeisen.ru/about/career/vacancies/",
+  "robots_ok": true,
+  "status": 404,
+  "final": "https://www.raiffeisen.ru/about/career/vacancies/",
+  "size": 117038,
+  "title": "Страница не найдена – ошибка 404",
+  "jobposting": 0,
+  "next_data": false,
+  "nuxt": false,
+  "vacancy_links": 0,
+  "link_sample": [],
+  "api": [
+   "/api/fl",
+   "https://oapi.raiffeisen.ru/api/"
+  ],
+  "captcha": false
+ },
+ {
+  "name": "gazprombank",
+  "url": "https://www.gazprombank.ru/about/career/",
+  "robots_ok": false,
+  "status": 404,
+  "final": "https://www.gazprombank.ru/about/career/",
+  "size": 13206,
+  "title": "ÐÐ°Ð·Ð¿ÑÐ¾Ð¼Ð±Ð°Ð½Ðº: ÑÑÑÐ°Ð½Ð¸ÑÐ° Ð½Ðµ Ð½Ð°Ð¹Ð´ÐµÐ½Ð°",
+  "jobposting": 0,
+  "next_data": false,
+  "nuxt": false,
+  "vacancy_links": 0,
+  "link_sample": [],
+  "api": [],
+  "captcha": false
+ },
+ {
+  "name": "megafon",
+  "url": "https://job.megafon.ru/",
+  "robots_ok": true,
+  "status": 200,
+  "final": "https://job.megafon.ru/",
+  "size": 274877,
+  "title": "Вакансии компании МегаФон на официальном сайте job.megafon.ru",
+  "jobposting": 0,
+  "next_data": false,
+  "nuxt": false,
+  "vacancy_links": 11,
+  "link_sample": [
+   "/vacancy/all/any",
+   "/vacancy/celabinsk/set/menedzher-po-stroitelstvu-4804",
+   "/vacancy/krasnoarsk/biznes-napravlenia/menedzher-po-prodazham-iot-reshenij-4802"
+  ],
+  "api": [],
+  "captcha": true
+ },
+ {
+  "name": "beeline",
+  "url": "https://job.beeline.ru/",
+  "robots_ok": false,
+  "status": 403,
+  "final": "https://job.beeline.ru/",
+  "size": 8807,
+  "title": "ÐÑÐºÐ»ÑÑÐ¸ÑÐµ VPN",
+  "jobposting": 0,
+  "next_data": false,
+  "nuxt": false,
+  "vacancy_links": 0,
+  "link_sample": [],
+  "api": [],
+  "captcha": false
+ },
+ {
+  "name": "rostelecom",
+  "url": "https://job.rt.ru/",
+  "robots_ok": true,
+  "status": 200,
+  "final": "https://job.rt.ru/",
+  "size": 130143,
+  "title": "Работа в Ростелекоме",
+  "jobposting": 0,
+  "next_data": true,
+  "nuxt": false,
+  "vacancy_links": 0,
+  "link_sample": [],
+  "api": [],
+  "captcha": false
+ },
+ {
+  "name": "samokat",
+  "url": "https://samokat.ru/careers",
+  "robots_ok": false,
+  "status": 403,
+  "final": "https://samokat.ru/careers",
+  "size": 1293,
+  "title": "",
+  "jobposting": 0,
+  "next_data": false,
+  "nuxt": false,
+  "vacancy_links": 0,
+  "link_sample": [],
+  "api": [],
+  "captcha": false
+ },
+ {
+  "name": "lemanapro",
+  "url": "https://lemanapro.ru/career/",
+  "robots_ok": true,
+  "status": 403,
+  "final": "https://lemanapro.ru/career/",
+  "size": 8199,
+  "title": "Server error",
+  "jobposting": 0,
+  "next_data": false,
+  "nuxt": false,
+  "vacancy_links": 0,
+  "link_sample": [],
+  "api": [],
+  "captcha": false
+ },
+ {
+  "name": "magnit",
+  "url": "https://rabota.magnit.ru/",
+  "robots_ok": true,
+  "status": 200,
+  "final": "https://rabota.magnit.ru/",
+  "size": 3394,
+  "title": "Работа в Краснодаре в Магнит — вакансии с официальным трудоустройством",
+  "jobposting": 0,
+  "next_data": false,
+  "nuxt": false,
+  "vacancy_links": 0,
+  "link_sample": [],
+  "api": [
+   "https://anketolog.ru/api/v2/frame/js/883845?token=drQAj8hv"
+  ],
+  "captcha": false
+ },
+ {
+  "name": "1c",
+  "url": "https://job.1c.ru/",
+  "robots_ok": false,
+  "status": 403,
+  "final": "https://job.1c.ru/",
+  "size": 189,
+  "title": "403 Forbidden",
+  "jobposting": 0,
+  "next_data": false,
+  "nuxt": false,
+  "vacancy_links": 0,
+  "link_sample": [],
+  "api": [],
+  "captcha": false
+ },
+ {
+  "name": "selectel",
+  "url": "https://selectel.ru/careers/",
+  "robots_ok": true,
+  "status": 200,
+  "final": "https://selectel.ru/careers/",
+  "size": 709083,
+  "title": "Ð Ð°Ð±Ð¾ÑÐ° Ð² IT-ÐºÐ¾Ð¼Ð¿Ð°Ð½Ð¸Ð¸ Selectel",
+  "jobposting": 0,
+  "next_data": false,
+  "nuxt": true,
+  "vacancy_links": 5,
+  "link_sample": [
+   "/careers/all/vacancy/1830/",
+   "/careers/all/vacancy/1900/",
+   "/careers/all/vacancy/1964/"
+  ],
+  "api": [
+   "https://docs.selectel.ru/api/",
+   "https://vk.ru/js/api/openapi.js?169"
+  ],
+  "captcha": false
+ },
+ {
+  "name": "skyeng",
+  "url": "https://careers.skyeng.ru/",
+  "robots_ok": "err URLError",
+  "err": "ConnectionError: HTTPSConnectionPool(host='careers.skyeng.ru', port=443): Max retries exceeded with url: / (Caused by"
+ },
+ {
+  "name": "kuper",
+  "url": "https://kuper.ru/careers",
+  "robots_ok": false,
+  "status": 403,
+  "final": "https://kuper.ru/careers",
+  "size": 4250,
+  "title": "ÐÑÐ¿ÐµÑ",
+  "jobposting": 0,
+  "next_data": false,
+  "nuxt": false,
+  "vacancy_links": 0,
+  "link_sample": [],
+  "api": [],
+  "captcha": false
+ },
+ {
+  "name": "lamoda",
+  "url": "https://job.lamoda.ru/",
+  "robots_ok": false,
+  "status": 200,
+  "final": "https://job.lamoda.ru/",
+  "size": 5112,
+  "title": "",
+  "jobposting": 0,
+  "next_data": false,
+  "nuxt": false,
+  "vacancy_links": 0,
+  "link_sample": [],
+  "api": [],
+  "captcha": false
+ },
+ {
+  "name": "t2",
+  "url": "https://career.t2.ru/",
+  "robots_ok": "err URLError",
+  "err": "ConnectionError: HTTPSConnectionPool(host='career.t2.ru', port=443): Max retries exceeded with url: / (Caused by Name"
+ },
+ {
+  "name": "domclick",
+  "url": "https://domclick.ru/career",
+  "robots_ok": true,
+  "status": 401,
+  "final": "https://domclick.ru/career",
+  "size": 279,
+  "title": "",
+  "jobposting": 0,
+  "next_data": false,
+  "nuxt": false,
+  "vacancy_links": 0,
+  "link_sample": [],
+  "api": [],
+  "captcha": false
+ },
+ {
+  "name": "cian",
+  "url": "https://career.cian.ru/",
+  "robots_ok": false,
+  "status": 200,
+  "final": "https://career.cian.ru/tmgrdfrend/showcaptcha?cc=1&form-fb-hint=1.150&mt=D48FA6B8DD582400402349E473907B3F67F5E6927C76691",
+  "size": 11606,
+  "title": "ÐÑ Ð½Ðµ ÑÐ¾Ð±Ð¾Ñ?",
+  "jobposting": 0,
+  "next_data": false,
+  "nuxt": false,
+  "vacancy_links": 0,
+  "link_sample": [],
+  "api": [],
+  "captcha": true
+ },
+ {
+  "name": "aviasales",
+  "url": "https://www.aviasales.ru/about/vacancies",
+  "robots_ok": true,
+  "status": 200,
+  "final": "https://www.aviasales.ru/about/vacancies",
+  "size": 138393,
+  "title": "Вакансии в Авиасейлс",
+  "jobposting": 0,
+  "next_data": false,
+  "nuxt": false,
+  "vacancy_links": 28,
+  "link_sample": [
+   "/about/vacancies/4197840",
+   "/about/vacancies/4219517",
+   "/about/vacancies/4241746"
+  ],
+  "api": [],
+  "captcha": false
+ },
+ {
+  "name": "tochka",
+  "url": "https://hr.tochka.com/",
+  "robots_ok": "err URLError",
+  "err": "SSLError: HTTPSConnectionPool(host='hr.tochka.com', port=443): Max retries exceeded with url: / (Caused by SSL"
+ },
+ {
+  "name": "sovcombank",
+  "url": "https://sovcombank.ru/about/career",
+  "robots_ok": "err URLError",
+  "err": "SSLError: HTTPSConnectionPool(host='sovcombank.ru', port=443): Max retries exceeded with url: /about/career (C"
+ },
+ {
+  "name": "sibur",
+  "url": "https://www.sibur.ru/career/vacancies/",
+  "robots_ok": "err URLError",
+  "err": "SSLError: HTTPSConnectionPool(host='www.sibur.ru', port=443): Max retries exceeded with url: /career/vacancies"
+ },
+ {
+  "name": "gazpromneft",
+  "url": "https://www.gazprom-neft.ru/careers/",
+  "robots_ok": "err URLError",
+  "err": "ConnectTimeout: HTTPSConnectionPool(host='www.gazprom-neft.ru', port=443): Max retries exceeded with url: /careers/ "
+ },
+ {
+  "name": "nornickel",
+  "url": "https://www.nornickel.ru/careers/vacancies/",
+  "robots_ok": false,
+  "status": 200,
+  "final": "https://career.nornickel.ru/",
+  "size": 132326,
+  "title": "Работай на будущее уже сейчас! Официальный карьерный портал Норникеля",
+  "jobposting": 0,
+  "next_data": false,
+  "nuxt": false,
+  "vacancy_links": 6,
+  "link_sample": [
+   "/policy/vacancy/",
+   "/vacancies/",
+   "/vacancies/it/"
+  ],
+  "api": [
+   "/api/unisender/subscribe/",
+   "/api/vacancies/get/",
+   "https://api-maps.yandex.ru/v3/?apikey=d9689197-8182-459e-a9b3-3ecc32c2d1d4&amp;lang=ru_RU"
+  ],
+  "captcha": true
+ },
+ {
+  "name": "rosatom",
+  "url": "https://rosatom-career.ru/vacancies",
+  "robots_ok": "err URLError",
+  "err": "ConnectTimeout: HTTPSConnectionPool(host='rosatom-career.ru', port=443): Max retries exceeded with url: /vacancies ("
+ },
+ {
+  "name": "yadro",
+  "url": "https://yadro.com/careers/vacancies",
+  "robots_ok": true,
+  "status": 404,
+  "final": "https://yadro.com/careers/vacancies",
+  "size": 370765,
+  "title": "404",
+  "jobposting": 0,
+  "next_data": false,
+  "nuxt": false,
+  "vacancy_links": 0,
+  "link_sample": [],
+  "api": [],
+  "captcha": false
+ },
+ {
+  "name": "mvideo",
+  "url": "https://job.mvideoeldorado.ru/",
+  "robots_ok": "err URLError",
+  "err": "ConnectionError: HTTPSConnectionPool(host='job.mvideoeldorado.ru', port=443): Max retries exceeded with url: / (Cause"
+ }
+]
