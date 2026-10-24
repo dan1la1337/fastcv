@@ -47,6 +47,7 @@ export type HiringType = "product" | "outsource" | "agency";
 export function sourceOf(v: Pick<Vacancy, "source_type" | "source_url">): { badge: string; link: string } {
   if (v.source_type === "internal") return { badge: "Прямой работодатель", link: "" };
   if (v.source_url?.includes("trudvsem.ru")) return { badge: "Работа России", link: "Вакансия на trudvsem.ru" };
+  if (v.source_url?.includes("superjob.ru")) return { badge: "SuperJob", link: "Вакансия на SuperJob" };
   return { badge: "Telegram", link: "Пост в Telegram" };
 }
 

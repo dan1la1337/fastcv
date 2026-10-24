@@ -23,7 +23,7 @@ SYNC_KEY = "trudvsem_synced_at"
 CURSOR_KEY = "trudvsem_cursor"      # незаконченный обход: {"since", "started", "region"}
 KEEP_DAYS = 2
 MAX_PER_RUN = 15_000      # ~150 запросов, несколько минут
-MAX_STORED = 50_000       # потолок для бесплатного тарифа базы (~240 МБ)
+MAX_STORED = 40_000       # потолок для бесплатного тарифа базы; вместе с SuperJob ~250 МБ
 RANKING_WEIGHT = 0.9
 MAX_PAGES_PER_REGION = 30
 TIME_BUDGET_SECONDS = 10 * 60   # дальше обход продолжит следующий запуск
@@ -32,7 +32,10 @@ REGION_CODES = [f"{n:02d}00000000000" for n in range(1, 100)]
 # Сфера вакансии в «Работе России» → направление FastCV. ИТ-сферу не сопоставляем:
 # направление определит база по названию («Программист» → backend). Остальное — по
 # сфере, иначе «Полицейский мобильного взвода» попадал в Mobile, а охранник — в ИБ.
-_SPHERES = [("информационные технологии", None), ("информационная безопасность", "security"), ("маркетинг", "marketing"), ("реклам", "marketing"),
+_SPHERES = [("информационные технологии", None), ("информационная безопасность", "security"),
+            # SuperJob: «IT, Интернет, связь, телеком», «Рабочий персонал», «Розничная торговля»
+            ("it,", None), ("интернет", None), ("рабочий персонал", "production"), ("торговл", "sales"),
+            ("маркетинг", "marketing"), ("реклам", "marketing"),
             ("продаж", "sales"), ("бухгалтер", "finance"), ("финанс", "finance"), ("банк", "finance"),
             ("страхован", "finance"), ("образовани", "education"), ("наук", "education"),
             ("персонал", "hr"), ("кадр", "hr"), ("сми", "content"), ("издатель", "content"),
@@ -82,14 +85,17 @@ def level_for(years: Optional[float]) -> Optional[str]:
     return "junior" if years < 2 else "middle" if years < 5 else "senior"
 
 
-def direction_of(v: dict) -> Optional[str]:
-    sphere = ((v.get("category") or {}).get("specialisation") or "").lower()
-    if not sphere:
-        return None
+def sphere_direction(sphere: str) -> Optional[str]:
+    """Сфера из каталога источника → направление FastCV; None — решит база по названию."""
+    sphere = (sphere or "").lower()
     for key, direction in _SPHERES:
         if key in sphere:
             return direction
-    return None     # сфера без пары — направление определит база по названию
+    return None
+
+
+def direction_of(v: dict) -> Optional[str]:
+    return sphere_direction((v.get("category") or {}).get("specialisation") or "")
 
 
 def map_vacancy(v: dict) -> Optional[dict]:
