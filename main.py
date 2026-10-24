@@ -48,7 +48,7 @@ CHANNEL_PAUSE_SECONDS = 2
 # задания лимит 30 минут. Недошедшие каналы первыми пойдут в следующий запуск.
 CHANNELS_TIME_BUDGET_SECONDS = 14 * 60
 # Источники без ИИ, которые тоже source_type = external (source_post = «источник/id»)
-IMPORTED_SOURCES = ("trudvsem", "superjob")
+IMPORTED_SOURCES = ("trudvsem", "superjob", "career")
 # Лента не открывается столько запусков подряд (≈3 дня при запуске раз в 2 часа) — канал выключаем
 DEAD_AFTER_FAILED_RUNS = 36
 # Доля каналов без доступной ленты, при которой это похоже на блокировку, а не на закрытые каналы
@@ -453,6 +453,7 @@ class Store:
             "vacancies_external": self.telegram_vacancies("id", count="exact", head=True).gte("created_at", since).execute().count or 0,
             "vacancies_trudvsem": self.imported_since("trudvsem", since),
             "vacancies_superjob": self.imported_since("superjob", since),
+            "vacancies_career": self.imported_since("career", since),
             "vacancies_employer": self.count("vacancies", gte_created_at=since, eq_source_type="internal"),
             "vacancies_in_feed": self.count("vacancies", is_archived_at="null"),
             "users": self.count("profiles", gte_created_at=since),
@@ -529,6 +530,26 @@ class Store:
 
     def prune_source(self, source: str, keep_hours: int) -> dict:
         return self.db.rpc("prune_imported", {"source": source, "keep_hours": keep_hours}).execute().data or {}
+
+    def career_ids(self, company: str) -> dict[str, bool]:
+        """Вакансии компании с её сайта: id → в архиве ли (постранично: их тысячи)."""
+        prefix, found, start = f"career/{company}/", {}, 0
+        while True:
+            rows = (self.db.table("vacancies").select("source_post, archived_at")
+                    .like("source_post", prefix + "%").order("source_post").range(start, start + 999)
+                    .execute().data)
+            for r in rows:
+                found[r["source_post"][len(prefix):]] = r["archived_at"] is not None
+            if len(rows) < 1000:
+                return found
+            start += 1000
+
+    def archive_career(self, company: str, ids: list[str]) -> int:
+        now = datetime.now(timezone.utc).isoformat()
+        for i in range(0, len(ids), 200):
+            posts = [f"career/{company}/{vid}" for vid in ids[i:i + 200]]
+            self.db.table("vacancies").update({"archived_at": now}).in_("source_post", posts).execute()
+        return len(ids)
 
     def pending_notifications(self) -> list[dict]:
         return self.db.rpc("pending_notifications", {}).execute().data or []
@@ -757,7 +778,8 @@ def daily_report_text(stats: dict, summary: Optional[RunSummary] = None) -> str:
         "📊 FastCV: сводка за сутки",
         "",
         f"Новых вакансий: из Telegram {stats['vacancies_external']}, от работодателей {stats['vacancies_employer']}, "
-        f"«Работа России» {stats.get('vacancies_trudvsem', 0)}, SuperJob {stats.get('vacancies_superjob', 0)}",
+        f"«Работа России» {stats.get('vacancies_trudvsem', 0)}, SuperJob {stats.get('vacancies_superjob', 0)}, "
+        f"сайты компаний {stats.get('vacancies_career', 0)}",
         f"Всего в ленте: {stats['vacancies_in_feed']}",
         f"Новых пользователей: {stats['users']}",
         f"Откликов: {stats['applications']}",
@@ -1070,6 +1092,15 @@ def main() -> None:
             print(f"Письма об откликах: {notifications.send_notifications(store, notifications.make_sender(resend_key))}")
         except Exception as e:  # письма не должны ронять сбор; текст ошибки может содержать ключ
             print(f"⚠️ Письма об откликах: {type(e).__name__}")
+    # Сайты компаний (карты сайтов): JobPosting или разбор страницы тем же ИИ. CAREERS=off — выключить
+    if (env("CAREERS") or "on").lower() != "off":
+        try:
+            import careers
+            fetcher = careers.Fetcher()
+            fetcher.use_russian_ca()
+            print(f"Сайты компаний: {careers.import_careers(store, make_gemini_normalizer(gemini_key, models), fetcher)}")
+        except Exception as e:
+            print(f"⚠️ Сайты компаний: {type(e).__name__}: {str(e)[:200]}")
     # «Работа России»: открытые данные без ИИ. Отключается переменной TRUDVSEM=off
     if (env("TRUDVSEM") or "on").lower() != "off":
         try:

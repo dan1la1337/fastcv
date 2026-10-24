@@ -534,7 +534,7 @@ def test_daily_report_text():
     stats = {"vacancies_external": 40, "vacancies_employer": 2, "vacancies_trudvsem": 9000, "vacancies_superjob": 3000,
              "vacancies_in_feed": 610, "users": 3, "applications": 5, "channels": 34, "unavailable_channels": ["a", "b"]}
     text = main.daily_report_text(stats, main.RunSummary(2, [ok("x"), ok("y")]))
-    assert "Новых вакансий: из Telegram 40, от работодателей 2, «Работа России» 9000, SuperJob 3000" in text
+    assert "Новых вакансий: из Telegram 40, от работодателей 2, «Работа России» 9000, SuperJob 3000, сайты компаний 0" in text
     assert "Всего в ленте: 610" in text
     assert "у 2: @a, @b" in text
     assert "без проблем" in text
