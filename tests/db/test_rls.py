@@ -403,6 +403,14 @@ CHECKS: list[tuple] = [
         delete from vacancies where title like 'SJ %';""",
      "service_role", None, '{"removed": 1, "archived": 0} SJ fresh,SJ other'),
     ("ротация — только известные источники", False, "select prune_imported('', 1)", "service_role", None, None),
+    ("вакансии с сайтов компаний не уходят в архив по возрасту — только когда пропали с сайта", True,
+     """insert into vacancies (title, source_type, source_post, posted_at) values
+          ('CR old', 'external', 'career/acme/1', now() - interval '60 days'),
+          ('CR tg', 'external', 'somechannel/777', now() - interval '60 days');
+        create temp table a as select archive_stale_vacancies(30) n;
+        select string_agg(title || ':' || (archived_at is not null)::text, ',' order by title) from vacancies where title like 'CR %';
+        delete from vacancies where title like 'CR %';""",
+     "postgres", None, "CR old:false,CR tg:true"),
     ("сайт НЕ вызывает ротацию SuperJob", False, "select prune_imported('superjob', 8)", "authenticated", C, None),
     ("тип нанимателя — только из списка", False,
      "update vacancies set hiring_type = 'friends' where title = 'Ext'", "service_role", None, None),

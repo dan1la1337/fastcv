@@ -15,6 +15,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     .is("archived_at", null)
     .not("source_post", "like", "trudvsem/%")
     .not("source_post", "like", "superjob/%")
+    .not("source_post", "like", "career/%")
     .order("created_at", { ascending: false })
     .limit(5000);
 

@@ -48,6 +48,8 @@ export function sourceOf(v: Pick<Vacancy, "source_type" | "source_url">): { badg
   if (v.source_type === "internal") return { badge: "Прямой работодатель", link: "" };
   if (v.source_url?.includes("trudvsem.ru")) return { badge: "Работа России", link: "Вакансия на trudvsem.ru" };
   if (v.source_url?.includes("superjob.ru")) return { badge: "SuperJob", link: "Вакансия на SuperJob" };
+  // Вакансии с карьерных сайтов работодателей: ссылка ведёт на страницу вакансии компании
+  if (v.source_url && !/^https?:\/\/t\.me\//.test(v.source_url)) return { badge: "Сайт компании", link: "Откликнуться на сайте компании" };
   return { badge: "Telegram", link: "Пост в Telegram" };
 }
 

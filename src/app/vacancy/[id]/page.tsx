@@ -35,7 +35,7 @@ function summary(v: Vacancy): string {
 
 // Вакансии из API других площадок: живут несколько часов или дней и повторяют оригинал
 const isMirrored = (v: { source_url?: string | null }) =>
-  Boolean(v.source_url && (v.source_url.includes("trudvsem.ru") || v.source_url.includes("superjob.ru")));
+  Boolean(v.source_url && !/^https?:\/\/t\.me\//.test(v.source_url));
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const vacancy = await getVacancy((await params).id);
