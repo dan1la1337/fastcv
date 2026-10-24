@@ -7,6 +7,7 @@ import Link from "next/link";
 import { Briefcase, FileText, Loader2, LogOut, Save, Sparkles, Trash2, Upload, UserCircle } from "lucide-react";
 import type { ResumeDraft } from "@/lib/resume-draft";
 import TelegramSubscription from "@/components/TelegramSubscription";
+import DeleteAccount from "@/components/DeleteAccount";
 import { supabase, getUserRole, type UserRole } from "@/lib/supabase";
 import { DIRECTIONS, WORK_FORMATS, experienceFields, type Level, type WorkFormat } from "@/lib/vacancies";
 import ExperienceInput from "@/components/ExperienceInput";
@@ -373,6 +374,8 @@ export default function ProfilePage() {
         )}
 
         {isCandidate && user && <TelegramSubscription userId={user.id} />}
+
+        {user && <DeleteAccount userId={user.id} />}
       </div>
     </div>
   );

@@ -415,6 +415,19 @@ CHECKS: list[tuple] = [
          where not has_table_privilege(r, c.oid,
                  case p.polcmd when 'a' then 'insert' when 'w' then 'update' when 'd' then 'delete' else 'select' end)""",
      "postgres", None, "ok"),
+    ("аноним не может удалить аккаунт", False, "select delete_my_account()", "anon", None, None),
+    ("пользователь удаляет свой аккаунт целиком, чужие данные на месте", True,
+     """insert into auth.users values ('00000000-0000-0000-0000-0000000000d1', '{"role":"candidate"}');
+        update profiles set name = 'Del' where id = '00000000-0000-0000-0000-0000000000d1';  -- профиль создаёт триггер
+        insert into vacancy_marks (user_id, vacancy_id, kind) select '00000000-0000-0000-0000-0000000000d1', id, 'saved' from vacancies limit 1;
+        set role authenticated; set request.jwt.claim.sub = '00000000-0000-0000-0000-0000000000d1';
+        select delete_my_account();
+        reset role;
+        select (select count(*) from auth.users where id = '00000000-0000-0000-0000-0000000000d1')
+             + (select count(*) from profiles where id = '00000000-0000-0000-0000-0000000000d1')
+             + (select count(*) from vacancy_marks where user_id = '00000000-0000-0000-0000-0000000000d1')
+             || ' ' || ((select count(*) from profiles) > 0)::text""",
+     "postgres", None, "0 true"),
     ("кандидат отвязывает Telegram", True,
      "select unlink_telegram(); select coalesce(telegram_chat_id::text, 'нет') from profiles where id = auth.uid()",
      "authenticated", C, "нет"),

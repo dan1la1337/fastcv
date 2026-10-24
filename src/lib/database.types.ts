@@ -506,6 +506,7 @@ export type Database = {
         Returns: { chat_id: number; items: Json; user_id: string }[]
       }
       unlink_telegram: { Args: never; Returns: undefined }
+      delete_my_account: { Args: never; Returns: undefined }
       vacancy_direction: {
         Args: { stack?: Json; title: string }
         Returns: string

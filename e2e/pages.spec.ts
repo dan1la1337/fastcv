@@ -94,3 +94,20 @@ test("разметка JobPosting выводится только полной",
     expect(data.jobLocation?.address?.addressLocality, href).toBeTruthy();
   }
 });
+
+test("юридические страницы открываются, ссылки на них есть в подвале", async ({ page }) => {
+  await page.goto("/");
+  await page.getByRole("contentinfo").getByRole("link", { name: "Политика обработки данных" }).click();
+  await expect(page.getByRole("heading", { name: "Политика обработки персональных данных" })).toBeVisible();
+  await expect(page.getByText("Лобанов Данила Ильич")).toBeVisible();
+  await page.goto("/terms");
+  await expect(page.getByRole("heading", { name: "Пользовательское соглашение" })).toBeVisible();
+});
+
+test("регистрация недоступна без согласия с соглашением и политикой", async ({ page }) => {
+  await page.goto("/register/form?role=candidate");
+  const submit = page.getByRole("button", { name: "Зарегистрироваться" });
+  await expect(submit).toBeDisabled();
+  await page.getByRole("checkbox").check();
+  await expect(submit).toBeEnabled();
+});

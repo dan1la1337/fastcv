@@ -6,6 +6,7 @@ import { useSearchParams, useRouter } from 'next/navigation';
 import { ArrowLeft, Loader2, MailCheck } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import { authErrorText } from '@/lib/auth-errors';
+import { LEGAL_VERSION } from '@/lib/legal';
 
 const card = 'max-w-md w-full bg-neutral-900/50 border border-neutral-800 rounded-2xl p-8 shadow-2xl';
 const input = 'w-full px-4 py-3 bg-neutral-950 border border-neutral-800 rounded-xl text-sm text-neutral-100 focus:outline-none focus:border-blue-500 transition-colors';
@@ -27,6 +28,7 @@ function RegisterFormContent() {
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [agreed, setAgreed] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [awaitingConfirmation, setAwaitingConfirmation] = useState(false);
@@ -40,7 +42,8 @@ function RegisterFormContent() {
       email: email.trim(),
       password,
       options: {
-        data: { role },
+        // Согласие с соглашением и политикой: редакция и время — для подтверждения по 152-ФЗ
+        data: { role, consent_version: LEGAL_VERSION, consent_at: new Date().toISOString() },
         emailRedirectTo: `${window.location.origin}/auth/callback`,
       },
     });
@@ -104,13 +107,23 @@ function RegisterFormContent() {
               required minLength={6} className={input} placeholder="Минимум 6 символов" />
           </div>
 
+          <label className="flex items-start gap-3 text-xs text-neutral-400 leading-relaxed cursor-pointer">
+            <input type="checkbox" required checked={agreed} onChange={(e) => setAgreed(e.target.checked)}
+              className="mt-0.5 w-4 h-4 shrink-0 rounded bg-neutral-950 border-neutral-700" />
+            <span>
+              Принимаю <Link href="/terms" target="_blank" className="text-blue-400 hover:underline">пользовательское соглашение</Link> и
+              даю согласие на обработку персональных данных, в том числе их передачу за рубеж, на условиях{' '}
+              <Link href="/privacy" target="_blank" className="text-blue-400 hover:underline">политики</Link>
+            </span>
+          </label>
+
           {error && (
             <p role="alert" className="text-sm text-red-400 bg-red-950/30 border border-red-500/20 rounded-xl px-4 py-3">{error}</p>
           )}
 
           <button
             type="submit"
-            disabled={loading}
+            disabled={loading || !agreed}
             className="w-full flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-500 text-white py-3 rounded-xl text-sm font-semibold transition-colors disabled:opacity-50 mt-6"
           >
             {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Зарегистрироваться'}
