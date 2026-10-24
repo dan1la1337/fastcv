@@ -18,7 +18,8 @@ POSTING = {"@context": "https://schema.org", "@type": "JobPosting", "title": "Py
                           "value": {"minValue": 200000, "maxValue": 300000, "unitText": "MONTH"}},
            "jobLocation": {"@type": "Place", "address": {"addressLocality": "Москва"}}}
 PAGE_LD = f'<html><script type="application/ld+json">{json.dumps(POSTING, ensure_ascii=False)}</script></html>'
-PAGE_TEXT = "<html><title>QA в Acme</title><nav>меню</nav><main>Ищем тестировщика, опыт от 2 лет</main></html>"
+# Без JobPosting и без заголовков — остаётся только разбор текста ИИ
+PAGE_TEXT = "<html><nav>меню</nav><main>Ищем тестировщика, опыт от 2 лет</main></html>"
 
 
 class FakeSession:
@@ -118,3 +119,23 @@ def test_company_patterns_match_real_urls():
     import re
     for key, (url, vid) in samples.items():
         assert re.match(by_key[key].vacancy, url).group(1) == vid, key
+
+
+def test_title_city_and_description_from_page_heads_without_ai():
+    def meta(page):
+        row = careers.row_from_meta(page, CO, "1", "https://job.acme.ru/vacancy/1")
+        return (row["title"], row["city"]) if row else None
+
+    mts = careers.Company("mts", "МТС", "https://job.mts.ru", r".*")
+    page = ("<title>Продавец (Розничная сеть МТС) в Москва - Работа в МТС</title><h1>Детальная страница вакансии</h1>"
+            '<meta name="description" content="Ищете работу? Присоединяйтесь к команде МТС!">')
+    row = careers.row_from_meta(page, mts, "1", "u")
+    assert (row["title"], row["city"], row["company_name"]) == ("Продавец (Розничная сеть МТС)", "Москва", "МТС")
+    assert row["description"].startswith("Ищете работу")
+    assert meta("<h1>Go Platform инженер в AI VK, Москва</h1>") == ("Go Platform инженер в AI VK", "Москва")
+    assert meta('<title>Вакансия: Ведущий специалист по охране труда</title><h1>Ведущий специалист по охране труда</h1>'
+                '<meta name="description" content="Вакансия в Selectel. Город: Москва. Белая зарплата">') == (
+        "Ведущий специалист по охране труда", "Москва")
+    assert meta("<title>Вакансия Продакт-менеджер | Т-Банк ex. Тинькофф</title>") == ("Продакт-менеджер", None)
+    assert meta("<h1>Руководитель направления (юридические лица)</h1>") == ("Руководитель направления (юридические лица)", None)
+    assert meta("<h1>Вакансии</h1>") is None
