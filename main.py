@@ -530,6 +530,12 @@ class Store:
     def prune_source(self, source: str, keep_hours: int) -> dict:
         return self.db.rpc("prune_imported", {"source": source, "keep_hours": keep_hours}).execute().data or {}
 
+    def pending_notifications(self) -> list[dict]:
+        return self.db.rpc("pending_notifications", {}).execute().data or []
+
+    def mark_notified(self, kind: str, ids: list[str]) -> int:
+        return self.db.rpc("mark_notified", {"kind": kind, "ids": ids}).execute().data or 0
+
     def set_hiring_type(self, vacancy_id: str, hiring_type: str) -> None:
         self.db.table("vacancies").update({"hiring_type": hiring_type}).eq("id", vacancy_id).is_("hiring_type", "null").execute()
 
@@ -1056,6 +1062,14 @@ def main() -> None:
             print(f"Telegram: отправлено подборок {sent}")
         except Exception as e:  # подписка не должна ронять сбор
             print(f"⚠️ Подборки в Telegram: {type(e).__name__}: {str(e)[:200]}")
+    # Письма об откликах: работодателям — о новых, кандидатам — о приглашении или отказе
+    resend_key = env("RESEND_API_KEY")
+    if resend_key:
+        try:
+            import notifications
+            print(f"Письма об откликах: {notifications.send_notifications(store, notifications.make_sender(resend_key))}")
+        except Exception as e:  # письма не должны ронять сбор; текст ошибки может содержать ключ
+            print(f"⚠️ Письма об откликах: {type(e).__name__}")
     # «Работа России»: открытые данные без ИИ. Отключается переменной TRUDVSEM=off
     if (env("TRUDVSEM") or "on").lower() != "off":
         try:

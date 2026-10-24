@@ -64,6 +64,8 @@ jobs:
           TELEGRAM_JOBS_BOT_TOKEN: ${{ secrets.TELEGRAM_JOBS_BOT_TOKEN }}
           # Ключ приложения SuperJob (api.superjob.ru); без него источник пропускается
           SUPERJOB_API_KEY: ${{ secrets.SUPERJOB_API_KEY }}
+          # Письма об откликах через Resend (домен fastcv.ru); без ключа не отправляются
+          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
           ALERT_TEST: ${{ inputs.test_alert }}
           DAILY_REPORT: ${{ github.event.schedule == '23 6 * * *' || inputs.daily_report == true }}
           BACKFILL_COMPANY: ${{ inputs.backfill_company || 0 }}
