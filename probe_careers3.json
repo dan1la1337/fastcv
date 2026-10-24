@@ -1,0 +1,258 @@
+[
+ {
+  "name": "mts",
+  "sitemaps": [
+   "https://job.mts.ru/sitemap.xml"
+  ],
+  "urls_total": 2516,
+  "vacancy_urls": 2447,
+  "sample": [
+   "https://job.mts.ru/vacancy/80555827261406669",
+   "https://job.mts.ru/vacancy/716958269020569856",
+   "https://job.mts.ru/vacancy/50181446647684776",
+   "https://job.mts.ru/vacancy/319109158597035540",
+   "https://job.mts.ru/vacancy/68597022248248608",
+   "https://job.mts.ru/vacancy/706475984567667941",
+   "https://job.mts.ru/vacancy/694552126185016546",
+   "https://job.mts.ru/vacancy/701006843496893680",
+   "https://job.mts.ru/vacancy/655686241727027382",
+   "https://job.mts.ru/vacancy/304289005313200356",
+   "https://job.mts.ru/vacancy/57015737876964660",
+   "https://job.mts.ru/vacancy/704301789536583951"
+  ],
+  "shapes": [
+   [
+    "/vacancy/N",
+    2445
+   ],
+   [
+    "/vacancies",
+    1
+   ],
+   [
+    "/vacancies/companies",
+    1
+   ]
+  ],
+  "page_status": 200,
+  "page_jobposting": 0,
+  "page_next": false,
+  "page_text": 4092
+ },
+ {
+  "name": "tbank",
+  "sitemaps": [
+   "https://www.tbank.ru/sitemap.xml",
+   "https://www.tbank.ru/sitemap.xml",
+   "https://www.tbank.ru/sitemap.xml",
+   "https://www.tbank.ru/sitemap.xml",
+   "https://www.tbank.ru/sitemap.xml"
+  ],
+  "urls_total": 56521,
+  "vacancy_urls": 56005,
+  "sample": [
+   "https://www.tbank.ru/career/it/vacancy/murom/product-manager-v-t-bank/019e8406-0ea0-7175-a543-e47fe3fe711c/",
+   "https://www.tbank.ru/career/back-office/vacancy/889b1f3a-98aa-40fc-9d3d-0f41192758ab/java-developer/ba1d444f-9f54-4b97-a2b0-b65f30867d05/",
+   "https://www.tbank.ru/career/back-office/vacancy/samara/menedzher-po-prodazham-kreditnyh-produktov-dlya-biznesa-yurlica/f8d33277-b7c7-402e-99ca-f8472df87785/",
+   "https://www.tbank.ru/career/it/vacancy/khabarovsk/null/9993e848-f30a-4a6c-8566-8211ab1ff7b4/",
+   "https://www.tbank.ru/career/it/vacancy/df594e0e-a935-4664-9d26-0bae13f904fe/null/059001c8-9b11-40d1-b269-dd9f24419ade/",
+   "https://www.tbank.ru/career/it/vacancy/f231a6e9-5631-44a6-80bf-585e9491165e/null/3b645f3b-5e1a-4503-8bf4-1bc05e89f4f2/",
+   "https://www.tbank.ru/career/service/vacancy/a4a3e3af-ce5a-4eba-9aae-36c350fa7fec/predstavitel/14c85490-adee-433d-891c-6023588a72d1/",
+   "https://www.tbank.ru/career/it/vacancy/9c05e812-8679-4710-b8cb-5e8bd43cdf48/produktovyj-dizajner-avtoru/55fc6a5b-fe48-455e-9e41-8277123acbe7/",
+   "https://www.tbank.ru/career/it/vacancy/taganrog/senior-frontend-developer-angular/ec1e861d-d4c4-4cac-b641-e7170c123c7c/",
+   "https://www.tbank.ru/career/it/vacancy/samara/null/e546ad29-c106-4195-ada8-8dedf8375856/",
+   "https://www.tbank.ru/career/it/vacancy/orekhovo-zuyevo/ml-product-manager/019e6474-1510-7a52-99a0-f88c6eadcb69/",
+   "https://www.tbank.ru/career/it/vacancy/ryazan/ml-product-manager/019e6474-1510-7a52-99a0-f88c6eadcb69/"
+  ],
+  "shapes": [
+   [
+    "/career/it/vacancy",
+    49449
+   ],
+   [
+    "/career/back-office/vacancy",
+    5394
+   ],
+   [
+    "/career/service/vacancy",
+    622
+   ],
+   [
+    "/career/vacancies/service",
+    531
+   ],
+   [
+    "/career/vacancies/back-office",
+    3
+   ],
+   [
+    "/career/vacancies/it",
+    3
+   ],
+   [
+    "/career/vacancies/rotation-bigops",
+    3
+   ]
+  ],
+  "page_status": 429,
+  "page_jobposting": 0,
+  "page_next": false,
+  "page_text": 51
+ },
+ {
+  "name": "alfa",
+  "sitemaps": [
+   "https://job.alfabank.ru/sitemap.xml"
+  ],
+  "urls_total": 2380,
+  "vacancy_urls": 2353,
+  "sample": [
+   "https://job.alfabank.ru/vacancies/moskva/central-office/rukovoditel-napravleniia-pervichnyikh-prodazh-(iuridicheskie-litsa)_38787",
+   "https://job.alfabank.ru/vacancies/kemerovo/client-service/mobilnyii-bankir-g_-kemerovo_7139",
+   "https://job.alfabank.ru/vacancies/sankt-peterburg/central-office/alfa-agent_39197",
+   "https://job.alfabank.ru/vacancies/aprelevka/client-service/mobilnyii-bankir-(iuridicheskie-litsa)_37143",
+   "https://job.alfabank.ru/vacancies/bogoslovo-(moskovskaia-oblast_-g_o_-shchlkovo)/field-job/mobilnyii-bankir_38906",
+   "https://job.alfabank.ru/vacancies/kholmsk/client-service/mobilnyii-bankir_21444",
+   "https://job.alfabank.ru/vacancies/labinsk/client-service/mobilnyii-bankir_26417",
+   "https://job.alfabank.ru/vacancies/kudyimkar/field-job/mobilnyii-bankir_25041",
+   "https://job.alfabank.ru/vacancies/novoe-stupino-(moskovskaia-oblast)/remote-job/mobilnyii-bankir_31560",
+   "https://job.alfabank.ru/vacancies/salsk/central-office/universalnyii-menedzher_38019",
+   "https://job.alfabank.ru/vacancies/ulan-ude/central-office/menedzher_39048",
+   "https://job.alfabank.ru/vacancies/plesetsk/client-service/mobilnyii-bankir_23109"
+  ],
+  "shapes": [
+   [
+    "/vacancies/moskva/central-office",
+    160
+   ],
+   [
+    "/vacancies/moskva/remote-job",
+    120
+   ],
+   [
+    "/vacancies/moskva/client-service",
+    66
+   ],
+   [
+    "/vacancies/sankt-peterburg/central-office",
+    25
+   ],
+   [
+    "/vacancies/sankt-peterburg/client-service",
+    20
+   ],
+   [
+    "/vacancies/ekaterinburg/client-service",
+    20
+   ],
+   [
+    "/vacancies/krasnodar/central-office",
+    19
+   ],
+   [
+    "/vacancies/novosibirsk/central-office",
+    14
+   ]
+  ],
+  "page_status": 200,
+  "page_jobposting": 0,
+  "page_next": true,
+  "page_text": 4079
+ },
+ {
+  "name": "vk",
+  "sitemaps": [
+   "https://team.vk.company/sitemap.xml"
+  ],
+  "urls_total": 265,
+  "vacancy_urls": 261,
+  "sample": [
+   "http://team.vk.company/vacancy/46274/",
+   "http://team.vk.company/vacancy/52420/",
+   "http://team.vk.company/vacancy/54842/",
+   "http://team.vk.company/vacancy/47270/",
+   "http://team.vk.company/vacancy/55144/",
+   "http://team.vk.company/vacancy/52374/",
+   "http://team.vk.company/vacancy/52144/",
+   "http://team.vk.company/vacancy/54822/",
+   "http://team.vk.company/vacancy/54502/",
+   "http://team.vk.company/vacancy/52815/",
+   "http://team.vk.company/vacancy/52492/",
+   "http://team.vk.company/vacancy/52032/"
+  ],
+  "shapes": [
+   [
+    "/vacancy/N/",
+    260
+   ],
+   [
+    "/vacancy/",
+    1
+   ]
+  ],
+  "page_status": 200,
+  "page_jobposting": 0,
+  "page_next": false,
+  "page_text": 3438
+ },
+ {
+  "name": "sber",
+  "sitemaps": [
+   "https://rabota.sber.ru/sitemap/"
+  ],
+  "urls_total": 3006,
+  "vacancy_urls": 12,
+  "sample": [
+   "https://rabota.sber.ru/vacancy/privetstvennaya-vstrecha-stipendiantov-sbera/",
+   "https://rabota.sber.ru/vacancy/menedzher-vyezdnogo-servisa/",
+   "https://rabota.sber.ru/vacancy/offer-sbera-olimpiada-dlya-shkolnikov/",
+   "https://rabota.sber.ru/vacancy/razrabotchik-c-v-sbere/",
+   "https://rabota.sber.ru/vacancy/rabota-inkassatorom-v-sbere/",
+   "https://rabota.sber.ru/vacancy/offer-sbera-olimpiada-dlya-studentov/",
+   "https://rabota.sber.ru/vacancy/specialist-kontaktnogo-centra-sber/",
+   "https://rabota.sber.ru/vacancy/starshij-klientskij-menedzher-sber/",
+   "https://rabota.sber.ru/vacancy/menedzher-po-rabote-s-klientami/",
+   "https://rabota.sber.ru/search/vakansiya-analitika-4574125/",
+   "https://rabota.sber.ru/vacancy/agile-coach/",
+   "https://rabota.sber.ru/vacancy/shef-redaktor-rukovoditel-komandy-ai-trenerov-so-znaniem-anglijskogo-yazyka/"
+  ],
+  "shapes": [
+   [
+    "/search/vakansiya-analitika-N/",
+    1
+   ],
+   [
+    "/vacancy/offer-sbera-olimpiada-dlya-shkolnikov/",
+    1
+   ],
+   [
+    "/vacancy/privetstvennaya-vstrecha-stipendiantov-sbera/",
+    1
+   ],
+   [
+    "/vacancy/offer-sbera-olimpiada-dlya-studentov/",
+    1
+   ],
+   [
+    "/vacancy/razrabotchik-c-v-sbere/",
+    1
+   ],
+   [
+    "/vacancy/starshij-klientskij-menedzher-sber/",
+    1
+   ],
+   [
+    "/vacancy/specialist-kontaktnogo-centra-sber/",
+    1
+   ],
+   [
+    "/vacancy/shef-redaktor-rukovoditel-komandy-ai-trenerov-so-znaniem-anglijskogo-yazyka/",
+    1
+   ]
+  ],
+  "page_status": 200,
+  "page_jobposting": 0,
+  "page_next": true,
+  "page_text": 2483
+ }
+]
