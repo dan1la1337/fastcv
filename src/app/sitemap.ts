@@ -5,7 +5,7 @@ import { DIRECTIONS } from "@/lib/vacancies";
 const SITE = "https://fastcv.ru";
 
 // Карта сайта пересобирается раз в час: вакансии появляются каждые 2 часа.
-// Вакансии «Работы России» не включаем: они живут 2 дня и закрыты от индексации.
+// Вакансии «Работы России» и SuperJob не включаем: живут недолго и закрыты от индексации.
 export const revalidate = 3600;
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
@@ -14,6 +14,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     .select("id, created_at, posted_at, company_name")
     .is("archived_at", null)
     .not("source_post", "like", "trudvsem/%")
+    .not("source_post", "like", "superjob/%")
     .order("created_at", { ascending: false })
     .limit(5000);
 

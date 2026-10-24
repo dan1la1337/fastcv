@@ -33,7 +33,9 @@ function summary(v: Vacancy): string {
   return `${head}. ${v.description ?? ""}`.slice(0, 200);
 }
 
-const isMirrored = (v: { source_url?: string | null }) => Boolean(v.source_url?.includes("trudvsem.ru"));
+// Вакансии из API других площадок: живут несколько часов или дней и повторяют оригинал
+const isMirrored = (v: { source_url?: string | null }) =>
+  Boolean(v.source_url && (v.source_url.includes("trudvsem.ru") || v.source_url.includes("superjob.ru")));
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const vacancy = await getVacancy((await params).id);
@@ -44,7 +46,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     alternates: { canonical: `/vacancy/${vacancy.id}` },
     openGraph: { title: vacancy.title, description: summary(vacancy), type: "article" },
     // В поиск не попадают архивные вакансии (открываются по старым ссылкам) и вакансии
-    // «Работы России»: они живут 2 дня и повторяют trudvsem.ru — в выдаче были бы дубли и 404
+    // «Работы России» и SuperJob: живут недолго и повторяют оригинал — в выдаче были бы дубли и 404
     robots: vacancy.archived_at || isMirrored(vacancy) ? { index: false } : undefined,
   };
 }

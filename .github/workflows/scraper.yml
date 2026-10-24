@@ -30,7 +30,7 @@ concurrency:
 jobs:
   scrape:
     runs-on: ubuntu-latest
-    # Каналы — до 14 мин, «Работа России» — до 10 мин, плюс установка и подборки;
+    # Каналы — до 14 мин, «Работа России» — до 10 мин, SuperJob — до 6 мин, плюс установка и подборки;
     # лимит с запасом страхует от зависания
     timeout-minutes: 45
 
@@ -62,6 +62,8 @@ jobs:
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
           # Бот подборок для кандидатов (отдельный от оповещений); без него подборки не рассылаются
           TELEGRAM_JOBS_BOT_TOKEN: ${{ secrets.TELEGRAM_JOBS_BOT_TOKEN }}
+          # Ключ приложения SuperJob (api.superjob.ru); без него источник пропускается
+          SUPERJOB_API_KEY: ${{ secrets.SUPERJOB_API_KEY }}
           ALERT_TEST: ${{ inputs.test_alert }}
           DAILY_REPORT: ${{ github.event.schedule == '23 6 * * *' || inputs.daily_report == true }}
           BACKFILL_COMPANY: ${{ inputs.backfill_company || 0 }}

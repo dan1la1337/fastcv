@@ -491,6 +491,18 @@ class Store:
     def prune_trudvsem(self, keep_days: int) -> dict:
         return self.db.rpc("prune_trudvsem", {"keep_days": keep_days}).execute().data or {}
 
+    def count_source(self, source: str) -> int:
+        return (self.db.table("vacancies").select("id", count="exact", head=True)
+                .like("source_post", f"{source}/%").execute().count or 0)
+
+    def upsert_imported(self, rows: list[dict]) -> int:
+        """Вакансии из API без ИИ (SuperJob): новые добавляются, известные обновляются по source_post."""
+        self.db.table("vacancies").upsert(rows, on_conflict="source_post").execute()
+        return len(rows)
+
+    def prune_source(self, source: str, keep_hours: int) -> dict:
+        return self.db.rpc("prune_imported", {"source": source, "keep_hours": keep_hours}).execute().data or {}
+
     def set_hiring_type(self, vacancy_id: str, hiring_type: str) -> None:
         self.db.table("vacancies").update({"hiring_type": hiring_type}).eq("id", vacancy_id).is_("hiring_type", "null").execute()
 
@@ -1017,6 +1029,14 @@ def main() -> None:
             print(f"Работа России: {import_trudvsem(store)}")
         except Exception as e:  # импорт не должен ронять сбор из Telegram
             print(f"⚠️ Работа России: {type(e).__name__}: {str(e)[:200]}")
+    # SuperJob: официальный API, ключ приложения — секрет SUPERJOB_API_KEY
+    superjob_key = env("SUPERJOB_API_KEY")
+    if superjob_key:
+        try:
+            import superjob
+            print(f"SuperJob: {superjob.run(store, superjob_key)}")
+        except Exception as e:  # ошибку не печатаем целиком: в ней может оказаться запрос с ключом
+            print(f"⚠️ SuperJob: {type(e).__name__}")
     backfill = min(int(float(env("BACKFILL_COMPANY") or 0)), 600)
     if backfill > 0:
         try:

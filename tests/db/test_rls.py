@@ -392,6 +392,18 @@ CHECKS: list[tuple] = [
         delete from vacancies where title like 'TV %';""",
      "service_role", None, '{"removed": 1, "archived": 1} TV applied:true,TV fresh:false'),
     ("сайт НЕ вызывает ротацию", False, "select prune_trudvsem(2)", "authenticated", C, None),
+    ("ротация SuperJob по часам: старше окна удаляются, свежие и чужие источники остаются", True,
+     """insert into vacancies (title, source_type, source_post, posted_at) values
+          ('SJ old', 'external', 'superjob/old', now() - interval '9 hours'),
+          ('SJ fresh', 'external', 'superjob/fresh', now() - interval '1 hour'),
+          ('SJ other', 'external', 'trudvsem/sj-other', now() - interval '9 hours');
+        create temp table pr as select prune_imported('superjob', 8)::text as r;
+        select (select r from pr) || ' ' ||
+               (select string_agg(title, ',' order by title) from vacancies where title like 'SJ %');
+        delete from vacancies where title like 'SJ %';""",
+     "service_role", None, '{"removed": 1, "archived": 0} SJ fresh,SJ other'),
+    ("ротация — только известные источники", False, "select prune_imported('', 1)", "service_role", None, None),
+    ("сайт НЕ вызывает ротацию SuperJob", False, "select prune_imported('superjob', 8)", "authenticated", C, None),
     ("тип нанимателя — только из списка", False,
      "update vacancies set hiring_type = 'friends' where title = 'Ext'", "service_role", None, None),
     ("у каждого правила RLS есть права на таблицу для его роли", True,
