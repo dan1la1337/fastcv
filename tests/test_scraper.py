@@ -86,6 +86,10 @@ class FakeStore:
     def update_channel(self, username, fields):
         self.channel_updates[username] = fields
 
+    def deactivate_dead_channels(self, failed_runs):
+        self.dead_threshold = failed_runs
+        return getattr(self, "dead", [])
+
     def archive_stale(self, days):
         return 0
 
@@ -527,10 +531,10 @@ def test_store_count_maps_filters_to_postgrest():
 
 
 def test_daily_report_text():
-    stats = {"vacancies_external": 40, "vacancies_employer": 2, "vacancies_in_feed": 610, "users": 3,
-             "applications": 5, "channels": 34, "unavailable_channels": ["a", "b"]}
+    stats = {"vacancies_external": 40, "vacancies_employer": 2, "vacancies_trudvsem": 9000, "vacancies_superjob": 3000,
+             "vacancies_in_feed": 610, "users": 3, "applications": 5, "channels": 34, "unavailable_channels": ["a", "b"]}
     text = main.daily_report_text(stats, main.RunSummary(2, [ok("x"), ok("y")]))
-    assert "Новых вакансий: 42 (из каналов 40, от работодателей 2)" in text
+    assert "Новых вакансий: из Telegram 40, от работодателей 2, «Работа России» 9000, SuperJob 3000" in text
     assert "Всего в ленте: 610" in text
     assert "у 2: @a, @b" in text
     assert "без проблем" in text
@@ -840,3 +844,20 @@ def test_backfill_sets_experience_and_level_from_text():
     main.backfill_companies(store, lambda t: job(company="Acme", experience_min=3, level="senior"),
                             limit=5, fetch=lambda url: "", pause=0)
     assert store.experience == {"e": (3, "senior")}
+
+
+def test_dead_channels_are_switched_off_and_reported(monkeypatch):
+    monkeypatch.setattr(main.time, "sleep", lambda s: None)
+    store = FakeStore(rows=[])
+    store.dead = ["gone_channel"]
+    summary = main.run(store, lambda text: job())
+    assert store.dead_threshold == main.DEAD_AFTER_FAILED_RUNS
+    assert summary.deactivated == ["gone_channel"] and "@gone_channel" in main.alert_text(summary)
+
+
+def test_telegram_counts_exclude_imported_sources():
+    log = []
+    db = type("DB", (), {"table": lambda self, t: FakeQuery(log, data=[])})()
+    main.Store(db).telegram_vacancies().execute()
+    assert ("filter", ("source_post", "not.like", "trudvsem/%")) in log
+    assert ("filter", ("source_post", "not.like", "superjob/%")) in log
