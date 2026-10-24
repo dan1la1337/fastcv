@@ -39,6 +39,8 @@ export default function Feed({ initialRows, initialTotal }: { initialRows: Vacan
 
   // Избранное и скрытые: отметки пользователя на вакансиях
   const [marks, setMarks] = useState<Map<string, MarkKind>>(new Map());
+  // Вакансии, отметка которых ещё сохраняется: второй клик до ответа базы мог обогнать первый
+  const [pendingMarks, setPendingMarks] = useState<Set<string>>(new Set());
   const hiddenRef = useRef<string[]>([]);
   const [savedList, setSavedList] = useState<Vacancy[]>([]);
   const [hiddenList, setHiddenList] = useState<Vacancy[]>([]);
@@ -220,7 +222,8 @@ export default function Feed({ initialRows, initialTotal }: { initialRows: Vacan
   }, [isCandidate]);
 
   async function toggleMark(item: Vacancy, kind: MarkKind) {
-    if (!user) return;
+    if (!user || pendingMarks.has(item.id)) return;
+    setPendingMarks(prev => new Set(prev).add(item.id));
     const next = marks.get(item.id) === kind ? null : kind;
     const before = marks;
     const updated = new Map(marks);
@@ -239,6 +242,8 @@ export default function Feed({ initialRows, initialTotal }: { initialRows: Vacan
       setMarks(before);
       hiddenRef.current = [...before].filter(([, k]) => k === "hidden").map(([id]) => id);
       toast("Не удалось сохранить отметку. Попробуйте ещё раз.", "error");
+    } finally {
+      setPendingMarks(prev => { const rest = new Set(prev); rest.delete(item.id); return rest; });
     }
   }
 
@@ -406,6 +411,7 @@ export default function Feed({ initialRows, initialTotal }: { initialRows: Vacan
                 <>
                   <button
                     onClick={() => toggleMark(item, "saved")}
+                    disabled={pendingMarks.has(item.id)}
                     aria-pressed={marks.get(item.id) === "saved"}
                     className={`inline-flex items-center gap-1 text-xs transition-colors ${marks.get(item.id) === "saved" ? "text-amber-300" : "text-neutral-500 hover:text-amber-300"}`}
                   >
@@ -415,6 +421,7 @@ export default function Feed({ initialRows, initialTotal }: { initialRows: Vacan
                   {!savedMode && (
                     <button
                       onClick={() => toggleMark(item, "hidden")}
+                      disabled={pendingMarks.has(item.id)}
                       className="inline-flex items-center gap-1 text-xs text-neutral-500 hover:text-neutral-300 transition-colors"
                     >
                       <EyeOff className="w-3.5 h-3.5" /> Скрыть

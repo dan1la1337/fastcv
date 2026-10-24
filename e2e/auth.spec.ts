@@ -35,11 +35,13 @@ test.describe("кандидат", () => {
     await page.waitForLoadState("networkidle"); // отметки пользователя подгружаются после ленты
     // Одна и та же кнопка в обоих состояниях: следим за aria-pressed, а не за текстом
     const mark = page.locator("button[aria-pressed]").filter({ hasText: /В избранн/ }).first();
-    await expect(mark).toHaveAttribute("aria-pressed", "false");
+    // Начальное состояние может остаться от прерванного прогона — переключаем и возвращаем как было
+    const before = await mark.getAttribute("aria-pressed");
+    const after = before === "true" ? "false" : "true";
     await mark.click();
-    await expect(mark).toHaveAttribute("aria-pressed", "true");
+    await expect(mark).toHaveAttribute("aria-pressed", after);
     await mark.click();
-    await expect(mark).toHaveAttribute("aria-pressed", "false");
+    await expect(mark).toHaveAttribute("aria-pressed", before!);
   });
 });
 
