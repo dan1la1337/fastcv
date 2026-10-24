@@ -32,13 +32,14 @@ test.describe("кандидат", () => {
     // Меняет данные аккаунта — только в одном проекте, чтобы прогоны не мешали друг другу
     test.skip(info.project.name !== "desktop", "изменяет данные: только desktop");
     await logIn(page, candidate, "/");
-    const save = page.getByRole("button", { name: "В избранное" }).first();
-    await expect(save).toBeVisible();
-    await save.click();
-    const saved = page.getByRole("button", { name: "В избранном" }).first();
-    await expect(saved).toBeVisible();
-    await saved.click();
-    await expect(page.getByRole("button", { name: "В избранном" })).toHaveCount(0);
+    await page.waitForLoadState("networkidle"); // отметки пользователя подгружаются после ленты
+    // Одна и та же кнопка в обоих состояниях: следим за aria-pressed, а не за текстом
+    const mark = page.locator("button[aria-pressed]").filter({ hasText: /В избранн/ }).first();
+    await expect(mark).toHaveAttribute("aria-pressed", "false");
+    await mark.click();
+    await expect(mark).toHaveAttribute("aria-pressed", "true");
+    await mark.click();
+    await expect(mark).toHaveAttribute("aria-pressed", "false");
   });
 });
 
