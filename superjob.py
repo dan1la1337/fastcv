@@ -4,6 +4,7 @@
 
 SuperJob публикует ~60 тыс. вакансий в сутки, а бесплатный тариф базы мал, поэтому храним
 окно последних KEEP_HOURS часов и потолок MAX_STORED; prune_imported() убирает старое.
+Закрытые и архивные вакансии пропускаем (skipped).
 API отдаёт не больше 500 результатов на запрос, поэтому идём окнами по времени публикации
 и дробим окно, пока в нём не станет ≤ 500 вакансий.
 """
@@ -21,7 +22,7 @@ from trudvsem import level_for, money, sphere_direction, text
 
 API = "https://api.superjob.ru/2.0/vacancies/"
 SOURCE = "superjob"
-PAGE = 100
+PAGE = 100                      # API отдаёт не больше 40 на страницу — идём по признаку more
 API_LIMIT = 500                 # больше API не отдаёт ни на какой запрос
 KEEP_HOURS = 8
 MAX_STORED = 20_000
@@ -122,8 +123,8 @@ def import_superjob(store, fetch: Callable[[dict], dict], now: Optional[datetime
                 break
             data = fetch(_params(start, end, page))
         seen += len(pages)
-        # Вакансии, которые SuperJob сам дублирует в «Работу России», у нас уже есть оттуда
-        rows = [row for row in (map_vacancy(v) for v in pages if not v.get("trud_vsem")) if row]
+        # Поле trud_vsem заполнено у всех вакансий SuperJob — дубли по нему не отсеять
+        rows = [row for row in (map_vacancy(v) for v in pages) if row]
         skipped += len(pages) - len(rows)
         if rows:
             saved += store.upsert_imported(rows)

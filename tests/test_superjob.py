@@ -88,7 +88,7 @@ def test_walks_keep_window_and_splits_windows_over_api_limit():
     assert store.settings[superjob.CURSOR_KEY] == NOW.isoformat()
 
 
-def test_next_run_continues_from_cursor_and_skips_trudvsem_duplicates():
+def test_next_run_continues_from_cursor_and_skips_closed():
     fetch, calls = feed(per_hour=60)
     store = Store()
     store.settings[superjob.CURSOR_KEY] = (NOW - timedelta(hours=1)).isoformat()
@@ -96,9 +96,10 @@ def test_next_run_continues_from_cursor_and_skips_trudvsem_duplicates():
     assert min(p["date_published_from"] for p in calls) == int((NOW - timedelta(minutes=70)).timestamp())
 
     dup = Store()
-    stats = superjob.import_superjob(dup, lambda p: {"total": 1, "more": False, "objects": [{**SAMPLE, "trud_vsem": True}]},
-                                     now=NOW, clock=lambda: 0)
-    assert stats["saved"] == 0 and stats["skipped"] > 0
+    # trud_vsem в ответе есть у всех вакансий — это не признак дубля, сохраняем
+    page = [{**SAMPLE, "trud_vsem": True}, {**SAMPLE, "id": 2, "is_archive": True}]
+    stats = superjob.import_superjob(dup, lambda p: {"total": 2, "more": False, "objects": page}, now=NOW, clock=lambda: 0)
+    assert stats["saved"] > 0 and stats["skipped"] > 0
 
 
 def test_stops_at_storage_cap_and_time_budget():
