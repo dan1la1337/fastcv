@@ -1,0 +1,317 @@
+[
+ {
+  "name": "sber",
+  "sitemaps": [
+   "https://rabota.sber.ru/sitemap/"
+  ],
+  "urls_total": 3006,
+  "vacancy_urls": 12,
+  "sample": [
+   "https://rabota.sber.ru/search/vakansiya-analitika-4574125/",
+   "https://rabota.sber.ru/vacancy/offer-sbera-olimpiada-dlya-shkolnikov/",
+   "https://rabota.sber.ru/vacancy/privetstvennaya-vstrecha-stipendiantov-sbera/"
+  ],
+  "page_status": 200,
+  "page_jobposting": 0,
+  "page_next": true,
+  "page_text": 2483
+ },
+ {
+  "name": "vk",
+  "sitemaps": [
+   "https://team.vk.company/sitemap.xml"
+  ],
+  "urls_total": 265,
+  "vacancy_urls": 261,
+  "sample": [
+   "https://team.vk.company/vacancy/",
+   "http://team.vk.company/vacancy/45217/",
+   "http://team.vk.company/vacancy/46327/"
+  ],
+  "page_status": 200,
+  "page_jobposting": 0,
+  "page_next": false,
+  "page_text": 3438
+ },
+ {
+  "name": "avito",
+  "sitemaps": [
+   "https://career.avito.com/sitemap.xml",
+   "https://career.avito.com/sitemap.xml",
+   "https://career.avito.com/sitemap.xml"
+  ],
+  "urls_total": 708,
+  "vacancy_urls": 588,
+  "sample": [
+   "https://career.avito.com/vacancies/analitika-dannykh/19266/",
+   "https://career.avito.com/vacancies/razrabotka/19456/",
+   "https://career.avito.com/vacancies/prodazhi/19558/"
+  ],
+  "page_status": 200,
+  "page_jobposting": 1,
+  "page_next": false,
+  "page_text": 6122
+ },
+ {
+  "name": "wildberries",
+  "sitemaps": [
+   "https://career.rwb.ru/sitemap.xml"
+  ],
+  "urls_total": 2,
+  "vacancy_urls": 1,
+  "sample": [
+   "https://career.rwb.ru/vacancies"
+  ],
+  "page_status": 200,
+  "page_jobposting": 0,
+  "page_next": false,
+  "page_text": 26
+ },
+ {
+  "name": "x5",
+  "sitemaps": [
+   "https://rabota.x5.ru/sitemap.xml"
+  ],
+  "urls_total": 586,
+  "vacancy_urls": 2,
+  "sample": [
+   "https://rabota.x5.ru/vacancies",
+   "https://rabota.x5.ru/dostavka/vacancii-dlya-samozanatyh"
+  ],
+  "page_status": 200,
+  "page_jobposting": 0,
+  "page_next": false,
+  "page_text": 11806
+ },
+ {
+  "name": "mts",
+  "sitemaps": [
+   "https://job.mts.ru/sitemap.xml"
+  ],
+  "urls_total": 2516,
+  "vacancy_urls": 2447,
+  "sample": [
+   "https://job.mts.ru/vacancies",
+   "https://job.mts.ru/vacancies/companies",
+   "https://job.mts.ru/vacancy/48692116070669976"
+  ],
+  "page_status": 200,
+  "page_jobposting": 0,
+  "page_next": false,
+  "page_text": 4092
+ },
+ {
+  "name": "kaspersky",
+  "sitemaps": [
+   "https://careers.kaspersky.ru/sitemap.xml"
+  ],
+  "urls_total": 7,
+  "vacancy_urls": 1,
+  "sample": [
+   "https://careers.kaspersky.ru/vacancies"
+  ],
+  "page_status": 200,
+  "page_jobposting": 0,
+  "page_next": false,
+  "page_text": 1602
+ },
+ {
+  "name": "2gis",
+  "sitemaps": [
+   "https://job.2gis.ru/sitemap.xml"
+  ],
+  "urls_total": 86,
+  "vacancy_urls": 85,
+  "sample": [
+   "https://job.2gis.ru/vacancies",
+   "https://job.2gis.ru/vacancies/development/604",
+   "https://job.2gis.ru/vacancies/development/603"
+  ],
+  "page_status": 200,
+  "page_jobposting": 1,
+  "page_next": false,
+  "page_text": 5083
+ },
+ {
+  "name": "megafon",
+  "sitemaps": [
+   "User-agent:"
+  ],
+  "urls_total": 0,
+  "vacancy_urls": 0,
+  "sample": []
+ },
+ {
+  "name": "rostelecom",
+  "sitemaps": [
+   "https://job.rt.ru/sitemap.xml"
+  ],
+  "urls_total": 0,
+  "vacancy_urls": 0,
+  "sample": []
+ },
+ {
+  "name": "selectel",
+  "sitemaps": [
+   "https://selectel.ru/sitemap.xml",
+   "https://selectel.ru/blog/sitemap_index.xml"
+  ],
+  "urls_total": 1876,
+  "vacancy_urls": 24,
+  "sample": [
+   "https://selectel.ru/careers/all/vacancy/1967/",
+   "https://selectel.ru/careers/all/vacancy/1968/",
+   "https://selectel.ru/careers/all/vacancy/1964/"
+  ],
+  "page_status": 200,
+  "page_jobposting": 0,
+  "page_next": false,
+  "page_text": 24086
+ },
+ {
+  "name": "aviasales",
+  "sitemaps": [
+   "https://www.aviasales.ru/sitemap.xml"
+  ],
+  "urls_total": 149999,
+  "vacancy_urls": 3,
+  "sample": [
+   "https://www.aviasales.ru/hotels/no_vacancy",
+   "https://www.aviasales.ru/hotels/paxton_vacances_hotels_resorts_sanya",
+   "https://www.aviasales.ru/hotels/starc_by_pierre_vacances_premium"
+  ],
+  "page_status": 200,
+  "page_jobposting": 0,
+  "page_next": false,
+  "page_text": 210
+ },
+ {
+  "name": "tbank",
+  "sitemaps": [
+   "https://www.tbank.ru/sitemap.xml",
+   "https://www.tbank.ru/sitemap.xml",
+   "https://www.tbank.ru/sitemap.xml",
+   "https://www.tbank.ru/sitemap.xml",
+   "https://www.tbank.ru/sitemap.xml"
+  ],
+  "urls_total": 56832,
+  "vacancy_urls": 56316,
+  "sample": [
+   "https://www.tbank.ru/career/vacancies/back-office/",
+   "https://www.tbank.ru/career/vacancies/it/",
+   "https://www.tbank.ru/career/vacancies/rotation-bigops/"
+  ],
+  "page_status": 200,
+  "page_jobposting": 0,
+  "page_next": false,
+  "page_text": 4259
+ },
+ {
+  "name": "alfa",
+  "sitemaps": [
+   "https://job.alfabank.ru/sitemap.xml"
+  ],
+  "urls_total": 2380,
+  "vacancy_urls": 2353,
+  "sample": [
+   "https://job.alfabank.ru/x5card_vacancies",
+   "https://job.alfabank.ru/vacancies/remote-job",
+   "https://job.alfabank.ru/vacancies/digital"
+  ],
+  "page_status": 200,
+  "page_jobposting": 0,
+  "page_next": true,
+  "page_text": 4079
+ },
+ {
+  "name": "vtb",
+  "sitemaps": [
+   "https://www.vtb.ru/media-files/vtb.ru/sitemap.xml"
+  ],
+  "urls_total": 5059,
+  "vacancy_urls": 1,
+  "sample": [
+   "https://www.vtb.ru/npb/career/vacancy/"
+  ],
+  "page_status": 200,
+  "page_jobposting": 0,
+  "page_next": false,
+  "page_text": 129
+ },
+ {
+  "name": "sovcombank",
+  "sitemaps": [
+   "https://sovcombank.ru/sitemap.xml"
+  ],
+  "urls_total": 6614,
+  "vacancy_urls": 0,
+  "sample": []
+ },
+ {
+  "name": "tochka",
+  "sitemaps": [
+   "https://hr.tochka.com/sitemap.xml"
+  ],
+  "urls_total": 253,
+  "vacancy_urls": 251,
+  "sample": [
+   "https://hr.tochka.com/vacancies/catalog/vedushhijj-produktovyjj-marketolog/",
+   "https://hr.tochka.com/vacancies/catalog/menedzher-po-prodazham-dejjstvujushhim-klientam-servisa-finlid/",
+   "https://hr.tochka.com/vacancies/catalog/menedzher-po-prodazam-krupnim-klientam/"
+  ],
+  "page_status": 200,
+  "page_jobposting": 1,
+  "page_next": false,
+  "page_text": 5031
+ },
+ {
+  "name": "ptsecurity",
+  "sitemaps": [
+   "https://www.ptsecurity.com/sitemap.xml"
+  ],
+  "urls_total": 3766,
+  "vacancy_urls": 19,
+  "sample": [
+   "https://ptsecurity.com/about/vacancy/",
+   "https://ptsecurity.com/about/vacancy/fullstack-developer--ptree/",
+   "https://ptsecurity.com/about/vacancy/1c-analitik--erp/"
+  ],
+  "page_status": 200,
+  "page_jobposting": 1,
+  "page_next": false,
+  "page_text": 5381
+ },
+ {
+  "name": "sibur",
+  "err": "SSLError: HTTPSConnectionPool(host='www.sibur.ru', port=443): Max retries exceeded with url: /robots.txt (Caused by SSLError(SSLCe"
+ },
+ {
+  "name": "raiffeisen",
+  "sitemaps": [
+   "https://www.raiffeisen.ru/sitemap.xml"
+  ],
+  "urls_total": 1274,
+  "vacancy_urls": 0,
+  "sample": []
+ },
+ {
+  "name": "yadro",
+  "sitemaps": [
+   "https://yadro.com/sitemap.xml"
+  ],
+  "urls_total": 239,
+  "vacancy_urls": 0,
+  "sample": []
+ },
+ {
+  "name": "domclick",
+  "sitemaps": [
+   "https://domclick.ru/my-home/promo/sitemap/moskva.xml",
+   "https://domclick.ru/stroitelstvo-domov/sitemaps",
+   "https://domclick.ru/sitemaps/realty/domclick.ru/sitemap.xml"
+  ],
+  "urls_total": 134,
+  "vacancy_urls": 0,
+  "sample": []
+ }
+]
