@@ -108,3 +108,17 @@ test("выпадающий список направлений ищет по т�
   await expect(remote).toHaveAttribute("aria-pressed", "true");
   await expect(hybrid).toHaveAttribute("aria-pressed", "true");
 });
+
+test("фильтр по источнику: только Telegram — во всех карточках бейдж Telegram, «Все» возвращает ленту", async ({ page }) => {
+  await page.goto("/");
+  await openFilters(page);
+  const all = await total(page);
+  await page.getByRole("button", { name: "Telegram", exact: true }).click();
+  await expect(page.getByRole("button", { name: "Telegram", exact: true })).toHaveAttribute("aria-pressed", "true");
+  await expect.poll(() => total(page)).toBeLessThanOrEqual(all);
+  const badges = await page.locator("section").filter({ has: page.locator("h2") })
+    .locator("text=/^(Telegram|SuperJob|Работа России|Сайт компании|Прямой работодатель)$/i").allTextContents();
+  expect(badges.every(b => b.toLowerCase() === "telegram")).toBe(true);
+  await page.getByRole("button", { name: "Все", exact: true }).first().click();
+  await expect.poll(() => total(page)).toBe(all);
+});

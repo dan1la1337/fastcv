@@ -114,7 +114,20 @@ export interface VacancyFilters {
   levels: Level[];
   /** Технологии: вакансия подходит, если упоминает хотя бы одну. */
   stack: string[];
+  /** Источники (vacancies.source_kind); пусто — все. */
+  sources: SourceKind[];
 }
+
+export type SourceKind = "telegram" | "career" | "employer" | "superjob" | "trudvsem";
+
+/** Откуда вакансия — для фильтра в ленте (значения vacancies.source_kind). */
+export const SOURCES: { id: SourceKind; label: string }[] = [
+  { id: "telegram", label: "Telegram" },
+  { id: "career", label: "Сайты компаний" },
+  { id: "employer", label: "Работодатели на FastCV" },
+  { id: "superjob", label: "SuperJob" },
+  { id: "trudvsem", label: "«Работа России»" },
+];
 
 export const PAGE_SIZE = 30;
 
@@ -129,6 +142,7 @@ export const DEFAULT_FILTERS: VacancyFilters = {
   area: "",
   levels: [],
   stack: [],
+  sources: [],
 };
 
 export type Area = "it" | "other" | "work";
@@ -275,6 +289,7 @@ export async function fetchVacancyPage(
   if (exclude.length) query = query.not("id", "in", `(${exclude.join(",")})`);
 
   if (filters.formats.length) query = query.in("work_format", filters.formats);
+  if (filters.sources.length) query = query.in("source_kind", filters.sources);
   if (filters.direction) query = query.eq("direction", filters.direction);
   else if (filters.area) query = query.in("direction", DIRECTIONS.filter(d => d.group === filters.area).map(d => d.id));
   if (filters.levels.length) query = query.in("level", filters.levels);

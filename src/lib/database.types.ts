@@ -347,6 +347,7 @@ export type Database = {
           first_seen_at: string | null
           channels_count: number
           scope_note: string | null
+          source_kind: string | null
           experience_min: number | null
         }
         Insert: {
@@ -383,6 +384,7 @@ export type Database = {
           first_seen_at?: string | null
           channels_count?: number
           scope_note?: string | null
+          source_kind?: string | null
           experience_min?: number | null
         }
         Update: {
@@ -419,6 +421,7 @@ export type Database = {
           first_seen_at?: string | null
           channels_count?: number
           scope_note?: string | null
+          source_kind?: string | null
           experience_min?: number | null
         }
         Relationships: [

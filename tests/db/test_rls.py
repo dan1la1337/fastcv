@@ -403,6 +403,14 @@ CHECKS: list[tuple] = [
         delete from vacancies where title like 'SJ %';""",
      "service_role", None, '{"removed": 1, "archived": 0} SJ fresh,SJ other'),
     ("ротация — только известные источники", False, "select prune_imported('', 1)", "service_role", None, None),
+    ("источник вакансии проставляется сам: telegram, career, superjob, trudvsem, employer", True,
+     f"""insert into vacancies (title, source_type, source_post) values
+          ('SK tg', 'external', 'somechannel/1'), ('SK career', 'external', 'career/acme/1'),
+          ('SK sj', 'external', 'superjob/1'), ('SK tv', 'external', 'trudvsem/1');
+        insert into vacancies (title, source_type, employer_id) values ('SK emp', 'internal', '{E}');
+        select string_agg(title || ':' || source_kind, ',' order by title) from vacancies where title like 'SK %';
+        delete from vacancies where title like 'SK %';""",
+     "postgres", None, "SK career:career,SK emp:employer,SK sj:superjob,SK tg:telegram,SK tv:trudvsem"),
     ("вакансии с сайтов компаний не уходят в архив по возрасту — только когда пропали с сайта", True,
      """insert into vacancies (title, source_type, source_post, posted_at) values
           ('CR old', 'external', 'career/acme/1', now() - interval '60 days'),
