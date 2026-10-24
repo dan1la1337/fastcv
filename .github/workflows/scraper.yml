@@ -2,10 +2,11 @@ name: Scheduled Vacancy Scraper
 
 on:
   schedule:
-    # Каждые 2 часа (каналов много, каждый запуск короче); 06:00 — отдельной строкой ниже
-    - cron: '0 0,2,4,8,10,12,14,16,18,20,22 * * *'
-    # Утренний запуск (09:00 по Москве) дополнительно присылает сводку за сутки
-    - cron: '0 6 * * *'
+    # Каждые 2 часа; утренний — отдельной строкой ниже. Не в начале часа: на :00 GitHub
+    # перегружен, и запуски по расписанию опаздывали на 2,5–5 часов
+    - cron: '23 0,2,4,8,10,12,14,16,18,20,22 * * *'
+    # Утренний запуск (~09:20 по Москве) дополнительно присылает сводку за сутки
+    - cron: '23 6 * * *'
   workflow_dispatch:
     inputs:
       test_alert:
@@ -62,7 +63,7 @@ jobs:
           # Бот подборок для кандидатов (отдельный от оповещений); без него подборки не рассылаются
           TELEGRAM_JOBS_BOT_TOKEN: ${{ secrets.TELEGRAM_JOBS_BOT_TOKEN }}
           ALERT_TEST: ${{ inputs.test_alert }}
-          DAILY_REPORT: ${{ github.event.schedule == '0 6 * * *' || inputs.daily_report == true }}
+          DAILY_REPORT: ${{ github.event.schedule == '23 6 * * *' || inputs.daily_report == true }}
           BACKFILL_COMPANY: ${{ inputs.backfill_company || 0 }}
         # -u: вывод сразу попадает в лог Actions, а не копится в буфере до конца
         run: python -u main.py
