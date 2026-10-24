@@ -91,6 +91,12 @@ jobs:
       - name: Build
         run: npx next build
       - name: End-to-end tests
+        env:
+          # Тестовые аккаунты на staging; в PR из форков секретов нет — эти тесты пропустятся
+          E2E_CANDIDATE_EMAIL: ${{ secrets.E2E_CANDIDATE_EMAIL }}
+          E2E_CANDIDATE_PASSWORD: ${{ secrets.E2E_CANDIDATE_PASSWORD }}
+          E2E_EMPLOYER_EMAIL: ${{ secrets.E2E_EMPLOYER_EMAIL }}
+          E2E_EMPLOYER_PASSWORD: ${{ secrets.E2E_EMPLOYER_PASSWORD }}
         run: npx playwright test
       - name: Upload traces of failed tests
         if: failure()
