@@ -415,6 +415,24 @@ CHECKS: list[tuple] = [
          where not has_table_privilege(r, c.oid,
                  case p.polcmd when 'a' then 'insert' when 'w' then 'update' when 'd' then 'delete' else 'select' end)""",
      "postgres", None, "ok"),
+    ("очередь писем: новый отклик — работодателю, приглашение — кандидату; после отметки пусто", True,
+     f"""update auth.users set email = 'c@example.com' where id = '{C}';
+        update auth.users set email = 'e@example.com' where id = '{E}';
+        insert into vacancies (title, source_type, employer_id) values ('NQ vacancy', 'internal', '{E}');
+        insert into applications (vacancy_id, candidate_id, status) select id, '{C}', 'new' from vacancies where title = 'NQ vacancy';
+        insert into applications (vacancy_id, candidate_id, status, candidate_notified_status, employer_notified_at, hr_replied_at)
+          select id, '{C}', 'interview_scheduled', 'new', now(), now() from vacancies where title = 'NQ vacancy';
+        create temp table q as select * from pending_notifications() where vacancy_title = 'NQ vacancy';
+        create temp table m as
+          select mark_notified('employer_new', array(select application_id from q where kind = 'employer_new')) a,
+                 mark_notified('candidate_status', array(select application_id from q where kind = 'candidate_status')) b;
+        create temp table q2 as select * from pending_notifications() where vacancy_title = 'NQ vacancy';
+        select (select string_agg(kind || ':' || email, ',' order by kind) from q) || ' / ' || (select count(*) from q2);
+        delete from applications where vacancy_id in (select id from vacancies where title = 'NQ vacancy');
+        delete from vacancies where title = 'NQ vacancy';""",
+     "postgres", None, "candidate_status:c@example.com,employer_new:e@example.com / 0"),
+    ("сборщик (service_role) читает очередь писем", True, "select count(*) >= 0 from pending_notifications()", "service_role", None, "t"),
+    ("сайт НЕ читает очередь писем с адресами", False, "select * from pending_notifications()", "authenticated", C, None),
     ("аноним не может удалить аккаунт", False, "select delete_my_account()", "anon", None, None),
     ("пользователь удаляет свой аккаунт целиком, чужие данные на месте", True,
      """insert into auth.users values ('00000000-0000-0000-0000-0000000000d1', '{"role":"candidate"}');
