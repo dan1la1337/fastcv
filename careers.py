@@ -4,8 +4,9 @@
 в ней перечислены страницы вакансий. Новые страницы читаем по одной, с паузами и с
 соблюдением robots.txt; капчи и защиту от ботов не обходим — такой сайт просто пропускаем.
 
-Со страницы берём разметку schema.org/JobPosting, если она есть (без ИИ), иначе текст
-страницы разбирает тот же ИИ, что и посты из Telegram. На FastCV — краткая выжимка и ссылка
+Со страницы берём разметку schema.org/JobPosting, если она есть, иначе название из H1 или
+заголовка и описание из meta description (тоже без ИИ: бесплатного лимита Gemini на тысячи
+страниц не хватает). Только если и этого нет — текст страницы разбирает ИИ. На FastCV — краткая выжимка и ссылка
 на страницу вакансии на сайте компании. Исчезла из карты сайта — уходит в архив.
 """
 
@@ -29,7 +30,7 @@ USER_AGENT = "Mozilla/5.0 (compatible; FastCVBot/1.0; +https://fastcv.ru)"
 ROBOTS_AGENT = "FastCVBot"
 RANKING_WEIGHT = 1.0          # как Telegram: иначе тысячи вакансий одной компании закрыли бы ленту
 TIME_BUDGET_SECONDS = 7 * 60
-MAX_NEW_PER_COMPANY = 40      # за запуск: на остальных новые страницы дочитаем в следующие
+MAX_NEW_PER_COMPANY = 150     # за запуск: остальные страницы дочитаем в следующие
 PAGE_TEXT_LIMIT = 6000
 # Сайты банков подписаны сертификатами НУЦ Минцифры, которых нет в стандартном наборе
 RUSSIAN_CA = ["https://gu-st.ru/content/Other/doc/russian_trusted_root_ca.cer",
@@ -156,6 +157,51 @@ def row_from_posting(posting: dict, company: Company, vid: str, url: str) -> Opt
     }
 
 
+_H1 = re.compile(r"<h1[^>]*>(.*?)</h1>", re.S | re.I)
+_META_DESC = re.compile(r'<meta[^>]+name="description"[^>]+content="([^"]*)"', re.I)
+_OG_TITLE = re.compile(r'<meta[^>]+property="og:title"[^>]+content="([^"]*)"', re.I)
+_JUNK_TITLES = re.compile(r"^(детальная страница|вакансия|вакансии|карьера|работа)\b.{0,20}$", re.I)
+_CITY_IN = re.compile(r"^(.{3,}?)\s+в\s+([А-ЯЁ][а-яё]+(?:[ -][А-ЯЁ][а-яё]+)?)$")
+_CITY_FIELD = re.compile(r"Город:\s*([А-ЯЁ][а-яё]+(?:[ -][А-ЯЁ][а-яё]+)?)")
+
+
+def row_from_meta(page: str, company: Company, vid: str, url: str) -> Optional[dict]:
+    """Без ИИ: название из H1 или заголовка страницы, описание из meta description.
+    Направление и уровень по названию определит база (триггер vacancies_normalize)."""
+    raw = [clean(m.group(1), 300) for m in (_H1.search(page), _OG_TITLE.search(page), _TITLE.search(page)) if m]
+    title = next((t for t in raw if t and not _JUNK_TITLES.match(t)), None)
+    if not title:
+        return None
+    # «Вакансия: X», «X - Работа в МТС», «X | Т-Банк», «X вакансия в Москве – Альфа-Банк»
+    title = re.sub(r"^вакансия[:\s]+", "", title, flags=re.I)
+    title = re.split(r"\s+[-–|]\s+(?:работа\b|вакансии\b|" + re.escape(company.name) + r"|т-банк)", title, flags=re.I)[0]
+    title = re.split(r"\s+[|–]\s+", title)[0]
+    title = re.sub(r"\s+вакансия\s+в\s+\S+$", "", title, flags=re.I).strip(" ,.-")
+    description = clean((_META_DESC.search(page) or [None, None])[1], 700)
+    city = None
+    if match := _CITY_IN.match(title):          # «Продавец в Москва» (МТС)
+        title, city = match.group(1), match.group(2)
+    elif "," in title and re.match(r"^[А-ЯЁ][а-яё]+(?:[ -][А-ЯЁ][а-яё]+)?$", title.rsplit(",", 1)[1].strip()):
+        title, city = title.rsplit(",", 1)[0], title.rsplit(",", 1)[1].strip()   # «… в AI VK, Москва»
+    elif description and (match := _CITY_FIELD.search(description)):
+        city = match.group(1)
+    if len(title) < 3:
+        return None
+    return {
+        "source_post": f"{SOURCE}/{company.key}/{vid}",
+        "source_url": url,
+        "source_type": "external",
+        "title": title[:200],
+        "company_name": company.name,
+        "description": description,
+        "city": city,
+        "is_remote": bool(description and re.search(r"удал[её]нн", description, re.I)),
+        "hiring_type": "product",
+        "posted_at": datetime.now(timezone.utc).isoformat(),
+        "ranking_weight": RANKING_WEIGHT,
+    }
+
+
 def row_from_ai(vacancy, company: Company, vid: str, url: str) -> Optional[dict]:
     """Ответ ИИ (VacancyAI) по тексту страницы → строка vacancies."""
     if not vacancy.is_job or not vacancy.title:
@@ -227,6 +273,8 @@ class Fetcher:
             raise Blocked(f"{r.status_code} {urlparse(url).netloc}")
         if r.status_code != 200:
             return None
+        if (getattr(r, "encoding", None) or "iso-8859-1").lower() == "iso-8859-1":   # без charset requests гадает неверно
+            r.encoding = "utf-8"
         if url.endswith(".gz"):
             import gzip
             try:
@@ -299,6 +347,8 @@ def import_careers(store, normalize: Callable[[str], object], fetcher: Optional[
                 posting = job_posting(page)
                 if posting:
                     row = row_from_posting(posting, company, vid, url)
+                elif (row := row_from_meta(page, company, vid, url)) is not None:
+                    pass
                 else:
                     try:
                         row = row_from_ai(normalize(page_text(page)), company, vid, url)
