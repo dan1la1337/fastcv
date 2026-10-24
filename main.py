@@ -19,6 +19,7 @@
 from __future__ import annotations
 
 import hashlib
+import json
 import os
 import re
 import sys
@@ -1098,7 +1099,15 @@ def main() -> None:
             import careers
             fetcher = careers.Fetcher()
             fetcher.use_russian_ca()
-            print(f"Сайты компаний: {careers.import_careers(store, make_gemini_normalizer(gemini_key, models), fetcher)}")
+            # Каждый запуск начинаем со следующей компании: если время кончится, очередь дойдёт до всех
+            offset = int(store.get_setting("careers_offset") or 0) % len(careers.COMPANIES)
+            store.set_setting("careers_offset", str(offset + 1))
+            order = careers.COMPANIES[offset:] + careers.COMPANIES[:offset]
+            career_stats = careers.import_careers(store, make_gemini_normalizer(gemini_key, models), fetcher, order)
+            print(f"Сайты компаний: {career_stats}")
+            # Итоги по компаниям — в базу: логи Actions не всегда под рукой, а так видно в /admin и SQL
+            store.set_setting("careers_last_run", json.dumps(
+                {"at": datetime.now(timezone.utc).isoformat(), "companies": career_stats}, ensure_ascii=False))
         except Exception as e:
             print(f"⚠️ Сайты компаний: {type(e).__name__}: {str(e)[:200]}")
     # «Работа России»: открытые данные без ИИ. Отключается переменной TRUDVSEM=off
