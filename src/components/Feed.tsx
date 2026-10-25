@@ -94,10 +94,13 @@ export default function Feed({ initialRows, initialTotal, hero }: { initialRows:
           .single();
         if (profile) setUserProfile(profile);
         // Ссылка «/?tab=for-you» (после онбординга) сразу открывает подборку
-        if (profile?.role === "candidate" && new URLSearchParams(window.location.search).get("tab") === "for-you") {
+        const tab = new URLSearchParams(window.location.search).get("tab");
+        if (profile?.role === "candidate" && tab === "for-you") {
           setMode("for-you");
           void loadRecommended(0);
         }
+        // «/?tab=saved» — нижняя панель на телефоне ведёт сразу в избранное
+        if (profile?.role === "candidate" && tab === "saved") void showSaved();
       }
     });
   }, []);
@@ -455,7 +458,7 @@ export default function Feed({ initialRows, initialTotal, hero }: { initialRows:
             <Logo />
           </div>
           <div className="flex items-center gap-2 sm:gap-4">
-            <span className="hidden sm:inline-flex items-center gap-2 font-mono text-xs text-teal-300">
+            <span className="inline-flex items-center gap-2 font-mono text-[11px] sm:text-xs text-teal-300 whitespace-nowrap">
               <span className="relative h-2 w-2" aria-hidden="true">
                 <span className="live-ping absolute inset-0 rounded-full bg-teal-300" />
                 <span className="absolute inset-0 rounded-full bg-teal-300" />
