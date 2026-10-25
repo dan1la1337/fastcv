@@ -454,8 +454,11 @@ export default function Feed({ initialRows, initialTotal, hero }: { initialRows:
     <div className="min-h-screen text-neutral-100 antialiased font-sans relative">
       <header className="border-b border-white/10 bg-neutral-950/70 backdrop-blur-md sticky top-0 z-20">
         <div className="max-w-6xl mx-auto px-4 py-3 sm:py-4 flex items-center justify-between gap-3">
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-1 sm:gap-3">
             <Logo />
+            <Link href="/about" className="hidden sm:inline-block px-3 py-2 rounded-full text-sm text-neutral-400 hover:text-white transition-colors">
+              О сервисе
+            </Link>
           </div>
           <div className="flex items-center gap-2 sm:gap-4">
             <span className="inline-flex items-center gap-2 font-mono text-[11px] sm:text-xs text-teal-300 whitespace-nowrap">

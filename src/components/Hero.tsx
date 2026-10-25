@@ -2,14 +2,17 @@ import Link from "next/link";
 import LiveCounter from "@/components/LiveCounter";
 import MatchRing from "@/components/MatchRing";
 import type { LiveStats } from "@/lib/live";
+import LandingSections from "@/components/LandingSections";
 
 /**
- * Первый экран для гостей (редизайн «Аврора»): обещание, пример совпадения и живой счётчик.
- * Вошедшим скрыт (.guest-only): им сразу лента.
+ * Главная страница (макет «Аврора»): обещание, пример совпадения, живой счётчик и лендинг.
+ * На «/» вошедшим скрыта (.guest-only): им сразу лента. На /about видна всем.
  */
-export default function Hero({ stats }: { stats: LiveStats | null }) {
+export default function Hero({ stats, always = false }: { stats: LiveStats | null; always?: boolean }) {
+  const feedHref = always ? "/#feed" : "#feed";
   return (
-    <section className="guest-only max-w-6xl mx-auto px-4 pt-10 sm:pt-16 pb-4 space-y-12">
+    <div className={always ? "" : "guest-only"}>
+    <section className="max-w-6xl mx-auto px-4 pt-10 sm:pt-16 pb-4 space-y-12">
       <div className="flex flex-wrap items-center gap-x-16 gap-y-10">
         <div className="flex-[1_1_480px] min-w-0 space-y-6">
           <h1 className="font-display text-4xl sm:text-5xl lg:text-[56px] font-bold leading-[1.1] tracking-tight">
@@ -24,7 +27,7 @@ export default function Hero({ stats }: { stats: LiveStats | null }) {
               className="rounded-full bg-teal-300 px-6 py-3.5 font-semibold text-neutral-950 hover:bg-teal-200 transition-colors">
               Загрузить резюме
             </Link>
-            <a href="#feed" className="rounded-full border border-white/20 px-6 py-3.5 text-neutral-100 hover:border-white/40 transition-colors">
+            <a href={feedHref} className="rounded-full border border-white/20 px-6 py-3.5 text-neutral-100 hover:border-white/40 transition-colors">
               Смотреть вакансии
             </a>
           </div>
@@ -50,5 +53,7 @@ export default function Hero({ stats }: { stats: LiveStats | null }) {
 
       {stats && <LiveCounter initial={stats} />}
     </section>
+    <LandingSections />
+    </div>
   );
 }
