@@ -1,164 +1,44 @@
 [
 {
-"u": "podrabotki_it",
+"u": "agile_jobs",
 "status": 302
 },
 {
-"u": "juno_jobs",
-"status": 200,
-"title": "junojobs → стажировки в IT",
-"posts": 20,
-"week": 20,
-"last": "2026-10-23",
-"cyr": 0.82,
-"sample": "Подборка джуновских вакансий Backend: - Инженер-программист 2 категории в ДКС - Младший Python-разработчик в Аналитическ"
+"u": "aiml_jobs",
+"status": 302
 },
 {
-"u": "jobs_juniors_remote",
-"status": 200,
-"title": "Авоська — junior IT вакансии/cтажировки",
-"posts": 20,
-"week": 7,
-"last": "2026-10-23",
-"cyr": 0.96,
-"sample": "Успей прокатиться на аттракционах и выиграть призы от ВТБ! 🎠 🎡 Еще не заглянул в « Парк карьерных возможностей» ? Самое "
+"u": "analysts_hunter",
+"status": 302
 },
 {
-"u": "juniors_intern_developers",
+"u": "analyst_job",
 "status": 200,
-"title": "Джуниор — разработчики вакансии",
-"posts": 20,
-"week": 4,
-"last": "2026-10-23",
-"cyr": 0.89,
-"sample": "Собрал чат-бота за вечер → заработал 9 000₽. Так и работают специалисты по чат-ботам: открыл шаблон → собрал бота как ко"
-},
-{
-"u": "jun_and_job",
-"status": 200,
-"title": "Джун и Джоб",
-"posts": 20,
+"title": "analyst_job",
+"posts": 2,
 "week": 0,
-"last": "2026-04-07",
-"cyr": 0.98,
-"sample": "Как зумеру найти нормальную работу в 2026 году (спойлер: \"просто отправлять резюме\" больше не работает)"
-},
-{
-"u": "job4analyst_junior",
-"status": 200,
-"title": "Вакансии аналитиков без опыта · BA, SA",
-"posts": 20,
-"week": 0,
-"last": "2025-02-28",
-"cyr": 0.74,
-"sample": "#SA #москва #фортис https://hh.ru/vacancy/117033818 #вакансия #вакансии #intern #работа #поискработы #итаналитик #систем"
-},
-{
-"u": "junior_designers",
-"status": 200,
-"title": "Джун Дизайнер - вакансии",
-"posts": 20,
-"week": 20,
-"last": "2026-10-23",
-"cyr": 0.85,
-"sample": "Подборка для дизайнеров Стажёр-дизайнер: - Digital-дизайнер в PROVOLOS - UX/UI Designer with English в Лимп Junior-дизай"
-},
-{
-"u": "jun_hi_vacancies",
-"status": 200,
-"title": "Вакансии дизайнерам",
-"posts": 20,
-"week": 6,
-"last": "2026-10-23",
-"cyr": 0.85,
-"sample": "Вакансии на сегодня: 💎 Хотите опубликовать вакансию? Входите как рекрутер на hirehi.ru и размещайте 🙂 ——— 1. Коммуникаци"
-},
-{
-"u": "stagirovky",
-"status": 200,
-"title": "Стажировочная",
-"posts": 20,
-"week": 20,
-"last": "2026-10-23",
-"cyr": 0.82,
-"sample": "#стажировка в Швеции для иностранных студентов, желающих поработать в сфере менеджмента артистов и музыкальной индустрии"
-},
-{
-"u": "stage_first",
-"status": 200,
-"title": "Первая ступень: стажировки и волонтерство",
-"posts": 20,
-"week": 1,
-"last": "2026-10-21",
-"cyr": 0.93,
-"sample": "Контент-маркетолог в агентство недвижимости Сергея Галлера (Санкт-Петербург) Агентство недвижимости Сергея Галлера — ком"
-},
-{
-"u": "jobbyrussia",
-"status": 200,
-"title": "Jobby: вакансии без опыта / стажировки",
-"posts": 17,
-"week": 3,
-"last": "2026-10-21",
-"cyr": 1.0,
-"sample": "В чем подвох: желтая кнопка выгодна при любом исходе. Если вы нажали 🟡 : 👉 большинство выбрало зелёную → премию получили"
-},
-{
-"u": "changellenge",
-"status": 200,
-"title": "Changellenge >>",
-"posts": 19,
-"week": 19,
-"last": "2026-10-23",
-"cyr": 0.95,
-"sample": "⠀⠀мечта тебя не прокормит /             \\ /                 \\ /                     \\ тогда я             а в подборке н"
-},
-{
-"u": "holder_job_devs",
-"status": 200,
-"title": "Builders x Devs",
-"posts": 20,
-"week": 1,
-"last": "2026-10-19",
+"last": "2026-05-31",
 "cyr": 0.0,
-"sample": "HIRING NOW ⚫️ Python Backend Developer $2,500+ / month | On-site | Tashkent, Uzbekistan | Full-time #Python #FastAPI #Po"
+"vac": 0.0,
+"sample": "🟡 This community is now protected by Collab.Land Token-gate your community and verify members automatically. Click below"
 },
 {
-"u": "frontenddev",
-"status": 302
-},
-{
-"u": "front_end_jobs",
-"status": 302
-},
-{
-"u": "javascript_jobs",
-"status": 302
-},
-{
-"u": "JScript_jobs",
+"u": "analyst_job_geeklink",
 "status": 200,
-"title": "JavaScript Job | Вакансии | Стажировки",
+"title": "Вакансии аналитиков, Data Analyst и Scientist",
 "posts": 20,
-"week": 18,
-"last": "2026-10-23",
-"cyr": 0.66,
-"sample": "Ищем студентов-айтишников без опыта. Платят выше рынка. Только проверенные компании: Сбер, Авито, Альфа-Банк и еще 20+ р"
+"week": 0,
+"last": "2026-08-24",
+"cyr": 0.89,
+"vac": 0.9,
+"sample": "💼 ВАКАНСИЯ: Системный аналитик Компания: Malkin.tech Зарплата: 200-250 тысяч рублей Локация/Format: Москва, гибрид Мы за"
 },
 {
-"u": "forweb",
+"u": "androidev",
 "status": 302
 },
 {
-"u": "reactjs_jobs",
-"status": 302
-},
-{
-"u": "react_js_jobs",
-"status": 302
-},
-{
-"u": "vuejs_jobs",
+"u": "android_jobs",
 "status": 302
 },
 {
@@ -166,120 +46,204 @@
 "status": 302
 },
 {
-"u": "angular_jobs_feed",
+"u": "appsec_job",
 "status": 200,
-"title": "Angular Jobs — вакансии и резюме",
+"title": "AppSec & DevSecOps Jobs",
 "posts": 20,
-"week": 9,
-"last": "2026-10-23",
-"cyr": 0.65,
-"sample": "#резюме #frontend #typescript #fulltime #parttime #удалёнка #angular #react #nextjs 💼 Senior Frontend Developer | Angula"
+"week": 2,
+"last": "2026-10-22",
+"cyr": 0.78,
+"vac": 0.75,
+"sample": "DevSecOps специалист, Ред Cофт ЗП: до 300к (на руки) Локация: Санкт-Петербург (м. Электросила) Мы ищем специалиста по бе"
 },
 {
-"u": "typescript_jobs",
+"u": "ba_jobs",
+"status": 302
+},
+{
+"u": "bds_job",
 "status": 200,
-"title": "typescript_jobs",
-"posts": 1,
+"title": "Big Data Science job",
+"posts": 20,
+"week": 1,
+"last": "2026-10-19",
+"cyr": 0.85,
+"vac": 1.0,
+"sample": "🔥 Аналитик данных РСХБ-Интех Москва, Гибрид Требования: ✅ Опыт работы в области данных от 5 лет в технических ролях (DA|"
+},
+{
+"u": "best_ITjob",
+"status": 200,
+"title": "Каналы IT Вакансий",
+"posts": 5,
 "week": 0,
-"last": "2019-03-11",
+"last": "2026-02-12",
+"cyr": 0.82,
+"vac": 0.6,
+"sample": "Размещение рекламы и вакансий - @hr_rus Ещё каналы IT вакансий - @it_rab"
+},
+{
+"u": "bigtechjobs",
+"status": 200,
+"title": "БИГТЕХ - вакансии и стажировки",
+"posts": 20,
+"week": 16,
+"last": "2026-10-25",
+"cyr": 0.86,
+"vac": 0.9,
+"sample": "Подборка вакансий из бигтеха Стажёр: - Стажёр DevOps-инженер [MWS Cloud Platform] в «МТС», Стажировки - Android-разработ"
+},
+{
+"u": "bitrix24_work",
+"status": 302
+},
+{
+"u": "bitrixworkrabota",
+"status": 302
+},
+{
+"u": "Bitrix_1C_Dev_Job",
+"status": 200,
+"title": "Какие разработчики, ты что, накарман?",
+"posts": 2,
+"week": 0,
+"last": "2026-04-23",
 "cyr": 0.0,
+"vac": 0.0,
 "sample": "Channel created"
 },
 {
-"u": "react_native_jobs",
-"status": 302
-},
-{
-"u": "nodejs_jobs",
-"status": 302
-},
-{
-"u": "nodejsjobsfeed",
+"u": "bitrix_1c_job",
 "status": 200,
-"title": "NodeJS Jobs канал вакансий и резюме",
+"title": "Вакансии 1С и Bitrix-разработчиков",
 "posts": 20,
-"week": 20,
-"last": "2026-10-23",
-"cyr": 0.57,
-"sample": "#resume #nodejs #react #nestjs #typescript #fullstack #backend #remote 👨‍💻 Senior Fullstack JavaScript Developer (Node.j"
-},
-{
-"u": "backend_frontend_jobs",
-"status": 200,
-"title": "Вакансии для разработчиков",
-"posts": 20,
-"week": 4,
-"last": "2026-10-23",
-"cyr": 0.75,
-"sample": "Ищут 10 человек, чтобы собирали чат-ботов по шаблону, как пазлы. ЗП: от 5-9000₽ за вечер. Занятость: 3-4 часа в день. Оп"
-},
-{
-"u": "ru_pythonjobs",
-"status": 200,
-"title": "Вакансии для Python-разработчиков / Python Jobs",
-"posts": 3,
 "week": 0,
-"last": "2026-03-25",
-"cyr": 0.86,
-"sample": "Вакансии для Python-разработчиков / Python Jobs pinned a photo"
+"last": "2026-10-15",
+"cyr": 0.91,
+"vac": 0.9,
+"sample": "💼 ВАКАНСИЯ: Senior-разработчик 1С: ERP+УХ. Фриланс Компания: Taglex Зарплата: 3500 час Локация/Format: Удаленно Основной"
 },
 {
-"u": "job_python",
+"u": "CyberSecurityJobs",
 "status": 200,
-"title": "Python Job | Вакансии | Стажировки",
+"title": "Cyber Security Jobs",
+"posts": 20,
+"week": 0,
+"last": "2026-09-18",
+"cyr": 0.0,
+"vac": 0.05,
+"sample": "We know this one is a bit outside the usual cybersecurity theme, but the payout looked too good not to share — and it ma"
+},
+{
+"u": "cybersecurity_jobs",
+"status": 302
+},
+{
+"u": "datajobs",
+"status": 302
+},
+{
+"u": "datajobschannel",
+"status": 200,
+"title": "Data jobs feed",
+"posts": 20,
+"week": 5,
+"last": "2026-10-21",
+"cyr": 0.82,
+"vac": 0.9,
+"sample": "Вакансия DA/DE в Альфа-Инсайт. Вендорсакая ставка. Требования: • Опыт работы от 2-х лет на позициях DA/DE в области DWH/"
+},
+{
+"u": "data_analyst_jobs",
+"status": 200,
+"title": "Data Analyst Jobs| Placement| SQL | Data Jobs",
+"posts": 4,
+"week": 0,
+"last": "2024-11-04",
+"cyr": 0.0,
+"vac": 0.0,
+"sample": "Channel name was changed to « Data Analyst Jobs| Placement| SQL | Data Jobs »"
+},
+{
+"u": "data_science_job",
+"status": 200,
+"title": "Вакансии data science и машинное обучение",
+"posts": 20,
+"week": 0,
+"last": "2026-07-07",
+"cyr": 0.64,
+"vac": 0.7,
+"sample": "NLP-инженер (GigaChat) [Remote] @ Сбер 300 000 —‍ 700 000 ₽/‍мес на руки 📍 Россия 👩‍💻 Можно работать удалённо из РФ Стек"
+},
+{
+"u": "data_science_place",
+"status": 200,
+"title": "Data Science: зарплаты и вакансии (Machine Learning, ML, Com",
+"posts": 20,
+"week": 0,
+"last": "2024-06-12",
+"cyr": 0.65,
+"vac": 1.0,
+"sample": "Data Engineer: обзор вакансий с возможностью удалённой работы Data Engineer (Дата-инженер) Скайтек. МОСКВА, требуемый оп"
+},
+{
+"u": "DEJobs",
+"status": 302
+},
+{
+"u": "DevOpsSRE_Jobs",
+"status": 200,
+"title": "DevOps/SRE_Jobs",
+"posts": 20,
+"week": 0,
+"last": "2026-09-29",
+"cyr": 0.79,
+"vac": 1.0,
+"sample": "Публикатор: Alina Romashka Обсуждение: #вакансия #devops #hft #linux #performance #lowlatency #remote DevOps / Infrastru"
+},
+{
+"u": "devops_job_geeklink",
+"status": 200,
+"title": "Вакансии DevOps и системных администраторов",
+"posts": 20,
+"week": 0,
+"last": "2026-09-16",
+"cyr": 0.72,
+"vac": 0.9,
+"sample": "👤 РЕЗЮМЕ: Middle DevOps / Infrastructure Engineer Опыт: 4 года Зарплата: 270000-320000 Навыки: Kubernetes, Docker, Helm,"
+},
+{
+"u": "devs_it",
+"status": 200,
+"title": "IT Jobs | Вакансии в IT",
 "posts": 20,
 "week": 17,
-"last": "2026-10-23",
-"cyr": 0.76,
-"sample": "#middle #удаленка #гибрид #офис BLACKHUB GAMES Automation QA (Python) Опыт работы: 3–6 лет Полная занятость График: 5/2 "
+"last": "2026-10-25",
+"cyr": 0.92,
+"vac": 1.0,
+"sample": "#middle #100k #удаленка Сервизория Аналитик данных маркетинговых исследований от 60 000 ₽ за месяц, до вычета налогов Оп"
 },
 {
-"u": "job_pythonz",
+"u": "DevZoneGD",
 "status": 200,
-"title": "Python Job | Вакансии | Стажировки",
+"title": "🕹 Работа в GameDev | DevZone & IT & Art",
 "posts": 20,
-"week": 6,
-"last": "2026-10-23",
-"cyr": 0.84,
-"sample": "#junior #удаленка Python разработчик / Python Developer Кадровое агентство HireWay - IT-рекрутинговое агентство, которое"
+"week": 20,
+"last": "2026-10-25",
+"cyr": 0.89,
+"vac": 0.94,
+"sample": "Вакансия: 3D моделер Заработная плата: по результатам собеседования Локация работы: #Удаленка Квалификации сотрудника: #"
 },
 {
-"u": "pythonrabota",
+"u": "DevZoneJunior",
 "status": 200,
-"title": "Python работа",
-"posts": 16,
-"week": 8,
-"last": "2026-10-23",
-"cyr": 0.83,
-"sample": "Python Developer Формат: гибрид/офис (Санкт-Петербург) Компания: Нанософт Полная занятость #hybrid #office #middle #full"
-},
-{
-"u": "pythonpythonjobs",
-"status": 200,
-"title": "Python — вакансии и стажировки",
+"title": "Работа Junior | DevZone | GameDev & IT & Дизайн",
 "posts": 20,
-"week": 16,
-"last": "2026-10-23",
-"cyr": 0.83,
-"sample": "Ищем студентов-айтишников без опыта. Платят выше рынка. Только проверенные компании: Сбер, Авито, Альфа-Банк и еще 20+ р"
-},
-{
-"u": "python_jobs",
-"status": 302
-},
-{
-"u": "python_job_board",
-"status": 200,
-"title": "Python Jobs переехал",
-"posts": 2,
-"week": 0,
-"last": "2023-03-27",
-"cyr": 0.71,
-"sample": "В связи с участившимися накрутками ботов, канал переехал на закрытый линк. Теперь он доступен по ссылке: https://t.me/+G"
-},
-{
-"u": "python_django_work",
-"status": 302
+"week": 19,
+"last": "2026-10-25",
+"cyr": 0.91,
+"vac": 1.0,
+"sample": "Продуктовый дизайнер в Маркетинг Формат работы Удалённо Привет! На связи команда онлайн-школы «Фоксфорд» — продуктовой E"
 },
 {
 "u": "django_jobs",
@@ -290,194 +254,15 @@
 "status": 200,
 "title": "django_jobs_board",
 "posts": 20,
-"week": 4,
+"week": 1,
 "last": "2026-10-18",
 "cyr": 0.61,
+"vac": 0.35,
 "sample": "#резюме #cv Формат работы: part-time, проектно, удаленно В поиске работы Python-разработчиком. Суммарный опыт коммерческ"
-},
-{
-"u": "python_job",
-"status": 302
-},
-{
-"u": "php_jobs",
-"status": 302
-},
-{
-"u": "jobforphp",
-"status": 200,
-"title": "Job for PHP",
-"posts": 12,
-"week": 4,
-"last": "2026-10-20",
-"cyr": 0.87,
-"sample": "Job for PHP pinned a photo"
-},
-{
-"u": "rabotaphp",
-"status": 200,
-"title": "PHP вакансии",
-"posts": 20,
-"week": 5,
-"last": "2026-10-22",
-"cyr": 0.52,
-"sample": "Старший Backend-разработчик PHP ЗП: от 224 900 ₽ Компания: СевенТест, НТЦ Формат: удалённо/гибрид/офис Полная занятость "
-},
-{
-"u": "symfony_careers",
-"status": 200,
-"title": "Symfony Jobs",
-"posts": 20,
-"week": 0,
-"last": "2024-12-12",
-"cyr": 0.55,
-"sample": "Вакансія: #remote #fulltime Компанія: Netpeak Core Локація: Ремоут Ставка: $2000-2400 Операційна платформа групи ІТ-комп"
-},
-{
-"u": "yii_jobs",
-"status": 200,
-"title": "Yii Вакансии и резюме",
-"posts": 20,
-"week": 0,
-"last": "2026-09-21",
-"cyr": 0.88,
-"sample": "#resume , ищу проектную работу 👨‍🔧 Виктор Бабанов, решаю сложные технические проблемы . - Вхожу в core Yii3 team - 13 ле"
-},
-{
-"u": "laravel_jobs",
-"status": 200,
-"title": "Laravel Jobs — вакансии и аналитика",
-"posts": 3,
-"week": 0,
-"last": "2017-12-08",
-"cyr": 0.21,
-"sample": "Channel photo updated"
-},
-{
-"u": "java_jobs",
-"status": 302
-},
-{
-"u": "job_javadevs",
-"status": 200,
-"title": "Java Job | Вакансии | Работа",
-"posts": 20,
-"week": 16,
-"last": "2026-10-23",
-"cyr": 0.81,
-"sample": "#middle #удаленка #гибрид #офис Норд Клан Инженер по автоматизации тестирования (Java) Опыт работы: 3–6 лет Проектная ра"
-},
-{
-"u": "job_java",
-"status": 302
-},
-{
-"u": "java_c_net_golang_jobs",
-"status": 200,
-"title": "Вакансии .Net, Java, C#, C++ и Golang разработчиков",
-"posts": 7,
-"week": 0,
-"last": "2026-10-02",
-"cyr": 0.88,
-"sample": "добрый день! пожалуйста, опубликуйте вакансию в канале по .NET вакансиям: #vacancy #Csharp #dotnet #iGaming #вакансия #f"
-},
-{
-"u": "alljvmjobs",
-"status": 200,
-"title": "JVM Jobs",
-"posts": 12,
-"week": 10,
-"last": "2026-10-22",
-"cyr": 0.73,
-"sample": "Java-разработчик в Kaspi.kz — казахстанская компания, предоставляющая финансовые и технологические услуги, оператор одно"
-},
-{
-"u": "spring_jobs",
-"status": 302
-},
-{
-"u": "dotnet_jobs",
-"status": 302
 },
 {
 "u": "DotNetRuJobs",
 "status": 302
-},
-{
-"u": "DotNetRuJobsFeed",
-"status": 200,
-"title": "Вакансии .NET (канал)",
-"posts": 20,
-"week": 8,
-"last": "2026-10-23",
-"cyr": 0.77,
-"sample": "#вакансия #DevOps #remote Вакансия: DevOps Engineer (Blockchain) Компания: vSelf Тип работы: Удаленная Заработная плата:"
-},
-{
-"u": "csharp_jobs",
-"status": 302
-},
-{
-"u": "forcsharp",
-"status": 200,
-"title": "Job for C#, .NET",
-"posts": 12,
-"week": 7,
-"last": "2026-10-21",
-"cyr": 0.75,
-"sample": "Senior Agentic Engineer Solbeg is a world-class partner in consulting, business process automation, technology, and soft"
-},
-{
-"u": "csharpdevjob",
-"status": 200,
-"title": "C# jobs — вакансии по C#, .NET, Unity",
-"posts": 20,
-"week": 5,
-"last": "2026-10-23",
-"cyr": 0.86,
-"sample": "Azur Games ищет senior Unity-разработчика для мобильных настольных игр Удалённо, в том числе из других стран Зарплата не"
-},
-{
-"u": "golang_jobsgo",
-"status": 302
-},
-{
-"u": "golangjob",
-"status": 200,
-"title": "Golang Jobs",
-"posts": 20,
-"week": 0,
-"last": "2023-02-10",
-"cyr": 0.87,
-"sample": "#вакансия #офис #Москва #job #office Middle/Senior Go разработчик Доход: от 150к до 350к рублей в зависимости от грейда."
-},
-{
-"u": "job_golang",
-"status": 302
-},
-{
-"u": "ruby_jobs",
-"status": 302
-},
-{
-"u": "rubyjob",
-"status": 200,
-"title": "Ruby & Elixir Job | Jooby.dev",
-"posts": 20,
-"week": 0,
-"last": "2026-06-24",
-"cyr": 0.29,
-"sample": "#Ruby #Fulltime #Remote #Senior #RubyOnRails #Sidekiq #PostgreSQL #Redis Senior Ruby on Rails разработчик - Appbooster A"
-},
-{
-"u": "forruby",
-"status": 200,
-"title": "Job for Ruby & Elixir",
-"posts": 12,
-"week": 7,
-"last": "2026-10-22",
-"cyr": 0.83,
-"sample": "Ruby on Rails Developer Zazmic is a multi-platform hub for on-demand engineering and digital marketing solutions. Locati"
 },
 {
 "u": "elixir_jobs",
@@ -487,21 +272,535 @@
 "week": 0,
 "last": "2026-10-15",
 "cyr": 0.0,
+"vac": 0.0,
 "sample": "Full-stack Engineer (Elixir, LiveView, React) Treat Health (Helsinki, Finland) Full time - On-site https://elixirjobs.ne"
 },
 {
-"u": "rust_jobs",
+"u": "FastCodeCareer",
+"status": 200,
+"title": "1С Stars: Вакансии, работа от FastCode 1C",
+"posts": 20,
+"week": 0,
+"last": "2026-10-09",
+"cyr": 0.95,
+"vac": 0.7,
+"sample": "💻 , Аналитик 1С, ГРОСССОФТ, удаленка, от 200тыс., стаж от 5 лет 1С Методолог-аналитик 1С (блоки Бюджетирование и Казначе"
+},
+{
+"u": "flutterroles",
+"status": 200,
+"title": "Flutter Jobs/Internships",
+"posts": 20,
+"week": 0,
+"last": "2026-03-10",
+"cyr": 0.0,
+"vac": 0.74,
+"sample": "The owner of this channel has been inactive for the last 11 months. If they remain inactive for the next 20 days, they m"
+},
+{
+"u": "forchiefs",
+"status": 200,
+"title": "Job for Chiefs (TOP vacancies)",
+"posts": 12,
+"week": 10,
+"last": "2026-10-23",
+"cyr": 0.63,
+"vac": 0.17,
+"sample": "Vice President, Engineering, Core Experience Google Identity & Engagement (GIE) is a division of Google that develops pr"
+},
+{
+"u": "fordev",
 "status": 302
 },
 {
-"u": "rust_jobs_feed",
+"u": "forhr",
 "status": 200,
-"title": "Rust Jobs - лента вакансий и резюме",
+"title": "Job for HR (IT & Digital)",
+"posts": 20,
+"week": 20,
+"last": "2026-10-23",
+"cyr": 0.07,
+"vac": 0.1,
+"sample": "Recruiting Researcher, Executive Engagement Netflix is a global streaming platform and entertainment company producing a"
+},
+{
+"u": "forwebdev",
+"status": 200,
+"title": "For Web — фронтенд, дизайн, программирование",
+"posts": 20,
+"week": 0,
+"last": "2025-05-12",
+"cyr": 0.67,
+"vac": 0.0,
+"sample": "GSAP теперь бесплатен: продвинутая библиотека для анимаций и все её платные плагины теперь доступны сообществу благодаря"
+},
+{
+"u": "FreeVacanciesIT",
+"status": 200,
+"title": "IT Фриланс | Вакансии",
+"posts": 20,
+"week": 1,
+"last": "2026-10-20",
+"cyr": 0.84,
+"vac": 0.94,
+"sample": "QA Specialist (Data Engineering) до 260к на руки Оформление: ИП, СЗ Срок проекта: 6 месяцев Формат работы: удаленный Тре"
+},
+{
+"u": "frontend_jobs",
+"status": 302
+},
+{
+"u": "front_end_dev",
+"status": 200,
+"title": "FrontEndDev",
+"posts": 20,
+"week": 15,
+"last": "2026-10-25",
+"cyr": 0.78,
+"vac": 0.05,
+"sample": "Как безопасно тестировать обработчик postMessage у iframe iframe с postMessage удобно использовать для виджетов, но без "
+},
+{
+"u": "front_end_jobs",
+"status": 302
+},
+{
+"u": "Gamedevjobs",
+"status": 200,
+"title": "Gamedev Jobs (Inflow)",
+"posts": 20,
+"week": 17,
+"last": "2026-10-25",
+"cyr": 0.21,
+"vac": 0.05,
+"sample": "2D ARTIST / GENERALIST | REMOTE GLOBAL | TAP CLAP #remote #fulltime #artjob #2d #generalist #gamedev https://teletype.in"
+},
+{
+"u": "gamedev_unity_unreal_engine_jobs",
+"status": 200,
+"title": "Вакансии GameDev, Unity и Unreal Engine разработчиков",
+"posts": 20,
+"week": 0,
+"last": "2026-08-07",
+"cyr": 0.82,
+"vac": 0.9,
+"sample": "👤 РЕЗЮМЕ: 3D-художник Опыт: 3 года Зарплата: От 80000 руб. Навыки: Photoshop, ZBrush, Blender, Substance Painter, UE5, U"
+},
+{
+"u": "gamedev_vakansii",
+"status": 200,
+"title": "Переходник",
+"posts": 2,
+"week": 0,
+"last": "2025-07-17",
+"cyr": 0.1,
+"vac": 0.0,
+"sample": "Канал тут 👇 👇 👇 https://t.me/+I-0GylOTD6gyMGI6 https://t.me/+I-0GylOTD6gyMGI6 https://t.me/+I-0GylOTD6gyMGI6"
+},
+{
+"u": "geeklink_ru",
+"status": 200,
+"title": "Вакансии и резюме в IT. GeekLink.io",
+"posts": 20,
+"week": 0,
+"last": "2026-03-10",
+"cyr": 0.86,
+"vac": 0.63,
+"sample": "✨ AI-подбор каналов для постинга вакансий и резюме Теперь в боте https://t.me/it_jobs_resumes_bot AI помогает подбирать "
+},
+{
+"u": "gogetajob",
+"status": 302
+},
+{
+"u": "golang_jobsgo",
+"status": 302
+},
+{
+"u": "golang_job_geeklink",
+"status": 200,
+"title": "Вакансии Golang-разработчиков",
+"posts": 20,
+"week": 0,
+"last": "2026-07-23",
+"cyr": 0.78,
+"vac": 0.9,
+"sample": "💼 ВАКАНСИЯ: Tech Lead / Solution Architect (Java / Go) Компания: BuyerTech Зарплата: 400000 Локация/Format: Москва, офис"
+},
+{
+"u": "habr_career",
+"status": 200,
+"title": "Хабр Карьера",
+"posts": 19,
+"week": 19,
+"last": "2026-10-25",
+"cyr": 0.9,
+"vac": 0.58,
+"sample": "Стать незаменимым на работе просто: никому не рассказывайте, как всё работает. Инструкции держите в голове. Теперь даже "
+},
+{
+"u": "hackdevjob",
+"status": 200,
+"title": "InfoSec Jobs — вакансии по информационной безопасности, info",
+"posts": 20,
+"week": 8,
+"last": "2026-10-25",
+"cyr": 0.84,
+"vac": 0.75,
+"sample": "📌 Один курс — хорошее вложение в себя. Два по той же цене — ещё лучше. В Proglib Academy действует акция: покупаешь один"
+},
+{
+"u": "haskell_job",
+"status": 200,
+"title": "Haskell Jobs",
+"posts": 20,
+"week": 0,
+"last": "2026-08-17",
+"cyr": 0.3,
+"vac": 0.63,
+"sample": "Всем привет! Мы ищем middle haskell разработчика (удаленно, можно оформиться в РФ или в Киргизии, а работать откуда хоче"
+},
+{
+"u": "hh_vacancy_development",
+"status": 302
+},
+{
+"u": "hh_vacancy_product_project",
+"status": 200,
+"title": "Работа для продактов и проджектов",
+"posts": 20,
+"week": 0,
+"last": "2026-10-06",
+"cyr": 0.9,
+"vac": 0.85,
+"sample": "Author: Кристина Докучаева 🌼 Login: @kristyawow ---------------------------------------- #ищу #проджект #менеджер Ищу от"
+},
+{
+"u": "hiddengurus",
+"status": 200,
+"title": "Hidden Gurus - Remote IT",
+"posts": 20,
+"week": 20,
+"last": "2026-10-25",
+"cyr": 0.81,
+"vac": 0.82,
+"sample": "SENIOR FULLSTACK DEVELOPER | REMOTE | FINTECH 💰 ЗП: $5 000–7 000 🌍 Формат: Удалённо (global) 🕒 Занятость: Полная занятос"
+},
+{
+"u": "hireproproduct",
+"status": 200,
+"title": "Hire ProProduct - Продуктовые вакансии",
+"posts": 20,
+"week": 3,
+"last": "2026-10-25",
+"cyr": 0.88,
+"vac": 0.84,
+"sample": "📩 Узнать стоимость и условия размещения: @unit1211209"
+},
+{
+"u": "HRTech_Jobs",
+"status": 200,
+"title": "HR-Tech.Карьера 🔥",
 "posts": 20,
 "week": 7,
 "last": "2026-10-22",
-"cyr": 0.76,
-"sample": "https://hh.ru/vacancy/138762700"
+"cyr": 0.94,
+"vac": 0.95,
+"sample": "Методолог по разработке оценочных продуктов в Корпоративный университет Сбербанка Мы ищем эксперта в области оценки перс"
+},
+{
+"u": "infosec_jobs",
+"status": 302
+},
+{
+"u": "ios_jobs",
+"status": 302
+},
+{
+"u": "itarchitect_jobs",
+"status": 302
+},
+{
+"u": "itjobs_nocode",
+"status": 200,
+"title": "Вайб-кодинг | No Code",
+"posts": 20,
+"week": 15,
+"last": "2026-10-25",
+"cyr": 0.9,
+"vac": 0.55,
+"sample": "#middle #гибрид Napoleon IT Инженер по ИИ-автоматизации бизнес-процессов Опыт работы: 3–6 лет Полная занятость График: 5"
+},
+{
+"u": "itlenta",
+"status": 302
+},
+{
+"u": "it_interns",
+"status": 200,
+"title": "IT - стажировки и обучение",
+"posts": 20,
+"week": 20,
+"last": "2026-10-25",
+"cyr": 0.8,
+"vac": 0.95,
+"sample": "Подборка стажировок Разработка: - Разработчик Python (Стажер) в ЦФТ - Младший разработчик в GlowByte - Backend-разработч"
+},
+{
+"u": "IT_jobs_apply",
+"status": 200,
+"title": "IT / Tech jobs",
+"posts": 20,
+"week": 0,
+"last": "2026-05-18",
+"cyr": 0.87,
+"vac": 0.0,
+"sample": "Системный аналитик в Силовые машины"
+},
+{
+"u": "it_sobes",
+"status": 200,
+"title": "АйТи собес",
+"posts": 20,
+"week": 0,
+"last": "2026-10-14",
+"cyr": 0.89,
+"vac": 0.67,
+"sample": "Всем привет! Мы — Perfectio . Наша команда стремится сделать подготовку к собеседованиям простой и понятной ↖️ В канале "
+},
+{
+"u": "it_vac",
+"status": 200,
+"title": "IT Jobs | вакансии, фриланс",
+"posts": 20,
+"week": 15,
+"last": "2026-10-25",
+"cyr": 0.94,
+"vac": 0.7,
+"sample": "💸 ДЕНЬГИ КАЖДЫЙ ДЕНЬ! ||| 📱 Помощник блогера | 💰 Доход от 50.000 ₽ ⏰ От 3 часов в день, график выбираете сами 📌 Публикац"
+},
+{
+"u": "it_vacancy_relocation",
+"status": 200,
+"title": "IT Digital вакансии РФ КАЗАХСТАН и релокация",
+"posts": 20,
+"week": 6,
+"last": "2026-10-25",
+"cyr": 0.8,
+"vac": 0.9,
+"sample": "#вакансия #Узбекистан #DevOps #Девопс #Senior $Lead ✅ Вакансия: Senior DevOps ✅ Формат: офис в Ташкенте, удаленки нет ✅ "
+},
+{
+"u": "javadevjob",
+"status": 200,
+"title": "Java jobs — вакансии для java-разработчиков",
+"posts": 20,
+"week": 8,
+"last": "2026-10-25",
+"cyr": 0.88,
+"vac": 0.75,
+"sample": "📌 Один курс — хорошее вложение в себя. Два по той же цене — ещё лучше. В Proglib Academy действует акция: покупаешь один"
+},
+{
+"u": "javascript_jobs",
+"status": 302
+},
+{
+"u": "java_jobs",
+"status": 302
+},
+{
+"u": "jc_it",
+"status": 200,
+"title": "Jobs Code: IT вакансии",
+"posts": 20,
+"week": 20,
+"last": "2026-10-25",
+"cyr": 0.88,
+"vac": 1.0,
+"sample": "Системный аналитик DWH / Data Analyst 217 000 ₽ ГК Орбита Группа Компаний Орбита - ведущий разработчик цифровых решений,"
+},
+{
+"u": "JobBoardOtus",
+"status": 200,
+"title": "OTUS Job Board // Работа в IT",
+"posts": 15,
+"week": 2,
+"last": "2026-10-20",
+"cyr": 0.94,
+"vac": 0.62,
+"sample": "Ждём вас на бесплатных уроках — новые инструменты для работы и ответы на вопросы для тех, кто хочет перейти на новый гре"
+},
+{
+"u": "jobfeeds",
+"status": 200,
+"title": "Работница",
+"posts": 20,
+"week": 3,
+"last": "2026-10-23",
+"cyr": 0.5,
+"vac": 0.68,
+"sample": "Junior Partnerships Manager (AI-интеграции) — AIMLAPI, Boiler Lab Привет! Мы в Boiler Lab ищем джуна в команду партнёрст"
+},
+{
+"u": "jobforjunior",
+"status": 200,
+"title": "Job for Junior",
+"posts": 17,
+"week": 17,
+"last": "2026-10-23",
+"cyr": 0.56,
+"vac": 0.82,
+"sample": "Джуниор+ / Миддл Продуктовый дизайнер в Маркетинг в Фоксфорд — онлайн-школа для школьников 1–11 классов с курсами по шко"
+},
+{
+"u": "jobforqa",
+"status": 200,
+"title": "QA Вакансии. Работа для тестировщиков. QaRocks",
+"posts": 20,
+"week": 10,
+"last": "2026-10-25",
+"cyr": 0.68,
+"vac": 0.63,
+"sample": "Fullstack QA Engineer (Java) Формат: гибрид (Москва, м. Проспект Мира) ЗП: от 160 000 ₽ Компания: Сбербанк Страхование О"
+},
+{
+"u": "jobfortester",
+"status": 200,
+"title": "Вакансии для тестировщиков.",
+"posts": 20,
+"week": 6,
+"last": "2026-10-25",
+"cyr": 0.56,
+"vac": 0.95,
+"sample": "Вакансия. Senior QA iGaming 🤪 Удалённо (Worldwide) 🤪 Made of Storm 🤪 от 2 000 $ Подробнее: https://telegra.ph/Senior-QA-"
+},
+{
+"u": "jobGeeks",
+"status": 302
+},
+{
+"u": "JobOfferInside",
+"status": 200,
+"title": "Offer Inside",
+"posts": 20,
+"week": 20,
+"last": "2026-10-25",
+"cyr": 0.73,
+"vac": 1.0,
+"sample": "IT Systems Engineer в Baseten 🤩 Удалённо 📸 Платформа инфраструктуры для запуска AI-моделей в production Задачи: •  Отвеч"
+},
+{
+"u": "jobs1c",
+"status": 302
+},
+{
+"u": "jobscode_infull",
+"status": 200,
+"title": "Jobs Code | In full",
+"posts": 20,
+"week": 19,
+"last": "2026-10-25",
+"cyr": 0.84,
+"vac": 1.0,
+"sample": "Системный аналитик DWH / Data Analyst 217 000 ₽ ГК Орбита Группа Компаний Орбита - ведущий разработчик цифровых решений,"
+},
+{
+"u": "JobsforDevsandOps",
+"status": 200,
+"title": "Слёрм Карьера — вакансии в IT",
+"posts": 20,
+"week": 0,
+"last": "2024-12-16",
+"cyr": 0.9,
+"vac": 0.6,
+"sample": "Прод на паузу, шампанское в продакшен 🥂 🍾 17 декабря откладываем все дела и встречаемся в прямом эфире на новогоднем кор"
+},
+{
+"u": "jobs_in_it_remoute",
+"status": 200,
+"title": "Job in IT || Вакансии в IT || Remote || Удаленка",
+"posts": 20,
+"week": 20,
+"last": "2026-10-25",
+"cyr": 0.61,
+"vac": 1.0,
+"sample": "Приветствуем Вас! Хотим напомнить всем про 🌐 Наш главный сайт DreamOffer 🆕 Здесь публикуются все вакансии. 🔖 Очень совет"
+},
+{
+"u": "jobs_juniors_remote",
+"status": 200,
+"title": "Авоська — junior IT вакансии/cтажировки",
+"posts": 20,
+"week": 8,
+"last": "2026-10-24",
+"cyr": 0.96,
+"vac": 0.7,
+"sample": "🙂 Новая вакансия 📍 Ассистент Личный ассистент / Personal Assistant Удалённо (мир) Ищу личного ассистента для удаленной р"
+},
+{
+"u": "jobs_vacations_it",
+"status": 302
+},
+{
+"u": "job_1C_SQL",
+"status": 302
+},
+{
+"u": "job_gamedev",
+"status": 200,
+"title": "Работа в Геймдеве Вакансии 3D художники аниматоры gamedev, u",
+"posts": 20,
+"week": 0,
+"last": "2026-09-27",
+"cyr": 0.86,
+"vac": 0.9,
+"sample": "Ищем Game Mathematician / специалиста по математике игровых механик Разрабатываем крупный сайт по открытию кейсов с пред"
+},
+{
+"u": "job_golang",
+"status": 302
+},
+{
+"u": "job_java",
+"status": 302
+},
+{
+"u": "jsdevjob",
+"status": 200,
+"title": "Javascript jobs — вакансии по фронтенду, джаваскрипт, React,",
+"posts": 15,
+"week": 9,
+"last": "2026-10-25",
+"cyr": 0.88,
+"vac": 0.75,
+"sample": "📌 Один курс — хорошее вложение в себя. Два по той же цене — ещё лучше. В Proglib Academy действует акция: покупаешь один"
+},
+{
+"u": "jsspeak",
+"status": 302
+},
+{
+"u": "juniors_rabota_jobs",
+"status": 200,
+"title": "Джуниор Вакансии Стажировки IT",
+"posts": 14,
+"week": 8,
+"last": "2026-10-24",
+"cyr": 0.94,
+"vac": 0.73,
+"sample": "🙂 Новая вакансия 📍 Ассистент Личный ассистент / Personal Assistant Удалённо (мир) Ищу личного ассистента для удаленной р"
+},
+{
+"u": "juno_jobs",
+"status": 200,
+"title": "junojobs → стажировки в IT",
+"posts": 20,
+"week": 20,
+"last": "2026-10-25",
+"cyr": 0.84,
+"vac": 0.95,
+"sample": "Подборка джуновских вакансий Backend: - Junior Programmer в GOODLAND PROPERTY - Разработчик программного обеспечения упр"
 },
 {
 "u": "kotlin_jobs",
@@ -511,7 +810,435 @@
 "week": 0,
 "last": "2026-05-22",
 "cyr": 0.43,
+"vac": 1.0,
 "sample": "Vacancy: Middle+ - Senior Kotlin Multiplatform-разработчик for VPN app Location: Russia Company: Atlanta https://atlanta"
+},
+{
+"u": "Machinelearning_Jobs",
+"status": 302
+},
+{
+"u": "ml_data_science_job",
+"status": 200,
+"title": "ML / DS_Jobs",
+"posts": 20,
+"week": 1,
+"last": "2026-10-20",
+"cyr": 0.78,
+"vac": 0.95,
+"sample": "Агент поддержки дал неверный ответ о возврате товара. Где возникла ошибка — при поиске по базе знаний или при формирован"
+},
+{
+"u": "ml_jobs",
+"status": 200,
+"title": "AI | ML Jobs",
+"posts": 1,
+"week": 0,
+"last": "2024-03-29",
+"cyr": 0.0,
+"vac": 0.0,
+"sample": "Channel created"
+},
+{
+"u": "mobdevjobs",
+"status": 200,
+"title": "UI/ASO дизайнер для мобильных приложений",
+"posts": 2,
+"week": 0,
+"last": "2024-02-19",
+"cyr": 0.85,
+"vac": 0.0,
+"sample": "Услуги ASO/UI дизайнера для мобильных приложений 📞 Предлагаю полный спектр графических услуг, чтобы помочь вашему проект"
+},
+{
+"u": "mobile_jobs",
+"status": 302
+},
+{
+"u": "mobile_vacancies",
+"status": 302
+},
+{
+"u": "mobjobskz",
+"status": 302
+},
+{
+"u": "myjobit",
+"status": 302
+},
+{
+"u": "nodejs_jobs",
+"status": 302
+},
+{
+"u": "opento_dev",
+"status": 200,
+"title": "Dev Jobs - ✈️ вакансии за рубежом",
+"posts": 20,
+"week": 9,
+"last": "2026-10-23",
+"cyr": 0.12,
+"vac": 0.39,
+"sample": "#verified #devops Senior DevOps Engineer / Onde ✅ Serbia, Portugal, Poland, Georgia, Spain (Remote) We help ambitious en"
+},
+{
+"u": "pentest_appsec_devsecops_job",
+"status": 200,
+"title": "Pentest, AppSec, DevSecOps - Вакансии безопасников",
+"posts": 20,
+"week": 0,
+"last": "2026-07-02",
+"cyr": 0.81,
+"vac": 0.9,
+"sample": "💼 ВАКАНСИЯ: Старший специалист по информационной безопасности / Senior DevSecOps Компания: МойСклад Зарплата: по договор"
+},
+{
+"u": "php_jobs",
+"status": 302
+},
+{
+"u": "ProCxxJobs",
+"status": 200,
+"title": "Pro.* Jobs",
+"posts": 20,
+"week": 0,
+"last": "2026-09-09",
+"cyr": 0.8,
+"vac": 0.95,
+"sample": "#c #developer ☁️ Позиция: Разработчик C ( Senior ) 🏙 Компания: «HuntTech» 💪 Опыт: от 5 лет 💰 ЗП: Вилка: 209 - 258тр 📅 Фо"
+},
+{
+"u": "productjobgo",
+"status": 200,
+"title": "Вакансии для продакт-менеджеров",
+"posts": 20,
+"week": 10,
+"last": "2026-10-25",
+"cyr": 0.92,
+"vac": 0.75,
+"sample": "Head of Product в FindYou Если кто-то хочет получить записи на разборы тестовых заданий из топовых компаний для продакто"
+},
+{
+"u": "products_jobs",
+"status": 302
+},
+{
+"u": "product_jobs",
+"status": 200,
+"title": "Вакансии для продактов и проджектов",
+"posts": 20,
+"week": 2,
+"last": "2026-10-22",
+"cyr": 0.92,
+"vac": 0.95,
+"sample": "Вакансия: Product Manager (CTV / AdTech) Компания: Visible Формат работы: полная занятость, гибрид (3 дня в офисе, 2 дня"
+},
+{
+"u": "product_project_job",
+"status": 200,
+"title": "Вакансии Product и Project-менеджеров",
+"posts": 20,
+"week": 0,
+"last": "2026-09-09",
+"cyr": 0.83,
+"vac": 0.9,
+"sample": "👤 РЕЗЮМЕ: Junior Project Manager / Project Coordinator Опыт: Более 7 лет общего профессионального опыта, включая около 4"
+},
+{
+"u": "progjob",
+"status": 200,
+"title": "Работа для программистов",
+"posts": 20,
+"week": 20,
+"last": "2026-10-25",
+"cyr": 0.72,
+"vac": 1.0,
+"sample": "Требуется «PHP-разработчик (Symfony)» (Москва, до 260 000 ₽) Компания «AGIMA» ищет хорошего специалиста на вакансию «PHP"
+},
+{
+"u": "projects_jobs",
+"status": 302
+},
+{
+"u": "pydevjob",
+"status": 200,
+"title": "Python jobs — вакансии по питону, Django, Flask",
+"posts": 20,
+"week": 12,
+"last": "2026-10-25",
+"cyr": 0.9,
+"vac": 0.8,
+"sample": "📌 Один курс — хорошее вложение в себя. Два по той же цене — ещё лучше. В Proglib Academy действует акция: покупаешь один"
+},
+{
+"u": "python_django_work",
+"status": 302
+},
+{
+"u": "python_jobs",
+"status": 302
+},
+{
+"u": "python_vacancy",
+"status": 302
+},
+{
+"u": "python_vakansii1",
+"status": 200,
+"title": "python_vakansii1",
+"posts": 2,
+"week": 0,
+"last": "2026-10-14",
+"cyr": 0.21,
+"vac": 0.0,
+"sample": "Мы переехали на новый канал! Ищите нас здесь: https://t.me/vflbetavdpybot?start=python_vakansii1 https://t.me/vflbetavdp"
+},
+{
+"u": "qa_chillout_jobs",
+"status": 200,
+"title": "QA Jobs",
+"posts": 17,
+"week": 0,
+"last": "2026-10-14",
+"cyr": 0.79,
+"vac": 0.94,
+"sample": "Middle QA Automation Engineer | Paphos, Cyprus 🇨🇾 Ищем Middle QA Automation Engineer в офис в Пафосе. Проект связан с ра"
+},
+{
+"u": "react_js_jobs",
+"status": 302
+},
+{
+"u": "react_native_jobs",
+"status": 302
+},
+{
+"u": "remotegeekjob",
+"status": 200,
+"title": "RemoteGeekjob",
+"posts": 20,
+"week": 20,
+"last": "2026-10-23",
+"cyr": 0.44,
+"vac": 0.25,
+"sample": "🔹 Team Lead (Python) – Data 🔹 Senior Backend Engineer (Python) – AI 🔹 QA Engineer 🔹 Backend Engineer (Python) – Data 🔹 S"
+},
+{
+"u": "rubyjob",
+"status": 200,
+"title": "Ruby & Elixir Job | Jooby.dev",
+"posts": 20,
+"week": 0,
+"last": "2026-06-24",
+"cyr": 0.29,
+"vac": 0.15,
+"sample": "#Ruby #Fulltime #Remote #Senior #RubyOnRails #Sidekiq #PostgreSQL #Redis Senior Ruby on Rails разработчик - Appbooster A"
+},
+{
+"u": "runello_jobs_analyst",
+"status": 200,
+"title": "Business / System Analyst Job Offers",
+"posts": 20,
+"week": 20,
+"last": "2026-10-25",
+"cyr": 0.89,
+"vac": 0.05,
+"sample": "Системный аналитик Компания занимается автоматизацией бизнес-процессов, разработкой архитектуры систем, настройкой витри"
+},
+{
+"u": "runello_jobs_devops",
+"status": 200,
+"title": "DevOps / SRE / Cloud Job Offers",
+"posts": 20,
+"week": 20,
+"last": "2026-10-25",
+"cyr": 0.59,
+"vac": 0.0,
+"sample": "Ведущий системный администратор инфраструктуры Грейд: Lead Стек: VMware vSphere, Linux, Windows Server, Bash, Python, Hi"
+},
+{
+"u": "runello_jobs_erp_crm",
+"status": 200,
+"title": "1C / ERP / CRM / SAP Job Offers",
+"posts": 20,
+"week": 20,
+"last": "2026-10-25",
+"cyr": 0.77,
+"vac": 0.1,
+"sample": "Программист 1С Грейд: Middle Стек: 1С:Предприятие 8.3, 1С:Бухгалтерия, 1С:Зарплата и управление персоналом, 1С:Управлени"
+},
+{
+"u": "runello_jobs_java",
+"status": 200,
+"title": "Java / Kotlin / JVM Job Offers",
+"posts": 20,
+"week": 20,
+"last": "2026-10-25",
+"cyr": 0.72,
+"vac": 0.0,
+"sample": "Ведущий инженер-программист (Java desкtop) Грейд: Lead Стек: Java, MySQL, GStreamer, UI/UX, PostgreSQL, OOP, Linux, Wind"
+},
+{
+"u": "runello_jobs_product",
+"status": 200,
+"title": "Product / Project / Delivery Job Offers",
+"posts": 20,
+"week": 20,
+"last": "2026-10-25",
+"cyr": 0.59,
+"vac": 0.05,
+"sample": "Project Manager направления «Афиша» ( Relax.by ) Грейд: Middle/Senior Стек: Project Management, Marketing, Analytics, Co"
+},
+{
+"u": "runello_jobs_qa",
+"status": 200,
+"title": "QA / Testing Job Offers",
+"posts": 20,
+"week": 20,
+"last": "2026-10-25",
+"cyr": 0.44,
+"vac": 0.0,
+"sample": "QA Engineer Стек: Функциональное тестирование, Тест-кейсы, Чек-листы, Тестовая документация, Jira, Unreal Engine, CryEng"
+},
+{
+"u": "runello_rus_backend",
+"status": 200,
+"title": "Backend Job Offers",
+"posts": 20,
+"week": 20,
+"last": "2026-10-25",
+"cyr": 0.49,
+"vac": 0.05,
+"sample": "Middle/Senior Go Developer (High-Load / Trading / Bots) Грейд: Middle/Senior Стек: Go, Redis, NATS, ClickHouse, PostgreS"
+},
+{
+"u": "runello_rus_datascience",
+"status": 200,
+"title": "Data / Analytics / BI Job Offers",
+"posts": 20,
+"week": 20,
+"last": "2026-10-25",
+"cyr": 0.66,
+"vac": 0.05,
+"sample": "BI-разработчик Грейд: Middle+ Стек: BI, SQL, Data Visualization, Data Quality, UX/UI, AI BI-разработчик в команду Авито "
+},
+{
+"u": "runello_rus_frontend",
+"status": 200,
+"title": "Frontend Job Offers",
+"posts": 20,
+"week": 20,
+"last": "2026-10-25",
+"cyr": 0.67,
+"vac": 0.0,
+"sample": "Junior Frontend Developer Vue Грейд: Junior Стек: Vue 3, JavaScript, TypeScript, Feature-Sliced Design, REST API, TanSta"
+},
+{
+"u": "runello_rus_goland",
+"status": 200,
+"title": "Go / Golang Job Offers",
+"posts": 20,
+"week": 20,
+"last": "2026-10-25",
+"cyr": 0.68,
+"vac": 0.05,
+"sample": "Senior Go Backend Developer Грейд: Senior Стек: Go, MySQL, MongoDB, ClickHouse, Redis, RabbitMQ, DigitalOcean, Prometheu"
+},
+{
+"u": "runello_rus_javascript",
+"status": 200,
+"title": "JavaScript Job Offers",
+"posts": 10,
+"week": 8,
+"last": "2026-10-24",
+"cyr": 0.7,
+"vac": 0.1,
+"sample": "Ведущий разработчик пользовательских интерфейсов БЮРО 1440 is a company that appears to be involved in space-related act"
+},
+{
+"u": "runello_rus_mobileappdevelopment",
+"status": 200,
+"title": "Mobile (iOS / Android / Flutter) Job Offers",
+"posts": 13,
+"week": 11,
+"last": "2026-10-25",
+"cyr": 0.69,
+"vac": 0.08,
+"sample": "Strong Junior Android Developer Грейд: Junior Стек: Kotlin, OOP, Coroutines, Flow, Android, Activity, Fragment, Intent X"
+},
+{
+"u": "runello_rus_php",
+"status": 200,
+"title": "PHP / Laravel / Bitrix Job Offers",
+"posts": 20,
+"week": 20,
+"last": "2026-10-25",
+"cyr": 0.73,
+"vac": 0.15,
+"sample": "PHP-developer Грейд: Middle Стек: PHP, Laravel, PHP 8, OOP, Composer, Eloquent, SQL, MySQL Alif — крупная международная "
+},
+{
+"u": "runello_rus_python",
+"status": 200,
+"title": "Python Job Offers",
+"posts": 20,
+"week": 20,
+"last": "2026-10-25",
+"cyr": 0.7,
+"vac": 0.05,
+"sample": "Team Lead (Python) Грейд: Team Lead Стек: Python, Django, FastAPI, FastMCP, PostgreSQL, Kafka, Redis, Celery Мы ищем Tea"
+},
+{
+"u": "runello_rus_typescript",
+"status": 200,
+"title": "Node.js / TypeScript Job Offers",
+"posts": 17,
+"week": 15,
+"last": "2026-10-25",
+"cyr": 0.65,
+"vac": 0.06,
+"sample": "Middle Fullstack JavaScript Developer Грейд: Middle Стек: Node.js, NestJS, JavaScript, TypeScript, React, Next.js, REST "
+},
+{
+"u": "runello_rus_webdevelopment",
+"status": 200,
+"title": "Fullstack / Software Job Offers",
+"posts": 20,
+"week": 20,
+"last": "2026-10-25",
+"cyr": 0.45,
+"vac": 0.05,
+"sample": "Ведущий инженер Radar Systems / DSP Стек: C, C++, Python, Digital Signal Processing, FFT, Doppler, FMCW, I/Q Сбер Банк —"
+},
+{
+"u": "RuSecJobs",
+"status": 200,
+"title": "RuSecJobs Channel",
+"posts": 19,
+"week": 1,
+"last": "2026-10-21",
+"cyr": 0.87,
+"vac": 0.65,
+"sample": "Неоднократно выполняли совместные проекты, хочу порекомендовать как надежного исполнителя, коллега в поиске работы!"
+},
+{
+"u": "rust_jobs",
+"status": 302
+},
+{
+"u": "ru_pythonjobs",
+"status": 200,
+"title": "Вакансии для Python-разработчиков / Python Jobs",
+"posts": 3,
+"week": 0,
+"last": "2026-03-25",
+"cyr": 0.86,
+"vac": 0.67,
+"sample": "Вакансии для Python-разработчиков / Python Jobs pinned a photo"
+},
+{
+"u": "saba_hunter",
+"status": 302
 },
 {
 "u": "scala_jobs",
@@ -525,580 +1252,34 @@
 "week": 0,
 "last": "2026-09-09",
 "cyr": 0.6,
+"vac": 0.38,
 "sample": "#вакансия https://avantstay.com/ Привет! Ищем бэкенд-инженера в AvantStay. Мы занимаемся краткосрочной арендой домов и с"
 },
 {
-"u": "cpp_jobs",
+"u": "smoke1c",
 "status": 302
-},
-{
-"u": "forcpp",
-"status": 200,
-"title": "Job for C, C++ Developers",
-"posts": 12,
-"week": 7,
-"last": "2026-10-23",
-"cyr": 0.74,
-"sample": "Software Engineer в Kaspi.kz — казахстанская компания, предоставляющая финансовые и технологические услуги, оператор одн"
-},
-{
-"u": "ProCxxJobs",
-"status": 200,
-"title": "Pro.* Jobs",
-"posts": 20,
-"week": 0,
-"last": "2026-09-09",
-"cyr": 0.8,
-"sample": "#c #developer ☁️ Позиция: Разработчик C ( Senior ) 🏙 Компания: «HuntTech» 💪 Опыт: от 5 лет 💰 ЗП: Вилка: 209 - 258тр 📅 Фо"
-},
-{
-"u": "haskell_job",
-"status": 200,
-"title": "Haskell Jobs",
-"posts": 20,
-"week": 0,
-"last": "2026-08-17",
-"cyr": 0.3,
-"sample": "Всем привет! Мы ищем middle haskell разработчика (удаленно, можно оформиться в РФ или в Киргизии, а работать откуда хоче"
-},
-{
-"u": "profunctor_jobs",
-"status": 200,
-"title": "Profunctor Jobs",
-"posts": 20,
-"week": 0,
-"last": "2022-08-18",
-"cyr": 0.35,
-"sample": "DevOps Senior Компания: Practicum Стэк: Bash, Kubernetes, Terraform, AWS, Python, Go, PostgreSQL, ELK Stack, Prometheus,"
-},
-{
-"u": "mobile_jobs",
-"status": 302
-},
-{
-"u": "forallmobile",
-"status": 200,
-"title": "Job for Mobile: iOS, Android, React Native",
-"posts": 12,
-"week": 7,
-"last": "2026-10-21",
-"cyr": 0.83,
-"sample": "Android Team Lead в Appercut — продуктовая IT-компания, которая занимается созданием и развитием своих собственных мобил"
-},
-{
-"u": "mobdevjobs",
-"status": 200,
-"title": "UI/ASO дизайнер для мобильных приложений",
-"posts": 2,
-"week": 0,
-"last": "2024-02-19",
-"cyr": 0.85,
-"sample": "Услуги ASO/UI дизайнера для мобильных приложений 📞 Предлагаю полный спектр графических услуг, чтобы помочь вашему проект"
-},
-{
-"u": "mobile_vacancies",
-"status": 302
-},
-{
-"u": "ios_android_swift_kotlin_jobs",
-"status": 200,
-"title": "UI/ASO дизайнер для мобильных приложений",
-"posts": 2,
-"week": 0,
-"last": "2024-02-19",
-"cyr": 0.85,
-"sample": "Услуги ASO/UI дизайнера для мобильных приложений 📞 Предлагаю полный спектр графических услуг, чтобы помочь вашему проект"
-},
-{
-"u": "ios_jobs",
-"status": 302
-},
-{
-"u": "android_jobs",
-"status": 302
-},
-{
-"u": "flutter_jobs",
-"status": 302
-},
-{
-"u": "flutter_dart_job",
-"status": 200,
-"title": "ASO/UI дизайнер",
-"posts": 2,
-"week": 0,
-"last": "2024-02-19",
-"cyr": 0.85,
-"sample": "Услуги ASO/UI дизайнера для мобильных приложений 📞 Предлагаю полный спектр графических услуг, чтобы помочь вашему проект"
-},
-{
-"u": "flutterroles",
-"status": 200,
-"title": "Flutter Jobs/Internships",
-"posts": 20,
-"week": 0,
-"last": "2026-03-10",
-"cyr": 0.0,
-"sample": "The owner of this channel has been inactive for the last 11 months. If they remain inactive for the next 20 days, they m"
-},
-{
-"u": "swift_jobs",
-"status": 200,
-"title": "Swift jobs / iOS",
-"posts": 2,
-"week": 0,
-"last": "2022-12-05",
-"cyr": 0.0,
-"sample": "."
-},
-{
-"u": "DevOpsSRE_Jobs",
-"status": 200,
-"title": "DevOps/SRE_Jobs",
-"posts": 20,
-"week": 0,
-"last": "2026-09-29",
-"cyr": 0.79,
-"sample": "Публикатор: Alina Romashka Обсуждение: #вакансия #devops #hft #linux #performance #lowlatency #remote DevOps / Infrastru"
-},
-{
-"u": "devops_geeklink",
-"status": 302
-},
-{
-"u": "devopssjob",
-"status": 200,
-"title": "Вакансии по DevOps & SRE",
-"posts": 16,
-"week": 6,
-"last": "2026-10-23",
-"cyr": 0.86,
-"sample": "💻 BGStaff ищет DevOps Middle/Senior на проекты с оплатой до 280 тысяч рублей Удалёнка или гибрид · полная занятость · ИП"
-},
-{
-"u": "sysadm_in_job",
-"status": 302
-},
-{
-"u": "sysadmin_rabota",
-"status": 302
-},
-{
-"u": "kubernetes_jobs",
-"status": 302
-},
-{
-"u": "qa_chillout_jobs",
-"status": 200,
-"title": "QA Jobs",
-"posts": 17,
-"week": 0,
-"last": "2026-10-14",
-"cyr": 0.79,
-"sample": "Middle QA Automation Engineer | Paphos, Cyprus 🇨🇾 Ищем Middle QA Automation Engineer в офис в Пафосе. Проект связан с ра"
-},
-{
-"u": "testjobs",
-"status": 302
-},
-{
-"u": "ingamejob_qa",
-"status": 200,
-"title": "Jobs: QA and Testing | InGameJob.com",
-"posts": 20,
-"week": 3,
-"last": "2026-10-22",
-"cyr": 0.0,
-"sample": "#top_vacancies_inGameJob Navigating today’s competitive gamedev market means you need to focus your applications exactly"
-},
-{
-"u": "vacancy_qa",
-"status": 200,
-"title": "Вакансии QA / Тестировщик",
-"posts": 20,
-"week": 0,
-"last": "2026-01-13",
-"cyr": 0.89,
-"sample": "🔥 Горящие авиабилеты из Москвы Канал, который отслеживает лучшие цены на перелёты и публикует только выгодные варианты. "
-},
-{
-"u": "DEJobs",
-"status": 302
-},
-{
-"u": "gamedevjobs",
-"status": 200,
-"title": "Gamedev Jobs (Inflow)",
-"posts": 20,
-"week": 15,
-"last": "2026-10-23",
-"cyr": 0.21,
-"sample": "MANUAL QA ENGINEER | REMOTE | HAPPY GAMES STUDIO #remote #fulltime #itjob #qa #manual #gamedev https://teletype.in/@remo"
-},
-{
-"u": "job_gamedev",
-"status": 200,
-"title": "Работа в Геймдеве Вакансии 3D художники аниматоры gamedev, u",
-"posts": 20,
-"week": 0,
-"last": "2026-09-27",
-"cyr": 0.86,
-"sample": "Ищем Game Mathematician / специалиста по математике игровых механик Разрабатываем крупный сайт по открытию кейсов с пред"
-},
-{
-"u": "forgamedev",
-"status": 200,
-"title": "Job for Gamedev",
-"posts": 19,
-"week": 19,
-"last": "2026-10-22",
-"cyr": 0.6,
-"sample": "Middle / Senior Sales Manager B2B в Betting Software — поставщик готовых программных решений для клиентов и партнёров в "
-},
-{
-"u": "young_gamedev",
-"status": 200,
-"title": "Gamedev Jobs - вакансии в геймдеве, CG",
-"posts": 20,
-"week": 10,
-"last": "2026-10-23",
-"cyr": 0.4,
-"sample": "#ua User Acquisition Manager (SRN) / AppQuantum ✅ Remote AppQuantum is an international mobile free-to-play game publish"
-},
-{
-"u": "gamedev_vakansii",
-"status": 200,
-"title": "Переходник",
-"posts": 2,
-"week": 0,
-"last": "2025-07-17",
-"cyr": 0.1,
-"sample": "Канал тут 👇 👇 👇 https://t.me/+I-0GylOTD6gyMGI6 https://t.me/+I-0GylOTD6gyMGI6 https://t.me/+I-0GylOTD6gyMGI6"
-},
-{
-"u": "rabota_v_gamedeve",
-"status": 200,
-"title": "Работа в геймдеве (вакансии)",
-"posts": 20,
-"week": 19,
-"last": "2026-10-23",
-"cyr": 0.81,
-"sample": "#Оффтоп ☕ Геймдев Кофе Нетворкинг, знакомства и просто общение про игры и их разработку Место, где можно познакомиться с"
-},
-{
-"u": "GameDev_and_Tech_vacancy",
-"status": 200,
-"title": "Jobs in GameDev & IT",
-"posts": 20,
-"week": 15,
-"last": "2026-10-23",
-"cyr": 0.83,
-"sample": "PR-менеджер со знанием Steam (Gamedev / Global, PC) Полная удаленка | Гибкий график | Фулл тайм | До 120 000 ₽ на руки +"
-},
-{
-"u": "gdjobs",
-"status": 200,
-"title": "GameDev Career – GDTalents",
-"posts": 20,
-"week": 14,
-"last": "2026-10-23",
-"cyr": 0.46,
-"sample": "Product Analyst в Last Level Удаленно / офис 🔗 Подробности на 👉 offerclaw.app"
-},
-{
-"u": "unity_jobs",
-"status": 200,
-"title": "Unity Jobs",
-"posts": 20,
-"week": 0,
-"last": "2026-07-20",
-"cyr": 0.78,
-"sample": "#shaders #HLSL #GLSL #UnityRendering #mobileGPU #URP #BIRP #VFXGraph #ShaderGraph #renderpipeline #frametime #drawcalls "
-},
-{
-"u": "unityjobs_pub",
-"status": 200,
-"title": "Unity Jobs",
-"posts": 20,
-"week": 2,
-"last": "2026-10-19",
-"cyr": 0.83,
-"sample": "Друзья, подборка каналов для вас! Будем рады, если вступите! 👌 Канал с игровыми вакансиям - https://t.me/devjobs Канал о"
-},
-{
-"u": "Jobs_Unity",
-"status": 200,
-"title": "Работа Unity",
-"posts": 20,
-"week": 0,
-"last": "2024-08-12",
-"cyr": 0.9,
-"sample": "🎮 Вакансия: Unity Разработчик Формат работы: Удаленка График: Гибкий 📌 О проекте: На текущий проект требуются Unity разр"
-},
-{
-"u": "unreal_jobs",
-"status": 302
-},
-{
-"u": "ingamejob_producing",
-"status": 200,
-"title": "Jobs: Producing and Management | InGameJob.com",
-"posts": 20,
-"week": 6,
-"last": "2026-10-23",
-"cyr": 0.0,
-"sample": "🚀 Head of Product 🚀 Company: Values Value Experience level: Senior Salary: Negotiable Job type: Full time Location: #Rel"
-},
-{
-"u": "ingamejob_marketing",
-"status": 200,
-"title": "Jobs: Marketing and PR | InGameJob.com",
-"posts": 20,
-"week": 5,
-"last": "2026-10-22",
-"cyr": 0.0,
-"sample": "#top_vacancies_inGameJob Navigating today’s competitive gamedev market means you need to focus your applications exactly"
-},
-{
-"u": "ingamejob_support",
-"status": 200,
-"title": "Jobs: Community Management and Customer Support | InGameJob.",
-"posts": 20,
-"week": 1,
-"last": "2026-10-22",
-"cyr": 0.0,
-"sample": "VIP Manager (Night Shift) Company: MOJAM Experience level: Senior Salary: Negotiable Job type: Full time Location: #Remo"
-},
-{
-"u": "blockchain_jobs",
-"status": 302
-},
-{
-"u": "Blockchain_geeklink",
-"status": 302
-},
-{
-"u": "web3jobs",
-"status": 302
-},
-{
-"u": "job_web3",
-"status": 200,
-"title": "Web 3.0 Job | Крипто Вакансии",
-"posts": 20,
-"week": 15,
-"last": "2026-10-23",
-"cyr": 0.27,
-"sample": "#вакансия #marketing #crypto #web3 #СанктПетербург #офис Marketing Manager в Atomic Wallet Atomic Wallet — некастодиальн"
-},
-{
-"u": "cryptoDevJobs",
-"status": 200,
-"title": "CryptoMarshall | Developer jobs | Вакансии для dev’ов",
-"posts": 20,
-"week": 2,
-"last": "2026-10-22",
-"cyr": 0.64,
-"sample": "#вакансия #vacancy #backend #typescript #nodejs #designengineer #sdet #web3 #remote 💼 Utorg — финтех-инфраструктура для "
-},
-{
-"u": "aiml_jobs",
-"status": 302
-},
-{
-"u": "datascienceml_jobs",
-"status": 200,
-"title": "Data Science Jobs",
-"posts": 20,
-"week": 11,
-"last": "2026-10-22",
-"cyr": 0.82,
-"sample": "🚀 ВАКАНСИЯ | COLLECTION ANALYST Abc Staff ищет сильного Analyst для международного fintech-проекта. 🌍 Рассматриваем канд"
-},
-{
-"u": "data_science_job",
-"status": 200,
-"title": "Вакансии data science и машинное обучение",
-"posts": 20,
-"week": 0,
-"last": "2026-07-07",
-"cyr": 0.64,
-"sample": "NLP-инженер (GigaChat) [Remote] @ Сбер 300 000 —‍ 700 000 ₽/‍мес на руки 📍 Россия 👩‍💻 Можно работать удалённо из РФ Стек"
-},
-{
-"u": "ml_data_science_job",
-"status": 200,
-"title": "ML / DS_Jobs",
-"posts": 20,
-"week": 1,
-"last": "2026-10-20",
-"cyr": 0.78,
-"sample": "Агент поддержки дал неверный ответ о возврате товара. Где возникла ошибка — при поиске по базе знаний или при формирован"
-},
-{
-"u": "Machinelearning_Jobs",
-"status": 302
-},
-{
-"u": "ds_jobs",
-"status": 302
-},
-{
-"u": "data_jobs",
-"status": 302
-},
-{
-"u": "datajob",
-"status": 200,
-"title": "Data jobs — вакансии по data science, анализу данных, аналит",
-"posts": 20,
-"week": 8,
-"last": "2026-10-23",
-"cyr": 0.88,
-"sample": "🚘 Дром ищет senior ML-инженера для рекомендаций и компьютерного зрения От 360 000 ₽ в месяц на руки Удалённо · начало дн"
-},
-{
-"u": "datajobs",
-"status": 302
-},
-{
-"u": "data_vacancies",
-"status": 302
-},
-{
-"u": "bds_job",
-"status": 200,
-"title": "Big Data Science job",
-"posts": 20,
-"week": 1,
-"last": "2026-10-19",
-"cyr": 0.85,
-"sample": "🔥 Аналитик данных РСХБ-Интех Москва, Гибрид Требования: ✅ Опыт работы в области данных от 5 лет в технических ролях (DA|"
-},
-{
-"u": "ml_jobs",
-"status": 200,
-"title": "AI | ML Jobs",
-"posts": 1,
-"week": 0,
-"last": "2024-03-29",
-"cyr": 0.0,
-"sample": "Channel created"
-},
-{
-"u": "opento_data",
-"status": 200,
-"title": "Data Science 🛸 & ML Jobs за рубежом",
-"posts": 20,
-"week": 12,
-"last": "2026-10-23",
-"cyr": 0.66,
-"sample": "#verified #contact Product Analyst @ Higgsfield AI ⚡️ 📍 Офис в Алматы · 🧩 Полная поддержка с релокацией (финансовая + оп"
-},
-{
-"u": "infosec_jobs",
-"status": 302
-},
-{
-"u": "infosec_work",
-"status": 200,
-"title": "Вакансии в ИБ | infosec",
-"posts": 20,
-"week": 18,
-"last": "2026-10-23",
-"cyr": 0.89,
-"sample": "Инженер по сетевой безопасности. Локация: #Москва . Опыт: 3+ лет. Зарплата: ₽. Обсуждается на собеседовании. Компания: Т"
-},
-{
-"u": "cybersecurity_jobs",
-"status": 302
-},
-{
-"u": "cybervacancies_channel",
-"status": 200,
-"title": "Кибербезопасность | Работа и вакансии",
-"posts": 20,
-"week": 6,
-"last": "2026-10-23",
-"cyr": 0.77,
-"sample": "Penetration Tester, провёл 10+ коммерческих пентестов (Black box, Grey box, OSINT). Зарегистрировал CVE-2025-63498 в MIT"
-},
-{
-"u": "Pentest_AppSec_DevSecOps_jobs",
-"status": 302
-},
-{
-"u": "appsec_job",
-"status": 200,
-"title": "AppSec & DevSecOps Jobs",
-"posts": 20,
-"week": 2,
-"last": "2026-10-22",
-"cyr": 0.78,
-"sample": "DevSecOps специалист, Ред Cофт ЗП: до 300к (на руки) Локация: Санкт-Петербург (м. Электросила) Мы ищем специалиста по бе"
-},
-{
-"u": "jobs1c",
-"status": 302
-},
-{
-"u": "joboneC",
-"status": 200,
-"title": "Р1: Premium. Вакансии 1С для Синьоров",
-"posts": 20,
-"week": 8,
-"last": "2026-10-23",
-"cyr": 0.95,
-"sample": "Аналитик-консультант 1С / Ведущий аналитик 1С 📍 Москва и МО (офис/гибрид) | 3–6 лет | Полная занятость CSC-HR ищет анали"
-},
-{
-"u": "Bitrix_1C_Dev_Job",
-"status": 200,
-"title": "Какие разработчики, ты что, накарман?",
-"posts": 2,
-"week": 0,
-"last": "2026-04-23",
-"cyr": 0.0,
-"sample": "Channel created"
-},
-{
-"u": "FastCodeCareer",
-"status": 200,
-"title": "1С Stars: Вакансии, работа от FastCode 1C",
-"posts": 20,
-"week": 0,
-"last": "2026-10-09",
-"cyr": 0.95,
-"sample": "💻 , Аналитик 1С, ГРОСССОФТ, удаленка, от 200тыс., стаж от 5 лет 1С Методолог-аналитик 1С (блоки Бюджетирование и Казначе"
-},
-{
-"u": "job_1C_SQL",
-"status": 302
-},
-{
-"u": "bitrix24_work",
-"status": 302
-},
-{
-"u": "bitrixworkrabota",
-"status": 302
-},
-{
-"u": "wordpress_jobs",
-"status": 200,
-"title": "WordPress Jobs",
-"posts": 20,
-"week": 0,
-"last": "2026-10-06",
-"cyr": 0.78,
-"sample": "Ламповое комьюнити про ИТ, ИИ и digital Наш канал вошел в подборку тг-каналов про ИТ, диджитал и Tech — это ламповое ком"
 },
 {
 "u": "sql_jobs",
 "status": 302
 },
 {
-"u": "itarchitect_jobs",
+"u": "symfony_careers",
+"status": 200,
+"title": "Symfony Jobs",
+"posts": 20,
+"week": 0,
+"last": "2024-12-12",
+"cyr": 0.55,
+"vac": 0.5,
+"sample": "Вакансія: #remote #fulltime Компанія: Netpeak Core Локація: Ремоут Ставка: $2000-2400 Операційна платформа групи ІТ-комп"
+},
+{
+"u": "sysadmin_rabota",
+"status": 302
+},
+{
+"u": "sysadm_in_job",
 "status": 302
 },
 {
@@ -1109,832 +1290,192 @@
 "week": 0,
 "last": "2026-07-27",
 "cyr": 0.78,
+"vac": 0.9,
 "sample": "💼 ВАКАНСИЯ: Техлид 1С Компания: УЛЬТРА ФИШ Зарплата: 350 000 Локация/Format: Москва, м. Румянцево #вакансия #офис #москв"
 },
 {
-"u": "jobfortm",
-"status": 200,
-"title": "Job for IT-TOP (Technical Managers)",
-"posts": 12,
-"week": 9,
-"last": "2026-10-23",
-"cyr": 0.76,
-"sample": "Team Lead (Python) – Data SplitMetrics is a global software company offering an ecosystem of products and services that "
+"u": "testjobs",
+"status": 302
 },
 {
-"u": "rabotaembedded",
+"u": "theyseeku_it",
 "status": 200,
-"title": "Work Embedded",
-"posts": 20,
-"week": 3,
-"last": "2026-10-21",
-"cyr": 0.85,
-"sample": "Work Embedded pinned a photo"
-},
-{
-"u": "vacancysmm",
-"status": 200,
-"title": "SMM работа, вакансии, фриланс",
-"posts": 19,
-"week": 19,
-"last": "2026-10-23",
-"cyr": 0.95,
-"sample": "🔥 ИЩЕМ КРЕАТИВНОГО КОНТЕНТ-ПРОДЮСЕРА ДЛЯ БЛОГА О КРАСОТЕ t.me/billerschool Аудитория: Instagram | Telegram | MAX | ВКонт"
-},
-{
-"u": "comeinlena",
-"status": 200,
-"title": "Леночка, войдите! SMM вакансии",
+"title": "Удаленка — IT и Digital",
 "posts": 20,
 "week": 20,
-"last": "2026-10-23",
-"cyr": 0.96,
-"sample": "Ведущий маркетолог З/п: от от 150 000 ₽ в месяц, офис в Москве Работодатель: CLIMTCOSMETICS — российский бренд декоратив"
-},
-{
-"u": "reklamodromo",
-"status": 200,
-"title": "Рекламодром: таргетолог, директолог, контекстолог, настройка",
-"posts": 20,
-"week": 20,
-"last": "2026-10-23",
-"cyr": 0.94,
-"sample": "💬 Таргетолог, ВКонтакте,  условия в лс Ищу таргетолога в ВК с кейсами по привлечению клиентов на услуги специалистов по "
-},
-{
-"u": "targetolog_jobs",
-"status": 302
-},
-{
-"u": "jobindigital",
-"status": 200,
-"title": "Вакансии/работа digital marketing | SMM | SEO | контент | та",
-"posts": 20,
-"week": 0,
-"last": "2024-08-22",
-"cyr": 0.87,
-"sample": "SEO Specialist (Middle-Senior) #vacancy #вакансия #job #remote #seo #middle #senior Firebird is an international travel "
-},
-{
-"u": "seohr",
-"status": 200,
-"title": "SEO HR, digital-вакансии, офис и удалёнка",
-"posts": 19,
-"week": 11,
-"last": "2026-10-23",
-"cyr": 0.9,
-"sample": "👤 SEO-специалист, офис или  гибрид, Москва, МАГ О компании: 🔸 МАГ — поставщик тканей и швейной фурнитуры, работающий с к"
-},
-{
-"u": "contextad_jobs",
-"status": 302
-},
-{
-"u": "performance_jobs",
-"status": 302
-},
-{
-"u": "growth_hacking_jobs",
-"status": 302
-},
-{
-"u": "affiliate_jobs",
-"status": 200,
-"title": "for sell",
-"posts": 2,
-"week": 0,
-"last": "2026-04-21",
-"cyr": 0.0,
-"sample": "for buy write - @abramov_92"
-},
-{
-"u": "hrcpa",
-"status": 200,
-"title": "Вакансии CPA, Digital, IT",
-"posts": 20,
-"week": 4,
-"last": "2026-10-23",
-"cyr": 0.83,
-"sample": "Вакансии CPA, Digital, IT pinned a photo"
-},
-{
-"u": "marketing_jobs",
-"status": 200,
-"title": "🎯 marketing jobs — вакансии для маркетологов",
-"posts": 20,
-"week": 18,
-"last": "2026-10-23",
-"cyr": 0.94,
-"sample": "AI Engineer (AI Marketing) в Cбер. Удаленка. О НАС: Мы создаем AI-продукты, которые трансформируют работу маркетинга: от"
-},
-{
-"u": "rabota_go",
-"status": 200,
-"title": "Вакансии 🤟🏻 Маркетинг, Медиа, Продажи, SMM | Работа GO - раз",
-"posts": 19,
-"week": 19,
-"last": "2026-10-23",
-"cyr": 0.96,
-"sample": "Резюме: 3D-визуализатор интерьеров / Interior 3D Artist 👩‍💻 Ира Караман Ник tg: @KARAMAN_IRA Номер телефона: +7 - 965 - "
-},
-{
-"u": "digital_jobster",
-"status": 200,
-"title": "Джобстер Digital | Маркетинг | Вакансии и резюме",
-"posts": 17,
-"week": 17,
-"last": "2026-10-23",
-"cyr": 0.95,
-"sample": "Продал 3 места на свое обучение — на счету +300 000 рублей, пока ты работаешь руками за 80к Пока кто-то сутками сидит в "
-},
-{
-"u": "rabota_freelancee",
-"status": 200,
-"title": "Удаленка. Вакансии и резюме Маркетинг, SMM, Digital - все дл",
-"posts": 19,
-"week": 17,
-"last": "2026-10-23",
-"cyr": 0.95,
-"sample": "Менеджер по продажам / Менеджер чата (без звонков) Работодатель: Онлайн-школа Эзотерика / нумерология / таро Что нужно д"
-},
-{
-"u": "workasap",
-"status": 200,
-"title": "Работа в диджитал и медиа",
-"posts": 20,
-"week": 4,
-"last": "2026-10-23",
-"cyr": 0.93,
-"sample": "Content Creator / UGC Creator — короткие видео на английском Ryze — AI-платформа для маркетинга из Сан-Франциско, работа"
-},
-{
-"u": "designer_ru",
-"status": 200,
-"title": "ИЩУ_ДИЗАЙНЕРА",
-"posts": 19,
-"week": 0,
-"last": "2026-09-17",
-"cyr": 0.67,
-"sample": "Пу-пу-пу… пока мы тыкали палочкой Клод Код и сочиняли промты-хотелки, рядом выросло гигантское комьюнити ИИ-дизайнеров. "
-},
-{
-"u": "uxinvite",
-"status": 200,
-"title": "INVITE",
-"posts": 4,
-"week": 0,
-"last": "2026-09-01",
-"cyr": 0.0,
-"sample": "🚀 BYIN is dropping a major update on September 3! Here’s what’s coming: 🔥 A ready-to-use memepad — create your own memec"
-},
-{
-"u": "uiux_jb",
-"status": 200,
-"title": "UI/UX Jobs | Переходник",
-"posts": 2,
-"week": 0,
-"last": "2023-07-03",
-"cyr": 0.7,
-"sample": "В связи с участившимися накрутками ботов, канал переехал на закрытый линк. Теперь он доступен по ссылке: https://t.me/+t"
-},
-{
-"u": "uiux_jobs",
-"status": 302
-},
-{
-"u": "uxui_jobs",
-"status": 302
-},
-{
-"u": "design_jobs_uxui",
-"status": 200,
-"title": "Вакансии для Дизайнеров",
-"posts": 20,
-"week": 4,
-"last": "2026-10-23",
-"cyr": 0.95,
-"sample": "Настроил чат-бота за пару часов → заработал 9 000₽. Просто представь, кто-то стоит в очереди на маршрутку в 8 утра чтобы"
-},
-{
-"u": "designers_ux_ui_graph_jobs",
-"status": 200,
-"title": "UI/ASO дизайнер",
-"posts": 2,
-"week": 0,
-"last": "2024-02-20",
-"cyr": 0.85,
-"sample": "Услуги ASO/UI дизайнера для мобильных приложений 📞 Предлагаю полный спектр графических услуг, чтобы помочь вашему проект"
-},
-{
-"u": "workcatcher",
-"status": 200,
-"title": "Ловец вакансий",
-"posts": 3,
-"week": 0,
-"last": "2026-04-18",
-"cyr": 0.89,
-"sample": "Ищешь заказчиков или исполнителей? Тогда ты по адресу! 🔥 @flexta_chat"
-},
-{
-"u": "jobs_design",
-"status": 302
-},
-{
-"u": "Designs_job",
-"status": 200,
-"title": "Уголок дизайнера | Вакансии",
-"posts": 20,
-"week": 15,
-"last": "2026-10-23",
-"cyr": 0.91,
-"sample": "#ищу #дизайнер #фигма Дизайнер на лендинг, 1 экран + адаптив. 15к. Портфолио сразу: @galina_fomi_group86 ➖ ➖ ➖ ➖ ➖ ➖ ➖ ➖"
-},
-{
-"u": "design_vacancy",
-"status": 200,
-"title": "Вакансии для дизайнеров",
-"posts": 20,
-"week": 3,
-"last": "2026-10-21",
-"cyr": 0.94,
-"sample": "💼 ✨ РАБОТА МЕЧТЫ БЛИЖЕ, ЧЕМ КАЖЕТСЯ ✨ 💼 Представь: ты работаешь из уютной кофейни, у моря или прямо с дивана ☕ 🌴 Сам реш"
-},
-{
-"u": "designwork_vacansy",
-"status": 200,
-"title": "Н",
-"posts": 2,
-"week": 0,
-"last": "2023-05-09",
-"cyr": 0.38,
-"sample": "Мы переехали. Ссылка на канал - https://t.me/designwork_vacansii"
-},
-{
-"u": "designwork_vacansii",
-"status": 200,
-"title": "ВАКАНСИИ ДЛЯ ДИЗАЙНЕРА | РАБОТА",
-"posts": 20,
-"week": 20,
-"last": "2026-10-23",
-"cyr": 0.89,
-"sample": "В Studio24 требуется AI-видеомейкер Мы медиа-продакшн студия полного цикла. Делаем видео для брендов: коммерческую рекла"
-},
-{
-"u": "designhunters",
-"status": 200,
-"title": "Design Hunters",
-"posts": 20,
-"week": 14,
-"last": "2026-10-23",
-"cyr": 0.8,
-"sample": "Руководитель команды дизайна Cразу две вакансии в Финуслугах — финансовом маркетплейсе от Московской биржи. Ищем руковод"
-},
-{
-"u": "motion_design_jobs",
-"status": 200,
-"title": "Новые заказы",
-"posts": 3,
-"week": 0,
-"last": "2026-08-20",
-"cyr": 0.38,
-"sample": "🖤 Мой личный сайт /// блог: mercuria.dev 🗡 Мои проекты: mercuria.dev/projects 👉🏻 Мой контакт: @mercuria_dev 💀 При спамба"
-},
-{
-"u": "motionhunter",
-"status": 200,
-"title": "Motion designer hunter",
-"posts": 20,
-"week": 20,
-"last": "2026-10-23",
-"cyr": 0.8,
-"sample": "Видеомонтажер Формат: удаленно / проектная деятельность Ищем видеомонтажера на проектную занятость для работы с контенто"
-},
-{
-"u": "graphic_design_jobs",
-"status": 200,
-"title": "Graphic design",
-"posts": 17,
-"week": 0,
-"last": "2026-02-14",
-"cyr": 0.0,
-"sample": ""
-},
-{
-"u": "illustrator_jobs",
-"status": 302
-},
-{
-"u": "product_design_jobs",
-"status": 200,
-"title": "Design Jobs",
-"posts": 20,
-"week": 0,
-"last": "2026-07-10",
-"cyr": 0.77,
-"sample": "Senior Продуктовый Дизайнер 2ГИС Местоположение: Russia Формат работы: Удаленно Опубликована: 07.07.2026 Требования: • О"
-},
-{
-"u": "3d_design_jobs",
-"status": 302
-},
-{
-"u": "forproducts",
-"status": 200,
-"title": "Job for Products and Projects",
-"posts": 20,
-"week": 20,
-"last": "2026-10-23",
-"cyr": 0.64,
-"sample": "Senior Product Manager в Авито — крупная российская платформа объявлений для покупки, продажи товаров, недвижимости, авт"
-},
-{
-"u": "hireproproduct",
-"status": 200,
-"title": "Hire ProProduct - Продуктовые вакансии",
-"posts": 20,
-"week": 2,
-"last": "2026-10-20",
+"last": "2026-10-25",
 "cyr": 0.88,
-"sample": "🚀 Ищете сильного специалиста в продуктовую команду? Hire ProProduct → 24000 подписчиков , которым интересны продуктовые "
+"vac": 1.0,
+"sample": "Системный аналитик DWH / Data Analyst 217 000 ₽ ГК Орбита Группа Компаний Орбита - ведущий разработчик цифровых решений,"
 },
 {
-"u": "product_jobs",
+"u": "typescript_jobs",
 "status": 200,
-"title": "Вакансии для продактов и проджектов",
-"posts": 20,
-"week": 2,
-"last": "2026-10-22",
-"cyr": 0.92,
-"sample": "Вакансия: Product Manager (CTV / AdTech) Компания: Visible Формат работы: полная занятость, гибрид (3 дня в офисе, 2 дня"
-},
-{
-"u": "products_jobs",
-"status": 302
-},
-{
-"u": "product_owner_jobs",
-"status": 302
-},
-{
-"u": "hh_vacancy_product_project",
-"status": 200,
-"title": "Работа для продактов и проджектов",
-"posts": 20,
+"title": "typescript_jobs",
+"posts": 1,
 "week": 0,
-"last": "2026-10-06",
-"cyr": 0.9,
-"sample": "Author: Кристина Докучаева 🌼 Login: @kristyawow ---------------------------------------- #ищу #проджект #менеджер Ищу от"
-},
-{
-"u": "product_project_hr_geeklink",
-"status": 302
-},
-{
-"u": "projects_jobs",
-"status": 302
-},
-{
-"u": "projects_jobs_feed",
-"status": 200,
-"title": "Management Jobs — вакансии и резюме",
-"posts": 20,
-"week": 20,
-"last": "2026-10-22",
-"cyr": 0.87,
-"sample": "#resume #cv #резюме Должность: Lead #Project Manager Локация: Кипр, Лимассол ЗП: от 6000 евро Опыт: Lead Project Manager"
-},
-{
-"u": "agile_jobs",
-"status": 302
-},
-{
-"u": "foranalysts",
-"status": 200,
-"title": "Job for Analysts & Data Scientists",
-"posts": 20,
-"week": 20,
-"last": "2026-10-22",
-"cyr": 0.57,
-"sample": "Digital Marketing Analyst в OLX Uzbekistan — крупная онлайн-платформа объявлений в стране, услугами которой пользуются м"
-},
-{
-"u": "analyst_geeklink",
-"status": 200,
-"title": "Вакансии и резюме Аналитиков",
-"posts": 20,
-"week": 4,
-"last": "2026-10-22",
-"cyr": 0.84,
-"sample": "Author: Королёв 💶 ( @corolevlife ) Login: @corolevlife ---------------------------------------- Нужны специалисты: можно"
-},
-{
-"u": "analyst_job",
-"status": 200,
-"title": "analyst_job",
-"posts": 2,
-"week": 0,
-"last": "2026-05-31",
+"last": "2019-03-11",
 "cyr": 0.0,
-"sample": "🟡 This community is now protected by Collab.Land Token-gate your community and verify members automatically. Click below"
-},
-{
-"u": "analysts_hunter",
-"status": 302
-},
-{
-"u": "ba_jobs",
-"status": 302
-},
-{
-"u": "data_analyst_jobs",
-"status": 200,
-"title": "Data Analyst Jobs| Placement| SQL | Data Jobs",
-"posts": 4,
-"week": 0,
-"last": "2024-11-04",
-"cyr": 0.0,
-"sample": "Channel name was changed to « Data Analyst Jobs| Placement| SQL | Data Jobs »"
+"vac": 0.0,
+"sample": "Channel created"
 },
 {
 "u": "tzprofi_job",
 "status": 302
 },
 {
-"u": "forallsales",
+"u": "uejobs",
 "status": 200,
-"title": "Job for Sales & BizDev",
-"posts": 17,
-"week": 17,
-"last": "2026-10-22",
-"cyr": 0.61,
-"sample": "Middle / Senior Sales Manager B2B в Betting Software — поставщик готовых программных решений для клиентов и партнёров в "
-},
-{
-"u": "textodromo",
-"status": 200,
-"title": "Текстодром: копирайтер, переводчик, редактор, журналист, смм",
-"posts": 20,
-"week": 20,
-"last": "2026-10-23",
-"cyr": 0.95,
-"sample": "💬 PR менеджер для продвижения бренда парфюма, условия в лс Ищу маркетолога/pr менеджера для взаимодействия с блогерами 👩"
-},
-{
-"u": "self_ma",
-"status": 200,
-"title": "Копирайтер, редактор — удаленная работа",
-"posts": 20,
-"week": 0,
-"last": "2026-09-30",
-"cyr": 0.95,
-"sample": "✅ Редактор в ANCOR • Гибридный формат: иногда нужно быть в офисах красной IT-компании в Москве ANCOR ищет редактора в бр"
-},
-{
-"u": "norm_work",
-"status": 200,
-"title": "Норм работа",
-"posts": 5,
-"week": 0,
-"last": "2022-06-14",
-"cyr": 1.0,
-"sample": "Чек-лист действий при выходе на новую работу Всё перечисленное обязан сделать ваш начальник или сотрудник, которому это "
-},
-{
-"u": "copywriter_vacancies",
-"status": 200,
-"title": "Вакансии для копирайтеров",
+"title": "Unreal Engine Jobs 🎮 (Работа, вакансии, стажировки)",
 "posts": 20,
 "week": 5,
-"last": "2026-10-22",
-"cyr": 0.95,
-"sample": "Ищем автора в Telegram-канал Нужен человек, который сам делает контент: находит темы, пишет посты и придумывает мемы. Пи"
+"last": "2026-10-25",
+"cyr": 0.29,
+"vac": 0.45,
+"sample": "SENIOR PROGRAMMER (TRAILHEAD INTERACTIVE) 🕹 The Last Point, Industrialis 🧠 Senior 💰 Negotiable ⏰ Full-time 🌎 Remote 🦄 De"
 },
 {
-"u": "work_for_writers",
-"status": 200,
-"title": "Work for writers",
-"posts": 1,
-"week": 0,
-"last": "2026-10-15",
-"cyr": 0.0,
-"sample": "Channel created"
-},
-{
-"u": "freelancechoice",
-"status": 200,
-"title": "Freelance Choice. Вакансии по копирайтингу",
-"posts": 17,
-"week": 11,
-"last": "2026-10-22",
-"cyr": 0.94,
-"sample": "[Свежие книги] [А ещё сейчас ищут #контент #менеджера в книжный магазин S-m-e-n-a.org . ✏️ Участвовать в формировании PR"
-},
-{
-"u": "textmoney",
-"status": 200,
-"title": "Текстмани: вакансии для копирайтеров. Работа для авторов и р",
-"posts": 20,
-"week": 0,
-"last": "2026-03-13",
-"cyr": 0.95,
-"sample": "Требуется автор для написания книги Есть контент для книги, разбитый на модули и смыслы. Контент про мотивацию и о самоп"
-},
-{
-"u": "prwork",
-"status": 200,
-"title": "PR-работа",
-"posts": 20,
-"week": 0,
-"last": "2026-10-16",
-"cyr": 0.95,
-"sample": "Вакансия: Руководитель программной дирекции (event) в VINCI Agency. 📎 Задачи: • Разработка концепции, тематических напра"
-},
-{
-"u": "pr_jobs",
-"status": 200,
-"title": "Wavium - НАБОР В КОМАНДУ",
-"posts": 2,
-"week": 0,
-"last": "2026-03-13",
-"cyr": 0.88,
-"sample": "⚡️ ВАКАНСИЯ 💎 ЗАКРЫТОЕ КОММЬЮНИТИ В СФЕРЕ АРБИТРАЖА КРИПТОВАЛЮТ Выплаты от $3.000 в месяц и более (в зависимости от обор"
-},
-{
-"u": "journalist_jobs",
+"u": "uiux_jobs",
 "status": 302
 },
 {
-"u": "media_jobs",
-"status": 302
-},
-{
-"u": "dddwork",
+"u": "unityjobs_pub",
 "status": 200,
-"title": "Работа в медиа",
-"posts": 20,
-"week": 15,
-"last": "2026-10-23",
-"cyr": 0.95,
-"sample": "SMM-агентство I AM AGENCY ищет менеджера по продажам на международный рынок Что делать: – активно искать и привлекать кл"
-},
-{
-"u": "communication_department",
-"status": 200,
-"title": "Департамент коммуникаций",
+"title": "Unity Jobs",
 "posts": 20,
 "week": 2,
-"last": "2026-10-23",
-"cyr": 0.99,
-"sample": "Забудьте о неловких переговорах и двусмысленных фразах Представьте, что вы можете \"примерить\" свою речь перед важной вст"
+"last": "2026-10-19",
+"cyr": 0.83,
+"vac": 0.79,
+"sample": "Друзья, подборка каналов для вас! Будем рады, если вступите! 👌 Канал с игровыми вакансиям - https://t.me/devjobs Канал о"
 },
 {
-"u": "ux_writer_jobs",
+"u": "unity_jobs",
 "status": 200,
-"title": "UX-редакторы, вы где?",
+"title": "Unity Jobs",
 "posts": 20,
 "week": 0,
-"last": "2026-08-31",
+"last": "2026-07-20",
+"cyr": 0.78,
+"vac": 0.85,
+"sample": "#shaders #HLSL #GLSL #UnityRendering #mobileGPU #URP #BIRP #VFXGraph #ShaderGraph #renderpipeline #frametime #drawcalls "
+},
+{
+"u": "uxui_jobs",
+"status": 302
+},
+{
+"u": "vacancy_it_ulbitv",
+"status": 200,
+"title": "Вакансии в IT (Айти) | Рефералки в IT | By Ulbi TV",
+"posts": 20,
+"week": 5,
+"last": "2026-10-23",
+"cyr": 0.53,
+"vac": 0.9,
+"sample": "Подборка вакансий на 23.10.2026 ⚙️ Backend Backend-разработчик (Java) — Стажировка / Дуальное обучение (500000-800000) J"
+},
+{
+"u": "vacancy_qa",
+"status": 200,
+"title": "Вакансии QA / Тестировщик",
+"posts": 20,
+"week": 0,
+"last": "2026-01-13",
+"cyr": 0.89,
+"vac": 1.0,
+"sample": "🔥 Горящие авиабилеты из Москвы Канал, который отслеживает лучшие цены на перелёты и публикует только выгодные варианты. "
+},
+{
+"u": "vakansii_it",
+"status": 200,
+"title": "Вакансии айти IT 💻",
+"posts": 20,
+"week": 6,
+"last": "2026-10-25",
 "cyr": 0.94,
-"sample": "😎 Авито ищет UX-редакторов: присоединяйся к оплачиваемой программе Design Bootcamp и развивай продукт для миллионов поль"
+"vac": 1.0,
+"sample": "😀 😃 😄 😁 😆 Бизнес-аналитик IT ✅ Без опыта ✅ Удаленно Требования: - высшее образование в сфере информационных технологий -"
 },
 {
-"u": "community_manager_jobs",
+"u": "vuejs_jobs",
 "status": 302
 },
 {
-"u": "video_jobs",
-"status": 302
-},
-{
-"u": "kadroviku",
+"u": "wordpress_jobs",
 "status": 200,
-"title": "Кадровику",
-"posts": 20,
-"week": 20,
-"last": "2026-10-23",
-"cyr": 1.0,
-"sample": "Как оплатить время вынужденного прогула восстановленному на работе сотруднику, если в этот период попали праздники Незак"
-},
-{
-"u": "hrwork",
-"status": 200,
-"title": "HR JOURNAL",
+"title": "WordPress Jobs",
 "posts": 20,
 "week": 0,
-"last": "2026-09-11",
-"cyr": 0.96,
-"sample": "Бывший исследователь OpenAI Дэниел Кокотайло отказался от 2 миллионов долларов, лишь бы не молчать. Теперь он рассказыва"
+"last": "2026-10-06",
+"cyr": 0.78,
+"vac": 0.47,
+"sample": "Ламповое комьюнити про ИТ, ИИ и digital Наш канал вошел в подборку тг-каналов про ИТ, диджитал и Tech — это ламповое ком"
 },
 {
-"u": "Hey_hr",
+"u": "workayte",
 "status": 200,
-"title": "Эй, HR! Антон Платонов ️",
+"title": "Работа в ИТ",
 "posts": 20,
-"week": 0,
-"last": "2026-10-02",
-"cyr": 0.98,
-"sample": "Почему умные люди делают бессмысленную работу ? Бесполезные отчёты и пустые совещания принято списывать на глупость, но "
-},
-{
-"u": "talent_hunters",
-"status": 200,
-"title": "Talent Hunters",
-"posts": 20,
-"week": 2,
+"week": 14,
 "last": "2026-10-22",
-"cyr": 0.97,
-"sample": "Какое будущее ждёт HR в большом отчёте hh с данными от BSG, Gartner и др. 🟧"
+"cyr": 0.8,
+"vac": 0.9,
+"sample": "#вакансия #работа #Pega #PegaDeveloper #PegaSSA #SeniorSystemArchitect #BPM #Java #разработчик #Middle #MiddlePlus #банк"
 },
 {
-"u": "ready_hr",
-"status": 302
-},
-{
-"u": "hr_jobster",
+"u": "ya_jobs",
 "status": 200,
-"title": "Джобстер | HR будни",
+"title": "Яндекс нанимает | Вакансии для разработчиков",
 "posts": 20,
 "week": 0,
-"last": "2025-09-07",
-"cyr": 0.97,
-"sample": "☀️ Подписаться на будни HR 💡 Искать кандидатов"
+"last": "2026-10-09",
+"cyr": 0.94,
+"vac": 0.95,
+"sample": "Разработчик на Go в команду еком-продуктов для бизнеса 🌐 Мы создаём новый амбициозный проект, который предлагает рынку к"
 },
 {
-"u": "tpeople",
+"u": "yii_jobs",
 "status": 200,
-"title": "Tpeople - your finance career",
+"title": "Yii Вакансии и резюме",
 "posts": 20,
 "week": 0,
-"last": "2026-10-16",
-"cyr": 0.92,
-"sample": "Медиахолдинг МТС (On Медиа) ищет аналитика/старшего аналитика в корпоративные финансы (включает, в том числе, трек M&A) "
-},
-{
-"u": "bankman_20",
-"status": 200,
-"title": "BANKMAN // Вакансии в банках",
-"posts": 20,
-"week": 4,
-"last": "2026-10-23",
-"cyr": 0.82,
-"sample": "РОССЕЛЬХОЗБАНК 💼 Начальник отдела ценообразования и процентной политики Управления финансового анализа и отчётности 📍 Мо"
-},
-{
-"u": "careerinconsulting",
-"status": 200,
-"title": "Карьера в консалтинговых фирмах",
-"posts": 17,
-"week": 0,
-"last": "2026-10-14",
-"cyr": 0.96,
-"sample": "Дайджест вакансий от нашего партнера Gigoo. https://t.me/gigoo_ru/2436"
-},
-{
-"u": "finexecutive",
-"status": 200,
-"title": "FinExecutive #1 in finance jobs",
-"posts": 20,
-"week": 8,
-"last": "2026-10-23",
-"cyr": 0.66,
-"sample": "🤣 Friday's fun! #finexecutive #funday"
-},
-{
-"u": "financejobs",
-"status": 200,
-"title": "Finance_Jobs_India",
-"posts": 20,
-"week": 0,
-"last": "2022-12-12",
-"cyr": 0.0,
-"sample": "Monsterindia.com Jobs Assistant Manager Gold Loan Office Company: Gupta International Experience: 0 to 3 Salary: 1.00 to"
-},
-{
-"u": "aestheticsoflawjob",
-"status": 200,
-"title": "Вакансии для юристов (стажировки, госслужба)",
-"posts": 20,
-"week": 16,
-"last": "2026-10-23",
-"cyr": 0.98,
-"sample": "Онлайн-практики вернулись с новыми направлениями 🔥 Три недели погружения в финтех и реальные задачи Альфа-Банка — програ"
-},
-{
-"u": "legaljobsradar",
-"status": 200,
-"title": "Вакансии Для Юристов",
-"posts": 20,
-"week": 4,
-"last": "2026-10-22",
-"cyr": 0.98,
-"sample": "❗️ Отправить договор на проверку в ChatGPT = рискнуть дважды. Первый риск — нейросеть уверенно сошлётся на норму, которо"
-},
-{
-"u": "MVTOPvacancy",
-"status": 200,
-"title": "MV: вакансии для руководителей",
-"posts": 20,
-"week": 20,
-"last": "2026-10-23",
-"cyr": 0.92,
-"sample": "➡️ ВАКАНСИЯ: CEO / Генеральный директор | Hayler Group 📍 Москва, Россия, гибрид Hayler Group — компания в косметической "
-},
-{
-"u": "studentsuper",
-"status": 200,
-"title": "SuperJob Старт / Работа для студентов и молодых специалистов",
-"posts": 11,
-"week": 3,
-"last": "2026-10-23",
-"cyr": 0.97,
-"sample": "Эхх… 🧩 🧩 🧩 🧩 🧩 🧩 🧩 🧩 🧩 🧩 🧩 🧩 🧩 🧩 🧩 🧩 🧩 🧩 🧩 🧩 🧩 🧩 🧩 🧩 Вот, что вы пропускаете, если еще не посмотрели первую серию шоу Бы"
-},
-{
-"u": "careerspace",
-"status": 200,
-"title": "careerspace",
-"posts": 7,
-"week": 7,
-"last": "2026-10-23",
-"cyr": 0.95,
-"sample": "💼 💼 💼 Вакансии в аналитике и управлении продуктом Product Lead / Hyper AdTech Зарплата: от 346 000 ₽ /на руки Подробнее "
-},
-{
-"u": "vakansii_stagirovki_it",
-"status": 302
-},
-{
-"u": "young_intern",
-"status": 200,
-"title": "Young Стажёр - стажировки ИТ",
-"posts": 20,
-"week": 20,
-"last": "2026-10-23",
-"cyr": 0.83,
-"sample": "Ищем студентов-айтишников без опыта. Платят выше рынка. Только проверенные компании: Сбер, Авито, Альфа-Банк и еще 20+ р"
-},
-{
-"u": "Getitrussia",
-"status": 200,
-"title": "Get IT",
-"posts": 20,
-"week": 20,
-"last": "2026-10-23",
-"cyr": 0.82,
-"sample": "#Системныйаналитик #DWH #Москва #удаленно #проект Открыта позиция на проект, Системного аналитика DWH (ПО, транспортная "
-},
-{
-"u": "yuniorapp",
-"status": 200,
-"title": "Юниор: стажировки и вакансии для молодых специалистов",
-"posts": 20,
-"week": 20,
-"last": "2026-10-23",
-"cyr": 0.83,
-"sample": "Подборка для джунов Стажёр: - Project manager в Вебмарт Групп - Стажёр Golang-разработчик в VK - Тестировщик ПО (Junior)"
-},
-{
-"u": "myitjob",
-"status": 200,
-"title": "IT Стажировки",
-"posts": 10,
-"week": 10,
-"last": "2026-10-23",
+"last": "2026-09-21",
 "cyr": 0.88,
-"sample": "Младший продакт-менеджер (BISOU, monolove, ORIATIQUE) в ГРИДЕМ, Москва Ищем ассистента продакта для полного цикла: анали"
+"vac": 0.75,
+"sample": "#resume , ищу проектную работу 👨‍🔧 Виктор Бабанов, решаю сложные технические проблемы . - Вхожу в core Yii3 team - 13 ле"
 },
 {
-"u": "newdirections",
+"u": "young_june",
 "status": 200,
-"title": "New directions: вакансии и стажировки",
+"title": "Young & Junior - вакансии IT",
 "posts": 20,
-"week": 19,
-"last": "2026-10-23",
-"cyr": 0.85,
-"sample": "Торопись! ⚡ Ищем студентов-айтишников без опыта. Платят выше рынка. Только проверенные компании: Сбер, Авито, Альфа-Банк"
+"week": 20,
+"last": "2026-10-25",
+"cyr": 0.8,
+"vac": 0.95,
+"sample": "Подборка Junior/Стажёр удалённо Разработка: - Golang-разработчик в IBS - Java Developer в ITK academy - Java-разработчик"
 },
 {
-"u": "itkazahstan",
-"status": 302
-},
-{
-"u": "ml_jobs_kz",
+"u": "young_relocate",
 "status": 200,
-"title": "AIMoLdin Jobs (DSML.KZ)",
+"title": "Relocate - зарубежные вакансии на релокацию и удаленку",
 "posts": 20,
-"week": 4,
+"week": 14,
 "last": "2026-10-23",
-"cyr": 0.03,
-"sample": "Data Analyst / Data Scientist Teniz Capital Investment Banking 450,000 to 700,000 KZT NET per month Almaty / Office Teni"
+"cyr": 0.45,
+"vac": 0.89,
+"sample": "#дайджест #hr #recruiter 🔥 HR, Recruiter Middle/Senior Recruiter / Cryptopay Remote. Recruiter (Performance & GTM) / Plu"
 },
 {
-"u": "datajobskz",
+"u": "youritjob",
 "status": 200,
-"title": "KZ Jobs Data Science & Engineering",
+"title": "IT Работа: Сербия и удаленка LENKEP 🔥",
 "posts": 20,
-"week": 7,
+"week": 17,
 "last": "2026-10-23",
-"cyr": 0.67,
-"sample": "#jobs #Алматы 📍 Формат/working arrangement: офис в Алматы ✔️ Должность/position: Разработчик программного обеспечения уп"
+"cyr": 0.38,
+"vac": 0.55,
+"sample": "AI / LLM Engineer (Go + Python) Ищем AI/LLM Engineer, который будет проектировать и развивать production-системы на базе"
 }
 ]
