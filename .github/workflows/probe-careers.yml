@@ -1,0 +1,69 @@
+name: Probe careers
+on:
+  push:
+    branches: ["probe/careers"]
+permissions:
+  contents: write
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v7
+      - name: Probe
+        run: |
+          pip install -q requests
+          python3 - <<'PY'
+          import re, json, time, requests
+          from urllib.parse import urlsplit
+          from urllib import robotparser
+          UA = "Mozilla/5.0 (compatible; FastCVBot/1.0; +https://fastcv.ru)"
+          S = requests.Session(); S.headers["User-Agent"] = UA
+          VAC = re.compile(r"vacanc|vakans|/jobs?/|career|rabota", re.I)
+          def get(u):
+              try:
+                  r = S.get(u, timeout=20)
+                  return r.status_code, r.text
+              except Exception as e:
+                  return type(e).__name__, ""
+          out = []
+          for site in open("sites.txt").read().split():
+              p = urlsplit(site); root = f"{p.scheme}://{p.netloc}"
+              row = {"site": site}
+              st, robots = get(root + "/robots.txt"); row["robots"] = st
+              rp = robotparser.RobotFileParser(); rp.parse(robots.splitlines() if st == 200 else [])
+              row["allowed"] = rp.can_fetch("FastCVBot", site)
+              st, html = get(site); row["page"] = st
+              row["spa"] = bool(html) and len(re.sub(r"<script.*?</script>", "", html, flags=re.S)) < 3000
+              row["page_ld"] = "JobPosting" in html
+              maps = re.findall(r"(?im)^sitemap:\s*(\S+)", robots) or [root + "/sitemap.xml"]
+              seen, urls = 0, []
+              while maps and seen < 25:
+                  m = maps.pop(0); seen += 1
+                  st, xml = get(m)
+                  locs = re.findall(r"<loc>\s*([^<]+?)\s*</loc>", xml)
+                  if "<sitemapindex" in xml:
+                      maps = sorted(locs, key=lambda u: not VAC.search(u)) + maps
+                  else:
+                      urls += [u for u in locs if VAC.search(u)]
+                  time.sleep(0.5)
+              row["maps_read"] = seen; row["vac_urls"] = len(urls)
+              shapes = {}
+              for u in urls:
+                  k = re.sub(r"\d+", "N", re.sub(r"[0-9a-f]{8}-[0-9a-f-]{27}", "UUID", u)); k = "/".join(k.split("/")[:6])
+                  shapes[k] = shapes.get(k, 0) + 1
+              row["shapes"] = sorted(shapes.items(), key=lambda x: -x[1])[:4]
+              deep = [u for u in urls if re.search(r"\d{3,}|[0-9a-f]{8}-", u)]
+              row["samples"] = deep[:3] or urls[:3]
+              if row["samples"]:
+                  st, page = get(row["samples"][0])
+                  row["sample_status"] = st
+                  row["sample_ld"] = "JobPosting" in page
+                  h1 = re.search(r"<h1[^>]*>(.*?)</h1>", page, re.S)
+                  row["sample_h1"] = re.sub(r"<[^>]+>|\s+", " ", h1.group(1)).strip()[:80] if h1 else None
+                  row["sample_allowed"] = rp.can_fetch("FastCVBot", row["samples"][0])
+              out.append(row); print(json.dumps(row, ensure_ascii=False)[:300])
+          json.dump(out, open("probe_result.json", "w"), ensure_ascii=False, indent=0)
+          PY
+          git config user.name probe && git config user.email probe@users.noreply.github.com
+          git add probe_result.json && git commit -qm "probe result" && git push -q
