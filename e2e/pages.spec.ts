@@ -104,6 +104,14 @@ test("юридические страницы открываются, ссылк
   await expect(page.getByRole("heading", { name: "Пользовательское соглашение" })).toBeVisible();
 });
 
+test("страница источников: ссылка в подвале и порядок исключения канала", async ({ page }) => {
+  await page.goto("/");
+  await page.getByRole("contentinfo").getByRole("link", { name: "Источники вакансий" }).click();
+  await expect(page.getByRole("heading", { name: "Источники вакансий", level: 1 })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Как исключить свой канал или сайт" })).toBeVisible();
+  await expect(page.getByRole("article").getByRole("link", { name: "eqytest@gmail.com" })).toHaveAttribute("href", /^mailto:eqytest@gmail\.com\?subject=/);
+});
+
 test("регистрация недоступна без согласия с соглашением и политикой", async ({ page }) => {
   await page.goto("/register/form?role=candidate");
   const submit = page.getByRole("button", { name: "Зарегистрироваться" });

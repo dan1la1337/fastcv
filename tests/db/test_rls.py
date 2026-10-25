@@ -301,6 +301,28 @@ CHECKS: list[tuple] = [
         set role authenticated; set request.jwt.claims = '{"email": "Owner@Example.com"}';
         select (admin_metrics() ->> 'vacancies_total')::int > 0 and jsonb_array_length(admin_metrics() -> 'vacancies_by_day') = 14""",
      "postgres", None, "t"),
+    # --- исключение канала по просьбе владельца ---
+    ("пользователь НЕ исключает каналы", False, "select exclude_channel('somechan')", "authenticated", C, None),
+    ("аноним НЕ исключает каналы", False, "select exclude_channel('somechan')", "anon", None, None),
+    ("администратор исключает канал: сбор выключен, вакансии в архиве, чужие на месте", True,
+     """insert into app_admins (email) values ('owner@example.com') on conflict do nothing;
+        insert into channels (username, is_active) values ('OptOutChan', true);
+        insert into vacancies (title, source_type, source_post) values
+          ('Opt 1', 'external', 'OptOutChan/1'), ('Opt 2', 'external', 'otherchan/1');
+        set role authenticated; set request.jwt.claims = '{"email": "owner@example.com"}';
+        select exclude_channel('@optoutchan', 'просьба владельца');
+        select count(*) from excluded_channels() where username = 'OptOutChan';
+        reset role;
+        select (select is_active::text from channels where username = 'OptOutChan') || ':' ||
+               (select string_agg((archived_at is not null)::text, ',' order by title) from vacancies where title like 'Opt %')""",
+     "postgres", None, "1\n1\nfalse:true,false"),
+    ("исключение канала, которого нет в списке, запоминается заранее", True,
+     """insert into app_admins (email) values ('owner@example.com') on conflict do nothing;
+        set role authenticated; set request.jwt.claims = '{"email": "owner@example.com"}';
+        select exclude_channel('future_chan');
+        reset role;
+        select is_active::text || ':' || (excluded_at is not null)::text from channels where username = 'future_chan'""",
+     "postgres", None, "0\nfalse:true"),
     # --- подписка в Telegram ---
     ("кандидат НЕ вписывает себе чужой chat_id", False,
      "update profiles set telegram_chat_id = 42 where id = auth.uid()", "authenticated", C, None),
