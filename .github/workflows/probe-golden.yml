@@ -1,0 +1,42 @@
+name: Probe golden
+on:
+  push:
+    branches: ["probe/golden"]
+jobs:
+  collect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.11'
+      - run: pip install -q -r requirements.txt
+      - name: Collect posts into ai_golden (not committed anywhere)
+        env:
+          SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: |
+          python - <<'PY'
+          import os, time
+          from supabase import create_client
+          import main
+          db = create_client(os.environ["SUPABASE_URL"], os.environ["SUPABASE_SERVICE_ROLE_KEY"])
+          channels = ["theyseeku", "job_python", "forfrontend", "fordesigner", "aestheticsoflawjob", "reklamodromo",
+                      "runello_rus_python", "it_interns", "bigtechjobs", "juniors_rabota_jobs", "devs_it", "MVTOPvacancy",
+                      "legaljobsradar", "bankman_20", "datajob", "forallqa", "fordevops", "mobiledevjobs", "jobforjunior",
+                      "hiddengurus", "pydevjob", "django_jobs_board", "progjob", "vdhl_good"]
+          total = 0
+          for ch in channels:
+              try:
+                  posts, _ = main.parse_channel_page(main.fetch_page(f"https://t.me/s/{ch}"), ch)
+              except Exception as e:
+                  print(ch, "error", type(e).__name__); continue
+              rows = [{"source": p.key, "text": p.text} for p in posts if len(p.text) >= main.MIN_TEXT_LEN][-5:]
+              if rows:
+                  db.table("ai_golden").upsert(rows, on_conflict="source", ignore_duplicates=True).execute()
+                  total += len(rows)
+              print(ch, len(rows))
+              time.sleep(1)
+          print("total", total)
+          PY
