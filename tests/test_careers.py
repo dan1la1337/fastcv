@@ -169,3 +169,20 @@ def test_company_preferences_are_valid_regexes():
         re.compile(co.prefer)
         assert all(d in {"data_ml", "product", "analytics", "design", "qa", "backend", "frontend", "devops"}
                    for _, d in co.categories)
+
+
+def test_time_is_shared_between_companies():
+    t = [0.0]
+
+    def clock():
+        t[0] += 10          # каждый шаг — 10 «секунд»
+        return t[0]
+
+    other = careers.Company("beta", "Beta", "https://job.acme.ru", r"^https://job\.acme\.ru/vacancy/(\d+)/?$", pause=0)
+    many = "<urlset>" + "".join(f"<url><loc>https://job.acme.ru/vacancy/{i}</loc></url>" for i in range(1, 40)) + "</urlset>"
+    pages = {f"https://job.acme.ru/vacancy/{i}": PAGE_LD for i in range(1, 40)}
+    store = Store()
+    stats = careers.import_careers(store, ai, site(**{"https://job.acme.ru/sitemap-vacancies.xml": many}, **pages),
+                                   [CO, other], clock=clock, time_budget=400)
+    assert stats["acme"].get("stopped") == "company share"
+    assert stats["beta"]["saved"] > 0

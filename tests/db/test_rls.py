@@ -388,6 +388,14 @@ CHECKS: list[tuple] = [
                (select (vacancies > 0)::text from direction_counts where direction = 'design')""",
      "postgres", None, "1:true"),
     ("сайт НЕ запускает пересчёт справочников", False, "select refresh_feed_stats()", "anon", None, None),
+    ("сайты компаний: ИТ в ленте наравне с Telegram, розница ниже", True,
+     """insert into vacancies (title, source_type, source_post, ranking_weight) values
+          ('Python-разработчик', 'external', 'career/x/1', 1.0),
+          ('Менеджер по продажам', 'external', 'career/x/2', 1.0),
+          ('Менеджер по продажам', 'external', 'tgchan/2', 1.0);
+        select string_agg(ranking_weight::text, ',' order by source_post) from vacancies
+         where source_post in ('career/x/1', 'career/x/2', 'tgchan/2')""",
+     "postgres", None, "1,0.85,1"),
     ("направление ИТ-вакансий по названию", True,
      """select string_agg(vacancy_direction(t), ',' order by n) from (values
           (1, 'Старший DS-инженер в команду рекомендаций'),
