@@ -39,6 +39,11 @@ const securityHeaders = [
 
 const nextConfig: NextConfig = {
   poweredByHeader: false,
+  // Прокси к Supabase для браузера: см. SUPABASE_PROXY_PATH в src/lib/supabase.ts
+  async rewrites() {
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL?.replace(/\/$/, "");
+    return supabaseUrl ? [{ source: "/sb/:path*", destination: `${supabaseUrl}/:path*` }] : [];
+  },
   async headers() {
     return [{ source: "/(.*)", headers: securityHeaders }];
   },
