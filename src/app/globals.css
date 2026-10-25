@@ -61,9 +61,13 @@ body {
 @keyframes letter-write { from { clip-path: inset(0 0 100% 0); } to { clip-path: inset(0 0 0 0); } }
 .letter-write { animation: letter-write 1.2s cubic-bezier(.3, .7, .2, 1) both; }
 
+/* Полосы воронки растут слева направо */
+@keyframes bar-grow { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+.bar-grow { transform-origin: left; animation: bar-grow 1.2s cubic-bezier(.2, .8, .2, 1) both; }
+
 /* Вошедшим главный экран-приветствие не нужен: признак входа ставит скрипт в <head> до отрисовки */
 html[data-auth] .guest-only { display: none; }
 
 @media (prefers-reduced-motion: reduce) {
-  .aurora-a, .aurora-b, .ring-fill, .live-ping, .ai-shimmer, .letter-write { animation: none; }
+  .aurora-a, .aurora-b, .ring-fill, .live-ping, .ai-shimmer, .letter-write, .bar-grow { animation: none; }
 }

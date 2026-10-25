@@ -5,9 +5,10 @@ import type { User } from "@supabase/supabase-js";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import {
-  Archive, ArrowLeft, Briefcase, CheckCircle2, Eye, FileText, Loader2, Pencil, PlusCircle, RotateCcw, Send, Sparkles, Target, XCircle,
+  Archive, Briefcase, CheckCircle2, Eye, FileText, Loader2, Pencil, Plus, RotateCcw, Send, Sparkles, XCircle,
 } from "lucide-react";
-import { matchTone, toMatch, type Match } from "@/lib/matching";
+import { toMatch, type Match } from "@/lib/matching";
+import MatchRing from "@/components/MatchRing";
 import type { VacancyDraft } from "@/lib/vacancy-draft";
 import { supabase, getUserRole } from "@/lib/supabase";
 import { formatSalary, plural, type Vacancy } from "@/lib/vacancies";
@@ -66,8 +67,8 @@ const REJECT_REASONS: { label: string; text: string }[] = [
 ];
 
 const inputClass =
-  "w-full px-4 py-3 bg-neutral-950 border border-neutral-800 rounded-xl text-sm text-neutral-100 focus:outline-none focus:border-teal-300";
-const labelClass = "block text-xs font-bold text-neutral-500 uppercase tracking-wider mb-2";
+  "w-full px-4 py-3 bg-[#0B0F19] border border-white/12 rounded-2xl text-sm text-neutral-100 focus:outline-none focus:border-teal-300";
+const labelClass = "block text-xs text-neutral-400 mb-2";
 
 export default function EmployerDashboard() {
   const router = useRouter();
@@ -84,7 +85,7 @@ export default function EmployerDashboard() {
   const [notice, setNotice] = useState<{ kind: "ok" | "error"; text: string } | null>(null);
 
   const [matches, setMatches] = useState<Record<string, Match>>({});
-  const [sortBy, setSortBy] = useState<"new" | "match">("new");
+  const [sortBy, setSortBy] = useState<"new" | "match">("match");
   // Ответ кандидату: какой отклик, какой статус и текст письма
   const [reply, setReply] = useState<{ appId: string; status: "interview_scheduled" | "rejected"; text: string } | null>(null);
   const [replying, setReplying] = useState(false);
@@ -287,42 +288,42 @@ export default function EmployerDashboard() {
 
   const openVacancies = vacancies.filter(v => !v.archived_at).length;
   const tabClass = (tab: Tab) =>
-    `px-4 py-2 rounded-xl text-xs font-semibold transition-colors ${
-      activeTab === tab ? "bg-neutral-800 text-white border border-neutral-700" : "text-neutral-400 hover:text-white"
+    `px-4 py-2 rounded-full text-sm transition-colors ${
+      activeTab === tab ? "bg-white/[0.14] text-white" : "text-neutral-400 hover:text-white"
     }`;
 
   return (
     <div className="min-h-screen text-neutral-100 font-sans p-4 sm:p-8">
-      <div className="max-w-4xl mx-auto space-y-6">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-neutral-800 pb-4">
-          <div className="flex items-center gap-3">
-            <Link href="/" className="p-2 bg-neutral-900 border border-neutral-800 rounded-xl hover:bg-neutral-800 transition-colors">
-              <ArrowLeft className="w-4 h-4" />
-            </Link>
-            <div>
-              <h1 className="text-xl font-bold">Кабинет работодателя</h1>
-              <p className="text-xs text-neutral-400 mt-0.5">
-                Компания: {companyName || <Link href="/profile" className="text-teal-300 hover:underline">укажите в профиле</Link>}
-              </p>
+      <div className="max-w-5xl mx-auto space-y-6">
+        <div className="flex flex-wrap items-center gap-x-6 gap-y-4">
+          <div className="space-y-1.5">
+            <div className="flex flex-wrap items-center gap-3">
+              <h1 className="font-display text-2xl font-bold">Кабинет работодателя</h1>
+              <span className="px-3 py-1 rounded-full bg-white/[0.08] text-xs text-neutral-300">для работодателей</span>
             </div>
+            <p className="text-sm text-neutral-400">
+              Компания: {companyName || <Link href="/profile" className="text-teal-300 hover:underline">укажите в профиле</Link>}
+            </p>
           </div>
+          <span className="flex-1" />
+          <button
+            onClick={() => openForm()}
+            className="inline-flex items-center gap-2 h-11 px-5 rounded-full bg-teal-300 hover:bg-teal-200 text-neutral-950 text-sm font-semibold transition-colors"
+          >
+            <Plus className="w-4 h-4" /> Новая вакансия
+          </button>
+        </div>
 
-          <div className="flex flex-wrap items-center gap-2">
-            <button onClick={() => setActiveTab("applications")} className={tabClass("applications")}>
-              Отклики ({applications.length})
-            </button>
-            <button onClick={() => setActiveTab("vacancies")} className={tabClass("vacancies")}>
-              Мои вакансии ({openVacancies})
-            </button>
-            <button
-              onClick={() => openForm()}
-              className={`px-4 py-2 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-colors ${
-                activeTab === "form" && !editingId ? "bg-teal-300 text-neutral-950" : "bg-neutral-900 border border-neutral-800 text-neutral-300 hover:bg-neutral-800"
-              }`}
-            >
-              <PlusCircle className="w-4 h-4" /> Опубликовать
-            </button>
-          </div>
+        <div role="tablist" aria-label="Разделы кабинета" className="inline-flex gap-1 p-1 rounded-full bg-white/[0.06]">
+          <button role="tab" aria-selected={activeTab === "applications"} onClick={() => setActiveTab("applications")} className={tabClass("applications")}>
+            Отклики · {applications.length}
+          </button>
+          <button role="tab" aria-selected={activeTab === "vacancies"} onClick={() => setActiveTab("vacancies")} className={tabClass("vacancies")}>
+            Вакансии · {openVacancies}
+          </button>
+          {activeTab === "form" && (
+            <button role="tab" aria-selected className={tabClass("form")}>{editingId ? "Редактирование" : "Новая вакансия"}</button>
+          )}
         </div>
 
         {notice && (
@@ -335,10 +336,10 @@ export default function EmployerDashboard() {
 
         {/* Форма публикации / редактирования */}
         {activeTab === "form" && (
-          <div className="bg-neutral-900/50 border border-neutral-800 rounded-2xl p-6 sm:p-8 space-y-6">
-            <h2 className="text-lg font-bold">{editingId ? "Редактирование вакансии" : "Новая вакансия"}</h2>
+          <div className="glass rounded-3xl p-6 sm:p-8 space-y-6">
+            <h2 className="font-display text-lg font-bold">{editingId ? "Редактирование вакансии" : "Новая вакансия"}</h2>
             {!editingId && (
-              <div className="rounded-xl border border-teal-300/20 bg-teal-950/20 p-4 space-y-3">
+              <div className="rounded-2xl border border-teal-300/25 bg-teal-300/[0.06] p-4 space-y-3">
                 <p className="text-sm text-neutral-300 flex items-center gap-2">
                   <Sparkles className="w-4 h-4 text-teal-300" /> Опишите вакансию парой фраз — ИИ напишет полный текст
                 </p>
@@ -346,7 +347,7 @@ export default function EmployerDashboard() {
                   placeholder="Ищем мидл-бэкендера на Python в финтех, Django + Postgres, удалёнка, 250–300к"
                   className={`${inputClass} resize-y`} />
                 <button type="button" onClick={draftWithAi} disabled={drafting || notes.trim().length < 15}
-                  className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-teal-300 hover:bg-teal-200 text-neutral-950 text-xs font-semibold disabled:opacity-50">
+                  className="inline-flex items-center gap-2 h-10 px-4 rounded-full bg-teal-300 hover:bg-teal-200 text-neutral-950 text-sm font-semibold disabled:opacity-50">
                   {drafting ? <><Loader2 className="w-4 h-4 animate-spin" /> Пишем…</> : "Написать черновик"}
                 </button>
               </div>
@@ -385,7 +386,7 @@ export default function EmployerDashboard() {
                 </div>
                 <label className="flex items-center gap-3 cursor-pointer sm:pt-6">
                   <input type="checkbox" checked={form.isRemote} onChange={e => setForm({ ...form, isRemote: e.target.checked })}
-                    className="w-5 h-5 rounded bg-neutral-950 border-neutral-800 text-teal-400 focus:ring-0" />
+                    className="w-5 h-5 accent-teal-300" />
                   <span className="text-sm text-neutral-300">Возможна удалённая работа</span>
                 </label>
               </div>
@@ -405,12 +406,12 @@ export default function EmployerDashboard() {
 
               <div className="flex flex-col sm:flex-row gap-3">
                 <button type="submit" disabled={saving}
-                  className="flex-1 py-3.5 bg-teal-300 hover:bg-teal-200 text-neutral-950 rounded-xl text-sm font-bold transition-colors disabled:opacity-50 flex items-center justify-center gap-2">
+                  className="flex-1 h-12 bg-teal-300 hover:bg-teal-200 text-neutral-950 rounded-full text-sm font-semibold transition-colors disabled:opacity-50 flex items-center justify-center gap-2">
                   {saving ? <Loader2 className="w-5 h-5 animate-spin" /> : editingId ? "Сохранить изменения" : "Опубликовать"}
                 </button>
                 {editingId && (
                   <button type="button" onClick={() => { setEditingId(null); setActiveTab("vacancies"); }}
-                    className="px-6 py-3.5 bg-neutral-900 border border-neutral-800 rounded-xl text-sm text-neutral-300 hover:bg-neutral-800">
+                    className="px-6 h-12 border border-white/15 rounded-full text-sm text-neutral-300 hover:text-white hover:border-white/30">
                     Отмена
                   </button>
                 )}
@@ -422,8 +423,8 @@ export default function EmployerDashboard() {
         {/* Мои вакансии */}
         {activeTab === "vacancies" && (
           vacancies.length === 0 ? (
-            <div className="text-center py-20 bg-neutral-900/30 border border-dashed border-neutral-800 rounded-2xl">
-              <Briefcase className="w-10 h-10 mx-auto text-neutral-700 mb-3" />
+            <div className="text-center py-20 border border-dashed border-white/15 rounded-3xl">
+              <Briefcase className="w-10 h-10 mx-auto text-neutral-600 mb-3" />
               <p className="text-neutral-400 text-sm font-medium">У вас пока нет вакансий</p>
               <button onClick={() => openForm()} className="mt-3 text-sm text-teal-300 hover:underline">Опубликовать первую</button>
             </div>
@@ -433,39 +434,55 @@ export default function EmployerDashboard() {
                 const forVacancy = applications.filter(a => a.vacancies.id === v.id);
                 const count = forVacancy.length;
                 const invited = forVacancy.filter(a => a.status === "interview_scheduled").length;
+                const views = v.views_count ?? 0;
+                const top = Math.max(views, count, invited, 1);
+                const funnel = [
+                  { label: "Просмотры", value: views, color: "bg-indigo-400", word: ["просмотр", "просмотра", "просмотров"] as [string, string, string] },
+                  { label: "Отклики", value: count, color: "bg-teal-300", word: ["отклик", "отклика", "откликов"] as [string, string, string] },
+                  { label: "Приглашения", value: invited, color: "bg-teal-100", word: ["приглашение", "приглашения", "приглашений"] as [string, string, string] },
+                ];
                 return (
-                  <div key={v.id} className={`bg-neutral-900/60 border border-neutral-800 rounded-2xl p-5 flex flex-col sm:flex-row sm:items-center gap-4 ${v.archived_at ? "opacity-60" : ""}`}>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2">
-                        <h3 className="font-bold text-white truncate">{v.title}</h3>
-                        {v.archived_at && <span className="text-[10px] uppercase px-2 py-0.5 rounded bg-neutral-800 text-neutral-400 border border-neutral-700">закрыта</span>}
+                  <div key={v.id} className={`glass rounded-3xl p-5 sm:p-6 space-y-4 ${v.archived_at ? "opacity-60" : ""}`}>
+                    <div className="flex flex-wrap items-start gap-4">
+                      <div className="flex-1 min-w-[14rem]">
+                        <div className="flex flex-wrap items-center gap-2">
+                          <h3 className="font-display text-lg font-bold text-white">{v.title}</h3>
+                          {v.archived_at && <span className="text-xs px-2.5 py-0.5 rounded-full bg-white/[0.08] text-neutral-400">закрыта</span>}
+                        </div>
+                        <p className="text-sm text-neutral-400 mt-1">
+                          {formatSalary(v.salary_min, v.salary_max, v.salary_currency)}
+                          {v.city ? ` · ${v.city}` : ""}{v.is_remote ? " · удалённо" : ""}
+                        </p>
                       </div>
-                      <p className="text-xs text-neutral-400 mt-1">
-                        {formatSalary(v.salary_min, v.salary_max, v.salary_currency)}
-                        {v.city ? ` · ${v.city}` : ""}{v.is_remote ? " · удалённо" : ""}
-                      </p>
-                      <p className="text-xs text-neutral-500 mt-1" title="Воронка вакансии">
-                        {v.views_count ?? 0} {plural(v.views_count ?? 0, ["просмотр", "просмотра", "просмотров"])}
-                        {" → "}{count} {plural(count, ["отклик", "отклика", "откликов"])}
-                        {" → "}{invited} {plural(invited, ["приглашение", "приглашения", "приглашений"])}
-                      </p>
+                      <div className="flex items-center gap-2 shrink-0">
+                        <Link href={`/vacancy/${v.id}`} title="Открыть страницу вакансии" aria-label="Открыть страницу вакансии"
+                          className="w-10 h-10 inline-flex items-center justify-center rounded-full border border-white/12 text-neutral-400 hover:text-white hover:border-white/30"><Eye className="w-4 h-4" /></Link>
+                        <button onClick={() => openForm(v)} title="Редактировать" aria-label="Редактировать"
+                          className="w-10 h-10 inline-flex items-center justify-center rounded-full border border-white/12 text-neutral-400 hover:text-white hover:border-white/30"><Pencil className="w-4 h-4" /></button>
+                        {v.archived_at ? (
+                          <button onClick={() => setArchived(v, false)}
+                            className="inline-flex items-center gap-1.5 h-10 px-4 rounded-full border border-white/12 text-sm text-neutral-300 hover:text-white hover:border-white/30">
+                            <RotateCcw className="w-3.5 h-3.5" /> Открыть снова
+                          </button>
+                        ) : (
+                          <button onClick={() => setArchived(v, true)}
+                            className="inline-flex items-center gap-1.5 h-10 px-4 rounded-full border border-white/12 text-sm text-neutral-300 hover:text-red-300 hover:border-red-400/40">
+                            <Archive className="w-3.5 h-3.5" /> Закрыть
+                          </button>
+                        )}
+                      </div>
                     </div>
-                    <div className="flex items-center gap-2 shrink-0">
-                      <Link href={`/vacancy/${v.id}`} title="Открыть страницу вакансии"
-                        className="p-2 rounded-lg border border-neutral-800 text-neutral-400 hover:text-white hover:bg-neutral-800"><Eye className="w-4 h-4" /></Link>
-                      <button onClick={() => openForm(v)} title="Редактировать"
-                        className="p-2 rounded-lg border border-neutral-800 text-neutral-400 hover:text-white hover:bg-neutral-800"><Pencil className="w-4 h-4" /></button>
-                      {v.archived_at ? (
-                        <button onClick={() => setArchived(v, false)}
-                          className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg border border-neutral-800 text-xs text-neutral-300 hover:bg-neutral-800">
-                          <RotateCcw className="w-3.5 h-3.5" /> Открыть снова
-                        </button>
-                      ) : (
-                        <button onClick={() => setArchived(v, true)}
-                          className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg border border-neutral-800 text-xs text-neutral-300 hover:text-red-300 hover:bg-red-950/30">
-                          <Archive className="w-3.5 h-3.5" /> Закрыть
-                        </button>
-                      )}
+                    <div className="space-y-2 text-sm" aria-label="Воронка вакансии">
+                      {funnel.map((f, i) => (
+                        <div key={f.label} className="grid grid-cols-[7.5rem_1fr_3rem] items-center gap-3">
+                          <span className="text-neutral-400">{f.label}</span>
+                          <span className="h-2.5 rounded-r-md bg-white/[0.06] overflow-hidden">
+                            <span className={`bar-grow block h-full rounded-r-md ${f.color}`}
+                              style={{ width: `${Math.max(f.value ? 2 : 0, (f.value / top) * 100)}%`, animationDelay: `${i * 0.15}s` }} />
+                          </span>
+                          <span className="text-right tabular-nums" title={`${f.value} ${plural(f.value, f.word)}`}>{f.value}</span>
+                        </div>
+                      ))}
                     </div>
                   </div>
                 );
@@ -477,74 +494,76 @@ export default function EmployerDashboard() {
         {/* Отклики */}
         {activeTab === "applications" && (
           applications.length === 0 ? (
-            <div className="text-center py-20 bg-neutral-900/30 border border-dashed border-neutral-800 rounded-2xl">
-              <Briefcase className="w-10 h-10 mx-auto text-neutral-700 mb-3" />
+            <div className="text-center py-20 border border-dashed border-white/15 rounded-3xl">
+              <Briefcase className="w-10 h-10 mx-auto text-neutral-600 mb-3" />
               <p className="text-neutral-400 text-sm font-medium">Пока нет откликов</p>
               <p className="text-neutral-500 text-xs mt-1">Опубликуйте вакансию, чтобы получать отклики через Smart Apply</p>
             </div>
           ) : (
             <div className="grid gap-4">
-              <div className="flex items-center gap-2 text-xs text-neutral-400">
-                Сортировка:
-                {([["new", "Сначала новые"], ["match", "По совпадению"]] as const).map(([id, label]) => (
-                  <button key={id} onClick={() => setSortBy(id)} aria-pressed={sortBy === id}
-                    className={`px-3 py-1.5 rounded-lg border transition-colors ${sortBy === id ? "bg-neutral-800 border-neutral-700 text-white" : "border-neutral-800 hover:bg-neutral-900"}`}>
-                    {label}
-                  </button>
-                ))}
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <div role="group" aria-label="Сортировка откликов" className="inline-flex gap-1 p-1 rounded-full bg-white/[0.06] text-sm">
+                  {([["match", "По совпадению"], ["new", "Сначала новые"]] as const).map(([id, label]) => (
+                    <button key={id} onClick={() => setSortBy(id)} aria-pressed={sortBy === id}
+                      className={`px-4 py-1.5 rounded-full transition-colors ${sortBy === id ? "bg-white/[0.14] text-white" : "text-neutral-400 hover:text-white"}`}>
+                      {label}
+                    </button>
+                  ))}
+                </div>
+                <p className="text-xs text-neutral-500">Порядок зависит только от совпадения с вакансией — не от оплаты</p>
               </div>
               {(sortBy === "match"
                 ? [...applications].sort((a, b) => (matches[b.id]?.score ?? -1) - (matches[a.id]?.score ?? -1))
                 : applications
               ).map(app => (
-                <div key={app.id} className="bg-neutral-900/60 border border-neutral-800 rounded-2xl p-6 space-y-4">
-                  <div className="flex flex-col sm:flex-row justify-between gap-2">
-                    <div>
-                      <h3 className="text-lg font-bold text-white">{app.vacancies.title}</h3>
-                      <p className="text-xs text-neutral-400 mt-0.5">
-                        Кандидат: <span className="text-neutral-200 font-semibold">{app.profiles?.name || "Без имени"}</span>
-                        {app.profiles?.skills?.length ? ` · ${app.profiles.skills.join(", ")}` : ""}
+                <div key={app.id} className="glass rounded-3xl p-5 sm:p-6 space-y-4">
+                  <div className="flex flex-wrap items-center gap-4">
+                    {matches[app.id] && (
+                      <MatchRing value={matches[app.id].score} size={64} stroke={matches[app.id].score >= 70 ? "#5EEAD4" : "#818CF8"} />
+                    )}
+                    <div className="flex-1 min-w-[14rem]">
+                      <p className="font-semibold text-white flex flex-wrap items-center gap-2">
+                        {app.profiles?.name || "Без имени"}
+                        <span className={`text-xs px-2.5 py-0.5 rounded-full font-medium ${
+                          app.status === "interview_scheduled" ? "bg-teal-300/15 text-teal-200"
+                            : app.status === "rejected" ? "bg-white/[0.08] text-neutral-400"
+                            : "bg-amber-300/15 text-amber-200"
+                        }`}>
+                          {STATUS_LABELS[app.status] ?? app.status}
+                        </span>
+                      </p>
+                      <p className="text-sm text-neutral-400 mt-1">
+                        {app.vacancies.title}
+                        {app.profiles?.skills?.length ? ` · ${app.profiles.skills.slice(0, 6).join(", ")}` : ""}
                       </p>
                     </div>
-                    <span className={`text-xs px-3 py-1 h-fit rounded-full font-medium border ${
-                      app.status === "interview_scheduled" ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
-                        : app.status === "rejected" ? "bg-neutral-800 text-neutral-400 border-neutral-700"
-                        : "bg-amber-500/10 text-amber-400 border-amber-500/20"
-                    }`}>
-                      {STATUS_LABELS[app.status] ?? app.status}
-                    </span>
                   </div>
 
-                  {matches[app.id] && (
-                    <p className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-neutral-500">
-                      <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-md border font-semibold ${matchTone(matches[app.id].score)}`}>
-                        <Target className="w-3.5 h-3.5" />Совпадение {matches[app.id].score}%
-                      </span>
-                      {matches[app.id].matched.length > 0 && <span>Есть: <span className="text-emerald-400">{matches[app.id].matched.join(", ")}</span></span>}
-                      {matches[app.id].related.length > 0 && (
-                        <span title="Засчитано наполовину: у кандидата смежный опыт">
-                          Смежное: <span className="text-sky-300">{matches[app.id].related.map(r => `${r.skill} (есть ${r.via})`).join(", ")}</span>
-                        </span>
-                      )}
-                      {matches[app.id].missing.length > 0 && <span>Нет: <span className="text-amber-300">{matches[app.id].missing.join(", ")}</span></span>}
-                    </p>
+                  {matches[app.id] && (matches[app.id].matched.length + matches[app.id].related.length + matches[app.id].missing.length > 0) && (
+                    <div className="flex flex-wrap gap-2 text-xs">
+                      {matches[app.id].matched.map(s => <span key={s} className="px-2.5 py-1 rounded-full bg-teal-300/15 text-teal-200">{s} ✓</span>)}
+                      {matches[app.id].related.map(r => (
+                        <span key={r.skill} title="Засчитано наполовину: у кандидата смежный опыт" className="px-2.5 py-1 rounded-full bg-sky-400/10 text-sky-200">{r.skill} ≈ {r.via}</span>
+                      ))}
+                      {matches[app.id].missing.map(s => <span key={s} className="px-2.5 py-1 rounded-full bg-amber-300/10 text-amber-200">нет {s}</span>)}
+                    </div>
                   )}
 
-                  <div className="bg-neutral-950 border border-neutral-800/80 rounded-xl p-4 text-sm text-neutral-300 leading-relaxed whitespace-pre-line">
-                    <p className="text-xs font-bold text-neutral-500 uppercase tracking-wider mb-2">Сопроводительное письмо</p>
+                  <div className="bg-[#0B0F19] border border-white/10 rounded-2xl p-4 text-sm text-neutral-300 leading-relaxed whitespace-pre-line">
+                    <p className="text-xs text-neutral-500 mb-2">Сопроводительное письмо</p>
                     {app.cover_letter || "Письмо не сохранено"}
                   </div>
 
                   {app.hr_message && reply?.appId !== app.id && (
-                    <div className="rounded-xl border border-neutral-800 px-4 py-3 text-sm text-neutral-400">
-                      <p className="text-xs font-bold text-neutral-500 uppercase tracking-wider mb-1">Ваш ответ</p>
+                    <div className="rounded-2xl border border-white/10 px-4 py-3 text-sm text-neutral-400">
+                      <p className="text-xs text-neutral-500 mb-1">Ваш ответ</p>
                       <p className="whitespace-pre-line">{app.hr_message}</p>
                     </div>
                   )}
 
                   {reply?.appId === app.id && (
-                    <div className="space-y-3 rounded-xl border border-teal-300/30 bg-teal-950/20 p-4">
-                      <p className="text-xs font-bold text-neutral-400 uppercase tracking-wider">
+                    <div className="space-y-3 rounded-2xl border border-teal-300/30 bg-teal-300/[0.06] p-4">
+                      <p className="text-xs text-neutral-300">
                         {reply.status === "interview_scheduled" ? "Приглашение на собеседование" : "Отказ"} — кандидат увидит этот текст
                       </p>
                       {reply.status === "rejected" && (
@@ -555,7 +574,7 @@ export default function EmployerDashboard() {
                             return (
                               <button key={reason.label} type="button" aria-pressed={active}
                                 onClick={() => setReply({ ...reply, text: active ? base : `${base}\n\n${reason.text}` })}
-                                className={`px-3 py-1 rounded-lg text-xs border transition-colors ${active ? "bg-teal-300 border-teal-300 text-neutral-950" : "border-neutral-700 text-neutral-300 hover:bg-neutral-800"}`}>
+                                className={`px-3 py-1 rounded-full text-xs border transition-colors ${active ? "bg-teal-300 border-teal-300 text-neutral-950" : "border-white/15 text-neutral-300 hover:border-white/30"}`}>
                                 {reason.label}
                               </button>
                             );
@@ -568,27 +587,27 @@ export default function EmployerDashboard() {
                       <div className="flex justify-end gap-2">
                         <button onClick={() => setReply(null)} className="px-3 py-1.5 text-xs text-neutral-400 hover:text-white">Отмена</button>
                         <button onClick={sendReply} disabled={replying}
-                          className="px-4 py-1.5 bg-teal-300 hover:bg-teal-200 text-neutral-950 rounded-lg text-xs font-bold flex items-center gap-1.5 disabled:opacity-50">
+                          className="h-10 px-4 bg-teal-300 hover:bg-teal-200 text-neutral-950 rounded-full text-sm font-semibold flex items-center gap-1.5 disabled:opacity-50">
                           {replying ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Send className="w-3.5 h-3.5" />} Отправить
                         </button>
                       </div>
                     </div>
                   )}
 
-                  <div className="flex items-center justify-end gap-3 pt-2 border-t border-neutral-800/60">
+                  <div className="flex flex-wrap items-center justify-end gap-2.5 pt-3 border-t border-white/10">
                     {app.profiles?.resume_path && (
                       <button onClick={() => openResume(app.profiles!.resume_path!)}
-                        className="mr-auto px-3 py-1.5 bg-neutral-800 hover:bg-neutral-700 text-neutral-200 rounded-lg text-xs font-medium border border-neutral-700 transition-colors flex items-center gap-1.5">
+                        className="mr-auto h-11 px-4 rounded-full border border-white/12 text-neutral-200 hover:border-white/30 text-sm transition-colors flex items-center gap-1.5">
                         <FileText className="w-3.5 h-3.5" /> Резюме (PDF)
                       </button>
                     )}
                     <button onClick={() => setReply({ appId: app.id, status: "rejected", text: REPLY_TEMPLATES.rejected(app.vacancies.title) })}
-                      className="px-3 py-1.5 bg-neutral-800 hover:bg-red-950/40 text-neutral-300 hover:text-red-400 rounded-lg text-xs font-medium border border-neutral-700 transition-colors flex items-center gap-1.5">
+                      className="h-11 px-4 rounded-full border border-white/15 text-neutral-300 hover:text-red-300 hover:border-red-400/40 text-sm transition-colors flex items-center gap-1.5">
                       <XCircle className="w-3.5 h-3.5" /> Отказать
                     </button>
                     <button onClick={() => setReply({ appId: app.id, status: "interview_scheduled", text: REPLY_TEMPLATES.interview_scheduled(app.vacancies.title) })}
-                      className="px-4 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-xs font-bold transition-colors flex items-center gap-1.5 shadow-lg shadow-emerald-600/20">
-                      <CheckCircle2 className="w-3.5 h-3.5" /> Пригласить на собеседование
+                      className="h-11 px-5 rounded-full bg-teal-300 hover:bg-teal-200 text-neutral-950 text-sm font-semibold transition-colors flex items-center gap-1.5">
+                      <CheckCircle2 className="w-4 h-4" /> Пригласить
                     </button>
                   </div>
                 </div>
