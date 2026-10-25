@@ -9,7 +9,7 @@ export default function Error({ error, retry }: { error: Error & { digest?: stri
   }, [error]);
 
   return (
-    <main className="min-h-screen bg-neutral-950 text-neutral-100 flex items-center justify-center px-4">
+    <main className="min-h-screen text-neutral-100 flex items-center justify-center px-4">
       <div className="max-w-md text-center space-y-4">
         <h1 className="text-xl font-semibold">Что-то пошло не так</h1>
         <p className="text-sm text-neutral-400">
@@ -19,7 +19,7 @@ export default function Error({ error, retry }: { error: Error & { digest?: stri
         <div className="flex justify-center gap-3">
           <button
             onClick={() => retry()}
-            className="px-5 py-2.5 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-sm font-semibold transition-colors"
+            className="px-5 py-2.5 bg-teal-300 hover:bg-teal-200 text-neutral-950 rounded-xl text-sm font-semibold transition-colors"
           >
             Повторить
           </button>

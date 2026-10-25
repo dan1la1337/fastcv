@@ -13,6 +13,7 @@ import { fetchMatches, fetchRecommended, matchTone, type Match } from "@/lib/mat
 import type { Tables } from "@/lib/database.types";
 import type { User } from "@supabase/supabase-js";
 import Link from "next/link";
+import Logo from "@/components/Logo";
 import SmartApply from "@/components/SmartApply";
 import CompanyLine from "@/components/CompanyLine";
 import { estimateSalary, fetchSalaryBenchmarks, type SalaryBenchmark } from "@/lib/salary";
@@ -24,7 +25,7 @@ import SearchSelect, { type SelectOption } from "@/components/SearchSelect";
  * в HTML (initialRows): лента видна до загрузки скриптов и индексируется поисковиками.
  * Дальше — запросы из браузера при смене фильтров и «Показать ещё».
  */
-export default function Feed({ initialRows, initialTotal }: { initialRows: Vacancy[] | null; initialTotal: number }) {
+export default function Feed({ initialRows, initialTotal, hero }: { initialRows: Vacancy[] | null; initialTotal: number; hero?: React.ReactNode }) {
   const [vacancies, setVacancies] = useState<Vacancy[]>(initialRows ?? []);
   const [total, setTotal] = useState(initialTotal);
   const [page, setPage] = useState(0);
@@ -294,7 +295,7 @@ export default function Feed({ initialRows, initialTotal }: { initialRows: Vacan
   const direction = DIRECTIONS.find(d => d.id === selectedDirection);
   const chip = (active: boolean) =>
     `text-xs px-2.5 py-1.5 rounded-md border transition-colors ${active
-      ? "bg-blue-600 border-blue-500 text-white"
+      ? "bg-teal-300 border-teal-300 text-neutral-950"
       : "bg-neutral-950 border-neutral-700 text-neutral-400 hover:border-neutral-500 hover:text-neutral-200"}`;
 
   const forYou = mode === "for-you";
@@ -311,7 +312,7 @@ export default function Feed({ initialRows, initialTotal }: { initialRows: Vacan
 
         {/* Бейджи источников */}
         {item.source_type === 'external' ? (
-           <div className="absolute top-0 right-0 bg-blue-500/10 text-blue-400 text-[10px] uppercase font-bold px-3 py-1 rounded-bl-lg border-b border-l border-blue-500/20 z-10">
+           <div className="absolute top-0 right-0 bg-teal-300/10 text-teal-300 text-[10px] uppercase font-bold px-3 py-1 rounded-bl-lg border-b border-l border-teal-300/20 z-10">
              {sourceOf(item).badge}
            </div>
         ) : (
@@ -324,7 +325,7 @@ export default function Feed({ initialRows, initialTotal }: { initialRows: Vacan
         <div className="flex flex-col sm:flex-row justify-between gap-4">
           <div className="pr-12">
             <h2 className="text-xl font-bold text-neutral-100">
-              <Link href={`/vacancy/${item.id}`} className="hover:text-blue-400 transition-colors">{item.title}</Link>
+              <Link href={`/vacancy/${item.id}`} className="hover:text-teal-300 transition-colors">{item.title}</Link>
             </h2>
             <CompanyLine vacancy={item} className="text-sm text-neutral-400 mt-0.5" />
             <p className="text-base font-semibold text-emerald-400 mt-1 flex flex-wrap items-center gap-2">
@@ -358,7 +359,7 @@ export default function Feed({ initialRows, initialTotal }: { initialRows: Vacan
 
           <button
             onClick={() => setApplyVacancy(item)}
-            className="inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-sm font-semibold transition-colors shrink-0 shadow-lg shadow-blue-500/20 relative z-10"
+            className="inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-teal-300 hover:bg-teal-200 text-neutral-950 rounded-xl text-sm font-semibold transition-colors shrink-0 shadow-lg shadow-teal-300/20 relative z-10"
           >
             <Sparkles className="w-4 h-4" /> Smart Apply
           </button>
@@ -436,7 +437,7 @@ export default function Feed({ initialRows, initialTotal }: { initialRows: Vacan
                   href={item.source_url}
                   target="_blank"
                   rel="noreferrer"
-                  className="inline-flex items-center gap-1 text-xs text-neutral-500 hover:text-blue-400 transition-colors"
+                  className="inline-flex items-center gap-1 text-xs text-neutral-500 hover:text-teal-300 transition-colors"
                 >
                   {sourceOf(item).link} <ExternalLink className="w-3 h-3" />
                 </a>
@@ -449,14 +450,11 @@ export default function Feed({ initialRows, initialTotal }: { initialRows: Vacan
   };
 
   return (
-    <div className="min-h-screen bg-neutral-950 text-neutral-100 antialiased font-sans relative">
+    <div className="min-h-screen text-neutral-100 antialiased font-sans relative">
       <header className="border-b border-neutral-800 bg-neutral-900/80 backdrop-blur-md sticky top-0 z-20">
         <div className="max-w-6xl mx-auto px-4 py-3 sm:py-4 flex items-center justify-between gap-3">
           <div className="flex items-center gap-3">
-            <span className="bg-blue-600 text-white font-black px-2.5 py-1 rounded-lg text-sm tracking-tight shadow-lg shadow-blue-500/25 flex items-center gap-1">
-              ⚡ Fast<span className="text-blue-200">CV</span>
-            </span>
-            <span className="hidden sm:inline font-semibold text-base tracking-tight text-neutral-200">AI Job Board</span>
+            <Logo />
           </div>
           <div className="flex items-center gap-2 sm:gap-4">
             <span className="hidden sm:inline text-xs font-medium text-emerald-400 bg-emerald-400/10 px-3 py-1.5 rounded-full border border-emerald-400/20">
@@ -484,7 +482,7 @@ export default function Feed({ initialRows, initialTotal }: { initialRows: Vacan
 
                 <Link
                   href="/profile"
-                  className="w-9 h-9 flex items-center justify-center rounded-full bg-blue-600/20 border border-blue-500/50 text-blue-400 font-bold cursor-pointer hover:bg-blue-600/30 transition-colors relative z-50"
+                  className="w-9 h-9 flex items-center justify-center rounded-full bg-teal-300/20 border border-teal-300/50 text-teal-300 font-bold cursor-pointer hover:bg-teal-300/30 transition-colors relative z-50"
                   title="Перейти в личный кабинет"
                 >
                   {user.email?.charAt(0).toUpperCase()}
@@ -502,7 +500,8 @@ export default function Feed({ initialRows, initialTotal }: { initialRows: Vacan
         </div>
       </header>
 
-      <main className="max-w-6xl mx-auto px-4 py-6 lg:py-8 grid grid-cols-1 lg:grid-cols-4 gap-4 lg:gap-8 relative z-0">
+      {hero}
+      <main id="feed" className="max-w-6xl mx-auto px-4 py-6 lg:py-8 grid grid-cols-1 lg:grid-cols-4 gap-4 lg:gap-8 relative z-0 scroll-mt-20">
         {(() => {
           const active = [search.trim(), formats.length > 0, minSalary > 0, onlyWithSalary, city.trim(), selectedDirection, area, selectedLevels.length > 0, sources.length > 0].filter(Boolean).length;
           return (
@@ -513,7 +512,7 @@ export default function Feed({ initialRows, initialTotal }: { initialRows: Vacan
             >
               <span className="inline-flex items-center gap-2">
                 <SlidersHorizontal className="w-4 h-4 text-neutral-400" /> Фильтры
-                {active > 0 && <span className="text-xs px-2 py-0.5 rounded-full bg-blue-600 text-white">{active}</span>}
+                {active > 0 && <span className="text-xs px-2 py-0.5 rounded-full bg-teal-300 text-neutral-950">{active}</span>}
               </span>
               <ChevronDown className={`w-4 h-4 text-neutral-400 transition-transform ${filtersOpen ? "rotate-180" : ""}`} />
             </button>
@@ -527,7 +526,7 @@ export default function Feed({ initialRows, initialTotal }: { initialRows: Vacan
               <label className="text-xs font-bold text-neutral-500 uppercase tracking-wider">Ключевые слова</label>
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400" />
-                <input type="text" placeholder="Java, Backend..." value={search} onChange={(e) => setSearch(e.target.value)} className="w-full pl-9 pr-4 py-2.5 bg-neutral-950 border border-neutral-800 rounded-lg text-sm text-neutral-100 focus:outline-none focus:border-blue-500 transition-colors" />
+                <input type="text" placeholder="Java, Backend..." value={search} onChange={(e) => setSearch(e.target.value)} className="w-full pl-9 pr-4 py-2.5 bg-neutral-950 border border-neutral-800 rounded-lg text-sm text-neutral-100 focus:outline-none focus:border-teal-300 transition-colors" />
               </div>
             </div>
 
@@ -548,7 +547,7 @@ export default function Feed({ initialRows, initialTotal }: { initialRows: Vacan
                   step={25000}
                   value={minSalary}
                   onChange={(e) => setMinSalary(Number(e.target.value))}
-                  className="w-full h-1.5 bg-neutral-800 rounded-lg appearance-none cursor-pointer accent-blue-500 transition-all hover:bg-neutral-700"
+                  className="w-full h-1.5 bg-neutral-800 rounded-lg appearance-none cursor-pointer accent-teal-300 transition-all hover:bg-neutral-700"
                 />
                 <div className="flex justify-between text-[10px] text-neutral-500 font-mono">
                   <span>0 ₽</span>
@@ -561,8 +560,8 @@ export default function Feed({ initialRows, initialTotal }: { initialRows: Vacan
                 onClick={() => setOnlyWithSalary(!onlyWithSalary)}
                 className="flex items-center gap-3 cursor-pointer group pt-1 select-none"
               >
-                <div className={`w-4 h-4 rounded border flex items-center justify-center transition-all duration-150 ${onlyWithSalary ? 'bg-blue-600 border-blue-500' : 'border-neutral-700 group-hover:border-neutral-500'}`}>
-                  {onlyWithSalary && <span className="text-white text-[10px] font-bold">✓</span>}
+                <div className={`w-4 h-4 rounded border flex items-center justify-center transition-all duration-150 ${onlyWithSalary ? 'bg-teal-300 border-teal-300' : 'border-neutral-700 group-hover:border-neutral-500'}`}>
+                  {onlyWithSalary && <span className="text-neutral-950 text-[10px] font-bold">✓</span>}
                 </div>
                 <span className="text-xs text-neutral-300 group-hover:text-neutral-100 transition-colors">
                   Только с указанной ЗП
@@ -671,7 +670,7 @@ export default function Feed({ initialRows, initialTotal }: { initialRows: Vacan
                   aria-selected={mode === id}
                   onClick={() => (id === "for-you" ? showForYou() : id === "saved" ? showSaved() : setMode("all"))}
                   className={`inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-medium border transition-colors ${
-                    mode === id ? "bg-blue-600 border-blue-500 text-white" : "bg-neutral-900/60 border-neutral-800 text-neutral-300 hover:bg-neutral-800"
+                    mode === id ? "bg-teal-300 border-teal-300 text-neutral-950" : "bg-neutral-900/60 border-neutral-800 text-neutral-300 hover:bg-neutral-800"
                   }`}
                 >
                   {id === "for-you" && <Target className="w-4 h-4" />}
@@ -685,24 +684,24 @@ export default function Feed({ initialRows, initialTotal }: { initialRows: Vacan
           {isCandidate && !hasPrefs && !forYou && (
             <div className="rounded-xl border border-neutral-800 bg-neutral-900/60 px-4 py-3 text-sm text-neutral-300">
               Расскажите, что ищете — направления, уровень и навыки, — и у каждой вакансии появится процент совпадения.{" "}
-              <Link href="/profile#prefs" className="text-blue-400 hover:underline">Заполнить профиль</Link>
+              <Link href="/profile#prefs" className="text-teal-300 hover:underline">Заполнить профиль</Link>
             </div>
           )}
 
           {forYou && (
-            <div className="rounded-xl border border-blue-500/20 bg-blue-950/20 px-4 py-3 text-sm text-neutral-300">
+            <div className="rounded-xl border border-teal-300/20 bg-teal-950/20 px-4 py-3 text-sm text-neutral-300">
               {hasPrefs ? (
                 <>Вакансии отсортированы по совпадению с вашим профилем: направления, навыки, уровень, формат и город.{" "}
-                  <Link href="/profile#prefs" className="text-blue-400 hover:underline">Изменить, что ищу</Link></>
+                  <Link href="/profile#prefs" className="text-teal-300 hover:underline">Изменить, что ищу</Link></>
               ) : (
                 <>Подборка пока общая: укажите в профиле направления, уровень и навыки — и вакансии выстроятся под вас.{" "}
-                  <Link href="/profile#prefs" className="text-blue-400 hover:underline">Заполнить за минуту</Link></>
+                  <Link href="/profile#prefs" className="text-teal-300 hover:underline">Заполнить за минуту</Link></>
               )}
             </div>
           )}
 
           {listLoading ? (
-            <div className="flex items-center justify-center h-64"><div className="w-6 h-6 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"></div></div>
+            <div className="flex items-center justify-center h-64"><div className="w-6 h-6 border-2 border-teal-300 border-t-transparent rounded-full animate-spin"></div></div>
           ) : loadError ? (
             <div className="text-center py-20 text-sm text-red-400">{loadError}</div>
           ) : list.length === 0 ? (
@@ -747,8 +746,8 @@ export default function Feed({ initialRows, initialTotal }: { initialRows: Vacan
               <ul className="mt-3 space-y-2">
                 {hiddenList.map(v => (
                   <li key={v.id} className="flex items-center justify-between gap-3 text-sm">
-                    <Link href={`/vacancy/${v.id}`} className="text-neutral-300 hover:text-blue-400 truncate">{v.title}</Link>
-                    <button onClick={() => toggleMark(v, "hidden")} className="inline-flex items-center gap-1 text-xs text-blue-400 hover:underline shrink-0">
+                    <Link href={`/vacancy/${v.id}`} className="text-neutral-300 hover:text-teal-300 truncate">{v.title}</Link>
+                    <button onClick={() => toggleMark(v, "hidden")} className="inline-flex items-center gap-1 text-xs text-teal-300 hover:underline shrink-0">
                       <Undo2 className="w-3.5 h-3.5" /> Вернуть в ленту
                     </button>
                   </li>

@@ -11,7 +11,7 @@ export default function CompanyLine({ vacancy, className }: {
   return (
     <p className={className}>
       {vacancy.company_name && (
-        <Link href={companyHref(vacancy.company_name)} className="hover:text-blue-400 transition-colors">{vacancy.company_name}</Link>
+        <Link href={companyHref(vacancy.company_name)} className="hover:text-teal-300 transition-colors">{vacancy.company_name}</Link>
       )}
       {vacancy.company_name && label && <span className="text-neutral-500"> · </span>}
       {label && <span className="text-neutral-500">{label}</span>}

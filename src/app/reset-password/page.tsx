@@ -32,11 +32,11 @@ export default function ResetPasswordPage() {
   }
 
   return (
-    <div className="min-h-screen bg-neutral-950 flex items-center justify-center p-4">
+    <div className="min-h-screen flex items-center justify-center p-4">
       <div className={card}>
         {sent ? (
           <div className="text-center space-y-4">
-            <MailCheck className="w-10 h-10 text-blue-400 mx-auto" />
+            <MailCheck className="w-10 h-10 text-teal-300 mx-auto" />
             <h1 className="text-2xl font-bold text-white">Проверьте почту</h1>
             <p className="text-neutral-400 text-sm leading-relaxed">
               Если аккаунт с адресом <span className="font-medium text-neutral-100">{email}</span> существует,
@@ -53,11 +53,11 @@ export default function ResetPasswordPage() {
                 <label htmlFor="email" className="block text-xs font-bold text-neutral-500 uppercase tracking-wider mb-2">Email</label>
                 <input id="email" type="email" required autoComplete="email" value={email} onChange={e => setEmail(e.target.value)}
                   placeholder="name@example.com"
-                  className="w-full px-4 py-3 bg-neutral-950 border border-neutral-800 rounded-xl text-sm text-neutral-100 focus:outline-none focus:border-blue-500 transition-colors" />
+                  className="w-full px-4 py-3 bg-neutral-950 border border-neutral-800 rounded-xl text-sm text-neutral-100 focus:outline-none focus:border-teal-300 transition-colors" />
               </div>
               {error && <p role="alert" className="text-sm text-red-400 bg-red-950/30 border border-red-500/20 rounded-xl px-4 py-3">{error}</p>}
               <button type="submit" disabled={loading}
-                className="w-full flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-500 text-white py-3 rounded-xl text-sm font-semibold transition-colors disabled:opacity-50">
+                className="w-full flex items-center justify-center gap-2 bg-teal-300 hover:bg-teal-200 text-neutral-950 py-3 rounded-xl text-sm font-semibold transition-colors disabled:opacity-50">
                 {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : "Отправить ссылку"}
               </button>
             </form>

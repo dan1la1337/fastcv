@@ -17,11 +17,11 @@ const MAX_DIRECTIONS = 5; // как в ограничении profiles_pref_dire
 const RESUME_MAX_BYTES = 5 * 1024 * 1024; // совпадает с лимитом бакета resumes
 
 const inputClass =
-  "w-full bg-neutral-950 border border-neutral-800 rounded-xl px-4 py-3 text-sm text-neutral-200 focus:outline-none focus:border-blue-500 transition-colors";
+  "w-full bg-neutral-950 border border-neutral-800 rounded-xl px-4 py-3 text-sm text-neutral-200 focus:outline-none focus:border-teal-300 transition-colors";
 const labelClass = "block text-xs font-bold text-neutral-500 uppercase tracking-wider mb-2";
 const chip = (active: boolean) =>
   `text-xs px-3 py-1.5 rounded-lg border transition-colors ${active
-    ? "bg-blue-600 border-blue-500 text-white"
+    ? "bg-teal-300 border-teal-300 text-neutral-950"
     : "bg-neutral-950 border-neutral-700 text-neutral-400 hover:border-neutral-500 hover:text-neutral-200"}`;
 
 export default function ProfilePage() {
@@ -204,8 +204,8 @@ export default function ProfilePage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-neutral-950 flex items-center justify-center">
-        <Loader2 className="w-8 h-8 animate-spin text-blue-500" />
+      <div className="min-h-screen flex items-center justify-center">
+        <Loader2 className="w-8 h-8 animate-spin text-teal-300" />
       </div>
     );
   }
@@ -213,11 +213,11 @@ export default function ProfilePage() {
   const isCandidate = role === "candidate";
 
   return (
-    <div className="min-h-screen bg-neutral-950 text-neutral-100 font-sans p-4 sm:p-8">
+    <div className="min-h-screen text-neutral-100 font-sans p-4 sm:p-8">
       <div className="max-w-2xl mx-auto space-y-8">
         <div className="flex items-center justify-between">
           <Link href="/" className="inline-flex items-center gap-2 hover:opacity-80 transition-opacity">
-            <span className="bg-blue-600 text-white font-black px-2.5 py-1 rounded-lg text-sm tracking-tight shadow-lg shadow-blue-500/25">⚡ Fast<span className="text-blue-200">CV</span></span>
+            <span className="font-display font-bold text-lg tracking-tight text-neutral-100">fastcv</span>
           </Link>
           <button onClick={handleLogout} className="text-sm text-neutral-400 hover:text-white flex items-center gap-2 transition-colors">
             <LogOut className="w-4 h-4" /> Выйти
@@ -241,7 +241,7 @@ export default function ProfilePage() {
               <div className="inline-flex items-center gap-2 px-4 py-2 bg-neutral-950 border border-neutral-800 rounded-xl text-sm font-medium text-neutral-300">
                 {isCandidate
                   ? <><UserCircle className="w-4 h-4 text-emerald-400" /> Соискатель</>
-                  : <><Briefcase className="w-4 h-4 text-blue-400" /> Работодатель</>}
+                  : <><Briefcase className="w-4 h-4 text-teal-300" /> Работодатель</>}
               </div>
             </div>
 
@@ -320,7 +320,7 @@ export default function ProfilePage() {
                 className={`${inputClass} h-32 resize-y leading-relaxed`} />
             </div>
 
-            <button type="submit" disabled={saving} className="w-full flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-500 text-white py-3.5 rounded-xl text-sm font-semibold transition-colors disabled:opacity-50">
+            <button type="submit" disabled={saving} className="w-full flex items-center justify-center gap-2 bg-teal-300 hover:bg-teal-200 text-neutral-950 py-3.5 rounded-xl text-sm font-semibold transition-colors disabled:opacity-50">
               {saving ? <Loader2 className="w-5 h-5 animate-spin" /> : <><Save className="w-4 h-4" /> Сохранить профиль</>}
             </button>
           </form>
@@ -337,7 +337,7 @@ export default function ProfilePage() {
 
             {resumePath && (
               <button onClick={autofillFromResume} disabled={autofilling}
-                className="w-full flex items-center justify-center gap-2 bg-blue-600/10 hover:bg-blue-600/20 border border-blue-500/30 text-blue-300 rounded-xl py-3 text-sm font-medium transition-colors disabled:opacity-50">
+                className="w-full flex items-center justify-center gap-2 bg-teal-300/10 hover:bg-teal-300/20 border border-teal-300/30 text-teal-200 rounded-xl py-3 text-sm font-medium transition-colors disabled:opacity-50">
                 {autofilling
                   ? <><Loader2 className="w-4 h-4 animate-spin" /> ИИ читает резюме…</>
                   : <><Sparkles className="w-4 h-4" /> Заполнить профиль по резюме</>}
@@ -346,8 +346,8 @@ export default function ProfilePage() {
 
             {resumePath ? (
               <div className="flex flex-wrap items-center gap-3 bg-neutral-950 border border-neutral-800 rounded-xl p-4">
-                <FileText className="w-5 h-5 text-blue-400 shrink-0" />
-                <button onClick={openResume} className="text-sm text-neutral-200 hover:text-blue-400 underline-offset-2 hover:underline">
+                <FileText className="w-5 h-5 text-teal-300 shrink-0" />
+                <button onClick={openResume} className="text-sm text-neutral-200 hover:text-teal-300 underline-offset-2 hover:underline">
                   resume.pdf
                 </button>
                 <div className="ml-auto flex items-center gap-2">
@@ -363,7 +363,7 @@ export default function ProfilePage() {
               </div>
             ) : (
               <button onClick={() => fileInput.current?.click()} disabled={resumeBusy}
-                className="w-full flex items-center justify-center gap-2 border border-dashed border-neutral-700 hover:border-blue-500 rounded-xl py-6 text-sm text-neutral-300 transition-colors disabled:opacity-50">
+                className="w-full flex items-center justify-center gap-2 border border-dashed border-neutral-700 hover:border-teal-300 rounded-xl py-6 text-sm text-neutral-300 transition-colors disabled:opacity-50">
                 {resumeBusy ? <Loader2 className="w-5 h-5 animate-spin" /> : <><Upload className="w-4 h-4" /> Загрузить PDF</>}
               </button>
             )}

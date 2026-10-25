@@ -116,8 +116,8 @@ export default function SmartApply({
 
             <div className="p-5 overflow-y-auto space-y-4">
               {!coverLetter ? (
-                <div className="bg-blue-950/20 border border-blue-500/20 rounded-xl p-6 text-center space-y-4">
-                  <Sparkles className="w-10 h-10 text-blue-400 mx-auto" />
+                <div className="bg-teal-950/20 border border-teal-300/20 rounded-xl p-6 text-center space-y-4">
+                  <Sparkles className="w-10 h-10 text-teal-300 mx-auto" />
                   <div>
                     <h4 className="text-white font-medium mb-1">Сгенерировать идеальное письмо?</h4>
                     <p className="text-sm text-neutral-400">LLM-агент проанализирует твой профиль и требования вакансии, чтобы составить уникальное сопроводительное.</p>
@@ -130,7 +130,7 @@ export default function SmartApply({
                             <button key={value} type="button" aria-pressed={settings[key] === value}
                               onClick={() => setSettings(prev => ({ ...prev, [key]: value }))}
                               className={`text-xs px-2.5 py-1 rounded-md border transition-colors ${settings[key] === value
-                                ? "bg-blue-600 border-blue-500 text-white"
+                                ? "bg-teal-300 border-teal-300 text-neutral-950"
                                 : "bg-neutral-950 border-neutral-700 text-neutral-400 hover:text-neutral-200"}`}>
                               {label}
                             </button>
@@ -143,14 +143,14 @@ export default function SmartApply({
                     <button 
                       onClick={generateCoverLetter} 
                       disabled={isGenerating}
-                      className="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-500 text-white px-6 py-2.5 rounded-lg text-sm font-medium transition-colors disabled:opacity-50"
+                      className="inline-flex items-center gap-2 bg-teal-300 hover:bg-teal-200 text-neutral-950 px-6 py-2.5 rounded-lg text-sm font-medium transition-colors disabled:opacity-50"
                     >
                       {isGenerating ? <><Loader2 className="w-4 h-4 animate-spin" /> Анализируем...</> : 'Начать магию'}
                     </button>
                   ) : (
                     <Link
                       href="/login"
-                      className="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-500 text-white px-6 py-2.5 rounded-lg text-sm font-medium transition-colors"
+                      className="inline-flex items-center gap-2 bg-teal-300 hover:bg-teal-200 text-neutral-950 px-6 py-2.5 rounded-lg text-sm font-medium transition-colors"
                     >
                       Войдите, чтобы откликнуться
                     </Link>
@@ -165,7 +165,7 @@ export default function SmartApply({
                   <textarea 
                     value={coverLetter}
                     onChange={(e) => setCoverLetter(e.target.value)}
-                    className="w-full h-64 bg-neutral-950 border border-neutral-800 rounded-xl p-4 text-sm text-neutral-200 focus:outline-none focus:border-blue-500 leading-relaxed resize-none"
+                    className="w-full h-64 bg-neutral-950 border border-neutral-800 rounded-xl p-4 text-sm text-neutral-200 focus:outline-none focus:border-teal-300 leading-relaxed resize-none"
                   />
                   {letterSource?.vacancyId === vacancy.id && letterSource.source === "template" ? (
                     <p className="text-xs text-amber-400">
@@ -274,7 +274,7 @@ export default function SmartApply({
               {/* Поле с адресом почты и кнопкой копирования */}
               <div className="flex items-center justify-between bg-neutral-950 border border-neutral-800 rounded-xl p-3.5">
                 <div className="flex items-center gap-3 overflow-hidden">
-                  <Mail className="w-4 h-4 text-blue-400 shrink-0" />
+                  <Mail className="w-4 h-4 text-teal-300 shrink-0" />
                   <span className="text-sm font-mono text-neutral-200 truncate">{successContactModal.value}</span>
                 </div>
                 <button
@@ -299,7 +299,7 @@ export default function SmartApply({
 
                 <a
                   href={`mailto:${encodeURIComponent(successContactModal.value)}?subject=${encodeURIComponent("Отклик на вакансию: " + successContactModal.vacancyTitle)}`}
-                  className="flex items-center justify-center gap-2 py-2.5 px-4 bg-blue-600 hover:bg-blue-500 rounded-xl text-xs font-semibold text-white transition-colors"
+                  className="flex items-center justify-center gap-2 py-2.5 px-4 bg-teal-300 hover:bg-teal-200 rounded-xl text-xs font-semibold text-neutral-950 transition-colors"
                 >
                   <Mail className="w-3.5 h-3.5" /> Написать на почту
                 </a>

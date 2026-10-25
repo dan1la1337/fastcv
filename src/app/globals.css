@@ -1,21 +1,58 @@
 @import "tailwindcss";
 
-/* Сайт сделан в одной тёмной теме: фон и текст не зависят от темы системы */
+/* Тема «Аврора» (редизайн, фаза 3): глубокий тёмно-синий фон, мятный акцент (teal-300),
+   индиго — второй цвет сияния. Сайт в одной тёмной теме: от темы системы не зависит. */
 :root {
-  --background: #0a0a0a;
-  --foreground: #ededed;
+  --background: #05070d;
+  --foreground: #eef2f7;
   color-scheme: dark;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-sans: var(--font-inter);
+  --font-display: var(--font-unbounded);
+  --font-mono: var(--font-jetbrains);
+}
+
+/* Нейтральная шкала — холодная, под сине-чёрный фон; остальные цвета Tailwind как есть */
+@theme {
+  --color-neutral-50: #f8fafc;
+  --color-neutral-100: #eef2f7;
+  --color-neutral-200: #d5dbe5;
+  --color-neutral-300: #c7ceda;
+  --color-neutral-400: #a7b0c0;
+  --color-neutral-500: #8892a3;
+  --color-neutral-600: #5b6577;
+  --color-neutral-700: #2a3242;
+  --color-neutral-800: #1a2130;
+  --color-neutral-900: #0b0f19;
+  --color-neutral-950: #05070d;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: var(--font-geist-sans), system-ui, sans-serif;
+  font-family: var(--font-inter), system-ui, sans-serif;
+}
+
+/* Сияние на фоне: два размытых пятна медленно плывут. Без анимации, если пользователь просил */
+@keyframes aurora-a { 0%, 100% { transform: translate(0, 0) scale(1); } 50% { transform: translate(120px, 40px) scale(1.15); } }
+@keyframes aurora-b { 0%, 100% { transform: translate(0, 0) scale(1.1); } 50% { transform: translate(-140px, -30px) scale(0.95); } }
+.aurora-a { animation: aurora-a 14s ease-in-out infinite; }
+.aurora-b { animation: aurora-b 18s ease-in-out infinite; }
+
+/* Кольцо совпадения заполняется до своего значения (--ring-to задаёт компонент) */
+@keyframes ring-fill { from { stroke-dashoffset: var(--ring-from); } to { stroke-dashoffset: var(--ring-to); } }
+.ring-fill { animation: ring-fill 1.6s cubic-bezier(.3, .7, .2, 1) both; }
+
+@keyframes live-ping { 0% { transform: scale(1); opacity: .8; } 100% { transform: scale(2.6); opacity: 0; } }
+.live-ping { animation: live-ping 1.6s cubic-bezier(0, 0, .2, 1) infinite; }
+
+/* Вошедшим главный экран-приветствие не нужен: признак входа ставит скрипт в <head> до отрисовки */
+html[data-auth] .guest-only { display: none; }
+
+@media (prefers-reduced-motion: reduce) {
+  .aurora-a, .aurora-b, .ring-fill, .live-ping { animation: none; }
 }

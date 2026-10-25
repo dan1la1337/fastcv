@@ -51,7 +51,7 @@ export default async function DirectionPage({ params }: Props) {
   ).sort((a, b) => b[1] - a[1]).slice(0, 5);
 
   return (
-    <main className="min-h-screen bg-neutral-950 text-neutral-100 px-4 py-8">
+    <main className="min-h-screen text-neutral-100 px-4 py-8">
       <div className="max-w-3xl mx-auto space-y-6">
         <Link href="/" className="inline-flex items-center gap-2 text-sm text-neutral-400 hover:text-white">
           <ArrowLeft className="w-4 h-4" /> Все вакансии

@@ -94,7 +94,7 @@ export default async function VacancyPage({ params }: Props) {
   });
 
   return (
-    <div className="min-h-screen bg-neutral-950 text-neutral-100 font-sans">
+    <div className="min-h-screen text-neutral-100 font-sans">
       {!vacancy.archived_at && !isMirrored(vacancy) && jsonLd && (
         <script
           type="application/ld+json"
@@ -119,7 +119,7 @@ export default async function VacancyPage({ params }: Props) {
             <span className={`inline-block text-[10px] uppercase font-bold px-2.5 py-1 rounded-md border ${
               vacancy.source_type === "internal"
                 ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
-                : "bg-blue-500/10 text-blue-400 border-blue-500/20"
+                : "bg-teal-300/10 text-teal-300 border-teal-300/20"
             }`}>
               {sourceOf(vacancy).badge}
             </span>
@@ -178,7 +178,7 @@ export default async function VacancyPage({ params }: Props) {
                 href={vacancy.source_url}
                 target="_blank"
                 rel="noreferrer"
-                className="inline-flex items-center gap-1.5 text-sm text-neutral-400 hover:text-blue-400 transition-colors"
+                className="inline-flex items-center gap-1.5 text-sm text-neutral-400 hover:text-teal-300 transition-colors"
               >
                 {sourceOf(vacancy).link === "Пост в Telegram" ? "Оригинальный пост в Telegram" : sourceOf(vacancy).link} <ExternalLink className="w-4 h-4" />
               </a>

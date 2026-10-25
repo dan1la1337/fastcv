@@ -516,6 +516,7 @@ export type Database = {
       }
       unlink_telegram: { Args: never; Returns: undefined }
       delete_my_account: { Args: never; Returns: undefined }
+      live_stats: { Args: never; Returns: Json }
       exclude_channel: {
         Args: { p_note?: string; p_username: string }
         Returns: number

@@ -12,11 +12,11 @@ import ExperienceInput from "@/components/ExperienceInput";
 const MAX_DIRECTIONS = 5;
 
 const inputClass =
-  "w-full bg-neutral-950 border border-neutral-800 rounded-xl px-4 py-3 text-sm text-neutral-200 focus:outline-none focus:border-blue-500 transition-colors";
+  "w-full bg-neutral-950 border border-neutral-800 rounded-xl px-4 py-3 text-sm text-neutral-200 focus:outline-none focus:border-teal-300 transition-colors";
 const labelClass = "block text-xs font-bold text-neutral-500 uppercase tracking-wider mb-2";
 const chip = (active: boolean) =>
   `text-sm px-3 py-1.5 rounded-lg border transition-colors ${active
-    ? "bg-blue-600 border-blue-500 text-white"
+    ? "bg-teal-300 border-teal-300 text-neutral-950"
     : "bg-neutral-950 border-neutral-700 text-neutral-300 hover:border-neutral-500"}`;
 
 /**
@@ -84,14 +84,14 @@ export default function WelcomePage() {
 
   if (!userId) {
     return (
-      <div className="min-h-screen bg-neutral-950 flex items-center justify-center">
-        <Loader2 className="w-8 h-8 animate-spin text-blue-500" />
+      <div className="min-h-screen flex items-center justify-center">
+        <Loader2 className="w-8 h-8 animate-spin text-teal-300" />
       </div>
     );
   }
 
   return (
-    <main className="min-h-screen bg-neutral-950 text-neutral-100 px-4 py-8">
+    <main className="min-h-screen text-neutral-100 px-4 py-8">
       <form onSubmit={save} className="max-w-2xl mx-auto space-y-7">
         <header className="space-y-2">
           <h1 className="text-2xl sm:text-3xl font-bold">Что вы ищете?</h1>
@@ -150,12 +150,12 @@ export default function WelcomePage() {
         </div>
 
         <p className="text-xs text-neutral-500">
-          Есть резюме в PDF? Загрузите его в <Link href="/profile" className="text-blue-400 hover:underline">профиле</Link> —
+          Есть резюме в PDF? Загрузите его в <Link href="/profile" className="text-teal-300 hover:underline">профиле</Link> —
           ИИ заполнит опыт и навыки за вас.
         </p>
 
         <button type="submit" disabled={saving || !name.trim()}
-          className="w-full flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-500 text-white py-3.5 rounded-xl text-sm font-semibold transition-colors disabled:opacity-50">
+          className="w-full flex items-center justify-center gap-2 bg-teal-300 hover:bg-teal-200 text-neutral-950 py-3.5 rounded-xl text-sm font-semibold transition-colors disabled:opacity-50">
           {saving ? <Loader2 className="w-5 h-5 animate-spin" /> : <><Sparkles className="w-4 h-4" /> Показать мои вакансии</>}
         </button>
       </form>

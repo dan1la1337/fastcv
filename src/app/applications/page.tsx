@@ -20,7 +20,7 @@ interface Application {
 
 const STATUS: Record<string, { text: string; style: string }> = {
   new: { text: "Ждёт ответа работодателя", style: "bg-amber-500/10 text-amber-400 border-amber-500/20" },
-  viewed: { text: "Просмотрен", style: "bg-blue-500/10 text-blue-400 border-blue-500/20" },
+  viewed: { text: "Просмотрен", style: "bg-teal-300/10 text-teal-300 border-teal-300/20" },
   interview_scheduled: { text: "Приглашение на собеседование", style: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20" },
   rejected: { text: "Отказ", style: "bg-neutral-800 text-neutral-400 border-neutral-700" },
 };
@@ -59,14 +59,14 @@ export default function CandidateApplications() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-neutral-950 flex items-center justify-center">
-        <Loader2 className="w-8 h-8 animate-spin text-blue-500" />
+      <div className="min-h-screen flex items-center justify-center">
+        <Loader2 className="w-8 h-8 animate-spin text-teal-300" />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-neutral-950 text-neutral-100 p-4 sm:p-8">
+    <div className="min-h-screen text-neutral-100 p-4 sm:p-8">
       <div className="max-w-3xl mx-auto space-y-6">
         <div className="flex items-center justify-between gap-3 border-b border-neutral-800 pb-4">
           <div className="flex items-center gap-3">
@@ -84,7 +84,7 @@ export default function CandidateApplications() {
           <div className="text-center py-20 bg-neutral-900/30 border border-dashed border-neutral-800 rounded-2xl space-y-3">
             <MessageSquare className="w-10 h-10 mx-auto text-neutral-700" />
             <p className="text-neutral-400 text-sm font-medium">Вы ещё не откликались на вакансии</p>
-            <Link href="/" className="inline-block text-sm text-blue-400 hover:text-blue-300">Перейти к вакансиям</Link>
+            <Link href="/" className="inline-block text-sm text-teal-300 hover:text-teal-200">Перейти к вакансиям</Link>
           </div>
         ) : (
           <div className="grid gap-4">
@@ -101,7 +101,7 @@ export default function CandidateApplications() {
                   <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-2">
                     <div className="min-w-0">
                       {v ? (
-                        <Link href={`/vacancy/${v.id}`} className="text-lg font-bold text-white hover:text-blue-400 transition-colors">
+                        <Link href={`/vacancy/${v.id}`} className="text-lg font-bold text-white hover:text-teal-300 transition-colors">
                           {v.title}
                         </Link>
                       ) : (
@@ -144,7 +144,7 @@ export default function CandidateApplications() {
 
                   {external && v?.source_url && (
                     <a href={v.source_url} target="_blank" rel="noreferrer"
-                      className="inline-flex items-center gap-1.5 text-xs text-neutral-400 hover:text-blue-400 transition-colors">
+                      className="inline-flex items-center gap-1.5 text-xs text-neutral-400 hover:text-teal-300 transition-colors">
                       Оригинальный пост <ExternalLink className="w-3.5 h-3.5" />
                     </a>
                   )}
