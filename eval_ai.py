@@ -23,13 +23,15 @@ def same(field: str, expected: Any, got: Any) -> bool:
     return expected == got
 
 
-def score(cases: list[dict], normalize: Callable[[str], Any]) -> dict:
+def score(cases: list[dict], normalize: Callable[[str], Any], pause: Callable[[], None] = lambda: None) -> dict:
     """cases: [{source, text, expected}]. Поля сверяем только те, что есть в разметке;
     для «не вакансий» — только is_job."""
     totals = {f: [0, 0] for f in FIELDS}
     mistakes: list[dict] = []
     failed = 0
-    for case in cases:
+    for i, case in enumerate(cases):
+        if i:
+            pause()             # как в сборщике: без паузы бесплатный лимит Gemini кончается за минуту
         expected = case["expected"]
         try:
             got = normalize(case["text"]).model_dump()
@@ -53,14 +55,17 @@ def score(cases: list[dict], normalize: Callable[[str], Any]) -> dict:
 
 
 def main() -> None:
-    from main import GEMINI_MODELS, make_gemini_normalizer
+    import time
+
+    from main import AI_PAUSE_SECONDS, GEMINI_MODELS, make_gemini_normalizer
     from supabase import create_client
 
     db = create_client(os.environ["SUPABASE_URL"], os.environ["SUPABASE_SERVICE_ROLE_KEY"])
     models = tuple(m.strip() for m in (os.getenv("GEMINI_MODELS") or "").split(",") if m.strip()) or GEMINI_MODELS
     rows = (db.table("ai_golden").select("source, text, expected")
             .not_.is_("expected", "null").order("id").execute().data or [])
-    result = score(rows, make_gemini_normalizer(os.environ["GEMINI_API_KEY"], models))
+    result = score(rows, make_gemini_normalizer(os.environ["GEMINI_API_KEY"], models),
+                   pause=lambda: time.sleep(AI_PAUSE_SECONDS))
     result["models"] = list(models)
     result["at"] = datetime.now(timezone.utc).isoformat()
     print(f"Постов: {result['cases']}, ИИ не ответил: {result['ai_failed']}")
