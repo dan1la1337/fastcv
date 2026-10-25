@@ -125,6 +125,8 @@ export type Database = {
       channels: {
         Row: {
           category: string | null
+          excluded_at: string | null
+          excluded_note: string | null
           failed_runs: number
           id: number
           is_active: boolean | null
@@ -135,6 +137,8 @@ export type Database = {
         }
         Insert: {
           category?: string | null
+          excluded_at?: string | null
+          excluded_note?: string | null
           failed_runs?: number
           id?: number
           is_active?: boolean | null
@@ -145,6 +149,8 @@ export type Database = {
         }
         Update: {
           category?: string | null
+          excluded_at?: string | null
+          excluded_note?: string | null
           failed_runs?: number
           id?: number
           is_active?: boolean | null
@@ -510,6 +516,18 @@ export type Database = {
       }
       unlink_telegram: { Args: never; Returns: undefined }
       delete_my_account: { Args: never; Returns: undefined }
+      exclude_channel: {
+        Args: { p_note?: string; p_username: string }
+        Returns: number
+      }
+      excluded_channels: {
+        Args: never
+        Returns: {
+          excluded_at: string
+          excluded_note: string | null
+          username: string
+        }[]
+      }
       vacancy_direction: {
         Args: { stack?: Json; title: string }
         Returns: string

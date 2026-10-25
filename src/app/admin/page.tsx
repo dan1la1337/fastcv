@@ -5,6 +5,7 @@ import { ArrowLeft } from "lucide-react";
 import { createSupabaseServerClient } from "@/lib/supabase-server";
 import { DIRECTIONS, plural } from "@/lib/vacancies";
 import TelegramBotSetup from "@/components/TelegramBotSetup";
+import ChannelOptOut, { type ExcludedChannel } from "@/components/ChannelOptOut";
 
 export const metadata: Metadata = { title: "Метрики — FastCV", robots: { index: false } };
 
@@ -45,6 +46,7 @@ export default async function AdminPage() {
   if (error || !data) notFound();
   const m = data as unknown as Metrics;
   const { data: botSetting } = await supabase.from("app_settings").select("value").eq("key", "telegram_bot_username").maybeSingle();
+  const { data: excluded } = await supabase.rpc("excluded_channels");
 
   const days = m.vacancies_by_day ?? [];
   const totals = days.map(d => d.external + d.internal);
@@ -164,6 +166,7 @@ export default async function AdminPage() {
           </section>
         </div>
         <TelegramBotSetup current={botSetting?.value ?? null} />
+        <ChannelOptOut initial={(excluded ?? []) as ExcludedChannel[]} />
       </div>
     </main>
   );

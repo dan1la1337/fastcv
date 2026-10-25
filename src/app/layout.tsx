@@ -39,6 +39,7 @@ export default function RootLayout({
             <Link href="/jobs" className="hover:text-neutral-200">Вакансии по направлениям</Link>
             <Link href="/terms" className="hover:text-neutral-200">Пользовательское соглашение</Link>
             <Link href="/privacy" className="hover:text-neutral-200">Политика обработки данных</Link>
+            <Link href="/sources" className="hover:text-neutral-200">Источники вакансий</Link>
             <a href={`mailto:${OPERATOR.email}`} className="hover:text-neutral-200">{OPERATOR.email}</a>
           </div>
         </footer>
