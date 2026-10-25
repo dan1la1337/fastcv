@@ -1,0 +1,30 @@
+name: AI eval
+
+# Точность извлечения на эталонном наборе (таблица ai_golden). Запускать вручную перед
+# сменой модели или промпта; можно указать модели через запятую.
+on:
+  workflow_dispatch:
+    inputs:
+      models:
+        description: 'Модели Gemini через запятую (пусто — как у сборщика)'
+        type: string
+        default: ''
+
+jobs:
+  eval:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.11'
+          cache: pip
+      - run: pip install -q -r requirements.txt
+      - name: Eval
+        env:
+          SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          GEMINI_MODELS: ${{ inputs.models }}
+        run: python -u eval_ai.py
