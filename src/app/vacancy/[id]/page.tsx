@@ -7,6 +7,7 @@ import { supabase } from "@/lib/supabase";
 import { VACANCY_COLUMNS, formatLabel, formatSalary, levelLabel, experienceLabel, plural, sourceOf, type Vacancy } from "@/lib/vacancies";
 import VacancyApply from "@/components/VacancyApply";
 import VacancyMatch from "@/components/VacancyMatch";
+import MobileApplyBar from "@/components/MobileApplyBar";
 import ViewCounter from "@/components/ViewCounter";
 import CompanyLine from "@/components/CompanyLine";
 import { estimateSalary, fetchSalaryBenchmarks } from "@/lib/salary";
@@ -196,7 +197,7 @@ export default async function VacancyPage({ params }: Props) {
           </div>
 
           {!vacancy.archived_at && (
-            <div id="smart-apply" className="flex-[1_1_360px] max-w-md min-w-0 lg:sticky lg:top-24 scroll-mt-6">
+            <div id="smart-apply" className="flex-[1_1_360px] lg:max-w-md min-w-0 lg:sticky lg:top-24 scroll-mt-6">
               <VacancyApply vacancy={vacancy} />
             </div>
           )}
@@ -204,16 +205,7 @@ export default async function VacancyPage({ params }: Props) {
       </div>
 
       {/* На телефоне панель Smart Apply ниже текста — кнопка внизу экрана ведёт к ней */}
-      {!vacancy.archived_at && (
-        <div className="lg:hidden sticky bottom-0 z-30 px-3 pb-3 pt-2">
-          <div className="glass backdrop-blur-md rounded-3xl p-3 flex items-center gap-3">
-            <p className="flex-1 text-xs text-neutral-400 leading-snug">Smart Apply напишет письмо под эту вакансию</p>
-            <a href="#smart-apply" className="shrink-0 inline-flex items-center gap-2 h-12 px-5 rounded-full bg-teal-300 text-neutral-950 text-sm font-semibold">
-              Откликнуться
-            </a>
-          </div>
-        </div>
-      )}
+      {!vacancy.archived_at && <MobileApplyBar target="smart-apply" />}
     </div>
   );
 }
