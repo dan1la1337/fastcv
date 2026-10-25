@@ -67,6 +67,11 @@ COMPANIES = [
     Company("selectel", "Selectel", "https://selectel.ru", r"^https?://selectel\.ru/careers/all/vacancy/(\d+)/?$"),
     Company("alfa", "Альфа-Банк", "https://job.alfabank.ru",
             r"^https?://job\.alfabank\.ru/vacancies/[^/]+/[^/]+/[^/]*_(\d+)/?$"),
+    Company("x5tech", "X5 Tech", "https://x5.tech", r"^https?://x5\.tech/vacancy/([0-9a-f-]{36})/?$"),
+    # Сбер: тысячи вакансий, больше всего в отделениях — ИТ-адреса (по транслиту названия) первыми
+    Company("sber", "Сбер", "https://rabota.sber.ru", r"^https?://rabota\.sber\.ru/search/[\w-]+-(\d+)/?$",
+            prefer=r"/search/[^/]*(razrab|programm|develop|analitik|analyst|devops|inzhener|engineer|testirov|"
+                   r"\bqa\b|data|java|python|golang|frontend|backend|arhitekt|administrator|\bml\b|\bit\b|tekhlid|timlid)"),
     # Т-Банк: одна вакансия повторяется по городам — id вакансии последний сегмент; сайт
     # ограничивает частоту запросов, поэтому пауза больше
     Company("tbank", "Т-Банк", "https://www.tbank.ru",

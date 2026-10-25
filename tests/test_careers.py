@@ -113,12 +113,18 @@ def test_company_patterns_match_real_urls():
         "vk": ("http://team.vk.company/vacancy/46274/", "46274"),
         "avito": ("https://career.avito.com/vacancies/razrabotka/19456/", "19456"),
         "alfa": ("https://job.alfabank.ru/vacancies/moskva/central-office/alfa-agent_39197", "39197"),
+        "x5tech": ("https://x5.tech/vacancy/e0592e04-4530-4f42-a9ed-0946095e6d6b", "e0592e04-4530-4f42-a9ed-0946095e6d6b"),
+        "sber": ("https://rabota.sber.ru/search/starshiy-klientskiy-menedzher-4482579/", "4482579"),
         "tbank": ("https://www.tbank.ru/career/it/vacancy/murom/product-manager-v-t-bank/019e8406-0ea0-7175-a543-e47fe3fe711c/",
                   "019e8406-0ea0-7175-a543-e47fe3fe711c"),
     }
     import re
     for key, (url, vid) in samples.items():
         assert re.match(by_key[key].vacancy, url).group(1) == vid, key
+    prefer = by_key["sber"].prefer
+    assert re.search(prefer, "https://rabota.sber.ru/search/razrabotchik-java-4482580/")
+    assert re.search(prefer, "https://rabota.sber.ru/search/it-arhitektor-4482581/")
+    assert not re.search(prefer, "https://rabota.sber.ru/search/starshiy-klientskiy-menedzher-4482579/")
 
 
 def test_title_city_and_description_from_page_heads_without_ai():
