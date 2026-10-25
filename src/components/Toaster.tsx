@@ -23,7 +23,7 @@ export function toast(text: string, kind: ToastKind = "info") {
 const STYLES: Record<ToastKind, { box: string; icon: typeof Info }> = {
   ok: { box: "border-emerald-500/30 bg-emerald-950/90 text-emerald-100", icon: CheckCircle2 },
   error: { box: "border-red-500/30 bg-red-950/90 text-red-100", icon: XCircle },
-  info: { box: "border-neutral-700 bg-neutral-900/95 text-neutral-100", icon: Info },
+  info: { box: "border-white/15 bg-neutral-900/95 text-neutral-100", icon: Info },
 };
 
 /** Вывод уведомлений. Подключён один раз в корневом layout. */

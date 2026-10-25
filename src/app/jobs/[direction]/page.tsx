@@ -57,7 +57,7 @@ export default async function DirectionPage({ params }: Props) {
           <ArrowLeft className="w-4 h-4" /> Все вакансии
         </Link>
         <header className="space-y-2">
-          <h1 className="text-2xl sm:text-3xl font-bold">Вакансии: {direction.label}</h1>
+          <h1 className="font-display text-2xl sm:text-3xl font-bold">Вакансии: {direction.label}</h1>
           <p className="text-sm text-neutral-400">
             {vacancies.length} {plural(vacancies.length, VACANCY_FORMS)}
             {vacancies.length > 0 && <> · удалённо — {remote}</>}
@@ -71,19 +71,19 @@ export default async function DirectionPage({ params }: Props) {
         {vacancies.length ? (
           <VacancyListStatic vacancies={vacancies} />
         ) : (
-          <p className="text-sm text-neutral-400 py-10 text-center border border-dashed border-neutral-800 rounded-2xl">
+          <p className="text-sm text-neutral-400 py-10 text-center border border-dashed border-white/10 rounded-2xl">
             Сейчас открытых вакансий нет — новые приходят каждые несколько часов.
           </p>
         )}
 
-        <nav className="pt-6 border-t border-neutral-800" aria-label="Другие направления">
+        <nav className="pt-6 border-t border-white/10" aria-label="Другие направления">
           <p className="text-xs text-neutral-500 mb-3">
             Другие направления · <Link href="/jobs" className="underline hover:text-neutral-300">все направления</Link>
           </p>
           <div className="flex flex-wrap gap-2">
             {DIRECTIONS.filter(d => d.id !== direction.id).map(d => (
               <Link key={d.id} href={`/jobs/${d.id.replace("_", "-")}`}
-                className="text-xs px-3 py-1.5 rounded-lg border border-neutral-800 text-neutral-300 hover:bg-neutral-900">
+                className="text-xs px-3 py-1.5 rounded-lg border border-white/10 text-neutral-300 hover:bg-neutral-900">
                 {d.label}
               </Link>
             ))}

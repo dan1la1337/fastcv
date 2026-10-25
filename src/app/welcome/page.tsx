@@ -12,12 +12,12 @@ import ExperienceInput from "@/components/ExperienceInput";
 const MAX_DIRECTIONS = 5;
 
 const inputClass =
-  "w-full bg-neutral-950 border border-neutral-800 rounded-xl px-4 py-3 text-sm text-neutral-200 focus:outline-none focus:border-teal-300 transition-colors";
+  "w-full bg-[#0B0F19] border border-white/12 rounded-2xl px-4 py-3 text-sm text-neutral-200 focus:outline-none focus:border-teal-300 transition-colors";
 const labelClass = "block text-xs font-bold text-neutral-500 uppercase tracking-wider mb-2";
 const chip = (active: boolean) =>
   `text-sm px-3 py-1.5 rounded-lg border transition-colors ${active
     ? "bg-teal-300 border-teal-300 text-neutral-950"
-    : "bg-neutral-950 border-neutral-700 text-neutral-300 hover:border-neutral-500"}`;
+    : "bg-neutral-950 border-white/15 text-neutral-300 hover:border-neutral-500"}`;
 
 /**
  * Онбординг кандидата за минуту: сразу после регистрации спрашиваем, что он ищет,
@@ -94,7 +94,7 @@ export default function WelcomePage() {
     <main className="min-h-screen text-neutral-100 px-4 py-8">
       <form onSubmit={save} className="max-w-2xl mx-auto space-y-7">
         <header className="space-y-2">
-          <h1 className="text-2xl sm:text-3xl font-bold">Что вы ищете?</h1>
+          <h1 className="font-display text-2xl sm:text-3xl font-bold">Что вы ищете?</h1>
           <p className="text-sm text-neutral-400">
             Минута — и лента выстроится под вас: у каждой вакансии появится процент совпадения.
           </p>
@@ -155,7 +155,7 @@ export default function WelcomePage() {
         </p>
 
         <button type="submit" disabled={saving || !name.trim()}
-          className="w-full flex items-center justify-center gap-2 bg-teal-300 hover:bg-teal-200 text-neutral-950 py-3.5 rounded-xl text-sm font-semibold transition-colors disabled:opacity-50">
+          className="w-full flex items-center justify-center gap-2 bg-teal-300 hover:bg-teal-200 text-neutral-950 py-3.5 rounded-full text-sm font-semibold transition-colors disabled:opacity-50">
           {saving ? <Loader2 className="w-5 h-5 animate-spin" /> : <><Sparkles className="w-4 h-4" /> Показать мои вакансии</>}
         </button>
       </form>

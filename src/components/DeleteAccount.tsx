@@ -36,7 +36,7 @@ export default function DeleteAccount({ userId }: { userId: string }) {
   }
 
   return (
-    <div className="bg-neutral-900/50 border border-neutral-800 rounded-2xl p-6 sm:p-8 space-y-4">
+    <div className="glass rounded-3xl p-6 sm:p-8 space-y-4">
       <div>
         <h2 className="text-lg font-bold text-white">Удаление аккаунта</h2>
         <p className="text-sm text-neutral-400 mt-1">
@@ -54,7 +54,7 @@ export default function DeleteAccount({ userId }: { userId: string }) {
             Чтобы подтвердить, введите слово «{CONFIRM_WORD}»
           </label>
           <input id="confirm-delete" value={word} onChange={e => setWord(e.target.value)} autoComplete="off"
-            className="w-full bg-neutral-950 border border-neutral-800 rounded-xl px-4 py-3 text-sm text-neutral-200 focus:outline-none focus:border-red-500" />
+            className="w-full bg-[#0B0F19] border border-white/12 rounded-2xl px-4 py-3 text-sm text-neutral-200 focus:outline-none focus:border-red-500" />
           {error && <p role="alert" className="text-sm text-red-400">{error}</p>}
           <div className="flex flex-wrap gap-2">
             <button onClick={remove} disabled={busy || word.trim().toLowerCase() !== CONFIRM_WORD}
@@ -62,7 +62,7 @@ export default function DeleteAccount({ userId }: { userId: string }) {
               {busy ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />} Удалить навсегда
             </button>
             <button onClick={() => { setOpen(false); setWord(""); }} disabled={busy}
-              className="px-4 py-2.5 rounded-xl border border-neutral-800 text-sm text-neutral-300 hover:bg-neutral-800">
+              className="px-4 py-2.5 rounded-xl border border-white/10 text-sm text-neutral-300 hover:bg-white/[0.08]">
               Отмена
             </button>
           </div>

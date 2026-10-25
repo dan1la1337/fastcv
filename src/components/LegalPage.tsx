@@ -11,7 +11,7 @@ export default function LegalPage({ title, children }: { title: string; children
           <ArrowLeft className="w-4 h-4" /> На главную
         </Link>
         <header className="space-y-1">
-          <h1 className="text-2xl sm:text-3xl font-bold text-white">{title}</h1>
+          <h1 className="font-display text-2xl sm:text-3xl font-bold text-white">{title}</h1>
           <p className="text-neutral-500">Редакция от {LEGAL_DATE}</p>
         </header>
         {children}
