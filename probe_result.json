@@ -1,0 +1,998 @@
+[
+{
+"site": "https://career.ozon.ru",
+"robots": 200,
+"allowed": false,
+"page": 403,
+"spa": false,
+"page_ld": false,
+"maps_read": 1,
+"vac_urls": 0,
+"shapes": [],
+"samples": []
+},
+{
+"site": "https://yandex.ru/jobs",
+"robots": 200,
+"allowed": false,
+"page": 200,
+"spa": false,
+"page_ld": false,
+"maps_read": 25,
+"vac_urls": 217,
+"shapes": [
+[
+"https://yandex.ru/blog/company/kak-rabotaet-yandeks-metrika",
+1
+],
+[
+"https://yandex.ru/blog/company/rabota-na-leto",
+1
+],
+[
+"https://yandex.ru/blog/company/kak-eto-rabotaet-sintez-rechi",
+1
+],
+[
+"https://yandex.ru/blog/company/rabota-na-mestnosti-kak-my-zapuskali-mtsk",
+1
+]
+],
+"samples": [
+"https://yandex.ru/blog/punto/ne-rabotaet-v-brauzere-chrome-versiya-58-0-3029-110-64-bit-ranshe-rabotal",
+"https://yandex.ru/blog/punto/office-2016-mso-32bit-ne-rabotaet-avtopereklyuchenie-vo-vsekh-programmakh-paketa",
+"https://yandex.ru/blog/punto/ne-rabotaet-v-outlook-2007"
+],
+"sample_status": 200,
+"sample_ld": false,
+"sample_h1": "",
+"sample_allowed": false
+},
+{
+"site": "https://careers.kaspersky.ru",
+"robots": 200,
+"allowed": true,
+"page": 200,
+"spa": false,
+"page_ld": false,
+"maps_read": 1,
+"vac_urls": 7,
+"shapes": [
+[
+"https://careers.kaspersky.ru",
+1
+],
+[
+"https://careers.kaspersky.ru/about",
+1
+],
+[
+"https://careers.kaspersky.ru/events",
+1
+],
+[
+"https://careers.kaspersky.ru/vacancies",
+1
+]
+],
+"samples": [
+"https://careers.kaspersky.ru",
+"https://careers.kaspersky.ru/about",
+"https://careers.kaspersky.ru/events"
+],
+"sample_status": 200,
+"sample_ld": false,
+"sample_h1": null,
+"sample_allowed": true
+},
+{
+"site": "https://rabota.sber.ru",
+"robots": 200,
+"allowed": true,
+"page": 200,
+"spa": false,
+"page_ld": false,
+"maps_read": 1,
+"vac_urls": 2906,
+"shapes": [
+[
+"https://rabota.sber.ru/search/starshiy-menedzher-po-rabote-s-klientami-N/",
+409
+],
+[
+"https://rabota.sber.ru/search/starshiy-klientskiy-menedzher-N/",
+150
+],
+[
+"https://rabota.sber.ru/search/menedzher-po-rabote-s-klientami-N/",
+95
+],
+[
+"https://rabota.sber.ru/search/specialist-otdeleniya-banka-N/",
+44
+]
+],
+"samples": [
+"https://rabota.sber.ru/search/starshiy-klientskiy-menedzher-4482579/",
+"https://rabota.sber.ru/search/stazher-llm-4577651/",
+"https://rabota.sber.ru/search/starshiy-menedzher-po-rabote-s-klientami-4387517/"
+],
+"sample_status": 200,
+"sample_ld": false,
+"sample_h1": "Старший клиентский менеджер",
+"sample_allowed": true
+},
+{
+"site": "https://x5.tech",
+"robots": 200,
+"allowed": true,
+"page": 200,
+"spa": false,
+"page_ld": false,
+"maps_read": 1,
+"vac_urls": 21,
+"shapes": [
+[
+"https://xN.tech/vacancy/UUID",
+20
+],
+[
+"https://xN.tech/vacancy",
+1
+]
+],
+"samples": [
+"https://x5.tech/vacancy/e0592e04-4530-4f42-a9ed-0946095e6d6b",
+"https://x5.tech/vacancy/4a5c7016-54d3-4218-8fa5-ed2b909cef9a",
+"https://x5.tech/vacancy/8efb189d-5c9e-4782-8300-400198c88f22"
+],
+"sample_status": 200,
+"sample_ld": false,
+"sample_h1": "Middle Support Engineer ( Red Panda/Kafka)",
+"sample_allowed": true
+},
+{
+"site": "https://rabota.x5.ru",
+"robots": 200,
+"allowed": true,
+"page": 200,
+"spa": false,
+"page_ld": false,
+"maps_read": 1,
+"vac_urls": 586,
+"shapes": [
+[
+"https://rabota.xN.ru/dostavka/cities/moscow",
+57
+],
+[
+"https://rabota.xN.ru/dostavka/cities/leningradskaya-oblast",
+31
+],
+[
+"https://rabota.xN.ru/dostavka/sborka/N-ka",
+7
+],
+[
+"https://rabota.xN.ru/dostavka/moscow/uao",
+6
+]
+],
+"samples": [
+"https://rabota.x5.ru/dostavka/all-darkstore-stations/ulica-1905-goda",
+"https://rabota.x5.ru/dostavka/dgsu26527"
+],
+"sample_status": 200,
+"sample_ld": false,
+"sample_h1": "Работа в дарксторе у метро Улица 1905 года в Москве",
+"sample_allowed": true
+},
+{
+"site": "https://career.wb.ru",
+"robots": 200,
+"allowed": true,
+"page": 200,
+"spa": false,
+"page_ld": false,
+"maps_read": 1,
+"vac_urls": 2,
+"shapes": [
+[
+"https://career.rwb.ru/",
+1
+],
+[
+"https://career.rwb.ru/vacancies",
+1
+]
+],
+"samples": [
+"https://career.rwb.ru/",
+"https://career.rwb.ru/vacancies"
+],
+"sample_status": 200,
+"sample_ld": false,
+"sample_h1": null,
+"sample_allowed": true
+},
+{
+"site": "https://kontur.ru/career",
+"robots": 403,
+"allowed": true,
+"page": 403,
+"spa": false,
+"page_ld": false,
+"maps_read": 1,
+"vac_urls": 0,
+"shapes": [],
+"samples": []
+},
+{
+"site": "https://job.megafon.ru",
+"robots": 200,
+"allowed": true,
+"page": 200,
+"spa": false,
+"page_ld": false,
+"maps_read": 1,
+"vac_urls": 0,
+"shapes": [],
+"samples": []
+},
+{
+"site": "https://moskva.beeline.ru/about/career",
+"robots": 200,
+"allowed": true,
+"page": 200,
+"spa": false,
+"page_ld": false,
+"maps_read": 24,
+"vac_urls": 24,
+"shapes": [
+[
+"https://moskva.beeline.ru/business/help/beeline-prodvizhenie",
+9
+],
+[
+"https://moskva.beeline.ru/business/help/fixcon-and-internet",
+6
+],
+[
+"https://moskva.beeline.ru/business/udalennaja-rabota/",
+3
+],
+[
+"https://moskva.beeline.ru/business/udalennaja-rabota/fmtn",
+3
+]
+],
+"samples": [
+"https://moskva.beeline.ru/business/help/beeline-prodvizhenie/kak-rabotat-v-beeline-prodvizhenii/shag-1-zaregistriruytes/",
+"https://moskva.beeline.ru/business/help/beeline-prodvizhenie/kak-rabotat-v-beeline-prodvizhenii/shag-3-popolnite-balans/",
+"https://moskva.beeline.ru/business/help/beeline-prodvizhenie/kak-rabotat-v-beeline-prodvizhenii/shag-4-otslezhivayte-rezultat/"
+],
+"sample_status": 200,
+"sample_ld": false,
+"sample_h1": "Ð¨Ð°Ð³ 1. ÐÐ°ÑÐµÐ³Ð¸ÑÑÑÐ¸ÑÑÐ¹ÑÐµÑÑ",
+"sample_allowed": true
+},
+{
+"site": "https://www.vtb.ru/career",
+"robots": "SSLError",
+"allowed": true,
+"page": "SSLError",
+"spa": false,
+"page_ld": false,
+"maps_read": 1,
+"vac_urls": 0,
+"shapes": [],
+"samples": []
+},
+{
+"site": "https://www.raiffeisen.ru/about/career",
+"robots": 200,
+"allowed": true,
+"page": 404,
+"spa": false,
+"page_ld": false,
+"maps_read": 1,
+"vac_urls": 13,
+"shapes": [
+[
+"https://www.raiffeisen.ru/wiki/v-kakikh-stranakh-budut-rabotat-karty-rossiyskikh-bankov/",
+1
+],
+[
+"https://www.raiffeisen.ru/wiki/kak-rabotaet-kreditnaya-karta/",
+1
+],
+[
+"https://www.raiffeisen.ru/wiki/pochemu-ne-rabotayut-platezhnye-sistemy/",
+1
+],
+[
+"https://www.raiffeisen.ru/wiki/chto-takoe-nakopitelnyj-schet-kak-on-rabotaet/",
+1
+]
+],
+"samples": [
+"https://www.raiffeisen.ru/wiki/v-kakikh-stranakh-budut-rabotat-karty-rossiyskikh-bankov/",
+"https://www.raiffeisen.ru/wiki/kak-rabotaet-kreditnaya-karta/",
+"https://www.raiffeisen.ru/wiki/pochemu-ne-rabotayut-platezhnye-sistemy/"
+],
+"sample_status": 200,
+"sample_ld": false,
+"sample_h1": "В каких странах мира работают карты российских банков",
+"sample_allowed": true
+},
+{
+"site": "https://samokat.tech",
+"robots": 403,
+"allowed": true,
+"page": 403,
+"spa": true,
+"page_ld": false,
+"maps_read": 1,
+"vac_urls": 0,
+"shapes": [],
+"samples": []
+},
+{
+"site": "https://yadro.com/careers",
+"robots": 200,
+"allowed": true,
+"page": 404,
+"spa": false,
+"page_ld": false,
+"maps_read": 1,
+"vac_urls": 3,
+"shapes": [
+[
+"https://yadro.com/ru/press/kriptonit-po-predlozheniyu-yadro-razrabotal-metod-uskoreniya-nastroyki-bazovykh-stantsiy-Ng-s-pomoschyu-ii",
+1
+],
+[
+"https://yadro.com/ru/press/psb-i-yadro-razrabotali-sistemu-monitoringa-infrastruktury-khraneniya",
+1
+],
+[
+"https://yadro.com/ru/press/postgres-professional-i-yadro-razrabotayut-paki-dlya-kriticheskoy-infrastruktury-dannykh",
+1
+]
+],
+"samples": [
+"https://yadro.com/ru/press/kriptonit-po-predlozheniyu-yadro-razrabotal-metod-uskoreniya-nastroyki-bazovykh-stantsiy-5g-s-pomoschyu-ii/",
+"https://yadro.com/ru/press/psb-i-yadro-razrabotali-sistemu-monitoringa-infrastruktury-khraneniya/",
+"https://yadro.com/ru/press/postgres-professional-i-yadro-razrabotayut-paki-dlya-kriticheskoy-infrastruktury-dannykh/"
+],
+"sample_status": 200,
+"sample_ld": false,
+"sample_h1": "«Криптонит» по предложению YADRO разработал метод ускорения настройки базовых ст",
+"sample_allowed": true
+},
+{
+"site": "https://tensor.ru/vacancies",
+"robots": 200,
+"allowed": true,
+"page": 200,
+"spa": false,
+"page_ld": false,
+"maps_read": 2,
+"vac_urls": 1,
+"shapes": [
+[
+"https://tensor.ru/vacancies",
+1
+]
+],
+"samples": [
+"https://tensor.ru/vacancies"
+],
+"sample_status": 200,
+"sample_ld": false,
+"sample_h1": "Вакансии",
+"sample_allowed": true
+},
+{
+"site": "https://www.naumen.ru/career",
+"robots": 200,
+"allowed": true,
+"page": 200,
+"spa": false,
+"page_ld": false,
+"maps_read": 10,
+"vac_urls": 75,
+"shapes": [
+[
+"https://www.naumen.ru/career/events/jug-ekb-N",
+18
+],
+[
+"https://www.naumen.ru/career/events/naumen-analyst-meetup-N",
+4
+],
+[
+"https://www.naumen.ru/career/events/naumen-java-meetup-N",
+3
+],
+[
+"https://www.naumen.ru/career/events/naumen-java-junior-meetup-N",
+3
+]
+],
+"samples": [
+"https://www.naumen.ru/career/events/naumen-na-pik-it-2025/",
+"https://www.naumen.ru/career/events/dump-2025-x-naumen/",
+"https://www.naumen.ru/career/events/unit-hack-2025-x-naumen/"
+],
+"sample_status": 200,
+"sample_ld": false,
+"sample_h1": "Пик IT 2025 x Naumen",
+"sample_allowed": true
+},
+{
+"site": "https://croc.ru/career",
+"robots": 200,
+"allowed": true,
+"page": 200,
+"spa": false,
+"page_ld": false,
+"maps_read": 3,
+"vac_urls": 8,
+"shapes": [
+[
+"https://www.croc.ru/career/faqs/",
+1
+],
+[
+"https://www.croc.ru/career/",
+1
+],
+[
+"https://www.croc.ru/press_releases/cod-kompressor-rabotaet-bez-prostoev-N-dnej/",
+1
+],
+[
+"https://www.croc.ru/press_releases/televend-sistema-klassa-smart-vending-rabotaet-iz-oblaka-krok/",
+1
+]
+],
+"samples": [
+"https://www.croc.ru/press_releases/cod-kompressor-rabotaet-bez-prostoev-2500-dnej/"
+],
+"sample_status": 200,
+"sample_ld": false,
+"sample_h1": "ЦОД «Компрессор» работает без простоев 2500 дней",
+"sample_allowed": true
+},
+{
+"site": "https://t1.ru/career",
+"robots": 200,
+"allowed": true,
+"page": "ReadTimeout",
+"spa": false,
+"page_ld": false,
+"maps_read": 2,
+"vac_urls": 28,
+"shapes": [
+[
+"https://tN.ru/about/purchases/accreditation",
+2
+],
+[
+"https://tN.ru/media/news/N_it-spetsialistov_predpochitayut_rabotat_v_filialah_krupnyh_kompaniy_v_svoem_regione",
+2
+],
+[
+"https://tN.ru/media/news/aft_vtb_i_tN_dogovorilis_vmeste_prorabotat_praktiku_ispolzovaniya_doverennogo_po_s_otkrytym_kodom_dlya_rossiyskoy_finansovoy_otrasli",
+2
+],
+[
+"https://tN.ru/media/news/golosovoy_ii-agent_ot_it-holdinga_tN_rabotaet_v_chetyryoh_operatsionnyh_tsito_im_n_n_priorova",
+2
+]
+],
+"samples": [
+"https://t1.ru/about/purchases/accreditation/rabota-s-blogerami",
+"https://t1.ru/media/news/37_it-spetsialistov_predpochitayut_rabotat_v_filialah_krupnyh_kompaniy_v_svoem_regione",
+"https://t1.ru/media/news/aft_vtb_i_t1_dogovorilis_vmeste_prorabotat_praktiku_ispolzovaniya_doverennogo_po_s_otkrytym_kodom_dlya_rossiyskoy_finansovoy_otrasli"
+],
+"sample_status": 200,
+"sample_ld": false,
+"sample_h1": "ÐÐ½ÐºÐµÑÐ° Ð°ÐºÐºÑÐµÐ´Ð¸ÑÐ°ÑÐ¸Ð¸ Ð² ÐºÐ°ÑÐµÐ³Ð¾ÑÐ¸Ð¸ Ð¡Ð²ÑÐ·Ð¸ Ñ Ð¾Ð±Ñ",
+"sample_allowed": true
+},
+{
+"site": "https://ibs.ru/career",
+"robots": 200,
+"allowed": false,
+"page": 200,
+"spa": false,
+"page_ld": false,
+"maps_read": 10,
+"vac_urls": 113,
+"shapes": [
+[
+"https://ibs.ru/career/",
+1
+],
+[
+"https://ibs.ru/career/jobs/",
+1
+],
+[
+"https://ibs.ru/career/jobs/menedzher-po-razvitiyu-biznesa-dalniy-vostok-irkutsk",
+1
+],
+[
+"https://ibs.ru/career/jobs/sistemnyy-analitik-gossektor-sankt-peterburg",
+1
+]
+],
+"samples": [
+"https://ibs.ru/career/jobs/menedzher-po-razvitiyu-biznesa-zakaznaya-razrabotka-moskva-300726/",
+"https://ibs.ru/career/jobs/direktor-po-razvitiyu-biznesa-moskva-091224/",
+"https://ibs.ru/career/jobs/inzhener-po-avtomatizatsii-testirovaniya-java-lyuboy-region-rf-udalennaya-rabota-300625/"
+],
+"sample_status": 200,
+"sample_ld": true,
+"sample_h1": "Менеджер по&nbsp;развитию бизнеса (заказная разработка)",
+"sample_allowed": false
+},
+{
+"site": "https://lanit.ru/career",
+"robots": 200,
+"allowed": true,
+"page": 404,
+"spa": false,
+"page_ld": false,
+"maps_read": 3,
+"vac_urls": 0,
+"shapes": [],
+"samples": []
+},
+{
+"site": "https://dodobrands.io",
+"robots": 200,
+"allowed": true,
+"page": 200,
+"spa": false,
+"page_ld": false,
+"maps_read": 1,
+"vac_urls": 0,
+"shapes": [],
+"samples": []
+},
+{
+"site": "https://career.lamoda.ru",
+"robots": "ConnectionError",
+"allowed": true,
+"page": "ConnectionError",
+"spa": false,
+"page_ld": false,
+"maps_read": 1,
+"vac_urls": 0,
+"shapes": [],
+"samples": []
+},
+{
+"site": "https://careers.skyeng.ru",
+"robots": "ConnectionError",
+"allowed": true,
+"page": "ConnectionError",
+"spa": false,
+"page_ld": false,
+"maps_read": 1,
+"vac_urls": 0,
+"shapes": [],
+"samples": []
+},
+{
+"site": "https://career.rostelecom.ru",
+"robots": "ConnectionError",
+"allowed": true,
+"page": "ConnectionError",
+"spa": false,
+"page_ld": false,
+"maps_read": 1,
+"vac_urls": 0,
+"shapes": [],
+"samples": []
+},
+{
+"site": "https://www.gazprombank.ru/about/career",
+"robots": 200,
+"allowed": true,
+"page": 404,
+"spa": false,
+"page_ld": false,
+"maps_read": 3,
+"vac_urls": 17,
+"shapes": [
+[
+"https://www.gazprombank.ru/pro-finance/card/kak-zarabotat-na-kreditnoj-karte",
+1
+],
+[
+"https://www.gazprombank.ru/pro-finance/card/kak-zarabotat-na-bankovskoy-karte",
+1
+],
+[
+"https://www.gazprombank.ru/pro-finance/card/kak-rabotaet-oplata-chastyami",
+1
+],
+[
+"https://www.gazprombank.ru/pro-finance/card/kak-rabotaet-keshaut",
+1
+]
+],
+"samples": [
+"https://www.gazprombank.ru/pro-finance/card/kak-zarabotat-na-kreditnoj-karte/",
+"https://www.gazprombank.ru/pro-finance/card/kak-zarabotat-na-bankovskoy-karte/",
+"https://www.gazprombank.ru/pro-finance/card/kak-rabotaet-oplata-chastyami/"
+],
+"sample_status": 200,
+"sample_ld": false,
+"sample_h1": "Как увеличить накопления с помощью кредитной карты",
+"sample_allowed": true
+},
+{
+"site": "https://career.sovcombank.ru",
+"robots": "ConnectionError",
+"allowed": true,
+"page": "ConnectionError",
+"spa": false,
+"page_ld": false,
+"maps_read": 1,
+"vac_urls": 0,
+"shapes": [],
+"samples": []
+},
+{
+"site": "https://job.domclick.ru",
+"robots": 200,
+"allowed": true,
+"page": 401,
+"spa": true,
+"page_ld": false,
+"maps_read": 25,
+"vac_urls": 0,
+"shapes": [],
+"samples": []
+},
+{
+"site": "https://career.magnit.ru",
+"robots": "ConnectionError",
+"allowed": true,
+"page": "ConnectionError",
+"spa": false,
+"page_ld": false,
+"maps_read": 1,
+"vac_urls": 0,
+"shapes": [],
+"samples": []
+},
+{
+"site": "https://jobs.kaspi.kz",
+"robots": "ConnectionError",
+"allowed": true,
+"page": "ConnectionError",
+"spa": false,
+"page_ld": false,
+"maps_read": 1,
+"vac_urls": 0,
+"shapes": [],
+"samples": []
+},
+{
+"site": "https://www.aston.ru/career",
+"robots": "SSLError",
+"allowed": true,
+"page": "SSLError",
+"spa": false,
+"page_ld": false,
+"maps_read": 1,
+"vac_urls": 0,
+"shapes": [],
+"samples": []
+},
+{
+"site": "https://usetech.ru/career",
+"robots": 200,
+"allowed": false,
+"page": 200,
+"spa": false,
+"page_ld": false,
+"maps_read": 1,
+"vac_urls": 0,
+"shapes": [],
+"samples": []
+},
+{
+"site": "https://reksoft.ru/career",
+"robots": 200,
+"allowed": true,
+"page": 200,
+"spa": false,
+"page_ld": false,
+"maps_read": 1,
+"vac_urls": 0,
+"shapes": [],
+"samples": []
+},
+{
+"site": "https://kuper.ru/career",
+"robots": 403,
+"allowed": true,
+"page": 403,
+"spa": false,
+"page_ld": false,
+"maps_read": 1,
+"vac_urls": 0,
+"shapes": [],
+"samples": []
+},
+{
+"site": "https://career.mts-digital.ru",
+"robots": "ConnectionError",
+"allowed": true,
+"page": "ConnectionError",
+"spa": false,
+"page_ld": false,
+"maps_read": 1,
+"vac_urls": 0,
+"shapes": [],
+"samples": []
+},
+{
+"site": "https://www.innotech.ru/career",
+"robots": "ConnectionError",
+"allowed": true,
+"page": "ConnectionError",
+"spa": false,
+"page_ld": false,
+"maps_read": 1,
+"vac_urls": 0,
+"shapes": [],
+"samples": []
+},
+{
+"site": "https://rt-solar.ru/career",
+"robots": 200,
+"allowed": true,
+"page": 404,
+"spa": false,
+"page_ld": false,
+"maps_read": 10,
+"vac_urls": 3,
+"shapes": [
+[
+"https://rt-solar.ru/vacancy/",
+1
+],
+[
+"https://rt-solar.ru/about_company/career/",
+1
+],
+[
+"https://rt-solar.ru/about_company/vakansii/",
+1
+]
+],
+"samples": [
+"https://rt-solar.ru/vacancy/",
+"https://rt-solar.ru/about_company/career/",
+"https://rt-solar.ru/about_company/vakansii/"
+],
+"sample_status": 200,
+"sample_ld": false,
+"sample_h1": "Вакансии JSOC",
+"sample_allowed": true
+},
+{
+"site": "https://bi.zone/career",
+"robots": 200,
+"allowed": true,
+"page": 404,
+"spa": false,
+"page_ld": false,
+"maps_read": 1,
+"vac_urls": 12,
+"shapes": [
+[
+"https://bi.zone/expertise/blog/threat-prediction-preventivnaya-rabota-s-ugrozami-v-bi-zone-tdr",
+1
+],
+[
+"https://bi.zone/expertise/blog/kak-rabotaet-darkgate-podrobnyy-tekhnicheskiy-analiz",
+1
+],
+[
+"https://bi.zone/expertise/events/bi-zone-grc-kak-rabotat-v-N-raz-bystree-obediniv-N-sistem-v-N",
+1
+],
+[
+"https://bi.zone/about/career/",
+1
+]
+],
+"samples": [
+"https://bi.zone/expertise/blog/threat-prediction-preventivnaya-rabota-s-ugrozami-v-bi-zone-tdr/",
+"https://bi.zone/expertise/blog/kak-rabotaet-darkgate-podrobnyy-tekhnicheskiy-analiz/",
+"https://bi.zone/expertise/events/bi-zone-grc-kak-rabotat-v-5-raz-bystree-obediniv-10-sistem-v-1/"
+],
+"sample_status": 200,
+"sample_ld": false,
+"sample_h1": "Threat Prediction: превентивная работа с&nbsp;угрозами в&nbsp;BI.ZONE&nbsp;SOC",
+"sample_allowed": true
+},
+{
+"site": "https://career.softline.ru",
+"robots": "ConnectionError",
+"allowed": true,
+"page": "ConnectionError",
+"spa": false,
+"page_ld": false,
+"maps_read": 1,
+"vac_urls": 0,
+"shapes": [],
+"samples": []
+},
+{
+"site": "https://www.cian.ru",
+"robots": 403,
+"allowed": true,
+"page": 200,
+"spa": false,
+"page_ld": false,
+"maps_read": 1,
+"vac_urls": 0,
+"shapes": [],
+"samples": []
+},
+{
+"site": "https://sbertech.ru/career",
+"robots": 200,
+"allowed": true,
+"page": 401,
+"spa": true,
+"page_ld": false,
+"maps_read": 1,
+"vac_urls": 4,
+"shapes": [
+[
+"https://sbertech.ru/career",
+1
+],
+[
+"https://sbertech.ru/news/kak-rabotaet-komanda-sber-teha-kotoraya-otvechaet-za-bezopasnost-it-landshafta-kompanii",
+1
+],
+[
+"https://sbertech.ru/news/sber-teh-pomog-aflt-sistems-razrabotat-sistemu-obrabotki-dannyh-aviakompanij",
+1
+],
+[
+"https://sbertech.ru/news/gendirektor-sberteha-maksim-tyatyushev-my-razrabotali-reshenie-dlya-bezopasnoj-raboty-s-ii",
+1
+]
+],
+"samples": [
+"https://sbertech.ru/career",
+"https://sbertech.ru/news/kak-rabotaet-komanda-sber-teha-kotoraya-otvechaet-za-bezopasnost-it-landshafta-kompanii",
+"https://sbertech.ru/news/sber-teh-pomog-aflt-sistems-razrabotat-sistemu-obrabotki-dannyh-aviakompanij"
+],
+"sample_status": 401,
+"sample_ld": false,
+"sample_h1": null,
+"sample_allowed": true
+},
+{
+"site": "https://career.gazprom-neft.ru",
+"robots": "ConnectTimeout",
+"allowed": true,
+"page": "ConnectTimeout",
+"spa": false,
+"page_ld": false,
+"maps_read": 1,
+"vac_urls": 0,
+"shapes": [],
+"samples": []
+},
+{
+"site": "https://www.ozon.ru",
+"robots": "ConnectTimeout",
+"allowed": true,
+"page": "ConnectTimeout",
+"spa": false,
+"page_ld": false,
+"maps_read": 1,
+"vac_urls": 0,
+"shapes": [],
+"samples": []
+},
+{
+"site": "https://hh.ivi.ru",
+"robots": 502,
+"allowed": true,
+"page": 404,
+"spa": true,
+"page_ld": false,
+"maps_read": 1,
+"vac_urls": 0,
+"shapes": [],
+"samples": []
+},
+{
+"site": "https://www.rshb.ru/career",
+"robots": "SSLError",
+"allowed": true,
+"page": "SSLError",
+"spa": false,
+"page_ld": false,
+"maps_read": 1,
+"vac_urls": 0,
+"shapes": [],
+"samples": []
+},
+{
+"site": "https://career.alfastrah.ru",
+"robots": "ConnectTimeout",
+"allowed": true,
+"page": "ConnectTimeout",
+"spa": false,
+"page_ld": false,
+"maps_read": 1,
+"vac_urls": 0,
+"shapes": [],
+"samples": []
+},
+{
+"site": "https://jobs.tutu.ru",
+"robots": "ConnectionError",
+"allowed": true,
+"page": "ConnectionError",
+"spa": false,
+"page_ld": false,
+"maps_read": 1,
+"vac_urls": 0,
+"shapes": [],
+"samples": []
+},
+{
+"site": "https://www.1c.ru",
+"robots": 200,
+"allowed": true,
+"page": 200,
+"spa": false,
+"page_ld": false,
+"maps_read": 1,
+"vac_urls": 0,
+"shapes": [],
+"samples": []
+},
+{
+"site": "https://career.rosatom.ru",
+"robots": "ConnectionError",
+"allowed": true,
+"page": "ConnectionError",
+"spa": false,
+"page_ld": false,
+"maps_read": 1,
+"vac_urls": 0,
+"shapes": [],
+"samples": []
+},
+{
+"site": "https://ecom.tech",
+"robots": 403,
+"allowed": true,
+"page": 403,
+"spa": true,
+"page_ld": false,
+"maps_read": 1,
+"vac_urls": 0,
+"shapes": [],
+"samples": []
+}
+]
