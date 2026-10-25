@@ -34,6 +34,8 @@ jobs:
                       row["last"] = max(times).date().isoformat() if times else None
                       txt = " ".join(texts)
                       row["cyr"] = round(len(re.findall("[а-яё]", txt.lower())) / max(1, len(re.findall("[a-zа-яё]", txt.lower()))), 2)
+                      vac = re.compile(r"ваканси|зарплат|з/п|₽|требовани|обязанност|опыт от|ищем|hiring|#job|#ваканс|salary", re.I)
+                      row["vac"] = round(sum(1 for x in texts if vac.search(x)) / max(1, len(texts)), 2)
                       row["sample"] = (texts[-1] if texts else "")[:120]
               except Exception as e:
                   row["err"] = str(e)[:80]
