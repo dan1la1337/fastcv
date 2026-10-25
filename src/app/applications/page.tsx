@@ -22,7 +22,7 @@ const STATUS: Record<string, { text: string; style: string }> = {
   new: { text: "Ждёт ответа работодателя", style: "bg-amber-500/10 text-amber-400 border-amber-500/20" },
   viewed: { text: "Просмотрен", style: "bg-teal-300/10 text-teal-300 border-teal-300/20" },
   interview_scheduled: { text: "Приглашение на собеседование", style: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20" },
-  rejected: { text: "Отказ", style: "bg-neutral-800 text-neutral-400 border-neutral-700" },
+  rejected: { text: "Отказ", style: "bg-white/[0.08] text-neutral-400 border-white/15" },
 };
 
 export default function CandidateApplications() {
@@ -68,20 +68,20 @@ export default function CandidateApplications() {
   return (
     <div className="min-h-screen text-neutral-100 p-4 sm:p-8">
       <div className="max-w-3xl mx-auto space-y-6">
-        <div className="flex items-center justify-between gap-3 border-b border-neutral-800 pb-4">
+        <div className="flex items-center justify-between gap-3 border-b border-white/10 pb-4">
           <div className="flex items-center gap-3">
-            <Link href="/" aria-label="К вакансиям" className="p-2 bg-neutral-900 border border-neutral-800 rounded-xl hover:bg-neutral-800 transition-colors">
+            <Link href="/" aria-label="К вакансиям" className="p-2 bg-neutral-900 border border-white/10 rounded-xl hover:bg-white/[0.08] transition-colors">
               <ArrowLeft className="w-4 h-4" />
             </Link>
-            <h1 className="text-xl font-bold">Мои отклики</h1>
+            <h1 className="font-display text-xl font-bold">Мои отклики</h1>
           </div>
-          <span className="text-xs text-neutral-400 bg-neutral-900 px-3 py-1.5 rounded-full border border-neutral-800 whitespace-nowrap">
+          <span className="text-xs text-neutral-400 bg-neutral-900 px-3 py-1.5 rounded-full border border-white/10 whitespace-nowrap">
             {applications.length} {plural(applications.length, ["отклик", "отклика", "откликов"])}
           </span>
         </div>
 
         {applications.length === 0 ? (
-          <div className="text-center py-20 bg-neutral-900/30 border border-dashed border-neutral-800 rounded-2xl space-y-3">
+          <div className="text-center py-20 border border-dashed border-white/15 rounded-3xl space-y-3">
             <MessageSquare className="w-10 h-10 mx-auto text-neutral-700" />
             <p className="text-neutral-400 text-sm font-medium">Вы ещё не откликались на вакансии</p>
             <Link href="/" className="inline-block text-sm text-teal-300 hover:text-teal-200">Перейти к вакансиям</Link>
@@ -94,10 +94,10 @@ export default function CandidateApplications() {
               // Отклик на вакансию из Telegram уходит работодателю в Telegram или на почту:
               // ответ придёт туда, а статус здесь работодатель не меняет
               const status = external
-                ? { text: "Отправлен в Telegram / на почту", style: "bg-neutral-800 text-neutral-300 border-neutral-700" }
+                ? { text: "Отправлен в Telegram / на почту", style: "bg-white/[0.08] text-neutral-300 border-white/15" }
                 : STATUS[app.status] ?? STATUS.new;
               return (
-                <div key={app.id} className="bg-neutral-900/60 border border-neutral-800 rounded-2xl p-5 sm:p-6 space-y-4">
+                <div key={app.id} className="glass rounded-3xl p-5 sm:p-6 space-y-4">
                   <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-2">
                     <div className="min-w-0">
                       {v ? (
@@ -126,7 +126,7 @@ export default function CandidateApplications() {
 
                   {app.hr_message && (
                     <div className={`rounded-xl border p-4 text-sm leading-relaxed ${
-                      app.status === "interview_scheduled" ? "border-emerald-500/30 bg-emerald-500/5 text-emerald-100" : "border-neutral-800 bg-neutral-950 text-neutral-300"
+                      app.status === "interview_scheduled" ? "border-emerald-500/30 bg-emerald-500/5 text-emerald-100" : "border-white/10 bg-neutral-950 text-neutral-300"
                     }`}>
                       <p className="text-xs font-bold text-neutral-500 uppercase tracking-wider mb-2">Ответ работодателя</p>
                       <p className="whitespace-pre-line">{app.hr_message}</p>
@@ -134,7 +134,7 @@ export default function CandidateApplications() {
                   )}
 
                   {app.cover_letter && (
-                    <details className="bg-neutral-950 border border-neutral-800 rounded-xl p-4 text-sm text-neutral-300 group">
+                    <details className="bg-[#0B0F19] border border-white/12 rounded-2xl p-4 text-sm text-neutral-300 group">
                       <summary className="cursor-pointer text-xs font-bold text-neutral-500 uppercase tracking-wider select-none">
                         Сопроводительное письмо
                       </summary>

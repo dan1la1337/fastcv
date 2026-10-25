@@ -2,7 +2,9 @@ import type { Metadata } from "next";
 import { Inter, JetBrains_Mono, Unbounded } from "next/font/google";
 import "./globals.css";
 import Link from "next/link";
+import { Suspense } from "react";
 import Toaster from "@/components/Toaster";
+import MobileNav from "@/components/MobileNav";
 import { OPERATOR } from "@/lib/legal";
 
 // Тема «Аврора»: Inter — текст, Unbounded — заголовки и логотип, JetBrains Mono — счётчики.
@@ -51,6 +53,7 @@ export default function RootLayout({
             <a href={`mailto:${OPERATOR.email}`} className="hover:text-neutral-200">{OPERATOR.email}</a>
           </div>
         </footer>
+        <Suspense fallback={null}><MobileNav /></Suspense>
         <Toaster />
       </body>
     </html>

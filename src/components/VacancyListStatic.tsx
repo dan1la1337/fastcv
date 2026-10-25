@@ -11,7 +11,7 @@ export default function VacancyListStatic({ vacancies }: { vacancies: Vacancy[] 
   return (
     <ul className="flex flex-col gap-3">
       {vacancies.map(v => (
-        <li key={v.id} className="bg-neutral-900/60 border border-neutral-800/80 rounded-2xl p-5">
+        <li key={v.id} className="bg-neutral-900/60 border border-white/10/80 rounded-2xl p-5">
           <h2 className="text-lg font-bold text-neutral-100">
             <Link href={`/vacancy/${v.id}`} className="hover:text-teal-300 transition-colors">{v.title}</Link>
           </h2>

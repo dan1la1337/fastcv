@@ -46,12 +46,12 @@ function LoginForm() {
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4 font-sans">
-      <div className="max-w-md w-full bg-neutral-900/50 border border-neutral-800 rounded-2xl p-8 shadow-2xl">
+      <div className="max-w-md w-full glass rounded-3xl p-8 shadow-2xl">
         <div className="text-center mb-8">
           <Link href="/" className="inline-flex items-center gap-2 mb-6 hover:opacity-80 transition-opacity">
             <span className="font-display font-bold text-lg tracking-tight text-neutral-100">fastcv</span>
           </Link>
-          <h1 className="text-2xl font-bold text-white">
+          <h1 className="font-display text-2xl font-bold text-white">
             С возвращением
           </h1>
           <p className="text-neutral-400 text-sm mt-2">
@@ -67,7 +67,7 @@ function LoginForm() {
               required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full px-4 py-3 bg-neutral-950 border border-neutral-800 rounded-xl text-sm text-neutral-100 focus:outline-none focus:border-teal-300 transition-colors"
+              className="w-full px-4 py-3 bg-[#0B0F19] border border-white/12 rounded-2xl text-sm text-neutral-100 focus:outline-none focus:border-teal-300 transition-colors"
               placeholder="name@example.com"
             />
           </div>
@@ -79,7 +79,7 @@ function LoginForm() {
               minLength={6}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full px-4 py-3 bg-neutral-950 border border-neutral-800 rounded-xl text-sm text-neutral-100 focus:outline-none focus:border-teal-300 transition-colors"
+              className="w-full px-4 py-3 bg-[#0B0F19] border border-white/12 rounded-2xl text-sm text-neutral-100 focus:outline-none focus:border-teal-300 transition-colors"
               placeholder="Минимум 6 символов"
             />
           </div>
@@ -91,7 +91,7 @@ function LoginForm() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full flex items-center justify-center gap-2 bg-teal-300 hover:bg-teal-200 text-neutral-950 py-3 rounded-xl text-sm font-semibold transition-colors disabled:opacity-50 mt-6"
+            className="w-full flex items-center justify-center gap-2 bg-teal-300 hover:bg-teal-200 text-neutral-950 py-3 rounded-full text-sm font-semibold transition-colors disabled:opacity-50 mt-6"
           >
             {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : "Войти"}
           </button>

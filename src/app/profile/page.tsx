@@ -17,12 +17,12 @@ const MAX_DIRECTIONS = 5; // как в ограничении profiles_pref_dire
 const RESUME_MAX_BYTES = 5 * 1024 * 1024; // совпадает с лимитом бакета resumes
 
 const inputClass =
-  "w-full bg-neutral-950 border border-neutral-800 rounded-xl px-4 py-3 text-sm text-neutral-200 focus:outline-none focus:border-teal-300 transition-colors";
+  "w-full bg-[#0B0F19] border border-white/12 rounded-2xl px-4 py-3 text-sm text-neutral-200 focus:outline-none focus:border-teal-300 transition-colors";
 const labelClass = "block text-xs font-bold text-neutral-500 uppercase tracking-wider mb-2";
 const chip = (active: boolean) =>
   `text-xs px-3 py-1.5 rounded-lg border transition-colors ${active
     ? "bg-teal-300 border-teal-300 text-neutral-950"
-    : "bg-neutral-950 border-neutral-700 text-neutral-400 hover:border-neutral-500 hover:text-neutral-200"}`;
+    : "bg-neutral-950 border-white/15 text-neutral-400 hover:border-neutral-500 hover:text-neutral-200"}`;
 
 export default function ProfilePage() {
   const router = useRouter();
@@ -232,13 +232,13 @@ export default function ProfilePage() {
           </div>
         )}
 
-        <div className="bg-neutral-900/50 border border-neutral-800 rounded-2xl p-6 sm:p-8 shadow-xl">
-          <h1 className="text-2xl font-bold mb-6 text-white">Личный кабинет</h1>
+        <div className="glass rounded-3xl p-6 sm:p-8 shadow-xl">
+          <h1 className="font-display text-2xl font-bold mb-6 text-white">Личный кабинет</h1>
 
           <form onSubmit={saveProfile} className="space-y-6">
             <div>
               <label className={labelClass}>Тип аккаунта</label>
-              <div className="inline-flex items-center gap-2 px-4 py-2 bg-neutral-950 border border-neutral-800 rounded-xl text-sm font-medium text-neutral-300">
+              <div className="inline-flex items-center gap-2 px-4 py-2 bg-[#0B0F19] border border-white/12 rounded-2xl text-sm font-medium text-neutral-300">
                 {isCandidate
                   ? <><UserCircle className="w-4 h-4 text-emerald-400" /> Соискатель</>
                   : <><Briefcase className="w-4 h-4 text-teal-300" /> Работодатель</>}
@@ -260,7 +260,7 @@ export default function ProfilePage() {
             )}
 
             {isCandidate && (
-              <fieldset id="prefs" className="space-y-5 border-t border-neutral-800 pt-6">
+              <fieldset id="prefs" className="space-y-5 border-t border-white/10 pt-6">
                 <legend className="text-base font-semibold text-white">Что ищу</legend>
                 <p className="text-xs text-neutral-500 -mt-2">По этим ответам и навыкам считается совпадение с вакансиями и подборка «Для вас».</p>
 
@@ -320,14 +320,14 @@ export default function ProfilePage() {
                 className={`${inputClass} h-32 resize-y leading-relaxed`} />
             </div>
 
-            <button type="submit" disabled={saving} className="w-full flex items-center justify-center gap-2 bg-teal-300 hover:bg-teal-200 text-neutral-950 py-3.5 rounded-xl text-sm font-semibold transition-colors disabled:opacity-50">
+            <button type="submit" disabled={saving} className="w-full flex items-center justify-center gap-2 bg-teal-300 hover:bg-teal-200 text-neutral-950 py-3.5 rounded-full text-sm font-semibold transition-colors disabled:opacity-50">
               {saving ? <Loader2 className="w-5 h-5 animate-spin" /> : <><Save className="w-4 h-4" /> Сохранить профиль</>}
             </button>
           </form>
         </div>
 
         {isCandidate && (
-          <div className="bg-neutral-900/50 border border-neutral-800 rounded-2xl p-6 sm:p-8 space-y-4">
+          <div className="glass rounded-3xl p-6 sm:p-8 space-y-4">
             <div>
               <h2 className="text-lg font-bold text-white">Резюме</h2>
               <p className="text-sm text-neutral-400 mt-1">
@@ -345,25 +345,25 @@ export default function ProfilePage() {
             )}
 
             {resumePath ? (
-              <div className="flex flex-wrap items-center gap-3 bg-neutral-950 border border-neutral-800 rounded-xl p-4">
+              <div className="flex flex-wrap items-center gap-3 bg-[#0B0F19] border border-white/12 rounded-2xl p-4">
                 <FileText className="w-5 h-5 text-teal-300 shrink-0" />
                 <button onClick={openResume} className="text-sm text-neutral-200 hover:text-teal-300 underline-offset-2 hover:underline">
                   resume.pdf
                 </button>
                 <div className="ml-auto flex items-center gap-2">
                   <button onClick={() => fileInput.current?.click()} disabled={resumeBusy}
-                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-neutral-800 text-xs text-neutral-300 hover:bg-neutral-800 disabled:opacity-50">
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-white/10 text-xs text-neutral-300 hover:bg-white/[0.08] disabled:opacity-50">
                     <Upload className="w-3.5 h-3.5" /> Заменить
                   </button>
                   <button onClick={removeResume} disabled={resumeBusy}
-                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-neutral-800 text-xs text-neutral-300 hover:text-red-300 hover:bg-red-950/30 disabled:opacity-50">
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-white/10 text-xs text-neutral-300 hover:text-red-300 hover:bg-red-950/30 disabled:opacity-50">
                     <Trash2 className="w-3.5 h-3.5" /> Удалить
                   </button>
                 </div>
               </div>
             ) : (
               <button onClick={() => fileInput.current?.click()} disabled={resumeBusy}
-                className="w-full flex items-center justify-center gap-2 border border-dashed border-neutral-700 hover:border-teal-300 rounded-xl py-6 text-sm text-neutral-300 transition-colors disabled:opacity-50">
+                className="w-full flex items-center justify-center gap-2 border border-dashed border-white/15 hover:border-teal-300 rounded-xl py-6 text-sm text-neutral-300 transition-colors disabled:opacity-50">
                 {resumeBusy ? <Loader2 className="w-5 h-5 animate-spin" /> : <><Upload className="w-4 h-4" /> Загрузить PDF</>}
               </button>
             )}

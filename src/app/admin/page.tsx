@@ -73,7 +73,7 @@ export default async function AdminPage() {
             <Link href="/" className="inline-flex items-center gap-2 text-sm text-neutral-400 hover:text-white">
               <ArrowLeft className="w-4 h-4" /> На сайт
             </Link>
-            <h1 className="text-2xl font-bold mt-2">Метрики FastCV</h1>
+            <h1 className="font-display text-2xl font-bold mt-2">Метрики FastCV</h1>
           </div>
           <p className="text-xs text-neutral-500">
             Обновлено {new Date(m.generated_at).toLocaleString("ru-RU", { timeZone: "Europe/Moscow", dateStyle: "short", timeStyle: "short" })} МСК ·
@@ -83,7 +83,7 @@ export default async function AdminPage() {
 
         <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3" aria-label="Ключевые показатели">
           {tiles.map(t => (
-            <div key={t.label} className="rounded-2xl border border-neutral-800 bg-neutral-900/50 p-5">
+            <div key={t.label} className="rounded-2xl border border-white/10 bg-neutral-900/50 p-5">
               <p className="text-xs text-neutral-400">{t.label}</p>
               <p className="text-3xl font-bold mt-1 tabular-nums">{t.value}</p>
               {t.note && <p className="text-xs text-neutral-500 mt-1">{t.note}</p>}
@@ -91,7 +91,7 @@ export default async function AdminPage() {
           ))}
         </section>
 
-        <section className="rounded-2xl border border-neutral-800 bg-neutral-900/50 p-5 space-y-4">
+        <section className="rounded-2xl border border-white/10 bg-neutral-900/50 p-5 space-y-4">
           <h2 className="text-sm font-semibold">Новые вакансии по дням, последние 14 дней</h2>
           <div className="flex items-end gap-[2px] h-44" role="img"
             aria-label={`Новые вакансии по дням: максимум ${totals[peak] ?? 0} за день`}>
@@ -122,7 +122,7 @@ export default async function AdminPage() {
               <thead><tr className="text-left text-neutral-500"><th className="py-1">День</th><th>Из каналов</th><th>От работодателей</th></tr></thead>
               <tbody>
                 {days.map(d => (
-                  <tr key={d.day} className="border-t border-neutral-800">
+                  <tr key={d.day} className="border-t border-white/10">
                     <td className="py-1">{new Date(d.day).toLocaleDateString("ru-RU")}</td><td>{d.external}</td><td>{d.internal}</td>
                   </tr>
                 ))}
@@ -132,7 +132,7 @@ export default async function AdminPage() {
         </section>
 
         <div className="grid lg:grid-cols-2 gap-6">
-          <section className="rounded-2xl border border-neutral-800 bg-neutral-900/50 p-5 space-y-3">
+          <section className="rounded-2xl border border-white/10 bg-neutral-900/50 p-5 space-y-3">
             <h2 className="text-sm font-semibold">Вакансии в ленте по направлениям</h2>
             <ul className="space-y-2">
               {directions.map(d => (
@@ -145,14 +145,14 @@ export default async function AdminPage() {
             </ul>
           </section>
 
-          <section className="rounded-2xl border border-neutral-800 bg-neutral-900/50 p-5 space-y-3">
+          <section className="rounded-2xl border border-white/10 bg-neutral-900/50 p-5 space-y-3">
             <h2 className="text-sm font-semibold">Источники за 7 дней</h2>
             {m.channels_week?.length ? (
               <table className="w-full text-xs tabular-nums">
                 <thead><tr className="text-left text-neutral-500"><th className="py-1">Канал</th><th className="text-right">Вакансий</th><th className="text-right">Доля</th></tr></thead>
                 <tbody>
                   {m.channels_week.map(c => (
-                    <tr key={c.channel} className="border-t border-neutral-800">
+                    <tr key={c.channel} className="border-t border-white/10">
                       <td className="py-1.5">
                         <a href={`https://t.me/${c.channel}`} target="_blank" rel="noreferrer" className="text-neutral-300 hover:text-teal-300">@{c.channel}</a>
                       </td>

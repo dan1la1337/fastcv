@@ -7,7 +7,7 @@ import { Loader2 } from "lucide-react";
 import { getUserRole, homeForRole, supabase } from "@/lib/supabase";
 import { authErrorText } from "@/lib/auth-errors";
 
-const input = "w-full px-4 py-3 bg-neutral-950 border border-neutral-800 rounded-xl text-sm text-neutral-100 focus:outline-none focus:border-teal-300 transition-colors";
+const input = "w-full px-4 py-3 bg-[#0B0F19] border border-white/12 rounded-2xl text-sm text-neutral-100 focus:outline-none focus:border-teal-300 transition-colors";
 
 /** Новый пароль. Сюда попадают по ссылке из письма: /auth/callback уже создал сессию. */
 export default function NewPasswordPage() {
@@ -42,8 +42,8 @@ export default function NewPasswordPage() {
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4">
-      <div className="max-w-md w-full bg-neutral-900/50 border border-neutral-800 rounded-2xl p-8 shadow-2xl">
-        <h1 className="text-2xl font-bold text-white text-center mb-6">Новый пароль</h1>
+      <div className="max-w-md w-full glass rounded-3xl p-8 shadow-2xl">
+        <h1 className="font-display text-2xl font-bold text-white text-center mb-6">Новый пароль</h1>
         {ready === false ? (
           <div className="space-y-4 text-center">
             <p className="text-sm text-neutral-400">Ссылка устарела или уже использована. Запросите новое письмо.</p>
@@ -63,7 +63,7 @@ export default function NewPasswordPage() {
             </div>
             {error && <p role="alert" className="text-sm text-red-400 bg-red-950/30 border border-red-500/20 rounded-xl px-4 py-3">{error}</p>}
             <button type="submit" disabled={loading || ready === null}
-              className="w-full flex items-center justify-center gap-2 bg-teal-300 hover:bg-teal-200 text-neutral-950 py-3 rounded-xl text-sm font-semibold transition-colors disabled:opacity-50">
+              className="w-full flex items-center justify-center gap-2 bg-teal-300 hover:bg-teal-200 text-neutral-950 py-3 rounded-full text-sm font-semibold transition-colors disabled:opacity-50">
               {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : "Сохранить пароль"}
             </button>
           </form>

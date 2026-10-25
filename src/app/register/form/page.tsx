@@ -8,8 +8,8 @@ import { supabase } from '@/lib/supabase';
 import { authErrorText } from '@/lib/auth-errors';
 import { LEGAL_VERSION } from '@/lib/legal';
 
-const card = 'max-w-md w-full bg-neutral-900/50 border border-neutral-800 rounded-2xl p-8 shadow-2xl';
-const input = 'w-full px-4 py-3 bg-neutral-950 border border-neutral-800 rounded-xl text-sm text-neutral-100 focus:outline-none focus:border-teal-300 transition-colors';
+const card = 'max-w-md w-full glass rounded-3xl p-8 shadow-2xl';
+const input = 'w-full px-4 py-3 bg-[#0B0F19] border border-white/12 rounded-2xl text-sm text-neutral-100 focus:outline-none focus:border-teal-300 transition-colors';
 const label = 'block text-xs font-bold text-neutral-500 uppercase tracking-wider mb-2';
 
 function Logo() {
@@ -72,7 +72,7 @@ function RegisterFormContent() {
       <div className="min-h-screen flex items-center justify-center p-4">
         <div className={`${card} text-center space-y-4`}>
           <MailCheck className="w-10 h-10 text-teal-300 mx-auto" />
-          <h1 className="text-2xl font-bold text-white">Проверьте почту</h1>
+          <h1 className="font-display text-2xl font-bold text-white">Проверьте почту</h1>
           <p className="text-neutral-400 text-sm leading-relaxed">
             Мы отправили письмо на <span className="font-medium text-neutral-100">{email}</span>.
             Перейдите по ссылке из письма, чтобы подтвердить аккаунт.
@@ -88,7 +88,7 @@ function RegisterFormContent() {
       <div className={card}>
         <div className="text-center mb-8">
           <Logo />
-          <h1 className="text-2xl font-bold text-white">Регистрация</h1>
+          <h1 className="font-display text-2xl font-bold text-white">Регистрация</h1>
           <p className="text-neutral-400 text-sm mt-2">
             {role === 'candidate' ? 'Профиль кандидата: отклики с письмом от ИИ' : 'Профиль компании: вакансии и отклики кандидатов'}
           </p>
@@ -109,7 +109,7 @@ function RegisterFormContent() {
 
           <label className="flex items-start gap-3 text-xs text-neutral-400 leading-relaxed cursor-pointer">
             <input type="checkbox" required checked={agreed} onChange={(e) => setAgreed(e.target.checked)}
-              className="mt-0.5 w-4 h-4 shrink-0 rounded bg-neutral-950 border-neutral-700" />
+              className="mt-0.5 w-4 h-4 shrink-0 rounded bg-neutral-950 border-white/15" />
             <span>
               Принимаю <Link href="/terms" target="_blank" className="text-teal-300 hover:underline">пользовательское соглашение</Link> и
               даю согласие на обработку персональных данных, в том числе их передачу за рубеж, на условиях{' '}
@@ -124,7 +124,7 @@ function RegisterFormContent() {
           <button
             type="submit"
             disabled={loading || !agreed}
-            className="w-full flex items-center justify-center gap-2 bg-teal-300 hover:bg-teal-200 text-neutral-950 py-3 rounded-xl text-sm font-semibold transition-colors disabled:opacity-50 mt-6"
+            className="w-full flex items-center justify-center gap-2 bg-teal-300 hover:bg-teal-200 text-neutral-950 py-3 rounded-full text-sm font-semibold transition-colors disabled:opacity-50 mt-6"
           >
             {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Зарегистрироваться'}
           </button>

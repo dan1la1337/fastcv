@@ -29,14 +29,14 @@ export default function TelegramBotSetup({ current }: { current: string | null }
   }
 
   return (
-    <section className="bg-neutral-900/50 border border-neutral-800 rounded-2xl p-5 space-y-3">
+    <section className="glass rounded-3xl p-5 space-y-3">
       <h2 className="text-sm font-semibold text-neutral-300">Бот подборок для кандидатов</h2>
       <p className="text-sm text-neutral-400">
         {bot ? <>Сейчас в профилях ссылка на <a className="text-teal-300 hover:underline" href={`https://t.me/${bot}`} target="_blank" rel="noreferrer">@{bot}</a>.</> : "Бот ещё не подключён — кандидаты видят «Бот настраивается»."}
         {" "}Кнопка берёт токен из TELEGRAM_JOBS_BOT_TOKEN на Vercel; её можно нажимать повторно.
       </p>
       <button onClick={setup} disabled={busy}
-        className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-teal-300 hover:bg-teal-200 text-neutral-950 text-sm font-semibold disabled:opacity-50">
+        className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-teal-300 hover:bg-teal-200 text-neutral-950 text-sm font-semibold disabled:opacity-50">
         {busy ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />} Подключить бота подборок
       </button>
       {message && <p className={`text-sm ${message.ok ? "text-emerald-400" : "text-red-300"}`}>{message.text}</p>}

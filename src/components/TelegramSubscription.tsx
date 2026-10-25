@@ -84,7 +84,7 @@ export default function TelegramSubscription({ userId }: { userId: string }) {
   if (!loaded) return null;
 
   return (
-    <div className="bg-neutral-900/50 border border-neutral-800 rounded-2xl p-6 sm:p-8 space-y-4">
+    <div className="glass rounded-3xl p-6 sm:p-8 space-y-4">
       <div>
         <h2 className="text-lg font-bold text-white flex items-center gap-2"><BellRing className="w-5 h-5 text-teal-300" /> Подборка в Telegram</h2>
         <p className="text-sm text-neutral-400 mt-1">
@@ -95,7 +95,7 @@ export default function TelegramSubscription({ userId }: { userId: string }) {
       {linked ? (
         <div className="flex flex-wrap items-center gap-3">
           <label className="flex items-center gap-3 cursor-pointer">
-            <input type="checkbox" checked={notify} onChange={toggle} className="w-5 h-5 rounded bg-neutral-950 border-neutral-800 text-teal-400 focus:ring-0" />
+            <input type="checkbox" checked={notify} onChange={toggle} className="w-5 h-5 rounded bg-neutral-950 border-white/10 text-teal-400 focus:ring-0" />
             <span className="text-sm text-neutral-200">Присылать подборку</span>
           </label>
           <button onClick={unlink} disabled={busy} className="ml-auto text-xs text-neutral-400 hover:text-red-300">Отвязать Telegram</button>
@@ -105,7 +105,7 @@ export default function TelegramSubscription({ userId }: { userId: string }) {
       ) : link ? (
         <div className="space-y-2">
           <a href={link} target="_blank" rel="noreferrer"
-            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-teal-300 hover:bg-teal-200 text-neutral-950 text-sm font-semibold">
+            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-full bg-teal-300 hover:bg-teal-200 text-neutral-950 text-sm font-semibold">
             <Send className="w-4 h-4" /> Открыть @{bot} и нажать «Start»
           </a>
           <p className="text-xs text-neutral-500">

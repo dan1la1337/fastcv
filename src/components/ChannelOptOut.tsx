@@ -39,7 +39,7 @@ export default function ChannelOptOut({ initial }: { initial: ExcludedChannel[] 
   }
 
   return (
-    <section className="bg-neutral-900/50 border border-neutral-800 rounded-2xl p-5 space-y-3">
+    <section className="glass rounded-3xl p-5 space-y-3">
       <h2 className="text-sm font-semibold text-neutral-300">Исключить канал по просьбе владельца</h2>
       <p className="text-sm text-neutral-400">
         Сбор из канала останавливается навсегда, его вакансии уходят в архив. Можно исключить и канал, которого ещё нет в
@@ -48,10 +48,10 @@ export default function ChannelOptOut({ initial }: { initial: ExcludedChannel[] 
       <form onSubmit={exclude} className="flex flex-wrap gap-2">
         <label className="sr-only" htmlFor="optout-channel">Канал</label>
         <input id="optout-channel" value={name} onChange={e => setName(e.target.value)} placeholder="@channel или ссылка"
-          className="flex-1 min-w-[12rem] rounded-xl bg-neutral-950 border border-neutral-800 px-3 py-2 text-sm" />
+          className="flex-1 min-w-[12rem] rounded-xl bg-neutral-950 border border-white/10 px-3 py-2 text-sm" />
         <label className="sr-only" htmlFor="optout-note">Основание</label>
         <input id="optout-note" value={note} onChange={e => setNote(e.target.value)} placeholder="Основание: письмо от 26.10"
-          className="flex-1 min-w-[12rem] rounded-xl bg-neutral-950 border border-neutral-800 px-3 py-2 text-sm" />
+          className="flex-1 min-w-[12rem] rounded-xl bg-neutral-950 border border-white/10 px-3 py-2 text-sm" />
         <button type="submit" disabled={busy || !name.trim()}
           className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-red-600 hover:bg-red-500 text-white text-sm font-semibold disabled:opacity-50">
           {busy ? <Loader2 className="w-4 h-4 animate-spin" /> : <Ban className="w-4 h-4" />} Исключить

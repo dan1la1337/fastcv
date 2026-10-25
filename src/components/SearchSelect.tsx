@@ -74,27 +74,27 @@ export default function SearchSelect({
   return (
     <div ref={root} className="relative">
       <button type="button" onClick={toggle} aria-haspopup="listbox" aria-expanded={open} aria-label={label}
-        className="w-full flex items-center justify-between gap-2 pl-3 pr-14 py-2.5 bg-neutral-950 border border-neutral-800 rounded-lg text-sm text-left hover:border-neutral-700 focus:outline-none focus:border-teal-300 transition-colors">
+        className="w-full flex items-center justify-between gap-2 pl-3 pr-14 py-2.5 bg-[#0B0F19] border border-white/12 rounded-xl text-sm text-left hover:border-white/15 focus:outline-none focus:border-teal-300 transition-colors">
         <span className={selected ? "text-neutral-100" : "text-neutral-500"}>{selected?.label ?? emptyLabel}</span>
       </button>
       <span className="absolute right-2 top-0 h-[42px] flex items-center gap-1 pointer-events-none">
         {selected && (
           <button type="button" aria-label="Сбросить" onClick={() => onChange("")}
-            className="pointer-events-auto p-0.5 rounded hover:bg-neutral-800 text-neutral-500 hover:text-white"><X className="w-3.5 h-3.5" /></button>
+            className="pointer-events-auto p-0.5 rounded hover:bg-white/[0.08] text-neutral-500 hover:text-white"><X className="w-3.5 h-3.5" /></button>
         )}
         <ChevronDown className={`w-4 h-4 text-neutral-500 transition-transform duration-200 ${open ? "rotate-180" : ""}`} />
       </span>
 
       <div
-        className={`absolute z-30 mt-1.5 w-full origin-top rounded-xl border border-neutral-800 bg-neutral-900 shadow-2xl shadow-black/50 transition-all duration-150 ease-out ${
+        className={`absolute z-30 mt-1.5 w-full origin-top rounded-xl border border-white/10 bg-neutral-900 shadow-2xl shadow-black/50 transition-all duration-150 ease-out ${
           open ? "opacity-100 scale-100 translate-y-0" : "opacity-0 scale-95 -translate-y-1 pointer-events-none"}`}
         aria-hidden={!open}
       >
-        <div className="relative p-2 border-b border-neutral-800">
+        <div className="relative p-2 border-b border-white/10">
           <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-500" />
           <input ref={input} value={query} onChange={e => { setQuery(e.target.value); setActive(0); }} onKeyDown={onKey}
             placeholder={placeholder} aria-controls={listId} tabIndex={open ? 0 : -1}
-            className="w-full pl-8 pr-2 py-2 bg-neutral-950 border border-neutral-800 rounded-lg text-sm text-neutral-100 focus:outline-none focus:border-teal-300" />
+            className="w-full pl-8 pr-2 py-2 bg-[#0B0F19] border border-white/12 rounded-xl text-sm text-neutral-100 focus:outline-none focus:border-teal-300" />
         </div>
         <ul id={listId} role="listbox" aria-label={label} className="max-h-72 overflow-y-auto p-1">
           {filtered.length === 0 && <li className="px-3 py-2 text-sm text-neutral-500">Ничего не нашлось</li>}
@@ -106,7 +106,7 @@ export default function SearchSelect({
                 <button type="button" role="option" aria-selected={o.value === value} tabIndex={-1}
                   onMouseEnter={() => setActive(i)} onClick={() => pick(o.value)}
                   className={`w-full flex items-center justify-between gap-2 px-3 py-1.5 rounded-md text-sm text-left transition-colors ${
-                    i === active ? "bg-neutral-800 text-white" : "text-neutral-300"}`}>
+                    i === active ? "bg-white/[0.08] text-white" : "text-neutral-300"}`}>
                   <span className="flex items-center gap-2">
                     {o.value === value ? <Check className="w-3.5 h-3.5 text-teal-300" /> : <span className="w-3.5" />}
                     {o.label}

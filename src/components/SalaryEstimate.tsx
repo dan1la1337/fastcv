@@ -5,7 +5,7 @@ import { plural } from "@/lib/vacancies";
 export default function SalaryEstimate({ estimate, className = "" }: { estimate: Estimate; className?: string }) {
   return (
     <span
-      className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-md border border-dashed border-neutral-700 text-neutral-300 font-normal ${className}`}
+      className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-md border border-dashed border-white/15 text-neutral-300 font-normal ${className}`}
       title="Работодатель не указал зарплату. Оценка — середина вилок похожих вакансий (то же направление и уровень) за 90 дней"
     >
       {formatEstimate(estimate)}

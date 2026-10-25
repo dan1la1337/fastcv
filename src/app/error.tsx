@@ -11,7 +11,7 @@ export default function Error({ error, retry }: { error: Error & { digest?: stri
   return (
     <main className="min-h-screen text-neutral-100 flex items-center justify-center px-4">
       <div className="max-w-md text-center space-y-4">
-        <h1 className="text-xl font-semibold">Что-то пошло не так</h1>
+        <h1 className="font-display text-xl font-semibold">Что-то пошло не так</h1>
         <p className="text-sm text-neutral-400">
           Мы уже видим ошибку в логах. Попробуйте ещё раз — обычно это помогает.
         </p>
@@ -19,13 +19,13 @@ export default function Error({ error, retry }: { error: Error & { digest?: stri
         <div className="flex justify-center gap-3">
           <button
             onClick={() => retry()}
-            className="px-5 py-2.5 bg-teal-300 hover:bg-teal-200 text-neutral-950 rounded-xl text-sm font-semibold transition-colors"
+            className="px-5 py-2.5 bg-teal-300 hover:bg-teal-200 text-neutral-950 rounded-full text-sm font-semibold transition-colors"
           >
             Повторить
           </button>
           <Link
             href="/"
-            className="px-5 py-2.5 bg-neutral-900 hover:bg-neutral-800 border border-neutral-800 rounded-xl text-sm text-neutral-200 transition-colors"
+            className="px-5 py-2.5 bg-neutral-900 hover:bg-white/[0.08] border border-white/10 rounded-xl text-sm text-neutral-200 transition-colors"
           >
             На главную
           </Link>

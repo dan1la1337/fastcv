@@ -6,7 +6,7 @@ import { ArrowLeft, Loader2, MailCheck } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { authErrorText } from "@/lib/auth-errors";
 
-const card = "max-w-md w-full bg-neutral-900/50 border border-neutral-800 rounded-2xl p-8 shadow-2xl";
+const card = "max-w-md w-full glass rounded-3xl p-8 shadow-2xl";
 
 /** Запрос письма для сброса пароля. Ссылка из письма ведёт на /reset-password/new через /auth/callback. */
 export default function ResetPasswordPage() {
@@ -37,7 +37,7 @@ export default function ResetPasswordPage() {
         {sent ? (
           <div className="text-center space-y-4">
             <MailCheck className="w-10 h-10 text-teal-300 mx-auto" />
-            <h1 className="text-2xl font-bold text-white">Проверьте почту</h1>
+            <h1 className="font-display text-2xl font-bold text-white">Проверьте почту</h1>
             <p className="text-neutral-400 text-sm leading-relaxed">
               Если аккаунт с адресом <span className="font-medium text-neutral-100">{email}</span> существует,
               мы отправили на него ссылку для смены пароля.
@@ -46,18 +46,18 @@ export default function ResetPasswordPage() {
           </div>
         ) : (
           <>
-            <h1 className="text-2xl font-bold text-white text-center">Сброс пароля</h1>
+            <h1 className="font-display text-2xl font-bold text-white text-center">Сброс пароля</h1>
             <p className="text-neutral-400 text-sm mt-2 mb-6 text-center">Пришлём ссылку для смены пароля на вашу почту</p>
             <form onSubmit={submit} className="space-y-4">
               <div>
                 <label htmlFor="email" className="block text-xs font-bold text-neutral-500 uppercase tracking-wider mb-2">Email</label>
                 <input id="email" type="email" required autoComplete="email" value={email} onChange={e => setEmail(e.target.value)}
                   placeholder="name@example.com"
-                  className="w-full px-4 py-3 bg-neutral-950 border border-neutral-800 rounded-xl text-sm text-neutral-100 focus:outline-none focus:border-teal-300 transition-colors" />
+                  className="w-full px-4 py-3 bg-[#0B0F19] border border-white/12 rounded-2xl text-sm text-neutral-100 focus:outline-none focus:border-teal-300 transition-colors" />
               </div>
               {error && <p role="alert" className="text-sm text-red-400 bg-red-950/30 border border-red-500/20 rounded-xl px-4 py-3">{error}</p>}
               <button type="submit" disabled={loading}
-                className="w-full flex items-center justify-center gap-2 bg-teal-300 hover:bg-teal-200 text-neutral-950 py-3 rounded-xl text-sm font-semibold transition-colors disabled:opacity-50">
+                className="w-full flex items-center justify-center gap-2 bg-teal-300 hover:bg-teal-200 text-neutral-950 py-3 rounded-full text-sm font-semibold transition-colors disabled:opacity-50">
                 {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : "Отправить ссылку"}
               </button>
             </form>
