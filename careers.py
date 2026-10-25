@@ -336,9 +336,12 @@ def import_careers(store, normalize: Callable[[str], object], fetcher: Optional[
     fetcher = fetcher or Fetcher()
     started = clock()
     stats: dict[str, dict] = {}
-    for company in companies:
+    for i, company in enumerate(companies):
         if clock() - started > time_budget:
             break
+        # Время делим поровну между оставшимися компаниями: тысячи розничных вакансий одного
+        # банка не должны съедать весь запуск. Недобранное компанией переходит следующим
+        company_deadline = clock() + (time_budget - (clock() - started)) / (len(companies) - i)
         info = stats.setdefault(company.key, {"new": 0, "saved": 0, "archived": 0})
         try:
             live = sitemap_vacancies(fetcher, company)
@@ -355,7 +358,8 @@ def import_careers(store, normalize: Callable[[str], object], fetcher: Optional[
                 fresh.sort(key=lambda vid: not re.search(company.prefer, live[vid]))
             info["new"] = len(fresh)
             for vid in fresh[:MAX_NEW_PER_COMPANY]:
-                if clock() - started > time_budget:
+                if clock() > company_deadline:
+                    info["stopped"] = "company share"
                     break
                 url = live[vid]
                 page = fetcher.get(url, company.pause)
