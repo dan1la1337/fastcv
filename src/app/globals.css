@@ -50,9 +50,20 @@ body {
 @keyframes live-ping { 0% { transform: scale(1); opacity: .8; } 100% { transform: scale(2.6); opacity: 0; } }
 .live-ping { animation: live-ping 1.6s cubic-bezier(0, 0, .2, 1) infinite; }
 
+/* Стеклянная панель «Авроры» */
+.glass { background: rgba(255, 255, 255, 0.04); border: 1px solid rgba(255, 255, 255, 0.10); }
+
+/* Значок ИИ: переливается мятным и индиго */
+@keyframes ai-shimmer { 0% { background-position: -200% 0; } 100% { background-position: 200% 0; } }
+.ai-shimmer { background: linear-gradient(90deg, #5EEAD4, #A5B4FC, #5EEAD4); background-size: 200% 100%; animation: ai-shimmer 3s linear infinite; }
+
+/* Готовое письмо проявляется сверху вниз */
+@keyframes letter-write { from { clip-path: inset(0 0 100% 0); } to { clip-path: inset(0 0 0 0); } }
+.letter-write { animation: letter-write 1.2s cubic-bezier(.3, .7, .2, 1) both; }
+
 /* Вошедшим главный экран-приветствие не нужен: признак входа ставит скрипт в <head> до отрисовки */
 html[data-auth] .guest-only { display: none; }
 
 @media (prefers-reduced-motion: reduce) {
-  .aurora-a, .aurora-b, .ring-fill, .live-ping { animation: none; }
+  .aurora-a, .aurora-b, .ring-fill, .live-ping, .ai-shimmer, .letter-write { animation: none; }
 }

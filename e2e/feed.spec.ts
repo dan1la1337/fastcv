@@ -70,7 +70,10 @@ test("карточка ведёт на страницу вакансии", async
   expect((await view).ok()).toBe(true);
   await expect(page).toHaveURL(/\/vacancy\/[0-9a-f-]{36}$/);
   await expect(page.getByRole("heading", { level: 1 })).toHaveText(title);
-  await expect(page.getByRole("button", { name: /Откликнуться/ })).toBeVisible();
+  // Панель Smart Apply справа: гостю — вход с возвратом на эту вакансию
+  const apply = page.getByRole("complementary", { name: "Smart Apply" });
+  await expect(apply).toBeVisible();
+  await expect(apply.getByRole("link", { name: "Войдите, чтобы откликнуться" })).toHaveAttribute("href", /\/login\?next=%2Fvacancy%2F/);
 });
 
 test("Smart Apply без входа предлагает войти", async ({ page }) => {
