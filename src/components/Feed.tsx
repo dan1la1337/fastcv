@@ -9,11 +9,12 @@ import {
 import { Clock, Search, MapPin, ChevronDown, Sparkles, Loader2, ExternalLink, Globe, SlidersHorizontal, Briefcase, Building2, Target, Bookmark, BookmarkCheck, EyeOff, Undo2 } from "lucide-react";
 import { fetchMarked, fetchMarks, setMark, type MarkKind } from "@/lib/marks";
 import { toast } from "@/components/Toaster";
-import { fetchMatches, fetchRecommended, matchTone, type Match } from "@/lib/matching";
+import { fetchMatches, fetchRecommended, type Match } from "@/lib/matching";
 import type { Tables } from "@/lib/database.types";
 import type { User } from "@supabase/supabase-js";
 import Link from "next/link";
 import Logo from "@/components/Logo";
+import MatchRing from "@/components/MatchRing";
 import SmartApply from "@/components/SmartApply";
 import CompanyLine from "@/components/CompanyLine";
 import { estimateSalary, fetchSalaryBenchmarks, type SalaryBenchmark } from "@/lib/salary";
@@ -294,9 +295,9 @@ export default function Feed({ initialRows, initialTotal, hero }: { initialRows:
   };
   const direction = DIRECTIONS.find(d => d.id === selectedDirection);
   const chip = (active: boolean) =>
-    `text-xs px-2.5 py-1.5 rounded-md border transition-colors ${active
-      ? "bg-teal-300 border-teal-300 text-neutral-950"
-      : "bg-neutral-950 border-neutral-700 text-neutral-400 hover:border-neutral-500 hover:text-neutral-200"}`;
+    `text-xs px-3 py-1.5 rounded-full border transition-colors ${active
+      ? "bg-teal-300/15 border-teal-300 text-teal-200"
+      : "bg-transparent border-white/15 text-neutral-300 hover:border-white/30 hover:text-neutral-100"}`;
 
   const forYou = mode === "for-you";
   const savedMode = mode === "saved";
@@ -308,27 +309,29 @@ export default function Feed({ initialRows, initialTotal, hero }: { initialRows:
     // Без заполненного профиля оценка у всех одинаковая — не показываем её
     const match = hasPrefs ? matches[item.id] : undefined;
     return (
-      <div key={item.id} className="bg-neutral-900/60 border border-neutral-800/80 rounded-2xl p-6 flex flex-col gap-4 relative overflow-hidden group">
+      <div key={item.id} className="bg-white/[0.04] border border-white/10 hover:border-white/20 rounded-3xl p-5 sm:p-6 flex flex-col gap-4 relative overflow-hidden group transition-colors">
 
         {/* Бейджи источников */}
         {item.source_type === 'external' ? (
-           <div className="absolute top-0 right-0 bg-teal-300/10 text-teal-300 text-[10px] uppercase font-bold px-3 py-1 rounded-bl-lg border-b border-l border-teal-300/20 z-10">
+           <div className="absolute top-4 right-4 bg-white/[0.06] text-neutral-300 text-[11px] font-medium px-2.5 py-1 rounded-full z-10">
              {sourceOf(item).badge}
            </div>
         ) : (
-           <div className="absolute top-0 right-0 bg-emerald-500/10 text-emerald-400 text-[10px] uppercase font-bold px-3 py-1 rounded-bl-lg border-b border-l border-emerald-500/20 z-10 flex items-center gap-1">
-             <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+           <div className="absolute top-4 right-4 bg-teal-300/15 text-teal-200 text-[11px] font-medium px-2.5 py-1 rounded-full z-10 flex items-center gap-1.5">
+             <span className="w-1.5 h-1.5 rounded-full bg-teal-300 animate-pulse"></span>
              Прямой работодатель
            </div>
         )}
 
         <div className="flex flex-col sm:flex-row justify-between gap-4">
-          <div className="pr-12">
-            <h2 className="text-xl font-bold text-neutral-100">
+          <div className="flex gap-4 sm:gap-5 items-start pr-24 sm:pr-28">
+          {match && <MatchRing value={match.score} size={64} stroke={match.score >= 70 ? "#5EEAD4" : "#818CF8"} />}
+          <div className="min-w-0">
+            <h2 className="text-lg sm:text-xl font-semibold text-neutral-100 leading-snug">
               <Link href={`/vacancy/${item.id}`} className="hover:text-teal-300 transition-colors">{item.title}</Link>
             </h2>
             <CompanyLine vacancy={item} className="text-sm text-neutral-400 mt-0.5" />
-            <p className="text-base font-semibold text-emerald-400 mt-1 flex flex-wrap items-center gap-2">
+            <p className="text-base font-semibold text-neutral-100 mt-1.5 flex flex-wrap items-center gap-2">
               {formatSalary(item.salary_min, item.salary_max, item.salary_currency)}
               {(() => {
                 const estimate = estimateSalary(item, benchmarks);
@@ -336,12 +339,6 @@ export default function Feed({ initialRows, initialTotal, hero }: { initialRows:
               })()}
             </p>
             <p className="flex flex-wrap items-center gap-3 text-xs text-neutral-400 mt-2">
-              {match && (
-                <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-md border font-semibold ${matchTone(match.score)}`}
-                  title="Насколько вакансия подходит вашему профилю">
-                  <Target className="w-3.5 h-3.5" />Совпадение {match.score}%
-                </span>
-              )}
               {(item.level || item.experience_min != null) && (
               <span className="inline-flex items-center gap-1"><Briefcase className="w-3.5 h-3.5" />
                 {[item.level && levelLabel(item.level), experienceLabel(item.experience_min)].filter(Boolean).join(" · ")}
@@ -356,10 +353,11 @@ export default function Feed({ initialRows, initialTotal, hero }: { initialRows:
               </span>
             </p>
           </div>
+          </div>
 
           <button
             onClick={() => setApplyVacancy(item)}
-            className="inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-teal-300 hover:bg-teal-200 text-neutral-950 rounded-xl text-sm font-semibold transition-colors shrink-0 shadow-lg shadow-teal-300/20 relative z-10"
+            className="inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-teal-300 hover:bg-teal-200 text-neutral-950 rounded-full text-sm font-semibold transition-colors shrink-0 relative z-10 sm:self-end"
           >
             <Sparkles className="w-4 h-4" /> Smart Apply
           </button>
@@ -368,7 +366,7 @@ export default function Feed({ initialRows, initialTotal, hero }: { initialRows:
 
         {match && (match.matched.length > 0 || match.missing.length > 0 || match.related.length > 0) && (
           <p className="text-xs text-neutral-500">
-            {match.matched.length > 0 && <>Есть у вас: <span className="text-emerald-400">{match.matched.join(", ")}</span></>}
+            {match.matched.length > 0 && <>Есть у вас: <span className="text-teal-200">{match.matched.join(", ")}</span></>}
             {match.related.length > 0 && (
               <>
                 {match.matched.length > 0 && " · "}
@@ -405,7 +403,7 @@ export default function Feed({ initialRows, initialTotal, hero }: { initialRows:
         {(item.stack?.length || item.source_url || isCandidate) ? (
           <div className="flex flex-wrap items-center gap-2">
             {item.stack?.slice(0, 8).map(tech => (
-              <span key={tech} className="text-[11px] px-2 py-0.5 rounded-md bg-neutral-800/80 border border-neutral-700/60 text-neutral-300">
+              <span key={tech} className="text-[11px] px-2.5 py-0.5 rounded-full bg-white/[0.06] text-neutral-300">
                 {tech}
               </span>
             ))}
@@ -451,14 +449,18 @@ export default function Feed({ initialRows, initialTotal, hero }: { initialRows:
 
   return (
     <div className="min-h-screen text-neutral-100 antialiased font-sans relative">
-      <header className="border-b border-neutral-800 bg-neutral-900/80 backdrop-blur-md sticky top-0 z-20">
+      <header className="border-b border-white/10 bg-neutral-950/70 backdrop-blur-md sticky top-0 z-20">
         <div className="max-w-6xl mx-auto px-4 py-3 sm:py-4 flex items-center justify-between gap-3">
           <div className="flex items-center gap-3">
             <Logo />
           </div>
           <div className="flex items-center gap-2 sm:gap-4">
-            <span className="hidden sm:inline text-xs font-medium text-emerald-400 bg-emerald-400/10 px-3 py-1.5 rounded-full border border-emerald-400/20">
-              {loading ? "…" : `${total} ${plural(total, VACANCY_FORMS)}`}
+            <span className="hidden sm:inline-flex items-center gap-2 font-mono text-xs text-teal-300">
+              <span className="relative h-2 w-2" aria-hidden="true">
+                <span className="live-ping absolute inset-0 rounded-full bg-teal-300" />
+                <span className="absolute inset-0 rounded-full bg-teal-300" />
+              </span>
+              {loading ? "…" : `${total.toLocaleString("ru-RU")} ${plural(total, VACANCY_FORMS)}`}
             </span>
             
             {user ? (
@@ -467,14 +469,14 @@ export default function Feed({ initialRows, initialTotal, hero }: { initialRows:
                 {isEmployer ? (
                   <Link 
                     href="/employer"
-                    className="px-3 py-1.5 bg-neutral-800 hover:bg-neutral-700 text-neutral-200 rounded-lg text-xs font-medium transition-colors border border-neutral-700"
+                    className="px-4 py-2 rounded-full text-sm text-neutral-300 hover:text-white hover:bg-white/[0.06] transition-colors"
                   >
                     Кабинет HR
                   </Link>
                 ) : (
                   <Link 
                     href="/applications"
-                    className="px-3 py-1.5 bg-neutral-800 hover:bg-neutral-700 text-neutral-200 rounded-lg text-xs font-medium transition-colors border border-neutral-700"
+                    className="px-4 py-2 rounded-full text-sm text-neutral-300 hover:text-white hover:bg-white/[0.06] transition-colors"
                   >
                     Мои отклики
                   </Link>
@@ -482,7 +484,7 @@ export default function Feed({ initialRows, initialTotal, hero }: { initialRows:
 
                 <Link
                   href="/profile"
-                  className="w-9 h-9 flex items-center justify-center rounded-full bg-teal-300/20 border border-teal-300/50 text-teal-300 font-bold cursor-pointer hover:bg-teal-300/30 transition-colors relative z-50"
+                  className="w-10 h-10 flex items-center justify-center rounded-full bg-white/10 text-neutral-100 font-semibold cursor-pointer hover:bg-white/15 transition-colors relative z-50"
                   title="Перейти в личный кабинет"
                 >
                   {user.email?.charAt(0).toUpperCase()}
@@ -491,7 +493,7 @@ export default function Feed({ initialRows, initialTotal, hero }: { initialRows:
             ) : (
               <Link 
                 href="/register"
-                className="px-3 sm:px-4 py-2 bg-neutral-800 hover:bg-neutral-700 text-white rounded-lg text-sm font-medium transition-colors border border-neutral-700 relative z-50 whitespace-nowrap"
+                className="px-4 py-2 bg-white/[0.08] hover:bg-white/[0.14] text-neutral-100 rounded-full text-sm font-medium transition-colors border border-white/15 relative z-50 whitespace-nowrap"
               >
                 Войти<span className="hidden sm:inline"> / Регистрация</span>
               </Link>
@@ -508,7 +510,7 @@ export default function Feed({ initialRows, initialTotal, hero }: { initialRows:
             <button
               onClick={() => setFiltersOpen(open => !open)}
               aria-expanded={filtersOpen}
-              className="lg:hidden flex items-center justify-between w-full px-4 py-3 bg-neutral-900/60 border border-neutral-800 rounded-xl text-sm font-medium text-neutral-200"
+              className="lg:hidden flex items-center justify-between w-full px-5 py-3 bg-white/[0.04] border border-white/10 rounded-full text-sm font-medium text-neutral-200"
             >
               <span className="inline-flex items-center gap-2">
                 <SlidersHorizontal className="w-4 h-4 text-neutral-400" /> Фильтры
@@ -520,13 +522,13 @@ export default function Feed({ initialRows, initialTotal, hero }: { initialRows:
         })()}
         {/* Sidebar Filters */}
         <aside className={`lg:col-span-1 space-y-6 ${filtersOpen ? "" : "hidden"} lg:block`}>
-          <div className="bg-neutral-900/50 border border-neutral-800 rounded-xl p-5 space-y-6">
+          <div className="bg-white/[0.04] border border-white/10 rounded-3xl p-5 space-y-6">
             {/* Поиск */}
             <div className="space-y-3">
               <label className="text-xs font-bold text-neutral-500 uppercase tracking-wider">Ключевые слова</label>
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400" />
-                <input type="text" placeholder="Java, Backend..." value={search} onChange={(e) => setSearch(e.target.value)} className="w-full pl-9 pr-4 py-2.5 bg-neutral-950 border border-neutral-800 rounded-lg text-sm text-neutral-100 focus:outline-none focus:border-teal-300 transition-colors" />
+                <input type="text" placeholder="Java, Backend..." value={search} onChange={(e) => setSearch(e.target.value)} className="w-full pl-9 pr-4 py-2.5 bg-white/[0.04] border border-white/10 rounded-full text-sm text-neutral-100 focus:outline-none focus:border-teal-300 transition-colors" />
               </div>
             </div>
 
@@ -534,7 +536,7 @@ export default function Feed({ initialRows, initialTotal, hero }: { initialRows:
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <label className="text-xs font-bold text-neutral-500 uppercase tracking-wider">Зарплата от</label>
-                <span className="text-xs font-semibold text-emerald-400 transition-all duration-200">
+                <span className="text-xs font-semibold text-teal-200 transition-all duration-200">
                   {minSalary === 0 ? "Любая" : `${minSalary.toLocaleString("ru-RU")} ₽`}
                 </span>
               </div>
@@ -570,7 +572,7 @@ export default function Feed({ initialRows, initialTotal, hero }: { initialRows:
             </div>
 
             {/* Формат работы */}
-            <div className="space-y-3 pt-2 border-t border-neutral-800/60">
+            <div className="space-y-3 pt-2 border-t border-white/[0.08]">
               <label className="text-xs font-bold text-neutral-500 uppercase tracking-wider">Формат</label>
               <div className="flex flex-wrap gap-2">
                 <button onClick={() => setFormats([])} className={chip(formats.length === 0)} aria-pressed={formats.length === 0}>Любой</button>
@@ -585,7 +587,7 @@ export default function Feed({ initialRows, initialTotal, hero }: { initialRows:
             </div>
 
             {/* Источник */}
-            <div className="space-y-3 pt-2 border-t border-neutral-800/60">
+            <div className="space-y-3 pt-2 border-t border-white/[0.08]">
               <label className="text-xs font-bold text-neutral-500 uppercase tracking-wider">Источник</label>
               <div className="flex flex-wrap gap-2">
                 <button onClick={() => setSources([])} className={chip(sources.length === 0)} aria-pressed={sources.length === 0}>Все</button>
@@ -600,7 +602,7 @@ export default function Feed({ initialRows, initialTotal, hero }: { initialRows:
             </div>
 
             {/* Уровень */}
-            <div className="space-y-3 pt-2 border-t border-neutral-800/60">
+            <div className="space-y-3 pt-2 border-t border-white/[0.08]">
               <label className="text-xs font-bold text-neutral-500 uppercase tracking-wider">Уровень</label>
               <div className="flex flex-wrap gap-2">
                 {LEVELS.map(l => (
@@ -612,7 +614,7 @@ export default function Feed({ initialRows, initialTotal, hero }: { initialRows:
             </div>
 
             {/* Город */}
-            <div className="space-y-3 pt-2 border-t border-neutral-800/60">
+            <div className="space-y-3 pt-2 border-t border-white/[0.08]">
               <label className="text-xs font-bold text-neutral-500 uppercase tracking-wider">Город</label>
               <SearchSelect label="Город" placeholder="Начните вводить город…" emptyLabel="Любой город"
                 options={cityOptions} value={city} onChange={setCity} />
@@ -620,7 +622,7 @@ export default function Feed({ initialRows, initialTotal, hero }: { initialRows:
           </div>
 
           {/* Направление и уточнение по технологиям */}
-          <div className="bg-neutral-900/50 border border-neutral-800 rounded-xl p-5 space-y-4">
+          <div className="bg-white/[0.04] border border-white/10 rounded-3xl p-5 space-y-4">
             <label className="text-xs font-bold text-neutral-500 uppercase tracking-wider">Направление</label>
 
             <SearchSelect label="Направление" placeholder="Например: frontend, маркетинг, React…" emptyLabel="Все направления"
@@ -653,8 +655,8 @@ export default function Feed({ initialRows, initialTotal, hero }: { initialRows:
                 key={id || "all"}
                 onClick={() => chooseArea(id)}
                 aria-pressed={area === id}
-                className={`px-3 py-1.5 rounded-lg text-sm border transition-colors ${
-                  area === id ? "bg-neutral-100 border-neutral-100 text-neutral-950 font-medium" : "bg-neutral-900/60 border-neutral-800 text-neutral-300 hover:bg-neutral-800"
+                className={`px-4 py-2 rounded-full text-sm border transition-colors ${
+                  area === id ? "bg-teal-300 border-teal-300 text-neutral-950 font-medium" : "bg-white/[0.04] border-white/10 text-neutral-300 hover:bg-white/[0.08]"
                 }`}
               >
                 <span className="sm:hidden">{short}</span><span className="hidden sm:inline">{label}</span>
@@ -669,8 +671,8 @@ export default function Feed({ initialRows, initialTotal, hero }: { initialRows:
                   role="tab"
                   aria-selected={mode === id}
                   onClick={() => (id === "for-you" ? showForYou() : id === "saved" ? showSaved() : setMode("all"))}
-                  className={`inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-medium border transition-colors ${
-                    mode === id ? "bg-teal-300 border-teal-300 text-neutral-950" : "bg-neutral-900/60 border-neutral-800 text-neutral-300 hover:bg-neutral-800"
+                  className={`inline-flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-medium border transition-colors ${
+                    mode === id ? "bg-white/[0.14] border-white/20 text-neutral-100" : "bg-transparent border-white/10 text-neutral-400 hover:text-neutral-100"
                   }`}
                 >
                   {id === "for-you" && <Target className="w-4 h-4" />}
@@ -682,14 +684,14 @@ export default function Feed({ initialRows, initialTotal, hero }: { initialRows:
           )}
 
           {isCandidate && !hasPrefs && !forYou && (
-            <div className="rounded-xl border border-neutral-800 bg-neutral-900/60 px-4 py-3 text-sm text-neutral-300">
+            <div className="rounded-3xl border border-white/10 bg-white/[0.04] px-5 py-4 text-sm text-neutral-300">
               Расскажите, что ищете — направления, уровень и навыки, — и у каждой вакансии появится процент совпадения.{" "}
               <Link href="/profile#prefs" className="text-teal-300 hover:underline">Заполнить профиль</Link>
             </div>
           )}
 
           {forYou && (
-            <div className="rounded-xl border border-teal-300/20 bg-teal-950/20 px-4 py-3 text-sm text-neutral-300">
+            <div className="rounded-3xl border border-teal-300/25 bg-teal-300/[0.06] px-5 py-4 text-sm text-neutral-300">
               {hasPrefs ? (
                 <>Вакансии отсортированы по совпадению с вашим профилем: направления, навыки, уровень, формат и город.{" "}
                   <Link href="/profile#prefs" className="text-teal-300 hover:underline">Изменить, что ищу</Link></>
@@ -705,7 +707,7 @@ export default function Feed({ initialRows, initialTotal, hero }: { initialRows:
           ) : loadError ? (
             <div className="text-center py-20 text-sm text-red-400">{loadError}</div>
           ) : list.length === 0 ? (
-            <div className="text-center py-20 bg-neutral-900/30 border border-dashed border-neutral-800 rounded-2xl">
+            <div className="text-center py-20 bg-white/[0.02] border border-dashed border-white/15 rounded-3xl">
               <p className="text-neutral-300 text-sm font-medium">Ничего не нашлось</p>
               <p className="text-neutral-500 text-xs mt-1">
                 {savedMode ? "Нажмите «В избранное» на карточке, чтобы вернуться к вакансии позже"
@@ -721,7 +723,7 @@ export default function Feed({ initialRows, initialTotal, hero }: { initialRows:
                   <button
                     onClick={() => loadRecommended(recPage + 1)}
                     disabled={recLoading}
-                    className="mx-auto mt-2 inline-flex items-center gap-2 px-6 py-2.5 bg-neutral-900 hover:bg-neutral-800 border border-neutral-800 rounded-xl text-sm text-neutral-200 transition-colors disabled:opacity-50"
+                    className="mx-auto mt-2 inline-flex items-center gap-2 px-6 py-3 bg-white/[0.06] hover:bg-white/[0.1] border border-white/15 rounded-full text-sm text-neutral-100 transition-colors disabled:opacity-50"
                   >
                     {recLoading ? <><Loader2 className="w-4 h-4 animate-spin" /> Загружаем…</> : "Показать ещё"}
                   </button>
@@ -730,7 +732,7 @@ export default function Feed({ initialRows, initialTotal, hero }: { initialRows:
                 <button
                   onClick={loadMore}
                   disabled={loadingMore}
-                  className="mx-auto mt-2 inline-flex items-center gap-2 px-6 py-2.5 bg-neutral-900 hover:bg-neutral-800 border border-neutral-800 rounded-xl text-sm text-neutral-200 transition-colors disabled:opacity-50"
+                  className="mx-auto mt-2 inline-flex items-center gap-2 px-6 py-3 bg-white/[0.06] hover:bg-white/[0.1] border border-white/15 rounded-full text-sm text-neutral-100 transition-colors disabled:opacity-50"
                 >
                   {loadingMore
                     ? <><Loader2 className="w-4 h-4 animate-spin" /> Загружаем…</>
@@ -741,7 +743,7 @@ export default function Feed({ initialRows, initialTotal, hero }: { initialRows:
           )}
 
           {savedMode && hiddenList.length > 0 && (
-            <details className="rounded-xl border border-neutral-800 bg-neutral-900/40 px-4 py-3">
+            <details className="rounded-3xl border border-white/10 bg-white/[0.03] px-5 py-4">
               <summary className="cursor-pointer text-sm text-neutral-300">Скрытые вакансии ({hiddenList.length})</summary>
               <ul className="mt-3 space-y-2">
                 {hiddenList.map(v => (
