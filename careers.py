@@ -45,12 +45,21 @@ class Company:
     vacancy: str          # регулярное выражение для адреса вакансии; группа 1 — id вакансии
     pause: float = 1.5    # секунд между запросами к сайту
     sitemaps: tuple[str, ...] = ()   # если в robots.txt карты сайта нет
+    # Адреса, которые читаем первыми (ИТ-вакансии): за запуск успеваем не все новые страницы
+    prefer: str = ""
+    # Раздел сайта в адресе → направление, когда по названию его не понять
+    # («Старший DS-инженер» в разделе data-science)
+    categories: tuple[tuple[str, str], ...] = ()
 
 
 COMPANIES = [
     Company("mts", "МТС", "https://job.mts.ru", r"^https?://job\.mts\.ru/vacancy/(\d+)/?$"),
     Company("vk", "VK", "https://team.vk.company", r"^https?://team\.vk\.company/vacancy/(\d+)/?$"),
-    Company("avito", "Авито", "https://career.avito.com", r"^https?://career\.avito\.com/vacancies/[\w-]+/(\d+)/?$"),
+    Company("avito", "Авито", "https://career.avito.com", r"^https?://career\.avito\.com/vacancies/[\w-]+/(\d+)/?$",
+            prefer=r"/vacancies/(razrabotka|data-science|analitika|upravlenie-produktom|dizajn|testirovanie|"
+                   r"informacionnaya-bezopasnost|infrastruktura)/",
+            categories=(("/data-science/", "data_ml"), ("/upravlenie-produktom/", "product"),
+                        ("/analitika/", "analytics"), ("/dizajn/", "design"), ("/testirovanie/", "qa"))),
     Company("tochka", "Точка", "https://hr.tochka.com", r"^https?://hr\.tochka\.com/vacancies/catalog/([\w-]+)/?$"),
     Company("2gis", "2ГИС", "https://job.2gis.ru", r"^https?://job\.2gis\.ru/vacancies/[\w-]+/(\d+)/?$"),
     Company("ptsecurity", "Positive Technologies", "https://www.ptsecurity.com",
@@ -61,7 +70,8 @@ COMPANIES = [
     # Т-Банк: одна вакансия повторяется по городам — id вакансии последний сегмент; сайт
     # ограничивает частоту запросов, поэтому пауза больше
     Company("tbank", "Т-Банк", "https://www.tbank.ru",
-            r"^https?://www\.tbank\.ru/career/[\w-]+/vacancy/(?:[^/]+/){1,2}([0-9a-f-]{36})/?$", pause=4.0),
+            r"^https?://www\.tbank\.ru/career/[\w-]+/vacancy/(?:[^/]+/){1,2}([0-9a-f-]{36})/?$", pause=4.0,
+            prefer=r"/career/it/"),
 ]
 
 _TAG = re.compile(r"<[^>]+>")
@@ -336,6 +346,8 @@ def import_careers(store, normalize: Callable[[str], object], fetcher: Optional[
             if live and len(gone) <= max(len(active) // 2, 5):
                 info["archived"] = store.archive_career(company.key, gone)
             fresh = [vid for vid in live if vid not in known]
+            if company.prefer:                              # ИТ-разделы — первыми
+                fresh.sort(key=lambda vid: not re.search(company.prefer, live[vid]))
             info["new"] = len(fresh)
             for vid in fresh[:MAX_NEW_PER_COMPANY]:
                 if clock() - started > time_budget:
@@ -355,6 +367,10 @@ def import_careers(store, normalize: Callable[[str], object], fetcher: Optional[
                     except Exception as e:      # ИИ недоступен — остальное дочитаем в следующий раз
                         info["ai"] = f"{type(e).__name__}: {str(e)[:120]}"
                         break
+                if row and not row.get("direction"):
+                    row["direction"] = next((d for part, d in company.categories if part in url), None)
+                    if not row["direction"]:
+                        del row["direction"]                # определит база по названию
                 # Страница не про вакансию (промо, мероприятие) — запоминаем архивной, чтобы не читать снова
                 store.upsert_imported([row or {
                     "source_post": f"{SOURCE}/{company.key}/{vid}", "source_url": url, "source_type": "external",

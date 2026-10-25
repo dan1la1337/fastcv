@@ -388,6 +388,15 @@ CHECKS: list[tuple] = [
                (select (vacancies > 0)::text from direction_counts where direction = 'design')""",
      "postgres", None, "1:true"),
     ("сайт НЕ запускает пересчёт справочников", False, "select refresh_feed_stats()", "anon", None, None),
+    ("направление ИТ-вакансий по названию", True,
+     """select string_agg(vacancy_direction(t), ',' order by n) from (values
+          (1, 'Старший DS-инженер в команду рекомендаций'),
+          (2, 'Руководитель продуктового направления юнита рекламного кабинета'),
+          (3, 'Старший инженер по серверным платформам'),
+          (4, 'Тимлид команды платежей'),
+          (5, 'Руководитель маркетинга продукта'),
+          (6, 'Менеджер по продажам')) v(n, t)""",
+     "postgres", None, "data_ml,product,backend,backend,marketing,sales"),
     ("ротация «Работы России»: старые удаляются, с откликами — в архив, свежие остаются", True,
      f"""insert into vacancies (title, source_type, source_post, posted_at) values
           ('TV old', 'external', 'trudvsem/old', now() - interval '5 days'),

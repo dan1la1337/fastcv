@@ -139,3 +139,27 @@ def test_title_city_and_description_from_page_heads_without_ai():
     assert meta("<title>Вакансия Продакт-менеджер | Т-Банк ex. Тинькофф</title>") == ("Продакт-менеджер", None)
     assert meta("<h1>Руководитель направления (юридические лица)</h1>") == ("Руководитель направления (юридические лица)", None)
     assert meta("<h1>Вакансии</h1>") is None
+
+
+def test_preferred_sections_first_and_direction_from_section():
+    co = careers.Company("acme", "Acme", "https://job.acme.ru", r"^https://job\.acme\.ru/vacancy/(?:\w+/)?(\d+)/?$",
+                         pause=0, prefer=r"/it/", categories=(("/ds/", "data_ml"),))
+    sitemap = """<urlset><url><loc>https://job.acme.ru/vacancy/shop/1</loc></url>
+    <url><loc>https://job.acme.ru/vacancy/ds/2</loc></url><url><loc>https://job.acme.ru/vacancy/it/3</loc></url></urlset>"""
+    page = "<h1>Старший DS-инженер</h1>"
+    fetcher = site(**{"https://job.acme.ru/sitemap-vacancies.xml": sitemap, "https://job.acme.ru/vacancy/shop/1": page,
+                      "https://job.acme.ru/vacancy/ds/2": page, "https://job.acme.ru/vacancy/it/3": page})
+    store = Store()
+    careers.import_careers(store, ai, fetcher, [co], clock=lambda: 0)
+    pages = [u for u in fetcher.session.calls if "/vacancy/" in u]
+    assert pages[0].endswith("/it/3")
+    rows = {r["source_post"]: r for r in store.rows}
+    assert rows["career/acme/2"]["direction"] == "data_ml" and "direction" not in rows["career/acme/1"]
+
+
+def test_company_preferences_are_valid_regexes():
+    import re
+    for co in careers.COMPANIES:
+        re.compile(co.prefer)
+        assert all(d in {"data_ml", "product", "analytics", "design", "qa", "backend", "frontend", "devops"}
+                   for _, d in co.categories)
