@@ -19,7 +19,7 @@ test("главная сразу отдаёт вакансии в HTML", async ({
 
 test("лента показывает карточки и счётчик", async ({ page }) => {
   await page.goto("/");
-  await expect(page.locator("section h2").first()).toBeVisible();
+  await expect(page.locator("#feed section h2").first()).toBeVisible();
   expect(await total(page)).toBeGreaterThan(0);
 });
 
@@ -30,7 +30,7 @@ test("фильтр по направлению сужает ленту и сбр
   await page.getByRole("button", { name: "Направление" }).click();
   await page.getByRole("listbox", { name: "Направление" }).getByRole("option", { name: "QA и тестирование" }).click();
   await expect.poll(() => total(page)).toBeLessThan(all);
-  await expect(page.locator("section h2").first()).toBeVisible();
+  await expect(page.locator("#feed section h2").first()).toBeVisible();
   await page.getByRole("button", { name: "Сбросить" }).click();
   await expect.poll(() => total(page)).toBe(all);
 });
@@ -45,7 +45,7 @@ test("уровень и формат работы фильтруют вмест�
   await page.getByRole("button", { name: "Удалённо", exact: true }).click();
   await expect.poll(() => total(page)).toBeLessThanOrEqual(senior);
   // В карточках — только Senior
-  for (const card of await page.locator("section h2").all()) {
+  for (const card of await page.locator("#feed section h2").all()) {
     const meta = await card.locator("xpath=..").textContent();
     expect(meta).toContain("Senior");
   }
@@ -62,7 +62,7 @@ test("поиск понимает словоформы", async ({ page }) => {
 
 test("карточка ведёт на страницу вакансии", async ({ page }) => {
   await page.goto("/");
-  const link = page.locator('section h2 a[href^="/vacancy/"]').first();
+  const link = page.locator('#feed section h2 a[href^="/vacancy/"]').first();
   const title = (await link.textContent())!.trim();
   // Страница вакансии засчитывает просмотр (воронка в кабинете работодателя)
   const view = page.waitForResponse(r => r.url().includes("/rpc/register_vacancy_view"));
@@ -119,7 +119,7 @@ test("фильтр по источнику: только Telegram — во вс�
   await page.getByRole("button", { name: "Telegram", exact: true }).click();
   await expect(page.getByRole("button", { name: "Telegram", exact: true })).toHaveAttribute("aria-pressed", "true");
   await expect.poll(() => total(page)).toBeLessThanOrEqual(all);
-  const badges = await page.locator("section").filter({ has: page.locator("h2") })
+  const badges = await page.locator("#feed section").filter({ has: page.locator("h2") })
     .locator("text=/^(Telegram|SuperJob|Работа России|Сайт компании|Прямой работодатель)$/i").allTextContents();
   expect(badges.every(b => b.toLowerCase() === "telegram")).toBe(true);
   await page.getByRole("button", { name: "Все", exact: true }).first().click();
