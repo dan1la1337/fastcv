@@ -42,6 +42,7 @@ MIN_TEXT_LEN = 40  # короче — точно не вакансия
 GEMINI_MODELS = ("gemini-3.1-flash-lite", "gemini-3.5-flash-lite", "gemini-3.6-flash")
 AI_ATTEMPTS = 2  # попыток на каждую модель
 AI_TIMEOUT_MS = 60_000  # без таймаута зависший запрос держал весь прогон
+AI_MODEL_STRIKES = 3  # обращений подряд, когда модель перегружена, — дальше в этом запуске без неё
 AI_CIRCUIT_BREAKER = 3  # каналов подряд без ответа Gemini — дальше не пытаемся
 AI_PAUSE_SECONDS = 2
 CHANNEL_PAUSE_SECONDS = 2
@@ -313,13 +314,19 @@ def make_gemini_normalizer(api_key: str, models: tuple[str, ...] = GEMINI_MODELS
             for f in failures:
                 stats["errors"][f] = stats["errors"].get(f, 0) + 1
 
+    # Модель, которая отвечает 503/429 несколько обращений подряд, до конца запуска пропускаем:
+    # иначе каждый пост сначала ждёт две неудачные попытки на ней (25.10 так уходило ~12 с на пост)
+    strikes: dict[str, int] = {}
+
     def _normalize(text: str, failures: list[str]) -> VacancyAI:
         stats["calls"] += 1
-        for model in models:
+        healthy = [m for m in models if strikes.get(m, 0) < AI_MODEL_STRIKES] or list(models)
+        for model in healthy:
             for attempt in range(AI_ATTEMPTS):
                 try:
                     response = client.models.generate_content(model=model, contents=wrap_post(text), config=config)
                     stats["ok"] += 1
+                    strikes[model] = 0
                     if isinstance(response.parsed, VacancyAI):
                         return response.parsed
                     return VacancyAI.model_validate_json(response.text)
@@ -331,6 +338,8 @@ def make_gemini_normalizer(api_key: str, models: tuple[str, ...] = GEMINI_MODELS
                         # 400 и подобные — ошибка в запросе, другие модели не помогут
                         raise AIUnavailable(f"{model}: {e.code} {e.status}") from e
                     failures.append(f"{model}: {e.code}")
+                    if attempt + 1 == AI_ATTEMPTS:
+                        strikes[model] = strikes.get(model, 0) + 1
                 except (httpx.HTTPError, requests.RequestException, ValueError) as e:
                     failures.append(f"{model}: {type(e).__name__}")
                 if attempt + 1 < AI_ATTEMPTS:

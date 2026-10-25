@@ -865,3 +865,17 @@ def test_telegram_counts_exclude_imported_sources():
     main.Store(db).telegram_vacancies().execute()
     assert ("filter", ("source_post", "not.like", "trudvsem/%")) in log
     assert ("filter", ("source_post", "not.like", "superjob/%")) in log
+
+
+def test_gemini_overloaded_model_is_skipped_for_the_rest_of_the_run(monkeypatch):
+    strikes = main.AI_MODEL_STRIKES
+    outcomes = []
+    for _ in range(strikes):                      # модель a перегружена, b отвечает
+        outcomes += [_api_error(503)] * main.AI_ATTEMPTS + [job()]
+    outcomes += [job(), job()]                    # дальше сразу b
+    calls = _fake_gemini(monkeypatch, outcomes)
+    normalize = main.make_gemini_normalizer("key", MODELS)
+    for _ in range(strikes + 2):
+        normalize("текст")
+    assert calls["models"][-2:] == ["model-b", "model-b"]
+    assert calls["n"] == len(outcomes)
