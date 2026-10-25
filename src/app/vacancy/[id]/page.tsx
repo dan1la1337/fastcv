@@ -2,10 +2,12 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { cache } from "react";
-import { AlertTriangle, ArrowLeft, Briefcase, Building2, Calendar, ExternalLink, Globe, MapPin, Megaphone } from "lucide-react";
+import { AlertTriangle, ArrowLeft, Calendar, ExternalLink } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { VACANCY_COLUMNS, formatLabel, formatSalary, levelLabel, experienceLabel, plural, sourceOf, type Vacancy } from "@/lib/vacancies";
-import ApplyButton from "@/components/ApplyButton";
+import VacancyApply from "@/components/VacancyApply";
+import VacancyMatch from "@/components/VacancyMatch";
+import MobileApplyBar from "@/components/MobileApplyBar";
 import ViewCounter from "@/components/ViewCounter";
 import CompanyLine from "@/components/CompanyLine";
 import { estimateSalary, fetchSalaryBenchmarks } from "@/lib/salary";
@@ -93,6 +95,16 @@ export default async function VacancyPage({ params }: Props) {
     day: "numeric", month: "long", year: "numeric",
   });
 
+  const remote = vacancy.work_format === "remote" || (!vacancy.work_format && vacancy.is_remote);
+  const format = remote ? "Удалённо" : formatLabel(vacancy.work_format);
+  const experience = [vacancy.level && levelLabel(vacancy.level), experienceLabel(vacancy.experience_min)].filter(Boolean).join(" · ");
+  const tiles = [
+    { label: "Зарплата", value: formatSalary(vacancy.salary_min, vacancy.salary_max, vacancy.salary_currency), estimate: true },
+    experience && { label: "Опыт", value: experience },
+    (format || vacancy.city) && { label: "Где", value: [format, vacancy.city].filter(Boolean).join(" · ") },
+  ].filter(Boolean) as { label: string; value: string; estimate?: boolean }[];
+  const channels = vacancy.source_type === "external" ? vacancy.channels_count ?? 1 : 0;
+
   return (
     <div className="min-h-screen text-neutral-100 font-sans">
       {!vacancy.archived_at && !isMirrored(vacancy) && jsonLd && (
@@ -103,89 +115,97 @@ export default async function VacancyPage({ params }: Props) {
         />
       )}
 
-      <div className="max-w-3xl mx-auto px-4 py-8 space-y-6">
+      <div className="max-w-6xl mx-auto px-4 py-8 space-y-6">
         <Link href="/" className="inline-flex items-center gap-2 text-sm text-neutral-400 hover:text-white transition-colors">
-          <ArrowLeft className="w-4 h-4" /> Все вакансии
+          <ArrowLeft className="w-4 h-4" /> К ленте
         </Link>
 
         {vacancy.archived_at && (
-          <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-sm text-amber-300">
+          <div className="rounded-2xl border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-sm text-amber-300">
             Вакансия в архиве: скорее всего, она уже закрыта.
           </div>
         )}
 
-        <article className="bg-neutral-900/60 border border-neutral-800 rounded-2xl p-6 sm:p-8 space-y-6">
-          <header className="space-y-3">
-            <span className={`inline-block text-[10px] uppercase font-bold px-2.5 py-1 rounded-md border ${
-              vacancy.source_type === "internal"
-                ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
-                : "bg-teal-300/10 text-teal-300 border-teal-300/20"
-            }`}>
-              {sourceOf(vacancy).badge}
-            </span>
-            <h1 className="text-2xl sm:text-3xl font-bold text-white">{vacancy.title}</h1>
-            <CompanyLine vacancy={vacancy} className="text-base text-neutral-300" />
-            <p className="text-xl font-semibold text-emerald-400 flex flex-wrap items-center gap-3">
-              {formatSalary(vacancy.salary_min, vacancy.salary_max, vacancy.salary_currency)}
-              {estimate && <SalaryEstimate estimate={estimate} className="text-sm" />}
-            </p>
-            <p className="flex flex-wrap items-center gap-4 text-sm text-neutral-400">
-              {vacancy.city && <span className="inline-flex items-center gap-1.5"><MapPin className="w-4 h-4" />{vacancy.city}</span>}
-              {(vacancy.level || vacancy.experience_min != null) && (
-                <span className="inline-flex items-center gap-1.5"><Briefcase className="w-4 h-4" />
-                  {[vacancy.level && levelLabel(vacancy.level), experienceLabel(vacancy.experience_min)].filter(Boolean).join(" · ")}
+        <div className="flex flex-wrap items-start gap-6">
+          <div className="flex-[999_1_560px] min-w-0 space-y-4">
+            <article className="glass rounded-3xl p-6 sm:p-8 space-y-5">
+              <div className="flex flex-wrap gap-2 text-xs">
+                <span className={`px-3 py-1 rounded-full ${vacancy.source_type === "internal" ? "bg-emerald-400/15 text-emerald-300" : "bg-white/[0.08] text-neutral-300"}`}>
+                  {sourceOf(vacancy).badge}
                 </span>
-              )}
-              {vacancy.work_format === "remote" || (!vacancy.work_format && vacancy.is_remote)
-                ? <span className="inline-flex items-center gap-1.5"><Globe className="w-4 h-4" />Удалённо</span>
-                : vacancy.work_format && <span className="inline-flex items-center gap-1.5"><Building2 className="w-4 h-4" />{formatLabel(vacancy.work_format)}</span>}
-              <span className="inline-flex items-center gap-1.5"><Calendar className="w-4 h-4" />{posted}</span>
-              {vacancy.source_type === "external" && (vacancy.channels_count ?? 1) > 1 && (
-                <span className="inline-flex items-center gap-1.5" title="Одну вакансию часто публикуют в нескольких каналах — мы показываем её один раз">
-                  <Megaphone className="w-4 h-4" />в {vacancy.channels_count} {plural(vacancy.channels_count!, ["канале", "каналах", "каналах"])}
+                <span className="px-3 py-1 rounded-full bg-teal-300/15 text-teal-200 inline-flex items-center gap-1.5">
+                  <Calendar className="w-3.5 h-3.5" /> Впервые — {posted}
+                  {channels > 1 && <> · в {channels} {plural(channels, ["канале", "каналах", "каналах"])}</>}
                 </span>
+              </div>
+              <h1 className="font-display text-2xl sm:text-[32px] leading-tight font-bold text-white">{vacancy.title}</h1>
+              <CompanyLine vacancy={vacancy} className="text-base text-neutral-300" />
+
+              {tiles.length > 0 && (
+                <div className="grid grid-cols-[repeat(auto-fit,minmax(10rem,1fr))] gap-3">
+                  {tiles.map(t => (
+                    <div key={t.label} className="rounded-2xl px-4 py-3 bg-white/[0.04] border border-white/[0.08]">
+                      <p className="text-xs text-neutral-500">{t.label}</p>
+                      <p className="mt-1 font-semibold text-white">{t.value}</p>
+                      {t.estimate && estimate && <SalaryEstimate estimate={estimate} className="text-xs mt-1" />}
+                    </div>
+                  ))}
+                </div>
               )}
-            </p>
-          </header>
 
-          {vacancy.description && (
-            <p className="text-neutral-300 leading-relaxed whitespace-pre-line">{vacancy.description}</p>
-          )}
+              {vacancy.description && (
+                <div className="space-y-2">
+                  <h2 className="text-base font-semibold text-white">О вакансии</h2>
+                  <p className="text-neutral-300 leading-relaxed whitespace-pre-line">{vacancy.description}</p>
+                </div>
+              )}
 
-          {vacancy.scope_note && (
-            <div className="flex gap-3 rounded-xl border border-amber-500/30 bg-amber-500/5 p-4 text-sm text-amber-100">
-              <AlertTriangle className="w-5 h-5 text-amber-400 shrink-0" />
-              <p>
-                <span className="font-semibold">Широкий круг задач.</span> {vacancy.scope_note}
-                <span className="block text-xs text-amber-200/60 mt-1">Так отметил ИИ FastCV по тексту вакансии — уточните объём работы на собеседовании.</span>
-              </p>
+              {vacancy.scope_note && (
+                <div className="flex gap-3 rounded-2xl border border-amber-500/30 bg-amber-500/5 p-4 text-sm text-amber-100">
+                  <AlertTriangle className="w-5 h-5 text-amber-400 shrink-0" />
+                  <p>
+                    <span className="font-semibold">Широкий круг задач.</span> {vacancy.scope_note}
+                    <span className="block text-xs text-amber-200/60 mt-1">Так отметил ИИ FastCV по тексту вакансии — уточните объём работы на собеседовании.</span>
+                  </p>
+                </div>
+              )}
+
+              {vacancy.stack && vacancy.stack.length > 0 && (
+                <div className="flex flex-wrap gap-2">
+                  {vacancy.stack.map(tech => (
+                    <span key={tech} className="text-xs px-3 py-1 rounded-full bg-white/[0.06] border border-white/10 text-neutral-300">{tech}</span>
+                  ))}
+                </div>
+              )}
+
+              <footer className="flex flex-wrap items-center gap-4 pt-4 border-t border-white/10">
+                {vacancy.source_url && (
+                  <a
+                    href={vacancy.source_url}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="inline-flex items-center gap-1.5 text-sm font-semibold text-teal-200 hover:text-white transition-colors"
+                  >
+                    {sourceOf(vacancy).link === "Пост в Telegram" ? "Оригинальный пост в Telegram" : sourceOf(vacancy).link} <ExternalLink className="w-4 h-4" />
+                  </a>
+                )}
+                {!vacancy.archived_at && <ViewCounter vacancyId={vacancy.id} />}
+              </footer>
+            </article>
+
+            {!vacancy.archived_at && <VacancyMatch vacancyId={vacancy.id} />}
+          </div>
+
+          {!vacancy.archived_at && (
+            <div id="smart-apply" className="flex-[1_1_360px] lg:max-w-md min-w-0 lg:sticky lg:top-24 scroll-mt-6">
+              <VacancyApply vacancy={vacancy} />
             </div>
           )}
-
-          {vacancy.stack && vacancy.stack.length > 0 && (
-            <div className="flex flex-wrap gap-2">
-              {vacancy.stack.map(tech => (
-                <span key={tech} className="text-xs px-2.5 py-1 rounded-md bg-neutral-800/80 border border-neutral-700/60 text-neutral-300">{tech}</span>
-              ))}
-            </div>
-          )}
-
-          <footer className="flex flex-wrap items-center gap-4 pt-4 border-t border-neutral-800">
-            {!vacancy.archived_at && <ApplyButton vacancy={vacancy} />}
-            {!vacancy.archived_at && <ViewCounter vacancyId={vacancy.id} />}
-            {vacancy.source_url && (
-              <a
-                href={vacancy.source_url}
-                target="_blank"
-                rel="noreferrer"
-                className="inline-flex items-center gap-1.5 text-sm text-neutral-400 hover:text-teal-300 transition-colors"
-              >
-                {sourceOf(vacancy).link === "Пост в Telegram" ? "Оригинальный пост в Telegram" : sourceOf(vacancy).link} <ExternalLink className="w-4 h-4" />
-              </a>
-            )}
-          </footer>
-        </article>
+        </div>
       </div>
+
+      {/* На телефоне панель Smart Apply ниже текста — кнопка внизу экрана ведёт к ней */}
+      {!vacancy.archived_at && <MobileApplyBar target="smart-apply" />}
     </div>
   );
 }

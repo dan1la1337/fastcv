@@ -6,7 +6,7 @@ import { supabase } from "@/lib/supabase";
 import type { Vacancy } from "@/lib/vacancies";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Send, X, Sparkles, Loader2, Copy, Check, Mail, ExternalLink } from "lucide-react";
+import { Send, X, Sparkles, Loader2, Copy, Check, Mail, ExternalLink, RotateCcw } from "lucide-react";
 import { toast } from "@/components/Toaster";
 
 // Настройки письма (значения совпадают с /api/cover-letter)
@@ -16,6 +16,7 @@ const LETTER_OPTIONS = {
   language: [["auto", "Как в вакансии"], ["ru", "Русский"], ["en", "English"]],
 } as const;
 type LetterSettings = { tone: string; length: string; language: string };
+const LETTER_LABELS = { tone: "Тон", length: "Длина", language: "Язык" } as const;
 
 /** Username Telegram из контакта вакансии; null, если это не похоже на username. */
 function telegramUsername(value: string): string | null {
@@ -31,10 +32,13 @@ export default function SmartApply({
   vacancy,
   user,
   onClose,
+  inline = false,
 }: {
   vacancy: Vacancy | null;
   user: User | null;
   onClose: () => void;
+  /** Панель на странице вакансии вместо модального окна. */
+  inline?: boolean;
 }) {
   // Состояния модального окна Smart Apply
   // Письмо и ошибка привязаны к id вакансии: у другой вакансии окно чистое
@@ -97,155 +101,177 @@ export default function SmartApply({
     setTimeout(() => setCopiedEmail(false), 2000);
   };
 
+  const sendApplication = async () => {
+    if (!vacancy) return;
+    if (!user) {
+      toast("Сначала войдите в систему.", "error");
+      return;
+    }
+    setIsSending(true);
+    const { error } = await supabase.from("applications").insert({
+      vacancy_id: vacancy.id,
+      candidate_id: user.id,
+      cover_letter: coverLetter,
+      status: 'new'
+    });
+    setIsSending(false);
+
+    if (error) {
+      toast(error.code === "23505"
+        ? "Вы уже откликались на эту вакансию."
+        : error.message.includes("apply_limit")
+          ? "Сегодня уже 15 откликов — это лимит FastCV против рассылок. Письмо сохранено в буфере, отправить можно завтра."
+          : "Не удалось отправить отклик: " + error.message, "error");
+      if (error.message.includes("apply_limit")) navigator.clipboard.writeText(coverLetter).catch(() => {});
+      return;
+    }
+
+    // Копируем сопроводительное письмо кандидату в буфер обмена для удобства
+    navigator.clipboard.writeText(coverLetter).catch(() => {});
+
+    onClose();
+
+    // Разделяем поведение контактов
+    const tg = vacancy.contact_type !== 'email' && vacancy.contact_value
+      ? telegramUsername(vacancy.contact_value) : null;
+    if (vacancy.source_type === 'external' && vacancy.contact_type === 'email' && vacancy.contact_value) {
+      // Показываем модальное окно для отправки на Email без навязчивого Outlook
+      setSuccessContactModal({
+        open: true,
+        type: 'email',
+        value: vacancy.contact_value.trim(),
+        vacancyTitle: vacancy.title
+      });
+    } else if (vacancy.source_type === 'external' && tg) {
+      window.open(`https://t.me/${tg}`, '_blank', 'noopener');
+      toast("Письмо скопировано. Вставьте его в чат с работодателем в Telegram.", "ok");
+    } else if (vacancy.source_type === 'external') {
+      // Контакта в посте нет — открываем оригинал, там есть ссылка на отклик
+      if (vacancy.source_url) window.open(vacancy.source_url, '_blank', 'noopener');
+      toast("Письмо скопировано. Контакта в посте нет — откликнитесь по ссылке из оригинального поста.", "info");
+    } else {
+      // Внутренняя вакансия — отклик уже у работодателя в кабинете
+      toast("Отклик доставлен работодателю.", "ok");
+      router.push('/applications');
+    }
+  };
+
+  // Тело Smart Apply: настройки и генерация, затем письмо и отправка. Одно и то же
+  // в окне (лента) и в панели справа на странице вакансии.
+  const panel = vacancy && (
+    <div className="space-y-4">
+      {!coverLetter ? (
+        <div className="space-y-4">
+          <p className="text-sm text-neutral-400 leading-relaxed">
+            ИИ прочитает вакансию и ваш профиль и напишет сопроводительное письмо под эту позицию — с навыками, которые совпадают.
+          </p>
+          {user && (Object.keys(LETTER_OPTIONS) as (keyof typeof LETTER_OPTIONS)[]).map(key => (
+            <div key={key} className="space-y-1.5">
+              <p className="text-xs text-neutral-500">{LETTER_LABELS[key]}</p>
+              <div role="group" aria-label={LETTER_LABELS[key]} className="grid grid-cols-3 gap-1 p-1 rounded-full bg-white/[0.06]">
+                {LETTER_OPTIONS[key].map(([value, label]) => (
+                  <button key={value} type="button" aria-pressed={settings[key] === value}
+                    onClick={() => setSettings(prev => ({ ...prev, [key]: value }))}
+                    className={`text-xs sm:text-sm px-2 py-2 rounded-full transition-colors ${settings[key] === value
+                      ? "bg-white/[0.14] text-white"
+                      : "text-neutral-400 hover:text-neutral-200"}`}>
+                    {label}
+                  </button>
+                ))}
+              </div>
+            </div>
+          ))}
+          {user ? (
+            <button
+              onClick={generateCoverLetter}
+              disabled={isGenerating}
+              className="w-full inline-flex items-center justify-center gap-2 bg-teal-300 hover:bg-teal-200 text-neutral-950 h-12 rounded-full text-sm font-semibold transition-colors disabled:opacity-50"
+            >
+              {isGenerating ? <><Loader2 className="w-4 h-4 animate-spin" /> Пишем письмо…</> : <><Sparkles className="w-4 h-4" /> Написать письмо</>}
+            </button>
+          ) : (
+            <Link
+              href={`/login?next=${encodeURIComponent(`/vacancy/${vacancy.id}`)}`}
+              className="w-full inline-flex items-center justify-center gap-2 bg-teal-300 hover:bg-teal-200 text-neutral-950 h-12 rounded-full text-sm font-semibold transition-colors"
+            >
+              Войдите, чтобы откликнуться
+            </Link>
+          )}
+          {generationError && (
+            <p className="text-sm text-red-400">{generationError}</p>
+          )}
+        </div>
+      ) : (
+        <div className="space-y-3">
+          <label htmlFor={`letter-${vacancy.id}`} className="text-xs text-neutral-500">Сопроводительное письмо</label>
+          <textarea
+            id={`letter-${vacancy.id}`}
+            value={coverLetter}
+            onChange={(e) => setCoverLetter(e.target.value)}
+            className="letter-write w-full h-64 bg-[#0B0F19] border border-white/10 rounded-2xl p-4 text-sm text-neutral-200 focus:outline-none focus:border-teal-300 leading-relaxed resize-none"
+          />
+          {letterSource?.vacancyId === vacancy.id && letterSource.source === "template" ? (
+            <p className="text-xs text-amber-400">
+              ИИ сейчас не отвечает, поэтому письмо собрано по шаблону из вашего профиля. Отредактируйте его или нажмите «Переписать» чуть позже.
+            </p>
+          ) : letterSource?.vacancyId === vacancy.id && letterSource.source === "cache" ? (
+            <p className="text-xs text-neutral-500">Это письмо вы уже генерировали для этой вакансии. «Переписать» — новый вариант.</p>
+          ) : (
+            <p className="text-xs text-neutral-500">Текст можно поправить перед отправкой.</p>
+          )}
+          <div className="flex gap-2.5">
+            <button
+              onClick={sendApplication}
+              disabled={isSending}
+              className="flex-1 inline-flex items-center justify-center gap-2 bg-teal-300 hover:bg-teal-200 text-neutral-950 h-12 rounded-full text-sm font-semibold transition-colors disabled:opacity-50"
+            >
+              {isSending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />} Откликнуться с письмом
+            </button>
+            <button
+              onClick={() => setCoverLetter("")}
+              aria-label="Переписать письмо"
+              title="Переписать"
+              className="w-12 h-12 shrink-0 inline-flex items-center justify-center rounded-full border border-white/15 text-neutral-300 hover:text-white hover:border-white/30 transition-colors"
+            >
+              <RotateCcw className="w-4 h-4" />
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+
+  const title = (
+    <div className="flex items-center gap-2.5">
+      <span aria-hidden="true" className="ai-shimmer w-7 h-7 rounded-[9px] shrink-0" />
+      <h2 className="font-display text-lg font-bold text-white">Smart Apply</h2>
+    </div>
+  );
+
   return (
     <>
+      {inline && vacancy && (
+        <aside aria-label="Smart Apply" className="glass rounded-3xl p-6 space-y-5">
+          {title}
+          {panel}
+        </aside>
+      )}
+
       {/* --- МОДАЛЬНОЕ ОКНО SMART APPLY --- */}
-      {vacancy && (
+      {!inline && vacancy && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in">
-          <div className="bg-neutral-900 border border-neutral-800 rounded-2xl w-full max-w-2xl overflow-hidden shadow-2xl flex flex-col max-h-[90vh]">
-            
-            <div className="flex items-center justify-between p-5 border-b border-neutral-800 bg-neutral-950/50">
-              <div>
-                <h3 className="text-lg font-bold text-white">Отклик с ИИ</h3>
-                <p className="text-sm text-neutral-400">{vacancy.title}</p>
+          <div role="dialog" aria-modal="true" aria-label={`Smart Apply: ${vacancy.title}`}
+            className="bg-[#0B0F19]/95 border border-white/12 rounded-3xl w-full max-w-xl overflow-hidden shadow-2xl flex flex-col max-h-[90vh]">
+            <div className="flex items-start justify-between gap-4 p-5 border-b border-white/10">
+              <div className="space-y-1.5 min-w-0">
+                {title}
+                <p className="text-sm text-neutral-400 truncate">{vacancy.title}</p>
               </div>
-              <button onClick={() => onClose()} className="text-neutral-500 hover:text-white transition-colors">
+              <button onClick={() => onClose()} aria-label="Закрыть" className="text-neutral-500 hover:text-white transition-colors">
                 <X className="w-6 h-6" />
               </button>
             </div>
-
-            <div className="p-5 overflow-y-auto space-y-4">
-              {!coverLetter ? (
-                <div className="bg-teal-950/20 border border-teal-300/20 rounded-xl p-6 text-center space-y-4">
-                  <Sparkles className="w-10 h-10 text-teal-300 mx-auto" />
-                  <div>
-                    <h4 className="text-white font-medium mb-1">Сгенерировать идеальное письмо?</h4>
-                    <p className="text-sm text-neutral-400">LLM-агент проанализирует твой профиль и требования вакансии, чтобы составить уникальное сопроводительное.</p>
-                  </div>
-                  {user && (
-                    <div className="space-y-2 text-left">
-                      {(Object.keys(LETTER_OPTIONS) as (keyof typeof LETTER_OPTIONS)[]).map(key => (
-                        <div key={key} className="flex flex-wrap items-center justify-center gap-1.5">
-                          {LETTER_OPTIONS[key].map(([value, label]) => (
-                            <button key={value} type="button" aria-pressed={settings[key] === value}
-                              onClick={() => setSettings(prev => ({ ...prev, [key]: value }))}
-                              className={`text-xs px-2.5 py-1 rounded-md border transition-colors ${settings[key] === value
-                                ? "bg-teal-300 border-teal-300 text-neutral-950"
-                                : "bg-neutral-950 border-neutral-700 text-neutral-400 hover:text-neutral-200"}`}>
-                              {label}
-                            </button>
-                          ))}
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                  {user ? (
-                    <button 
-                      onClick={generateCoverLetter} 
-                      disabled={isGenerating}
-                      className="inline-flex items-center gap-2 bg-teal-300 hover:bg-teal-200 text-neutral-950 px-6 py-2.5 rounded-lg text-sm font-medium transition-colors disabled:opacity-50"
-                    >
-                      {isGenerating ? <><Loader2 className="w-4 h-4 animate-spin" /> Анализируем...</> : 'Начать магию'}
-                    </button>
-                  ) : (
-                    <Link
-                      href="/login"
-                      className="inline-flex items-center gap-2 bg-teal-300 hover:bg-teal-200 text-neutral-950 px-6 py-2.5 rounded-lg text-sm font-medium transition-colors"
-                    >
-                      Войдите, чтобы откликнуться
-                    </Link>
-                  )}
-                  {generationError && (
-                    <p className="text-sm text-red-400">{generationError}</p>
-                  )}
-                </div>
-              ) : (
-                <div className="space-y-3 animate-in fade-in slide-in-from-bottom-2">
-                  <label className="text-xs font-bold text-neutral-500 uppercase tracking-wider">Сопроводительное письмо</label>
-                  <textarea 
-                    value={coverLetter}
-                    onChange={(e) => setCoverLetter(e.target.value)}
-                    className="w-full h-64 bg-neutral-950 border border-neutral-800 rounded-xl p-4 text-sm text-neutral-200 focus:outline-none focus:border-teal-300 leading-relaxed resize-none"
-                  />
-                  {letterSource?.vacancyId === vacancy.id && letterSource.source === "template" ? (
-                    <p className="text-xs text-amber-400">
-                      ИИ сейчас не отвечает, поэтому письмо собрано по шаблону из вашего профиля. Отредактируйте его или нажмите «Переписать» чуть позже.
-                    </p>
-                  ) : letterSource?.vacancyId === vacancy.id && letterSource.source === "cache" ? (
-                    <p className="text-xs text-neutral-500">Это письмо вы уже генерировали для этой вакансии. «Переписать» — новый вариант.</p>
-                  ) : (
-                    <p className="text-xs text-neutral-500">Ты можешь отредактировать текст перед отправкой.</p>
-                  )}
-                </div>
-              )}
-            </div>
-
-            {coverLetter && (
-              <div className="p-5 border-t border-neutral-800 bg-neutral-950/50 flex justify-end gap-3">
-                <button onClick={() => setCoverLetter("")} className="px-4 py-2 text-sm font-medium text-neutral-400 hover:text-white transition-colors">Переписать</button>
-                
-                <button 
-                  onClick={async () => {
-                    if (!user) {
-                      toast("Сначала войдите в систему.", "error");
-                      return;
-                    }
-                    setIsSending(true);
-                    const { error } = await supabase.from("applications").insert({
-                      vacancy_id: vacancy.id,
-                      candidate_id: user.id,
-                      cover_letter: coverLetter,
-                      status: 'new'
-                    });
-                    setIsSending(false);
-
-                    if (error) {
-                      toast(error.code === "23505"
-                        ? "Вы уже откликались на эту вакансию."
-                        : error.message.includes("apply_limit")
-                          ? "Сегодня уже 15 откликов — это лимит FastCV против рассылок. Письмо сохранено в буфере, отправить можно завтра."
-                          : "Не удалось отправить отклик: " + error.message, "error");
-                      if (error.message.includes("apply_limit")) navigator.clipboard.writeText(coverLetter).catch(() => {});
-                      return;
-                    }
-
-                    // Копируем сопроводительное письмо кандидату в буфер обмена для удобства
-                    navigator.clipboard.writeText(coverLetter).catch(() => {});
-
-                    onClose();
-
-                    // Разделяем поведение контактов
-                    const tg = vacancy.contact_type !== 'email' && vacancy.contact_value
-                      ? telegramUsername(vacancy.contact_value) : null;
-                    if (vacancy.source_type === 'external' && vacancy.contact_type === 'email' && vacancy.contact_value) {
-                      // Показываем модальное окно для отправки на Email без навязчивого Outlook
-                      setSuccessContactModal({
-                        open: true,
-                        type: 'email',
-                        value: vacancy.contact_value.trim(),
-                        vacancyTitle: vacancy.title
-                      });
-                    } else if (vacancy.source_type === 'external' && tg) {
-                      window.open(`https://t.me/${tg}`, '_blank', 'noopener');
-                      toast("Письмо скопировано. Вставьте его в чат с работодателем в Telegram.", "ok");
-                    } else if (vacancy.source_type === 'external') {
-                      // Контакта в посте нет — открываем оригинал, там есть ссылка на отклик
-                      if (vacancy.source_url) window.open(vacancy.source_url, '_blank', 'noopener');
-                      toast("Письмо скопировано. Контакта в посте нет — откликнитесь по ссылке из оригинального поста.", "info");
-                    } else {
-                      // Внутренняя вакансия — отклик уже у работодателя в кабинете
-                      toast("Отклик доставлен работодателю.", "ok");
-                      router.push('/applications');
-                    }
-                  }}
-                  disabled={isSending}
-                  className="inline-flex items-center gap-2 bg-emerald-600 hover:bg-emerald-500 text-white px-6 py-2 rounded-lg text-sm font-bold transition-colors cursor-pointer disabled:opacity-50"
-                >
-                  {isSending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />} Отправить HR
-                </button>
-              </div>
-            )}
-
+            <div className="p-5 overflow-y-auto">{panel}</div>
           </div>
         </div>
       )}
