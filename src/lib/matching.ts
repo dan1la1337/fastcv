@@ -63,7 +63,7 @@ export async function fetchRecommended(page: number, pageSize = 30): Promise<{ r
 
 /** Цвет значка совпадения. */
 export function matchTone(score: number): string {
-  if (score >= 75) return "bg-emerald-500/10 text-emerald-400 border-emerald-500/30";
-  if (score >= 50) return "bg-amber-500/10 text-amber-300 border-amber-500/30";
-  return "bg-neutral-800/60 text-neutral-400 border-neutral-700";
+  if (score >= 75) return "bg-teal-300/15 text-teal-200 border-teal-300/40";
+  if (score >= 50) return "bg-indigo-400/15 text-indigo-200 border-indigo-400/40";
+  return "bg-white/[0.06] text-neutral-400 border-white/15";
 }
