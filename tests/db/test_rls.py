@@ -375,10 +375,19 @@ CHECKS: list[tuple] = [
         insert into vacancies (title, source_type, direction, level, salary_min, salary_currency)
           select 'Wide ' || i, 'external', 'hr', 'junior', case when i % 2 = 0 then 30000 else 400000 end, 'RUB'
             from generate_series(1, 12) i;
+        select refresh_feed_stats();
         set role anon;
         select string_agg(direction || ':' || coalesce(level, '*') || ':' || sample, ',' order by all_levels)
           from salary_benchmarks where direction in ('design', 'hr')""",
      "postgres", None, "design:middle:10,design:*:10"),
+    ("справочники городов и направлений обновляются пересчётом", True,
+     """insert into vacancies (title, source_type, city, direction) values ('Stat', 'external', 'Стат-город', 'design');
+        select refresh_feed_stats();
+        set role anon;
+        select (select vacancies::text from vacancy_cities where city = 'Стат-город') || ':' ||
+               (select (vacancies > 0)::text from direction_counts where direction = 'design')""",
+     "postgres", None, "1:true"),
+    ("сайт НЕ запускает пересчёт справочников", False, "select refresh_feed_stats()", "anon", None, None),
     ("ротация «Работы России»: старые удаляются, с откликами — в архив, свежие остаются", True,
      f"""insert into vacancies (title, source_type, source_post, posted_at) values
           ('TV old', 'external', 'trudvsem/old', now() - interval '5 days'),
