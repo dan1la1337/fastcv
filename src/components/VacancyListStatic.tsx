@@ -13,7 +13,7 @@ export default function VacancyListStatic({ vacancies }: { vacancies: Vacancy[] 
       {vacancies.map(v => (
         <li key={v.id} className="bg-neutral-900/60 border border-neutral-800/80 rounded-2xl p-5">
           <h2 className="text-lg font-bold text-neutral-100">
-            <Link href={`/vacancy/${v.id}`} className="hover:text-blue-400 transition-colors">{v.title}</Link>
+            <Link href={`/vacancy/${v.id}`} className="hover:text-teal-300 transition-colors">{v.title}</Link>
           </h2>
           <CompanyLine vacancy={v} className="text-sm text-neutral-400 mt-0.5" />
           <p className="text-sm font-semibold text-emerald-400 mt-1">{formatSalary(v.salary_min, v.salary_max, v.salary_currency)}</p>

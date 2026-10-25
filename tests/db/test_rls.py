@@ -301,6 +301,8 @@ CHECKS: list[tuple] = [
         set role authenticated; set request.jwt.claims = '{"email": "Owner@Example.com"}';
         select (admin_metrics() ->> 'vacancies_total')::int > 0 and jsonb_array_length(admin_metrics() -> 'vacancies_by_day') = 14""",
      "postgres", None, "t"),
+    ("живой счётчик доступен гостю и не раскрывает каналы", True,
+     "select (live_stats() ? 'total')::text || ':' || (live_stats() ? 'channels')::text", "anon", None, "true:true"),
     # --- исключение канала по просьбе владельца ---
     ("пользователь НЕ исключает каналы", False, "select exclude_channel('somechan')", "authenticated", C, None),
     ("аноним НЕ исключает каналы", False, "select exclude_channel('somechan')", "anon", None, None),

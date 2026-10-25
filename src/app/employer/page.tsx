@@ -66,7 +66,7 @@ const REJECT_REASONS: { label: string; text: string }[] = [
 ];
 
 const inputClass =
-  "w-full px-4 py-3 bg-neutral-950 border border-neutral-800 rounded-xl text-sm text-neutral-100 focus:outline-none focus:border-blue-500";
+  "w-full px-4 py-3 bg-neutral-950 border border-neutral-800 rounded-xl text-sm text-neutral-100 focus:outline-none focus:border-teal-300";
 const labelClass = "block text-xs font-bold text-neutral-500 uppercase tracking-wider mb-2";
 
 export default function EmployerDashboard() {
@@ -279,8 +279,8 @@ export default function EmployerDashboard() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-neutral-950 flex items-center justify-center">
-        <Loader2 className="w-8 h-8 animate-spin text-blue-500" />
+      <div className="min-h-screen flex items-center justify-center">
+        <Loader2 className="w-8 h-8 animate-spin text-teal-300" />
       </div>
     );
   }
@@ -292,7 +292,7 @@ export default function EmployerDashboard() {
     }`;
 
   return (
-    <div className="min-h-screen bg-neutral-950 text-neutral-100 font-sans p-4 sm:p-8">
+    <div className="min-h-screen text-neutral-100 font-sans p-4 sm:p-8">
       <div className="max-w-4xl mx-auto space-y-6">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-neutral-800 pb-4">
           <div className="flex items-center gap-3">
@@ -302,7 +302,7 @@ export default function EmployerDashboard() {
             <div>
               <h1 className="text-xl font-bold">Кабинет работодателя</h1>
               <p className="text-xs text-neutral-400 mt-0.5">
-                Компания: {companyName || <Link href="/profile" className="text-blue-400 hover:underline">укажите в профиле</Link>}
+                Компания: {companyName || <Link href="/profile" className="text-teal-300 hover:underline">укажите в профиле</Link>}
               </p>
             </div>
           </div>
@@ -317,7 +317,7 @@ export default function EmployerDashboard() {
             <button
               onClick={() => openForm()}
               className={`px-4 py-2 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-colors ${
-                activeTab === "form" && !editingId ? "bg-blue-600 text-white" : "bg-neutral-900 border border-neutral-800 text-neutral-300 hover:bg-neutral-800"
+                activeTab === "form" && !editingId ? "bg-teal-300 text-neutral-950" : "bg-neutral-900 border border-neutral-800 text-neutral-300 hover:bg-neutral-800"
               }`}
             >
               <PlusCircle className="w-4 h-4" /> Опубликовать
@@ -338,15 +338,15 @@ export default function EmployerDashboard() {
           <div className="bg-neutral-900/50 border border-neutral-800 rounded-2xl p-6 sm:p-8 space-y-6">
             <h2 className="text-lg font-bold">{editingId ? "Редактирование вакансии" : "Новая вакансия"}</h2>
             {!editingId && (
-              <div className="rounded-xl border border-blue-500/20 bg-blue-950/20 p-4 space-y-3">
+              <div className="rounded-xl border border-teal-300/20 bg-teal-950/20 p-4 space-y-3">
                 <p className="text-sm text-neutral-300 flex items-center gap-2">
-                  <Sparkles className="w-4 h-4 text-blue-400" /> Опишите вакансию парой фраз — ИИ напишет полный текст
+                  <Sparkles className="w-4 h-4 text-teal-300" /> Опишите вакансию парой фраз — ИИ напишет полный текст
                 </p>
                 <textarea rows={3} maxLength={2000} value={notes} onChange={e => setNotes(e.target.value)}
                   placeholder="Ищем мидл-бэкендера на Python в финтех, Django + Postgres, удалёнка, 250–300к"
                   className={`${inputClass} resize-y`} />
                 <button type="button" onClick={draftWithAi} disabled={drafting || notes.trim().length < 15}
-                  className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold disabled:opacity-50">
+                  className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-teal-300 hover:bg-teal-200 text-neutral-950 text-xs font-semibold disabled:opacity-50">
                   {drafting ? <><Loader2 className="w-4 h-4 animate-spin" /> Пишем…</> : "Написать черновик"}
                 </button>
               </div>
@@ -385,7 +385,7 @@ export default function EmployerDashboard() {
                 </div>
                 <label className="flex items-center gap-3 cursor-pointer sm:pt-6">
                   <input type="checkbox" checked={form.isRemote} onChange={e => setForm({ ...form, isRemote: e.target.checked })}
-                    className="w-5 h-5 rounded bg-neutral-950 border-neutral-800 text-blue-600 focus:ring-0" />
+                    className="w-5 h-5 rounded bg-neutral-950 border-neutral-800 text-teal-400 focus:ring-0" />
                   <span className="text-sm text-neutral-300">Возможна удалённая работа</span>
                 </label>
               </div>
@@ -405,7 +405,7 @@ export default function EmployerDashboard() {
 
               <div className="flex flex-col sm:flex-row gap-3">
                 <button type="submit" disabled={saving}
-                  className="flex-1 py-3.5 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-sm font-bold transition-colors disabled:opacity-50 flex items-center justify-center gap-2">
+                  className="flex-1 py-3.5 bg-teal-300 hover:bg-teal-200 text-neutral-950 rounded-xl text-sm font-bold transition-colors disabled:opacity-50 flex items-center justify-center gap-2">
                   {saving ? <Loader2 className="w-5 h-5 animate-spin" /> : editingId ? "Сохранить изменения" : "Опубликовать"}
                 </button>
                 {editingId && (
@@ -425,7 +425,7 @@ export default function EmployerDashboard() {
             <div className="text-center py-20 bg-neutral-900/30 border border-dashed border-neutral-800 rounded-2xl">
               <Briefcase className="w-10 h-10 mx-auto text-neutral-700 mb-3" />
               <p className="text-neutral-400 text-sm font-medium">У вас пока нет вакансий</p>
-              <button onClick={() => openForm()} className="mt-3 text-sm text-blue-400 hover:underline">Опубликовать первую</button>
+              <button onClick={() => openForm()} className="mt-3 text-sm text-teal-300 hover:underline">Опубликовать первую</button>
             </div>
           ) : (
             <div className="grid gap-3">
@@ -543,7 +543,7 @@ export default function EmployerDashboard() {
                   )}
 
                   {reply?.appId === app.id && (
-                    <div className="space-y-3 rounded-xl border border-blue-500/30 bg-blue-950/20 p-4">
+                    <div className="space-y-3 rounded-xl border border-teal-300/30 bg-teal-950/20 p-4">
                       <p className="text-xs font-bold text-neutral-400 uppercase tracking-wider">
                         {reply.status === "interview_scheduled" ? "Приглашение на собеседование" : "Отказ"} — кандидат увидит этот текст
                       </p>
@@ -555,7 +555,7 @@ export default function EmployerDashboard() {
                             return (
                               <button key={reason.label} type="button" aria-pressed={active}
                                 onClick={() => setReply({ ...reply, text: active ? base : `${base}\n\n${reason.text}` })}
-                                className={`px-3 py-1 rounded-lg text-xs border transition-colors ${active ? "bg-blue-600 border-blue-500 text-white" : "border-neutral-700 text-neutral-300 hover:bg-neutral-800"}`}>
+                                className={`px-3 py-1 rounded-lg text-xs border transition-colors ${active ? "bg-teal-300 border-teal-300 text-neutral-950" : "border-neutral-700 text-neutral-300 hover:bg-neutral-800"}`}>
                                 {reason.label}
                               </button>
                             );
@@ -568,7 +568,7 @@ export default function EmployerDashboard() {
                       <div className="flex justify-end gap-2">
                         <button onClick={() => setReply(null)} className="px-3 py-1.5 text-xs text-neutral-400 hover:text-white">Отмена</button>
                         <button onClick={sendReply} disabled={replying}
-                          className="px-4 py-1.5 bg-blue-600 hover:bg-blue-500 text-white rounded-lg text-xs font-bold flex items-center gap-1.5 disabled:opacity-50">
+                          className="px-4 py-1.5 bg-teal-300 hover:bg-teal-200 text-neutral-950 rounded-lg text-xs font-bold flex items-center gap-1.5 disabled:opacity-50">
                           {replying ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Send className="w-3.5 h-3.5" />} Отправить
                         </button>
                       </div>

@@ -86,7 +86,7 @@ export default function TelegramSubscription({ userId }: { userId: string }) {
   return (
     <div className="bg-neutral-900/50 border border-neutral-800 rounded-2xl p-6 sm:p-8 space-y-4">
       <div>
-        <h2 className="text-lg font-bold text-white flex items-center gap-2"><BellRing className="w-5 h-5 text-blue-400" /> Подборка в Telegram</h2>
+        <h2 className="text-lg font-bold text-white flex items-center gap-2"><BellRing className="w-5 h-5 text-teal-300" /> Подборка в Telegram</h2>
         <p className="text-sm text-neutral-400 mt-1">
           Новые вакансии с совпадением от 70% — сообщением в Telegram, не чаще раза в несколько часов.
         </p>
@@ -95,7 +95,7 @@ export default function TelegramSubscription({ userId }: { userId: string }) {
       {linked ? (
         <div className="flex flex-wrap items-center gap-3">
           <label className="flex items-center gap-3 cursor-pointer">
-            <input type="checkbox" checked={notify} onChange={toggle} className="w-5 h-5 rounded bg-neutral-950 border-neutral-800 text-blue-600 focus:ring-0" />
+            <input type="checkbox" checked={notify} onChange={toggle} className="w-5 h-5 rounded bg-neutral-950 border-neutral-800 text-teal-400 focus:ring-0" />
             <span className="text-sm text-neutral-200">Присылать подборку</span>
           </label>
           <button onClick={unlink} disabled={busy} className="ml-auto text-xs text-neutral-400 hover:text-red-300">Отвязать Telegram</button>
@@ -105,7 +105,7 @@ export default function TelegramSubscription({ userId }: { userId: string }) {
       ) : link ? (
         <div className="space-y-2">
           <a href={link} target="_blank" rel="noreferrer"
-            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-sm font-semibold">
+            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-teal-300 hover:bg-teal-200 text-neutral-950 text-sm font-semibold">
             <Send className="w-4 h-4" /> Открыть @{bot} и нажать «Start»
           </a>
           <p className="text-xs text-neutral-500">
@@ -114,7 +114,7 @@ export default function TelegramSubscription({ userId }: { userId: string }) {
         </div>
       ) : (
         <button onClick={connect} disabled={busy}
-          className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border border-blue-500/40 text-blue-300 hover:bg-blue-600/10 text-sm font-medium disabled:opacity-50">
+          className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border border-teal-300/40 text-teal-200 hover:bg-teal-300/10 text-sm font-medium disabled:opacity-50">
           {busy ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />} Подключить Telegram
         </button>
       )}

@@ -54,7 +54,7 @@ export default async function JobsIndexPage() {
   const total = Object.values(counts).reduce((a, b) => a + b, 0);
 
   return (
-    <main className="min-h-screen bg-neutral-950 text-neutral-100 px-4 py-8">
+    <main className="min-h-screen text-neutral-100 px-4 py-8">
       <div className="max-w-3xl mx-auto space-y-8">
         <Link href="/" className="inline-flex items-center gap-2 text-sm text-neutral-400 hover:text-white">
           <ArrowLeft className="w-4 h-4" /> Все вакансии

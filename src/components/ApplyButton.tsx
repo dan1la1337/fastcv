@@ -20,7 +20,7 @@ export default function ApplyButton({ vacancy }: { vacancy: Vacancy }) {
     <>
       <button
         onClick={() => setOpen(true)}
-        className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-sm font-semibold transition-colors shadow-lg shadow-blue-500/20"
+        className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-teal-300 hover:bg-teal-200 text-neutral-950 rounded-xl text-sm font-semibold transition-colors shadow-lg shadow-teal-300/20"
       >
         <Sparkles className="w-4 h-4" /> Откликнуться с Smart Apply
       </button>

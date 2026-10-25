@@ -9,13 +9,13 @@ import { authErrorText } from '@/lib/auth-errors';
 import { LEGAL_VERSION } from '@/lib/legal';
 
 const card = 'max-w-md w-full bg-neutral-900/50 border border-neutral-800 rounded-2xl p-8 shadow-2xl';
-const input = 'w-full px-4 py-3 bg-neutral-950 border border-neutral-800 rounded-xl text-sm text-neutral-100 focus:outline-none focus:border-blue-500 transition-colors';
+const input = 'w-full px-4 py-3 bg-neutral-950 border border-neutral-800 rounded-xl text-sm text-neutral-100 focus:outline-none focus:border-teal-300 transition-colors';
 const label = 'block text-xs font-bold text-neutral-500 uppercase tracking-wider mb-2';
 
 function Logo() {
   return (
     <Link href="/" className="inline-flex items-center gap-2 mb-6 hover:opacity-80 transition-opacity">
-      <span className="bg-blue-600 text-white font-black px-2.5 py-1 rounded-lg text-sm tracking-tight shadow-lg shadow-blue-500/25">⚡ Fast<span className="text-blue-200">CV</span></span>
+      <span className="font-display font-bold text-lg tracking-tight text-neutral-100">fastcv</span>
     </Link>
   );
 }
@@ -69,9 +69,9 @@ function RegisterFormContent() {
 
   if (awaitingConfirmation) {
     return (
-      <div className="min-h-screen bg-neutral-950 flex items-center justify-center p-4">
+      <div className="min-h-screen flex items-center justify-center p-4">
         <div className={`${card} text-center space-y-4`}>
-          <MailCheck className="w-10 h-10 text-blue-400 mx-auto" />
+          <MailCheck className="w-10 h-10 text-teal-300 mx-auto" />
           <h1 className="text-2xl font-bold text-white">Проверьте почту</h1>
           <p className="text-neutral-400 text-sm leading-relaxed">
             Мы отправили письмо на <span className="font-medium text-neutral-100">{email}</span>.
@@ -84,7 +84,7 @@ function RegisterFormContent() {
   }
 
   return (
-    <div className="min-h-screen bg-neutral-950 flex items-center justify-center p-4">
+    <div className="min-h-screen flex items-center justify-center p-4">
       <div className={card}>
         <div className="text-center mb-8">
           <Logo />
@@ -111,9 +111,9 @@ function RegisterFormContent() {
             <input type="checkbox" required checked={agreed} onChange={(e) => setAgreed(e.target.checked)}
               className="mt-0.5 w-4 h-4 shrink-0 rounded bg-neutral-950 border-neutral-700" />
             <span>
-              Принимаю <Link href="/terms" target="_blank" className="text-blue-400 hover:underline">пользовательское соглашение</Link> и
+              Принимаю <Link href="/terms" target="_blank" className="text-teal-300 hover:underline">пользовательское соглашение</Link> и
               даю согласие на обработку персональных данных, в том числе их передачу за рубеж, на условиях{' '}
-              <Link href="/privacy" target="_blank" className="text-blue-400 hover:underline">политики</Link>
+              <Link href="/privacy" target="_blank" className="text-teal-300 hover:underline">политики</Link>
             </span>
           </label>
 
@@ -124,7 +124,7 @@ function RegisterFormContent() {
           <button
             type="submit"
             disabled={loading || !agreed}
-            className="w-full flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-500 text-white py-3 rounded-xl text-sm font-semibold transition-colors disabled:opacity-50 mt-6"
+            className="w-full flex items-center justify-center gap-2 bg-teal-300 hover:bg-teal-200 text-neutral-950 py-3 rounded-xl text-sm font-semibold transition-colors disabled:opacity-50 mt-6"
           >
             {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Зарегистрироваться'}
           </button>
@@ -143,7 +143,7 @@ function RegisterFormContent() {
 
 export default function RegistrationForm() {
   return (
-    <Suspense fallback={<div className="min-h-screen bg-neutral-950" />}>
+    <Suspense fallback={<div className="min-h-screen" />}>
       <RegisterFormContent />
     </Suspense>
   );

@@ -66,7 +66,7 @@ export default async function AdminPage() {
   ];
 
   return (
-    <main className="min-h-screen bg-neutral-950 text-neutral-100 px-4 py-8">
+    <main className="min-h-screen text-neutral-100 px-4 py-8">
       <div className="max-w-5xl mx-auto space-y-8">
         <div className="flex items-center justify-between gap-4">
           <div>
@@ -104,7 +104,7 @@ export default async function AdminPage() {
                     <span className="absolute -top-0.5 left-1/2 -translate-x-1/2 text-[11px] text-neutral-300 tabular-nums">{total}</span>
                   )}
                   <div
-                    className="w-full rounded-t-[4px] bg-blue-500 group-hover:bg-blue-400 transition-colors"
+                    className="w-full rounded-t-[4px] bg-teal-300 group-hover:bg-teal-200 transition-colors"
                     style={{ height: `${Math.max(total ? 2 : 0, (total / maxDay) * 85)}%` }}
                     title={`${date}: ${total} (из каналов ${d.external}, от работодателей ${d.internal})`}
                   />
@@ -138,7 +138,7 @@ export default async function AdminPage() {
               {directions.map(d => (
                 <li key={d.direction} className="grid grid-cols-[9rem_1fr_3rem] items-center gap-3 text-xs">
                   <span className="text-neutral-300 truncate">{directionLabel(d.direction)}</span>
-                  <span className="h-2.5 rounded-r-[4px] bg-blue-500" style={{ width: `${(d.count / maxDirection) * 100}%` }} />
+                  <span className="h-2.5 rounded-r-[4px] bg-teal-300" style={{ width: `${(d.count / maxDirection) * 100}%` }} />
                   <span className="text-neutral-400 tabular-nums text-right">{d.count}</span>
                 </li>
               ))}
@@ -154,7 +154,7 @@ export default async function AdminPage() {
                   {m.channels_week.map(c => (
                     <tr key={c.channel} className="border-t border-neutral-800">
                       <td className="py-1.5">
-                        <a href={`https://t.me/${c.channel}`} target="_blank" rel="noreferrer" className="text-neutral-300 hover:text-blue-400">@{c.channel}</a>
+                        <a href={`https://t.me/${c.channel}`} target="_blank" rel="noreferrer" className="text-neutral-300 hover:text-teal-300">@{c.channel}</a>
                       </td>
                       <td className="text-right text-neutral-300">{c.count}</td>
                       <td className="text-right text-neutral-500">{percent(c.count, weekVacancies)}</td>
