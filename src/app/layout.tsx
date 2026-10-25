@@ -46,6 +46,7 @@ export default function RootLayout({
         <footer className="mt-auto border-t border-white/10 px-4 py-6 text-xs text-neutral-400">
           <div className="max-w-5xl mx-auto flex flex-wrap items-center gap-x-5 gap-y-2">
             <span>© FastCV</span>
+            <Link href="/about" className="hover:text-neutral-200">О сервисе</Link>
             <Link href="/jobs" className="hover:text-neutral-200">Вакансии по направлениям</Link>
             <Link href="/terms" className="hover:text-neutral-200">Пользовательское соглашение</Link>
             <Link href="/privacy" className="hover:text-neutral-200">Политика обработки данных</Link>
