@@ -318,8 +318,12 @@ MODELS = ("model-a", "model-b", "model-c")
 
 def test_gemini_falls_back_to_next_model_when_overloaded(monkeypatch):
     calls = _fake_gemini(monkeypatch, [_api_error(503), _api_error(429), job()])
-    result = main.make_gemini_normalizer("key", MODELS)("текст")
+    normalize = main.make_gemini_normalizer("key", MODELS)
+    result = normalize("текст")
     assert result.title == "Python Developer"
+    # счётчики за запуск: одно обращение, ошибки по моделям — видно, упираемся ли в лимит
+    assert normalize.stats["calls"] == 1 and normalize.stats["ok"] == 1
+    assert normalize.stats["errors"] == {"model-a: 503": 1, "model-a: 429": 1}
     # две попытки на перегруженной модели, затем успех на следующей
     assert calls["models"] == ["model-a", "model-a", "model-b"]
     assert calls["timeout"] == main.AI_TIMEOUT_MS

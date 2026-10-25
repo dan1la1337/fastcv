@@ -300,12 +300,26 @@ def make_gemini_normalizer(api_key: str, models: tuple[str, ...] = GEMINI_MODELS
         system_instruction=PROMPT,
     )
 
+    # Счётчики за запуск: сколько обращений, сколько секунд ждали, какие ошибки (429 — лимит)
+    stats: dict = {"calls": 0, "ok": 0, "seconds": 0.0, "errors": {}}
+
     def normalize(text: str) -> VacancyAI:
         failures: list[str] = []
+        started = time.monotonic()
+        try:
+            return _normalize(text, failures)
+        finally:
+            stats["seconds"] = round(stats["seconds"] + time.monotonic() - started, 1)
+            for f in failures:
+                stats["errors"][f] = stats["errors"].get(f, 0) + 1
+
+    def _normalize(text: str, failures: list[str]) -> VacancyAI:
+        stats["calls"] += 1
         for model in models:
             for attempt in range(AI_ATTEMPTS):
                 try:
                     response = client.models.generate_content(model=model, contents=wrap_post(text), config=config)
+                    stats["ok"] += 1
                     if isinstance(response.parsed, VacancyAI):
                         return response.parsed
                     return VacancyAI.model_validate_json(response.text)
@@ -323,6 +337,7 @@ def make_gemini_normalizer(api_key: str, models: tuple[str, ...] = GEMINI_MODELS
                     time.sleep(AI_PAUSE_SECONDS * 2 ** attempt)
         raise AIUnavailable("; ".join(failures[-3:]) or "нет ответа")
 
+    normalize.stats = stats  # type: ignore[attr-defined]
     return normalize
 
 
@@ -1068,7 +1083,8 @@ def main() -> None:
     print(f"Модели Gemini: {', '.join(models)}")
     try:
         store = Store(create_client(supabase_url, supabase_key))
-        summary = run(store, make_gemini_normalizer(gemini_key, models))
+        channel_normalizer = make_gemini_normalizer(gemini_key, models)
+        summary = run(store, channel_normalizer)
     except Exception as e:
         # Текст ошибки без значений ключей: они в заголовках запросов, а не в сообщении
         notify(f"❌ FastCV: сборщик упал\n\n{type(e).__name__}: {str(e)[:500]}")
@@ -1076,6 +1092,17 @@ def main() -> None:
     text = alert_text(summary)
     if text:
         notify(text)
+    # Итоги каналов и Gemini — в базу (логи Actions не всегда доступны): видно, упирается ли
+    # сбор в лимит Gemini (ошибки 429) или во время
+    try:
+        store.set_setting("channels_last_run", json.dumps({
+            "at": datetime.now(timezone.utc).isoformat(),
+            "channels": summary.channels, "processed": len(summary.results),
+            "posts": sum(r.new_posts for r in summary.results), "saved": sum(r.saved for r in summary.results),
+            "out_of_time": summary.out_of_time, "ai": getattr(channel_normalizer, "stats", None),
+        }, ensure_ascii=False))
+    except Exception as e:
+        print(f"⚠️ Итоги каналов не сохранены: {type(e).__name__}")
     # Подборки кандидатам — отдельным ботом. Чаты к нему привязывает сайт (webhook),
     # бот оповещений владельца (TELEGRAM_BOT_TOKEN) с кандидатами не общается.
     jobs_token = env("TELEGRAM_JOBS_BOT_TOKEN")
