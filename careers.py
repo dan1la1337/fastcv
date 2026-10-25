@@ -29,7 +29,7 @@ SOURCE = "career"
 USER_AGENT = "Mozilla/5.0 (compatible; FastCVBot/1.0; +https://fastcv.ru)"
 ROBOTS_AGENT = "FastCVBot"
 RANKING_WEIGHT = 1.0          # как Telegram: иначе тысячи вакансий одной компании закрыли бы ленту
-TIME_BUDGET_SECONDS = 7 * 60
+TIME_BUDGET_SECONDS = 10 * 60   # из них «Работе России» отдали 3 минуты: там 40k вакансий и мало ИТ
 MAX_NEW_PER_COMPANY = 150     # за запуск: остальные страницы дочитаем в следующие
 PAGE_TEXT_LIMIT = 6000
 # Сайты банков подписаны сертификатами НУЦ Минцифры, которых нет в стандартном наборе
@@ -50,10 +50,13 @@ class Company:
     # Раздел сайта в адресе → направление, когда по названию его не понять
     # («Старший DS-инженер» в разделе data-science)
     categories: tuple[tuple[str, str], ...] = ()
+    # Доля времени запуска относительно других: больше — у ИТ-компаний с медленным сайтом,
+    # меньше — у банков и операторов, где почти вся карта сайта — розница
+    weight: float = 1.0
 
 
 COMPANIES = [
-    Company("mts", "МТС", "https://job.mts.ru", r"^https?://job\.mts\.ru/vacancy/(\d+)/?$"),
+    Company("mts", "МТС", "https://job.mts.ru", r"^https?://job\.mts\.ru/vacancy/(\d+)/?$", weight=0.5),
     Company("vk", "VK", "https://team.vk.company", r"^https?://team\.vk\.company/vacancy/(\d+)/?$"),
     Company("avito", "Авито", "https://career.avito.com", r"^https?://career\.avito\.com/vacancies/[\w-]+/(\d+)/?$",
             prefer=r"/vacancies/(razrabotka|data-science|analitika|upravlenie-produktom|dizajn|testirovanie|"
@@ -66,7 +69,7 @@ COMPANIES = [
             r"^https?://(?:www\.)?ptsecurity\.com/about/vacancy/([\w-]+)/?$"),
     Company("selectel", "Selectel", "https://selectel.ru", r"^https?://selectel\.ru/careers/all/vacancy/(\d+)/?$"),
     Company("alfa", "Альфа-Банк", "https://job.alfabank.ru",
-            r"^https?://job\.alfabank\.ru/vacancies/[^/]+/[^/]+/[^/]*_(\d+)/?$"),
+            r"^https?://job\.alfabank\.ru/vacancies/[^/]+/[^/]+/[^/]*_(\d+)/?$", weight=0.5),
     Company("x5tech", "X5 Tech", "https://x5.tech", r"^https?://x5\.tech/vacancy/([0-9a-f-]{36})/?$"),
     # Сбер: тысячи вакансий, больше всего в отделениях — ИТ-адреса (по транслиту названия) первыми
     Company("sber", "Сбер", "https://rabota.sber.ru", r"^https?://rabota\.sber\.ru/search/[\w-]+-(\d+)/?$",
@@ -76,7 +79,7 @@ COMPANIES = [
     # ограничивает частоту запросов, поэтому пауза больше
     Company("tbank", "Т-Банк", "https://www.tbank.ru",
             r"^https?://www\.tbank\.ru/career/[\w-]+/vacancy/(?:[^/]+/){1,2}([0-9a-f-]{36})/?$", pause=4.0,
-            prefer=r"/career/it/"),
+            prefer=r"/career/it/", weight=3.0),
 ]
 
 _TAG = re.compile(r"<[^>]+>")
@@ -339,9 +342,10 @@ def import_careers(store, normalize: Callable[[str], object], fetcher: Optional[
     for i, company in enumerate(companies):
         if clock() - started > time_budget:
             break
-        # Время делим поровну между оставшимися компаниями: тысячи розничных вакансий одного
+        # Время делим между оставшимися компаниями по весу (weight): тысячи розничных вакансий одного
         # банка не должны съедать весь запуск. Недобранное компанией переходит следующим
-        company_deadline = clock() + (time_budget - (clock() - started)) / (len(companies) - i)
+        left = sum(c.weight for c in companies[i:])
+        company_deadline = clock() + (time_budget - (clock() - started)) * company.weight / left
         info = stats.setdefault(company.key, {"new": 0, "saved": 0, "archived": 0})
         try:
             live = sitemap_vacancies(fetcher, company)

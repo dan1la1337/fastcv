@@ -186,3 +186,19 @@ def test_time_is_shared_between_companies():
                                    [CO, other], clock=clock, time_budget=400)
     assert stats["acme"].get("stopped") == "company share"
     assert stats["beta"]["saved"] > 0
+
+
+def test_heavier_company_gets_more_time():
+    t = [0.0]
+
+    def clock():
+        t[0] += 10
+        return t[0]
+
+    many = "<urlset>" + "".join(f"<url><loc>https://job.acme.ru/vacancy/{i}</loc></url>" for i in range(1, 60)) + "</urlset>"
+    pages = {f"https://job.acme.ru/vacancy/{i}": PAGE_LD for i in range(1, 60)}
+    light = careers.Company("light", "L", "https://job.acme.ru", r"^https://job\.acme\.ru/vacancy/(\d+)/?$", pause=0, weight=1)
+    heavy = careers.Company("heavy", "H", "https://job.acme.ru", r"^https://job\.acme\.ru/vacancy/(\d+)/?$", pause=0, weight=3)
+    stats = careers.import_careers(Store(), ai, site(**{"https://job.acme.ru/sitemap-vacancies.xml": many}, **pages),
+                                   [light, heavy], clock=clock, time_budget=800)
+    assert stats["heavy"]["saved"] > 2 * stats["light"]["saved"] > 0
