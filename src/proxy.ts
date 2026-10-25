@@ -78,7 +78,7 @@ function redirectWithCookies(url: URL, from: NextResponse): NextResponse {
 
 export const config = {
   matcher: [
-    // Всё, кроме статики, картинок и служебных файлов: сессия нужна и страницам, и API
-    "/((?!_next/static|_next/image|favicon.ico|robots.txt|sitemap.xml|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico)$).*)",
+    // Всё, кроме прокси к Supabase (/sb), статики, картинок и служебных файлов: сессия нужна и страницам, и API
+    "/((?!sb/|_next/static|_next/image|favicon.ico|robots.txt|sitemap.xml|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico)$).*)",
   ],
 };

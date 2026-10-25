@@ -35,12 +35,24 @@ function isServiceRoleJwt(key: string): boolean {
   }
 }
 
+/**
+ * Браузер ходит в Supabase через fastcv.ru (перезапись в next.config.ts), а не напрямую
+ * на *.supabase.co: у части пользователей из России прямые запросы туда обрываются
+ * («TypeError: Load failed» на iPhone), а запросы к своему домену проходят.
+ */
+export const SUPABASE_PROXY_PATH = "/sb";
+
+/** Имя cookie сессии по умолчанию у Supabase: sb-<id проекта>-auth-token. */
+export function sessionCookieName(projectUrl: string): string {
+  return `sb-${new URL(projectUrl).hostname.split(".")[0]}-auth-token`;
+}
+
 export const supabaseUrl: string = url;
 export const supabaseAnonKey: string = anonKey;
 
 /**
  * Клиент Supabase для кода, который работает и в браузере, и на сервере.
- * - В браузере сессия хранится в cookies (`@supabase/ssr`): так её видит сервер,
+ * - В браузере запросы идут через fastcv.ru/sb (см. SUPABASE_PROXY_PATH), сессия хранится в cookies (`@supabase/ssr`): так её видит сервер,
  *   и кабинеты закрываются ещё до отрисовки (см. src/proxy.ts).
  * - На сервере (страница вакансии, карта сайта) — клиент без сессии для публичных
  *   данных. Код, которому нужен вошедший пользователь на сервере, берёт клиент
@@ -49,7 +61,10 @@ export const supabaseAnonKey: string = anonKey;
 export const supabase =
   typeof window === "undefined"
     ? createClient<Database>(supabaseUrl, supabaseAnonKey, { auth: { persistSession: false, autoRefreshToken: false } })
-    : createBrowserClient<Database>(supabaseUrl, supabaseAnonKey);
+    : createBrowserClient<Database>(`${window.location.origin}${SUPABASE_PROXY_PATH}`, supabaseAnonKey, {
+        // Имя cookie сессии считается от адреса; оставляем прежнее, чтобы его видел сервер
+        cookieOptions: { name: sessionCookieName(supabaseUrl) },
+      });
 
 export type UserRole = "candidate" | "employer";
 
