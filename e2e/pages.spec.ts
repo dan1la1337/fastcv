@@ -109,7 +109,7 @@ test("страница источников: ссылка в подвале и �
   await page.getByRole("contentinfo").getByRole("link", { name: "Источники вакансий" }).click();
   await expect(page.getByRole("heading", { name: "Источники вакансий", level: 1 })).toBeVisible();
   await expect(page.getByRole("heading", { name: "Как исключить свой канал или сайт" })).toBeVisible();
-  await expect(page.getByRole("link", { name: "eqytest@gmail.com" })).toHaveAttribute("href", /^mailto:eqytest@gmail\.com/);
+  await expect(page.getByRole("article").getByRole("link", { name: "eqytest@gmail.com" })).toHaveAttribute("href", /^mailto:eqytest@gmail\.com\?subject=/);
 });
 
 test("регистрация недоступна без согласия с соглашением и политикой", async ({ page }) => {
