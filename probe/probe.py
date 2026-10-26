@@ -31,7 +31,7 @@ for n in open("probe/channels.txt").read().split():
     out["channels"].append(row); time.sleep(0.7)
 
 # 2. SuperJob: сколько ИТ-вакансий за 30 дней
-key = os.environ.get("SUPERJOB_API_KEY")
+key = None  # SuperJob уже проверен
 if key:
     sj = requests.Session(); sj.headers.update({"X-Api-App-Id": key, **UA})
     since = int((now - timedelta(days=30)).timestamp())
