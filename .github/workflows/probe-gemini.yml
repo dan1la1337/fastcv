@@ -18,6 +18,6 @@ jobs:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
         run: |
           pip install -q -r requirements.txt beautifulsoup4
-          python3 probe/gemini.py || true
+          PYTHONPATH=. python3 probe/gemini.py || true
           git config user.name probe && git config user.email probe@users.noreply.github.com
           git add probe/gemini_result.json && git commit -qm "probe result" && git push -q
