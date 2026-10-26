@@ -1,2151 +1,599 @@
 {
 "channels": [
 {
-"u": "agile_jobs",
-"status": 302
-},
-{
-"u": "analysts_hunter",
-"status": 302
-},
-{
-"u": "android_job",
-"status": 302
-},
-{
-"u": "android_jobs",
-"status": 302
-},
-{
-"u": "android_jobs_feed",
-"status": 302
-},
-{
-"u": "android_vacancies",
-"status": 302
-},
-{
-"u": "androidjobs",
-"status": 302
-},
-{
-"u": "angular_jobs",
-"status": 302
-},
-{
-"u": "autotest_jobs",
-"status": 302
-},
-{
-"u": "bitrix_work",
-"status": 302
-},
-{
-"u": "cctv_work",
-"status": 302
-},
-{
-"u": "cloud_jobs",
-"status": 302
-},
-{
-"u": "clubcomjob",
-"status": 302
-},
-{
-"u": "cto_jobs",
-"status": 302
-},
-{
-"u": "cto_jobs_feed",
-"status": 302
-},
-{
-"u": "ctojobs",
-"status": 302
-},
-{
-"u": "devjob",
-"status": 302
-},
-{
-"u": "devops_hr",
-"status": 302
-},
-{
-"u": "devops_job",
+"u": "analyst_job",
 "status": 200,
-"title": "DevOps Jobs",
+"title": "analyst_job",
 "posts": 2,
 "week": 0,
-"last": "2023-02-06",
+"last": "2026-05-31",
 "jobshare": 0.0,
 "cyr": 0.0,
-"sample": "Channel name was changed to « DevOps Jobs »"
+"sample": "🟡 This community is now protected by Collab.Land Token-gate your community and verify members automa"
 },
 {
-"u": "devops_jobs_ru",
+"u": "analyst_job_geeklink",
+"status": 200,
+"title": "Вакансии аналитиков, Data Analyst и Scientist",
+"posts": 20,
+"week": 0,
+"last": "2026-08-24",
+"jobshare": 0.95,
+"cyr": 0.89,
+"sample": "💼 ВАКАНСИЯ: Системный аналитик Компания: Malkin.tech Зарплата: 200-250 тысяч рублей Локация/Format: "
+},
+{
+"u": "androidev",
 "status": 302
 },
 {
-"u": "devops_rabota",
+"u": "bitrix24_work",
+"status": 302
+},
+{
+"u": "bitrix_1c_job",
 "status": 200,
-"title": "DevOps Вакансии",
+"title": "Вакансии 1С и Bitrix-разработчиков",
 "posts": 20,
-"week": 8,
+"week": 0,
+"last": "2026-10-15",
+"jobshare": 0.95,
+"cyr": 0.91,
+"sample": "💼 ВАКАНСИЯ: Senior-разработчик 1С: ERP+УХ. Фриланс Компания: Taglex Зарплата: 3500 час Локация/Forma"
+},
+{
+"u": "bitrixworkrabota",
+"status": 302
+},
+{
+"u": "choicy_work",
+"status": 200,
+"title": "🌎 CHOICY.WORK: Global карьера | вакансии | стартапы | удалён",
+"posts": 20,
+"week": 5,
 "last": "2026-10-26",
-"jobshare": 0.15,
+"jobshare": 1.0,
+"cyr": 0.79,
+"sample": "User Acquisition manager (Google/Meta) #remote SternMeister — сертифицированный AZAV онлайн-образова"
+},
+{
+"u": "dartlang_jobs",
+"status": 200,
+"title": "Dart Jobs",
+"posts": 20,
+"week": 1,
+"last": "2026-10-22",
+"jobshare": 1.0,
 "cyr": 0.83,
-"sample": "#senior #удаленка Циан Senior Python разработчик платформы / SRE dev Опыт работы: 3–6 лет Полная зан"
+"sample": "Вакансия Flutter / Full-stack разработчик (AI-native) в Xmethod.de Привет! Мы команда Xmethod.de — а"
 },
 {
-"u": "devops_vacancies",
+"u": "devops_job_geeklink",
 "status": 200,
-"title": "DevOps вакансии | работа",
+"title": "Вакансии DevOps и системных администраторов",
 "posts": 20,
 "week": 0,
-"last": "2025-09-17",
-"jobshare": 0.0,
-"cyr": 0.6,
-"sample": "🖥 DevOps-инженер Linux • Ansible • Docker/Podman • CI/CD 🌾 Разработка и внедрение процессов CI/CD. 🌾"
+"last": "2026-09-16",
+"jobshare": 0.95,
+"cyr": 0.72,
+"sample": "👤 РЕЗЮМЕ: Middle DevOps / Infrastructure Engineer Опыт: 4 года Зарплата: 270000-320000 Навыки: Kuber"
 },
 {
-"u": "devops_vakansii",
+"u": "devopssre_jobs",
 "status": 200,
-"title": "devops_vakansii",
-"posts": 2,
-"week": 0,
-"last": "2026-10-14",
-"jobshare": 0.0,
-"cyr": 0.25,
-"sample": "Мы только что переехали на новый канал! Вступайте здесь: https://t.me/vflbetadqspbot?start=devops_va"
-},
-{
-"u": "devops_work",
-"status": 200,
-"title": "DevOps | Job in IT | Portal",
-"posts": 2,
-"week": 0,
-"last": "2024-06-30",
-"jobshare": 0.0,
-"cyr": 0.42,
-"sample": "🇷🇺 Приветствуем Вас! Это наш бот-антиспам! Чтобы подписаться на канал, перейдите по ссылке ниже и сл"
-},
-{
-"u": "devopsjob",
-"status": 302
-},
-{
-"u": "devopsjobs",
-"status": 200,
-"title": "DevOps jobs vietnam",
+"title": "DevOps/SRE_Jobs",
 "posts": 20,
 "week": 0,
-"last": "2025-03-06",
-"jobshare": 0.0,
-"cyr": 0.0,
-"sample": "[Remote] Away Digital Teams đang tuyển dụng Senior DevOps GCP 🚀 > Từ 5 năm kinh nghiệm trong lĩnh vự"
+"last": "2026-09-29",
+"jobshare": 1.0,
+"cyr": 0.79,
+"sample": "Публикатор: Alina Romashka Обсуждение: #вакансия #devops #hft #linux #performance #lowlatency #remot"
 },
 {
-"u": "digitaljob_ch",
-"status": 302
-},
-{
-"u": "django_framework",
-"status": 302
-},
-{
-"u": "django_jobs",
-"status": 302
-},
-{
-"u": "easy_golang_job",
-"status": 302
-},
-{
-"u": "eth_jobs",
-"status": 302
-},
-{
-"u": "flutter_jobs",
-"status": 302
-},
-{
-"u": "flutter_jobs_feed",
-"status": 302
-},
-{
-"u": "flutter_vacancies",
+"u": "django_jobs_board",
 "status": 200,
-"title": "Flutter вакансии",
-"posts": 2,
+"title": "django_jobs_board",
+"posts": 20,
 "week": 0,
-"last": "2021-08-27",
-"jobshare": 0.0,
-"cyr": 0.0,
-"sample": "Channel photo updated"
+"last": "2026-10-18",
+"jobshare": 0.65,
+"cyr": 0.61,
+"sample": "#резюме #cv Формат работы: part-time, проектно, удаленно В поиске работы Python-разработчиком. Сумма"
 },
 {
-"u": "flutterjobs",
+"u": "dotnetrujobs",
 "status": 302
 },
 {
-"u": "forallandroid",
-"status": 302
-},
-{
-"u": "foralldesign",
-"status": 302
-},
-{
-"u": "foralldevops",
-"status": 302
-},
-{
-"u": "forallfrontend",
-"status": 302
-},
-{
-"u": "forallgamedev",
-"status": 302
-},
-{
-"u": "forallios",
-"status": 302
-},
-{
-"u": "forallmanagers",
-"status": 302
-},
-{
-"u": "forallpm",
-"status": 302
-},
-{
-"u": "forandroid",
-"status": 302
-},
-{
-"u": "forcto",
-"status": 302
-},
-{
-"u": "forflutter",
-"status": 302
-},
-{
-"u": "forfullstack",
-"status": 302
-},
-{
-"u": "forgolang",
-"status": 302
-},
-{
-"u": "forios",
+"u": "elixir_jobs",
 "status": 200,
-"title": "For iOS",
-"posts": 19,
+"title": "Elixir Jobs",
+"posts": 20,
 "week": 0,
-"last": "2022-09-12",
+"last": "2026-10-15",
 "jobshare": 0.0,
 "cyr": 0.0,
-"sample": "القوة بإمضائك الشخصي تم صدور نظام آي او اس ١٦ #ios_16 الجديد للآيفون والآيباد ⚠️ قبل التحديث! 1- خذ "
+"sample": "Full-stack Engineer (Elixir, LiveView, React) Treat Health (Helsinki, Finland) Full time - On-site h"
 },
 {
-"u": "forjava",
-"status": 302
-},
-{
-"u": "forjs",
-"status": 302
-},
-{
-"u": "forkotlin",
-"status": 302
-},
-{
-"u": "formanagers",
-"status": 302
-},
-{
-"u": "fornode",
-"status": 302
-},
-{
-"u": "fornodejs",
-"status": 302
-},
-{
-"u": "forphp",
-"status": 302
-},
-{
-"u": "forpm",
+"u": "fastcodecareer",
 "status": 200,
-"title": "project",
-"posts": 2,
+"title": "1С Stars: Вакансии, работа от FastCode 1C",
+"posts": 20,
 "week": 0,
-"last": "2024-08-08",
-"jobshare": 0.0,
-"cyr": 0.0,
-"sample": "Channel name was changed to « project »"
+"last": "2026-10-09",
+"jobshare": 0.7,
+"cyr": 0.95,
+"sample": "💻 , Аналитик 1С, ГРОСССОФТ, удаленка, от 200тыс., стаж от 5 лет 1С Методолог-аналитик 1С (блоки Бюдж"
 },
 {
-"u": "forqa",
-"status": 302
-},
-{
-"u": "forreact",
-"status": 302
-},
-{
-"u": "forsre",
+"u": "flutterroles",
 "status": 200,
-"title": "3",
-"posts": 2,
+"title": "Flutter Jobs/Internships",
+"posts": 20,
 "week": 0,
-"last": "2025-07-22",
-"jobshare": 0.0,
+"last": "2026-03-10",
+"jobshare": 0.58,
 "cyr": 0.0,
-"sample": "@forsre"
+"sample": "The owner of this channel has been inactive for the last 11 months. If they remain inactive for the "
 },
 {
-"u": "forswift",
+"u": "fordev",
+"status": 302
+},
+{
+"u": "forwebdev",
 "status": 200,
-"title": "Tys",
-"posts": 1,
+"title": "For Web — фронтенд, дизайн, программирование",
+"posts": 20,
 "week": 0,
-"last": "2026-04-03",
+"last": "2025-05-12",
 "jobshare": 0.0,
-"cyr": 0.0,
-"sample": "Channel created"
+"cyr": 0.67,
+"sample": "GSAP теперь бесплатен: продвинутая библиотека для анимаций и все её платные плагины теперь доступны "
 },
 {
-"u": "forteamlead",
-"status": 302
-},
-{
-"u": "fortestingjobs",
-"status": 302
-},
-{
-"u": "forunity",
-"status": 302
-},
-{
-"u": "forvue",
-"status": 302
-},
-{
-"u": "frontend_hr",
-"status": 302
-},
-{
-"u": "frontend_job",
+"u": "front_end_dev",
 "status": 200,
-"title": "FrontEnd - Job",
+"title": "FrontEndDev",
+"posts": 20,
+"week": 15,
+"last": "2026-10-26",
+"jobshare": 0.05,
+"cyr": 0.78,
+"sample": "GitHub добавил API для истории звёзд без приватных данных GitHub выпустил REST API endpoint для исто"
+},
+{
+"u": "front_end_jobs",
+"status": 302
+},
+{
+"u": "frontend_jobs_channel",
+"status": 200,
+"title": "Frontend Jobs 🚀",
+"posts": 20,
+"week": 0,
+"last": "2023-09-08",
+"jobshare": 1.0,
+"cyr": 0.8,
+"sample": "#вакансия #frontend #react #reactnative #mobile #typescript #redux #senior UTORG - международная ком"
+},
+{
+"u": "gamedev_unity_unreal_engine_jobs",
+"status": 200,
+"title": "Вакансии GameDev, Unity и Unreal Engine разработчиков",
+"posts": 20,
+"week": 0,
+"last": "2026-08-07",
+"jobshare": 0.95,
+"cyr": 0.82,
+"sample": "👤 РЕЗЮМЕ: 3D-художник Опыт: 3 года Зарплата: От 80000 руб. Навыки: Photoshop, ZBrush, Blender, Subst"
+},
+{
+"u": "gamedevjobtinder",
+"status": 302
+},
+{
+"u": "geeklink_ru",
+"status": 200,
+"title": "Вакансии и резюме в IT. GeekLink.io",
+"posts": 20,
+"week": 0,
+"last": "2026-03-10",
+"jobshare": 0.68,
+"cyr": 0.86,
+"sample": "✨ AI-подбор каналов для постинга вакансий и резюме Теперь в боте https://t.me/it_jobs_resumes_bot AI"
+},
+{
+"u": "golang_job_geeklink",
+"status": 200,
+"title": "Вакансии Golang-разработчиков",
+"posts": 20,
+"week": 0,
+"last": "2026-07-23",
+"jobshare": 0.95,
+"cyr": 0.78,
+"sample": "💼 ВАКАНСИЯ: Tech Lead / Solution Architect (Java / Go) Компания: BuyerTech Зарплата: 400000 Локация/"
+},
+{
+"u": "haskell_job",
+"status": 200,
+"title": "Haskell Jobs",
+"posts": 20,
+"week": 0,
+"last": "2026-08-17",
+"jobshare": 0.74,
+"cyr": 0.3,
+"sample": "Всем привет! Мы ищем middle haskell разработчика (удаленно, можно оформиться в РФ или в Киргизии, а "
+},
+{
+"u": "hireproproduct",
+"status": 200,
+"title": "Hire ProProduct - Продуктовые вакансии",
 "posts": 20,
 "week": 2,
-"last": "2026-10-20",
-"jobshare": 0.0,
-"cyr": 0.0,
-"sample": "Muallif: @UstozShogird Xodim kerak: 🏢 Idora: Rabola O'quv Markazi 📚 Texnologiya: Html, Css, JavaScri"
+"last": "2026-10-25",
+"jobshare": 0.89,
+"cyr": 0.88,
+"sample": "📩 Узнать стоимость и условия размещения: @unit1211209"
 },
 {
-"u": "frontend_jobs",
+"u": "it_jobs_apply",
+"status": 200,
+"title": "IT / Tech jobs",
+"posts": 20,
+"week": 0,
+"last": "2026-05-18",
+"jobshare": 0.0,
+"cyr": 0.87,
+"sample": "Системный аналитик в Силовые машины"
+},
+{
+"u": "it_vac",
+"status": 200,
+"title": "IT Jobs | вакансии, фриланс",
+"posts": 20,
+"week": 14,
+"last": "2026-10-26",
+"jobshare": 0.55,
+"cyr": 0.94,
+"sample": "Оператор Telegram-сообщества ✔️ Доход от 70 000 ₽ + бонусы ✔️ Удалённая работа ✔️ Свободный график ✔"
+},
+{
+"u": "itarchitect_jobs",
 "status": 302
 },
 {
-"u": "frontend_vacancy",
-"status": 200,
-"title": "Frontend Jobs",
-"posts": 20,
-"week": 0,
-"last": "2026-07-11",
-"jobshare": 0.0,
-"cyr": 0.0,
-"sample": "KDB Bank Uzbekistan kompaniyasi Frontend Developer lavozimiga vakansiya e'lon qiladi. Vue.js va Reac"
+"u": "itlenta",
+"status": 302
 },
 {
-"u": "frontend_vakansii",
+"u": "java_jobs",
+"status": 302
+},
+{
+"u": "job_1c_sql",
+"status": 302
+},
+{
+"u": "job_gamedev",
 "status": 200,
-"title": "frontend_vakansii",
-"posts": 2,
+"title": "Работа в Геймдеве Вакансии 3D художники аниматоры gamedev, u",
+"posts": 20,
+"week": 0,
+"last": "2026-09-27",
+"jobshare": 0.9,
+"cyr": 0.86,
+"sample": "Ищем Game Mathematician / специалиста по математике игровых механик Разрабатываем крупный сайт по от"
+},
+{
+"u": "job_java",
+"status": 302
+},
+{
+"u": "jobgeeks",
+"status": 302
+},
+{
+"u": "jobs1c",
+"status": 302
+},
+{
+"u": "jobscode_infull",
+"status": 200,
+"title": "Jobs Code | In full",
+"posts": 20,
+"week": 20,
+"last": "2026-10-26",
+"jobshare": 1.0,
+"cyr": 0.84,
+"sample": "Backend-разработчик (TypeScript, Junior-Middle) от 80 000 до 150 000 ₽ Спиридонов Павел Игоревич Bac"
+},
+{
+"u": "jobsfordevsandops",
+"status": 200,
+"title": "Слёрм Карьера — вакансии в IT",
+"posts": 20,
+"week": 0,
+"last": "2024-12-16",
+"jobshare": 0.75,
+"cyr": 0.9,
+"sample": "Прод на паузу, шампанское в продакшен 🥂 🍾 17 декабря откладываем все дела и встречаемся в прямом эфи"
+},
+{
+"u": "jsspeak",
+"status": 302
+},
+{
+"u": "nomadjobs",
+"status": 200,
+"title": "Nomad Jobs. IT вакансии для начинающих",
+"posts": 20,
+"week": 0,
+"last": "2024-12-06",
+"jobshare": 0.6,
+"cyr": 0.84,
+"sample": "Email-маркетолог в Unisender — продуктовая аккредитованная IT-компания, которая помогает бизнесу вес"
+},
+{
+"u": "procxx",
+"status": 302
+},
+{
+"u": "procxxjobs",
+"status": 200,
+"title": "Pro.* Jobs",
+"posts": 20,
+"week": 0,
+"last": "2026-09-09",
+"jobshare": 0.95,
+"cyr": 0.8,
+"sample": "#c #developer ☁️ Позиция: Разработчик C ( Senior ) 🏙 Компания: «HuntTech» 💪 Опыт: от 5 лет 💰 ЗП: Вил"
+},
+{
+"u": "product_project_job",
+"status": 200,
+"title": "Вакансии Product и Project-менеджеров",
+"posts": 20,
+"week": 0,
+"last": "2026-09-09",
+"jobshare": 0.95,
+"cyr": 0.83,
+"sample": "👤 РЕЗЮМЕ: Junior Project Manager / Project Coordinator Опыт: Более 7 лет общего профессионального оп"
+},
+{
+"u": "projects_jobs",
+"status": 302
+},
+{
+"u": "python_django_work",
+"status": 302
+},
+{
+"u": "python_vacancy",
+"status": 302
+},
+{
+"u": "qa_chillout_jobs",
+"status": 200,
+"title": "QA Jobs",
+"posts": 17,
 "week": 0,
 "last": "2026-10-14",
-"jobshare": 0.0,
-"cyr": 0.24,
-"sample": "Мы только что перебрались на новый канал! Заходите сюда: https://t.me/vflbetavdpybot?start=frontend_"
+"jobshare": 0.94,
+"cyr": 0.79,
+"sample": "Middle QA Automation Engineer | Paphos, Cyprus 🇨🇾 Ищем Middle QA Automation Engineer в офис в Пафосе"
 },
 {
-"u": "frontend_work",
-"status": 302
-},
-{
-"u": "frontendjobs",
-"status": 302
-},
-{
-"u": "frontendrabota",
-"status": 302
-},
-{
-"u": "fullstack_jobs",
-"status": 302
-},
-{
-"u": "fullstack_jobs_feed",
-"status": 302
-},
-{
-"u": "fullstack_vacancy",
-"status": 302
-},
-{
-"u": "fullstackjobs",
+"u": "rabotafrontend",
 "status": 200,
-"title": "4sss",
-"posts": 1,
-"week": 0,
-"last": "2024-06-08",
-"jobshare": 0.0,
-"cyr": 0.0,
-"sample": "Channel created"
-},
-{
-"u": "game_jobs",
-"status": 302
-},
-{
-"u": "gamedev_careers",
-"status": 302
-},
-{
-"u": "gamedev_hiring",
-"status": 302
-},
-{
-"u": "gamedev_hunter",
-"status": 302
-},
-{
-"u": "gamedev_job",
-"status": 200,
-"title": "Работа в геймдеве",
-"posts": 20,
-"week": 0,
-"last": "2025-08-26",
-"jobshare": 0.84,
-"cyr": 0.89,
-"sample": "Всем привет! Меня зовут Александр, я 3д художник с 8 летним стажем, ищу работу. https://www.artstati"
-},
-{
-"u": "gamedev_jobs",
-"status": 200,
-"title": "GameDev jobs",
-"posts": 20,
-"week": 0,
-"last": "2025-07-28",
-"jobshare": 0.45,
-"cyr": 0.89,
-"sample": "Ищу геймдизайнера с опытом геймификации и дофаминовых петель (habit loops) для женского мобильного п"
-},
-{
-"u": "gamedev_jobs_feed",
-"status": 302
-},
-{
-"u": "gamedev_rabota",
-"status": 302
-},
-{
-"u": "gamedev_vacancies",
-"status": 200,
-"title": "GameDev | Заказы и вакансии",
-"posts": 4,
-"week": 0,
-"last": "2025-02-04",
-"jobshare": 0.25,
-"cyr": 0.81,
-"sample": "нужен концепт художник для игры 📬 Юзернейм: @Z_o_n_a_5_1"
-},
-{
-"u": "gamedev_vakansii",
-"status": 200,
-"title": "Переходник",
-"posts": 2,
-"week": 0,
-"last": "2025-07-17",
-"jobshare": 0.0,
-"cyr": 0.1,
-"sample": "Канал тут 👇 👇 👇 https://t.me/+I-0GylOTD6gyMGI6 https://t.me/+I-0GylOTD6gyMGI6 https://t.me/+I-0GylOT"
-},
-{
-"u": "gamedev_work",
-"status": 200,
-"title": "GameDev Jobs",
-"posts": 1,
-"week": 0,
-"last": "2022-08-31",
-"jobshare": 0.0,
-"cyr": 0.0,
-"sample": "Channel created"
-},
-{
-"u": "gamedevhr",
-"status": 200,
-"title": "HR•Gamedev 💞",
-"posts": 20,
-"week": 0,
-"last": "2026-09-17",
-"jobshare": 0.42,
-"cyr": 0.96,
-"sample": "Немного хороших новостей. С 1 октября на HH станет чуть меньше ИИ. Отключают холодный поиск — это ко"
-},
-{
-"u": "gamedevjobs",
-"status": 200,
-"title": "Gamedev Jobs (Inflow)",
-"posts": 20,
-"week": 18,
-"last": "2026-10-26",
-"jobshare": 0.06,
-"cyr": 0.22,
-"sample": "GAME DESIGNER (ADULT GAME) | REMOTE GLOBAL | GYREBERG #remote #fulltime #gdjob #gamedesign #gamedev "
-},
-{
-"u": "gamedevjobs_ru",
-"status": 302
-},
-{
-"u": "gamedevvacancy",
-"status": 302
-},
-{
-"u": "gamejobs",
-"status": 302
-},
-{
-"u": "gd_jobs",
-"status": 200,
-"title": "GDJobs | Робота в Україні",
-"posts": 20,
-"week": 0,
-"last": "2024-06-18",
-"jobshare": 0.85,
-"cyr": 0.92,
-"sample": "Менеджер з продажу (упаковка: гофро, плівка, картон) в Завод гофротари Придніпровський 💸 Зарплата : "
-},
-{
-"u": "geekjob_ru",
-"status": 302
-},
-{
-"u": "get_job_or_die",
-"status": 200,
-"title": "get_job_or_die",
-"posts": 1,
-"week": 0,
-"last": "2022-11-29",
-"jobshare": 0.0,
-"cyr": 0.0,
-"sample": "Channel created"
-},
-{
-"u": "getmatch",
-"status": 200,
-"title": "100% FIXED MATCHES",
-"posts": 20,
-"week": 0,
-"last": "2023-02-05",
-"jobshare": 0.0,
-"cyr": 0.0,
-"sample": "100% FIXED MATCHES pinned a photo"
-},
-{
-"u": "getmatch_jobs",
-"status": 302
-},
-{
-"u": "gogetajob",
-"status": 302
-},
-{
-"u": "golang_jobsgo",
-"status": 302
-},
-{
-"u": "golangjob",
-"status": 200,
-"title": "Golang Jobs",
-"posts": 20,
-"week": 0,
-"last": "2023-02-10",
-"jobshare": 1.0,
-"cyr": 0.87,
-"sample": "#вакансия #офис #Москва #job #office Middle/Senior Go разработчик Доход: от 150к до 350к рублей в за"
-},
-{
-"u": "hr_it_management",
-"status": 302
-},
-{
-"u": "indie_gamedev_jobs",
-"status": 302
-},
-{
-"u": "ios_career",
-"status": 200,
-"title": "iOS Dev",
-"posts": 20,
-"week": 4,
-"last": "2026-10-26",
-"jobshare": 0.05,
-"cyr": 0.91,
-"sample": "Визуальное исследование SwiftUI Разработчик создал сайт, чтобы наглядно продемонстрировать встроенны"
-},
-{
-"u": "ios_jobs",
-"status": 302
-},
-{
-"u": "ios_jobs_feed",
-"status": 302
-},
-{
-"u": "ios_jobs_ua",
-"status": 302
-},
-{
-"u": "ios_vacancies",
-"status": 302
-},
-{
-"u": "iosjobs",
-"status": 302
-},
-{
-"u": "it_hr_jobs",
-"status": 302
-},
-{
-"u": "it_jobs",
-"status": 302
-},
-{
-"u": "it_jobs_ru",
-"status": 302
-},
-{
-"u": "it_managers_jobs",
-"status": 302
-},
-{
-"u": "it_pm_jobs",
-"status": 302
-},
-{
-"u": "it_rabota",
-"status": 302
-},
-{
-"u": "itjobs",
-"status": 200,
-"title": "IT Jobs, Tashkent (bepul)",
-"posts": 20,
-"week": 0,
-"last": "2024-09-06",
-"jobshare": 0.5,
-"cyr": 0.75,
-"sample": "Контент-менеджер от 5 000 000 ННО “Imkon Uzbekistan” Commeta Ecosystem г.Ташкент, Зиёлилар 9 Требуем"
-},
-{
-"u": "itjobsrussia",
-"status": 302
-},
-{
-"u": "itvacancy",
-"status": 200,
-"title": "Вакансии",
-"posts": 2,
-"week": 0,
-"last": "2020-11-12",
-"jobshare": 0.5,
-"cyr": 0.36,
-"sample": "вакансии"
-},
-{
-"u": "javascript_jobs",
-"status": 302
-},
-{
-"u": "job_frontend",
-"status": 200,
-"title": "Frontend Jobs | Переходник",
-"posts": 2,
-"week": 0,
-"last": "2023-07-04",
-"jobshare": 0.0,
-"cyr": 0.7,
-"sample": "В связи с участившимися накрутками ботов, канал переехал на закрытый линк. Теперь он доступен по ссы"
-},
-{
-"u": "jobqa",
-"status": 200,
-"title": "Джопка",
-"posts": 20,
-"week": 0,
-"last": "2025-09-14",
-"jobshare": 0.0,
-"cyr": 0.97,
-"sample": "Внуки: Мы не поедем к бабушке в деревню, у неё туалет с дыркой! Туалет бабушки через неделю:"
-},
-{
-"u": "jobs_abroad",
-"status": 200,
-"title": "Jobs abroad",
-"posts": 20,
-"week": 0,
-"last": "2025-04-08",
-"jobshare": 0.7,
-"cyr": 0.13,
-"sample": "#вакансия #удаленка #remote #fintech Вакансия: system administrator Компания: Smart Glocal Формат: У"
-},
-{
-"u": "jobs_devops",
-"status": 302
-},
-{
-"u": "jobs_frontend",
-"status": 302
-},
-{
-"u": "jobs_gamedev",
-"status": 200,
-"title": "Работа в геймдеве",
-"posts": 20,
-"week": 0,
-"last": "2024-03-28",
-"jobshare": 0.75,
-"cyr": 0.82,
-"sample": "Мы компания \"СТЕМ-игры\" и нам нужен senior unity developer для поддержки и развития существующего пр"
-},
-{
-"u": "jobs_it",
-"status": 302
-},
-{
-"u": "jobs_mobile",
-"status": 302
-},
-{
-"u": "jobs_pm",
-"status": 200,
-"title": "PM Jobs | Работа для Project и Product менеджера",
-"posts": 20,
-"week": 0,
-"last": "2026-10-08",
-"jobshare": 0.9,
-"cyr": 0.58,
-"sample": "3 месяца поиска → 10 собесов и оффер за 2 недели 🤘 Валентин - Middle Project Manager. Около 3 месяце"
-},
-{
-"u": "jobs_qa",
-"status": 302
-},
-{
-"u": "jobsit",
-"status": 302
-},
-{
-"u": "js_jobs_ru",
-"status": 200,
-"title": "JavaScript (JS) работа",
-"posts": 20,
-"week": 0,
-"last": "2021-03-06",
-"jobshare": 0.0,
-"cyr": 0.64,
-"sample": "#hh 1. Backend разработчик (Node.js) 💰 от 150 000 руб. 🏢 Иторум МР 📍 Москва 🏠 Возможна удаленка 📋️ П"
-},
-{
-"u": "js_vacancies",
-"status": 200,
-"title": "Удаленка без опыта",
+"title": "FrontEnd Работа",
 "posts": 14,
-"week": 0,
-"last": "2025-07-23",
-"jobshare": 0.29,
-"cyr": 0.89,
-"sample": "Трафик-менеджер от 25 000 до 200 000 ₽ за месяц, на руки Мы - активно развивающаяся арбитражная кома"
-},
-{
-"u": "jsjobs_ru",
-"status": 302
-},
-{
-"u": "junior_vacancies",
-"status": 200,
-"title": "Вакансии и стажировки для начинающих разработчиков, тестиров",
-"posts": 20,
-"week": 0,
-"last": "2025-11-01",
-"jobshare": 0.95,
-"cyr": 0.63,
-"sample": "Вакансия: Junior Python Developer Компания: Мы Evercode Lab Локация: офис, СПБ Ссылка: https://young"
-},
-{
-"u": "klavaorgwork",
-"status": 302
-},
-{
-"u": "kotlin_jobs",
-"status": 200,
-"title": "Kotlin Jobs",
-"posts": 20,
-"week": 0,
-"last": "2026-05-22",
-"jobshare": 0.58,
-"cyr": 0.43,
-"sample": "Vacancy: Middle+ - Senior Kotlin Multiplatform-разработчик for VPN app Location: Russia Company: Atl"
-},
-{
-"u": "kotlin_jobs_feed",
-"status": 302
-},
-{
-"u": "kubernetes_jobs",
-"status": 302
-},
-{
-"u": "laravel_jobs",
-"status": 200,
-"title": "Laravel Jobs — вакансии и аналитика",
-"posts": 3,
-"week": 0,
-"last": "2017-12-08",
-"jobshare": 0.33,
-"cyr": 0.21,
-"sample": "Channel photo updated"
-},
-{
-"u": "laraveljob",
-"status": 302
-},
-{
-"u": "linux_jobs",
-"status": 302
-},
-{
-"u": "management_jobs_feed",
-"status": 302
-},
-{
-"u": "microsoftstackjobs",
-"status": 302
-},
-{
-"u": "mobile_job_ua",
-"status": 200,
-"title": "mobile_job_ua",
-"posts": 2,
-"week": 0,
-"last": "2022-11-29",
-"jobshare": 0.0,
-"cyr": 0.0,
-"sample": "Channel name was changed to « mobile_job_ua »"
-},
-{
-"u": "mobile_jobs",
-"status": 302
-},
-{
-"u": "mobile_jobs_feed",
-"status": 302
-},
-{
-"u": "mobile_vacancies",
-"status": 302
-},
-{
-"u": "mobiledev_jobs",
-"status": 200,
-"title": "Mobile Dev_Jobs",
-"posts": 20,
 "week": 6,
 "last": "2026-10-26",
-"jobshare": 0.75,
-"cyr": 0.74,
-"sample": "💻 БЮРО 1440 ищет Flutter-разработчика для приложения двухфакторной аутентификации Нужно сделать клие"
+"jobshare": 0.87,
+"cyr": 0.81,
+"sample": "Frontend Developer Формат: удалённо/гибрид/офис Компания: Altenar Полная занятость #remote #office #"
 },
 {
-"u": "mobilejobs_ru",
+"u": "react_js_jobs",
 "status": 302
 },
 {
-"u": "myjobit",
+"u": "react_native_jobs",
 "status": 302
 },
 {
-"u": "networklsa",
-"status": 302
-},
-{
-"u": "neural_network_engineering",
+"u": "relocation_vacancies",
 "status": 200,
-"title": "Neural Networks Engineering",
+"title": "Вакансии с релокацией | релокация, relocation, relocate",
 "posts": 20,
 "week": 0,
-"last": "2026-02-23",
-"jobshare": 0.05,
-"cyr": 0.0,
-"sample": "​​ Relevance Feedback Did you know that Google search results used to have 👍 / 👎 buttons? It was the"
+"last": "2025-02-02",
+"jobshare": 0.35,
+"cyr": 0.28,
+"sample": "#IT DevOps Engineer (CI/CD) в Cisco Локация: Белград"
 },
 {
-"u": "neuroworkshop",
+"u": "ru_python",
 "status": 302
 },
 {
-"u": "nodejs_jobs",
-"status": 302
-},
-{
-"u": "nodejs_vacancies",
-"status": 302
-},
-{
-"u": "php_jobs",
-"status": 302
-},
-{
-"u": "php_jobs_feed",
-"status": 302
-},
-{
-"u": "pm_jobs",
-"status": 302
-},
-{
-"u": "pm_jobs_feed",
-"status": 302
-},
-{
-"u": "pm_vacancies",
+"u": "ru_pythonjobs",
 "status": 200,
-"title": "Вакансии",
-"posts": 1,
+"title": "Вакансии для Python-разработчиков / Python Jobs",
+"posts": 3,
 "week": 0,
-"last": "2025-11-10",
-"jobshare": 0.0,
-"cyr": 0.0,
-"sample": "Channel created"
+"last": "2026-03-25",
+"jobshare": 0.67,
+"cyr": 0.86,
+"sample": "Вакансии для Python-разработчиков / Python Jobs pinned a photo"
 },
 {
-"u": "pmclub_jobs",
-"status": 302
-},
-{
-"u": "pmjobs",
-"status": 302
-},
-{
-"u": "product_jobs",
+"u": "runello_rus_c",
 "status": 200,
-"title": "Вакансии для продактов и проджектов",
+"title": "C#/.Net Job Offers",
 "posts": 20,
-"week": 4,
+"week": 20,
+"last": "2026-10-25",
+"jobshare": 1.0,
+"cyr": 0.57,
+"sample": "Инженер-программист (Trainee/Junior) Грейд: Trainee/Junior Стек: C#, .NET, Java, Spring Boot, ASP.NE"
+},
+{
+"u": "runello_rus_c20",
+"status": 200,
+"title": "C++ / Embedded Job Offers",
+"posts": 20,
+"week": 20,
 "last": "2026-10-26",
-"jobshare": 0.95,
-"cyr": 0.92,
-"sample": "Вакансия: Проджект-менеджер с экспертизой в маркетинге Компания: Медиакод Формат работы: удалённо ил"
+"jobshare": 1.0,
+"cyr": 0.73,
+"sample": "Cinematic Artist (Unreal Engine) Грейд: Middle Стек: Unreal Engine, Unreal Engine 5, Blueprints, Cin"
 },
 {
-"u": "products_jobs",
-"status": 302
-},
-{
-"u": "project_jobs",
-"status": 302
-},
-{
-"u": "project_manager_jobs",
+"u": "runello_rus_html",
 "status": 200,
-"title": "Project Manager jobs worldwide",
-"posts": 2,
-"week": 0,
-"last": "2025-02-27",
-"jobshare": 0.0,
-"cyr": 0.0,
-"sample": "Soon this channel will be populated with jobs on a daily basis. Subscribe to receive notifications a"
+"title": "HTML / CSS Job Offers",
+"posts": 4,
+"week": 2,
+"last": "2026-10-26",
+"jobshare": 0.75,
+"cyr": 0.88,
+"sample": "Верстальщик Стек: HTML5, CSS3, JavaScript, Figma, Git, Flexbox, Grid, ChatGPT Энсайн — IT-компания, "
 },
 {
-"u": "projectmanager_jobs",
+"u": "saba_hunter",
 "status": 302
 },
 {
-"u": "python_jobs_feed",
+"u": "sql_jobs",
 "status": 302
 },
 {
-"u": "qa_automation_jobs",
+"u": "symfony_careers",
 "status": 200,
-"title": "QA Jobs Referral",
+"title": "Symfony Jobs",
 "posts": 20,
 "week": 0,
-"last": "2025-04-05",
-"jobshare": 0.11,
-"cyr": 0.0,
-"sample": "Hi All, Requirement in Oracle for Automation testing. Experience:  4 to 10 Years Technology: Seleniu"
+"last": "2024-12-12",
+"jobshare": 0.5,
+"cyr": 0.55,
+"sample": "Вакансія: #remote #fulltime Компанія: Netpeak Core Локація: Ремоут Ставка: $2000-2400 Операційна пла"
 },
 {
-"u": "qa_hunter",
+"u": "sysadm_in_job",
 "status": 302
 },
 {
-"u": "qa_job",
+"u": "sysadmin_rabota",
 "status": 302
 },
 {
-"u": "qa_jobs_feed",
-"status": 302
-},
-{
-"u": "qa_jobs_ru",
-"status": 302
-},
-{
-"u": "qa_rabota",
+"u": "teamlead_job_it",
 "status": 200,
-"title": "QA_Jobs",
+"title": "Вакансии для Lead разработчиков, аналитиков, дизайнеров",
+"posts": 20,
+"week": 0,
+"last": "2026-07-27",
+"jobshare": 0.95,
+"cyr": 0.78,
+"sample": "💼 ВАКАНСИЯ: Техлид 1С Компания: УЛЬТРА ФИШ Зарплата: 350 000 Локация/Format: Москва, м. Румянцево #в"
+},
+{
+"u": "theyseeku_it",
+"status": 200,
+"title": "Удаленка — IT и Digital",
 "posts": 20,
 "week": 20,
 "last": "2026-10-26",
 "jobshare": 1.0,
 "cyr": 0.89,
-"sample": "Фуллстек QA (Python) в компанию Firecode FIRECODE создает инновационные решения для крупных бизнесов"
+"sample": "Backend-разработчик (TypeScript, Junior-Middle) от 80 000 до 150 000 ₽ Спиридонов Павел Игоревич Bac"
 },
 {
-"u": "qa_vacancies",
+"u": "tzprofi_job",
+"status": 302
+},
+{
+"u": "ue_pub",
 "status": 200,
-"title": "QA",
+"title": "Unreal Engine Jobs",
 "posts": 20,
-"week": 0,
-"last": "2021-10-11",
-"jobshare": 0.95,
-"cyr": 0.22,
-"sample": "#Вакансия #Vacancy #qa #kyiv #engineer #middle #senior #automation 👑 Позиция: Middle/Senior QA autom"
+"week": 1,
+"last": "2026-10-20",
+"jobshare": 0.85,
+"cyr": 0.84,
+"sample": "Technical Animator, Unreal Engine 5.6 (проектная работа) Мы ITSALIVE.studio - мы сфокусированы на со"
 },
 {
-"u": "qa_vakansii",
-"status": 302
-},
-{
-"u": "qa_work",
+"u": "uejobs",
 "status": 200,
-"title": "QA Jobs | Работа для тестировщика",
+"title": "Unreal Engine Jobs 🎮 (Работа, вакансии, стажировки)",
 "posts": 20,
-"week": 0,
-"last": "2026-10-15",
-"jobshare": 0.9,
-"cyr": 0.8,
-"sample": "А что, если бы был такой фреймворк для Go-тестирования, который расширялся бы под любую задачу? Поду"
-},
-{
-"u": "qajobs",
-"status": 302
-},
-{
-"u": "qajobsfeed",
-"status": 302
-},
-{
-"u": "rabota_android",
-"status": 302
-},
-{
-"u": "rabota_gamedev",
-"status": 302
-},
-{
-"u": "rabota_ios",
-"status": 302
-},
-{
-"u": "rabota_it",
-"status": 302
-},
-{
-"u": "rabota_pm",
-"status": 200,
-"title": "Работа Вахтой РФ | ПРОММАРКЕТ",
-"posts": 20,
-"week": 0,
-"last": "2024-12-07",
-"jobshare": 0.65,
-"cyr": 0.91,
-"sample": "✍️ Пишите нам уже сейчас: https://vk.me/prommarket18 🤝 Оставить заявку: https://vk.cc/cClJi0 ☎️ Теле"
-},
-{
-"u": "react_jobs",
-"status": 302
-},
-{
-"u": "react_vacancies",
-"status": 302
-},
-{
-"u": "reactjobs",
-"status": 302
-},
-{
-"u": "reactnative_jobs",
-"status": 302
-},
-{
-"u": "relocate_jobs",
-"status": 302
-},
-{
-"u": "relocation_it_jobs",
-"status": 302
-},
-{
-"u": "remote_it_jobs",
-"status": 200,
-"title": "Remote IT Jobs [war time]",
-"posts": 20,
-"week": 0,
-"last": "2026-05-29",
-"jobshare": 0.16,
-"cyr": 0.86,
-"sample": "AI, кар’єра та ріст в IT без води. Як прокачати навички, пройти співбесіди, вийти на сильні офери й "
-},
-{
-"u": "remote_jobs_ru",
-"status": 200,
-"title": "Remote вакансии | Удалёнка без РФ",
-"posts": 20,
-"week": 3,
+"week": 4,
 "last": "2026-10-26",
-"jobshare": 1.0,
-"cyr": 0.78,
-"sample": "💻 Front‑End AI‑инженер 🏢 Accenture • 🌍 Remote 💰 $54K - $205K/год 🛠 Стек: JavaScript, TypeScript, Rea"
+"jobshare": 0.3,
+"cyr": 0.25,
+"sample": "PRINCIPAL C++ ENGINEER (TOBSPR GAMES) 🕹 Factory simulation game 🧠 Principal 💰 Negotiable ⏰ Full-time"
 },
 {
-"u": "remotedevjobs",
-"status": 200,
-"title": "Remote Dev Jobs",
-"posts": 20,
-"week": 0,
-"last": "2022-02-07",
-"jobshare": 0.0,
-"cyr": 0.0,
-"sample": "Senior Deep Learning Researcher, Speech (Remote) Company: AssemblyAI Source: stackoverflow.com #cnn "
-},
-{
-"u": "remotejobs_it",
-"status": 200,
-"title": "IT На фрилансе | На удаленке",
-"posts": 20,
-"week": 0,
-"last": "2024-01-12",
-"jobshare": 0.2,
-"cyr": 0.65,
-"sample": "😎 JavaScript Engineer Company: firstroundhr Location: 🌍 Anywhere Level: Senior #full_time Мы являемс"
-},
-{
-"u": "ru_modx_work",
+"u": "uiux_jobs",
 "status": 302
 },
 {
-"u": "rubyjob",
-"status": 200,
-"title": "Ruby & Elixir Job | Jooby.dev",
-"posts": 20,
-"week": 0,
-"last": "2026-06-24",
-"jobshare": 0.4,
-"cyr": 0.29,
-"sample": "#Ruby #Fulltime #Remote #Senior #RubyOnRails #Sidekiq #PostgreSQL #Redis Senior Ruby on Rails разраб"
-},
-{
-"u": "runello_jobs_android",
-"status": 302
-},
-{
-"u": "runello_jobs_csharp",
-"status": 302
-},
-{
-"u": "runello_jobs_flutter",
-"status": 302
-},
-{
-"u": "runello_jobs_frontend",
-"status": 302
-},
-{
-"u": "runello_jobs_frontend_dev",
-"status": 302
-},
-{
-"u": "runello_jobs_fullstack",
-"status": 302
-},
-{
-"u": "runello_jobs_gamedev",
-"status": 302
-},
-{
-"u": "runello_jobs_golang",
-"status": 302
-},
-{
-"u": "runello_jobs_ios",
-"status": 302
-},
-{
-"u": "runello_jobs_javascript",
-"status": 302
-},
-{
-"u": "runello_jobs_management",
-"status": 302
-},
-{
-"u": "runello_jobs_mobile",
-"status": 302
-},
-{
-"u": "runello_jobs_pm",
-"status": 302
-},
-{
-"u": "runello_jobs_python",
-"status": 302
-},
-{
-"u": "runello_jobs_sysadmin",
-"status": 302
-},
-{
-"u": "runello_jobs_teamlead",
-"status": 302
-},
-{
-"u": "runello_jobs_unity",
-"status": 302
-},
-{
-"u": "runello_rus_android",
-"status": 302
-},
-{
-"u": "runello_rus_cpp",
-"status": 302
-},
-{
-"u": "runello_rus_csharp",
-"status": 302
-},
-{
-"u": "runello_rus_devops",
-"status": 302
-},
-{
-"u": "runello_rus_flutter",
-"status": 302
-},
-{
-"u": "runello_rus_frontend_dev",
-"status": 302
-},
-{
-"u": "runello_rus_fullstack",
-"status": 302
-},
-{
-"u": "runello_rus_gamedev",
-"status": 302
-},
-{
-"u": "runello_rus_ios",
-"status": 302
-},
-{
-"u": "runello_rus_java",
-"status": 302
-},
-{
-"u": "runello_rus_kotlin",
-"status": 302
-},
-{
-"u": "runello_rus_management",
-"status": 302
-},
-{
-"u": "runello_rus_nodejs",
-"status": 302
-},
-{
-"u": "runello_rus_pm",
-"status": 302
-},
-{
-"u": "runello_rus_qa",
-"status": 302
-},
-{
-"u": "runello_rus_react",
-"status": 302
-},
-{
-"u": "runello_rus_swift",
-"status": 302
-},
-{
-"u": "runello_rus_sysadmin",
-"status": 302
-},
-{
-"u": "runello_rus_teamlead",
-"status": 302
-},
-{
-"u": "runello_rus_testing",
-"status": 302
-},
-{
-"u": "runello_rus_unity",
-"status": 302
-},
-{
-"u": "runello_rus_vue",
-"status": 302
-},
-{
-"u": "russian_frontend_jobs",
-"status": 302
-},
-{
-"u": "rust_jobs",
-"status": 302
-},
-{
-"u": "sapjobrus",
-"status": 200,
-"title": "Вакансии SAP",
-"posts": 20,
-"week": 9,
-"last": "2026-10-26",
-"jobshare": 1.0,
-"cyr": 0.82,
-"sample": "#вакансия ABAP-разработчик с опытом SAP BTP #удалённо #офис #гибрид #черногория #сербия #релокация #"
-},
-{
-"u": "scala_jobs",
-"status": 302
-},
-{
-"u": "scala_jobs_feed",
-"status": 200,
-"title": "scala_jobs_feed",
-"posts": 15,
-"week": 0,
-"last": "2026-09-09",
-"jobshare": 0.38,
-"cyr": 0.6,
-"sample": "#вакансия https://avantstay.com/ Привет! Ищем бэкенд-инженера в AvantStay. Мы занимаемся краткосрочн"
-},
-{
-"u": "scrum_jobs",
-"status": 302
-},
-{
-"u": "springframeworkio",
-"status": 302
-},
-{
-"u": "sre_jobs",
-"status": 302
-},
-{
-"u": "sre_jobs_feed",
-"status": 302
-},
-{
-"u": "swift_jobs",
-"status": 200,
-"title": "Swift jobs / iOS",
-"posts": 2,
-"week": 0,
-"last": "2022-12-05",
-"jobshare": 0.0,
-"cyr": 0.0,
-"sample": "."
-},
-{
-"u": "swift_jobs_feed",
-"status": 302
-},
-{
-"u": "sysadmin_vacancies",
-"status": 302
-},
-{
-"u": "teamlead_jobs",
-"status": 302
-},
-{
-"u": "teamlead_jobs_feed",
-"status": 302
-},
-{
-"u": "techlead_jobs",
-"status": 302
-},
-{
-"u": "testers_jobs",
-"status": 302
-},
-{
-"u": "testing_jobs_feed",
-"status": 302
-},
-{
-"u": "testingjobs",
-"status": 302
-},
-{
-"u": "typescript_jobs",
-"status": 200,
-"title": "typescript_jobs",
-"posts": 1,
-"week": 0,
-"last": "2019-03-11",
-"jobshare": 0.0,
-"cyr": 0.0,
-"sample": "Channel created"
-},
-{
-"u": "udalenka_it",
-"status": 200,
-"title": "Работа в IT онлайн",
-"posts": 4,
-"week": 0,
-"last": "2025-11-16",
-"jobshare": 0.75,
-"cyr": 0.89,
-"sample": "#ищу #дизайнер Вакансия: Дизайнер в онлайн-школу \"Animaway\" Мы ищем креативного дизайнера на постоян"
-},
-{
-"u": "unity3d_jobs",
-"status": 302
-},
-{
-"u": "unity_jobs",
+"u": "unityjobs_pub",
 "status": 200,
 "title": "Unity Jobs",
 "posts": 20,
 "week": 0,
-"last": "2026-07-20",
-"jobshare": 0.9,
+"last": "2026-10-19",
+"jobshare": 0.89,
+"cyr": 0.83,
+"sample": "Друзья, подборка каналов для вас! Будем рады, если вступите! 👌 Канал с игровыми вакансиям - https://"
+},
+{
+"u": "uxui_jobs",
+"status": 302
+},
+{
+"u": "wordpress_jobs",
+"status": 200,
+"title": "WordPress Jobs",
+"posts": 20,
+"week": 0,
+"last": "2026-10-06",
+"jobshare": 0.47,
 "cyr": 0.78,
-"sample": "#shaders #HLSL #GLSL #UnityRendering #mobileGPU #URP #BIRP #VFXGraph #ShaderGraph #renderpipeline #f"
+"sample": "Ламповое комьюнити про ИТ, ИИ и digital Наш канал вошел в подборку тг-каналов про ИТ, диджитал и Tec"
 },
 {
-"u": "unity_jobs_feed",
+"u": "xamarin_jobs",
 "status": 302
 },
 {
-"u": "unityjobs",
-"status": 302
-},
-{
-"u": "unreal_jobs",
-"status": 302
-},
-{
-"u": "unrealjobs",
-"status": 302
-},
-{
-"u": "upworkcom",
-"status": 302
-},
-{
-"u": "vue_jobs",
+"u": "ya_jobs",
 "status": 200,
-"title": "Vue jobs",
-"posts": 1,
+"title": "Яндекс нанимает | Вакансии для разработчиков",
+"posts": 20,
 "week": 0,
-"last": "2022-10-16",
-"jobshare": 0.0,
-"cyr": 0.0,
-"sample": "Channel created"
+"last": "2026-10-09",
+"jobshare": 0.95,
+"cyr": 0.94,
+"sample": "Разработчик на Go в команду еком-продуктов для бизнеса 🌐 Мы создаём новый амбициозный проект, которы"
 },
 {
-"u": "vue_vacancies",
+"u": "yii_jobs",
 "status": 200,
-"title": "Vue vacancies",
-"posts": 1,
+"title": "Yii Вакансии и резюме",
+"posts": 20,
 "week": 0,
-"last": "2023-07-20",
-"jobshare": 0.0,
-"cyr": 0.0,
-"sample": "Channel created"
-},
-{
-"u": "vuejs_jobs",
-"status": 302
-},
-{
-"u": "web_jobs",
-"status": 302
-},
-{
-"u": "web_jobs_feed",
-"status": 302
-},
-{
-"u": "webdev_jobs",
-"status": 200,
-"title": "Webdevelopment Jobs",
-"posts": 4,
-"week": 0,
-"last": "2022-05-18",
-"jobshare": 0.0,
-"cyr": 0.0,
-"sample": "https://kevit.io/careers/"
-},
-{
-"u": "yiijobs",
-"status": 302
+"last": "2026-09-21",
+"jobshare": 0.7,
+"cyr": 0.88,
+"sample": "#resume , ищу проектную работу 👨‍🔧 Виктор Бабанов, решаю сложные технические проблемы . - Вхожу в co"
 }
 ],
-"superjob": {
-"it_all": 604,
-"frontend": 14,
-"frontend_sample": [
-"Frontend-разработчик",
-"Старший креативный директор, бренд-опыт, игрушки и игры",
-"Mod Developer (Python &amp; React)",
-"Frontend-разработчик в VK Музыка",
-"Младший frontend-разработчик",
-"Fullstack QA-инженер уровня Middle+",
-"Младший продуктовый аналитик, Интеграции логистических провайдеров",
-"Fullstack-разработчик Битрикс24",
-"Фронтенд разработчик/UX|UI дизайнер",
-"Frontend-разработчик в Автоматизация внутренних процессов"
-],
-"frontend /it": 12,
-"react": 10,
-"react /it": 8,
-"vue": 2,
-"vue /it": 2,
-"javascript": 17,
-"javascript /it": 16,
-"верстальщик": 0,
-"верстальщик /it": 0,
-"devops": 10,
-"devops_sample": [
-"Junior DevOps Engineer",
-"Lead Product Owner (Offering)",
-"DevOps Engineer",
-"Разработчик систем интеграции с LLM",
-"Стажёр DevOps в департамент сопровождения информационных технологий",
-"Разработчик Java",
-"Ведущий системный инженер (Windows)",
-"DevOps инженер",
-"DevOps Engineer",
-"DevOps-инженер"
-],
-"devops /it": 8,
-"sre": 92,
-"sre /it": 36,
-"системный администратор": 275,
-"системный администратор /it": 133,
-"ios": 173,
-"ios /it": 22,
-"android": 215,
-"android /it": 23,
-"flutter": 0,
-"flutter /it": 0,
-"мобильн": 190,
-"мобильн /it": 15,
-"qa": 24,
-"qa /it": 13,
-"тестировщик": 217,
-"тестировщик_sample": [
-"QA ENGINEER",
-"Software Engineer in Test",
-"QA Engineer",
-"Game QA Engineer",
-"Middle Fullstack QA-инженер (CRM)",
-"Fullstack QA-инженер уровня Middle+",
-"Разработчик",
-"Стажер QA Auto JavaScript, Ozon Bank",
-"Технолог-разработчик (пищевое производство)",
-"Тестировщик 1С"
-],
-"тестировщик /it": 111,
-"тестирован": 1013,
-"тестирован /it": 89,
-"руководитель it": 5,
-"руководитель it /it": 1,
-"руководитель разработки": 290,
-"руководитель разработки /it": 13,
-"project manager": 22,
-"project manager /it": 3,
-"руководитель проектов": 320,
-"руководитель проектов /it": 14,
-"тимлид": 8,
-"тимлид /it": 5,
-"cto": 2,
-"cto /it": 1,
-"fullstack": 5,
-"fullstack /it": 5,
-"full stack": 5,
-"full stack /it": 5,
-"веб-разработчик": 21,
-"веб-разработчик /it": 16,
-"php": 4,
-"php /it": 4,
-"1с": 11,
-"1с /it": 11,
-"unity": 3,
-"unity_sample": [
-"UI Unreal Engine Developer",
-"Педагог дополнительного образования по VR/AR-технологиям (виртуальная и дополненная реальность)",
-"Level Designer в Мир танков"
-],
-"unity /it": 1,
-"unreal": 5,
-"unreal /it": 3,
-"геймдизайнер": 1,
-"геймдизайнер /it": 1,
-"игр": 55,
-"игр /it": 10,
-"game": 11,
-"game /it": 3,
-"catalogue33": [
-[
-651,
-"AI"
-],
-[
-603,
-"CRM-системы"
-],
-[
-627,
-"Data Science"
-],
-[
-628,
-"DevOps"
-],
-[
-629,
-"SRE"
-],
-[
-36,
-"Web-верстка"
-],
-[
-37,
-"Администрирование баз данных"
-],
-[
-38,
-"Аналитика"
-],
-[
-503,
-"Внедрение и сопровождение ПО"
-],
-[
-40,
-"Игровое ПО / Геймдев"
-],
-[
-41,
-"Инжиниринг"
-],
-[
-42,
-"Интернет, создание и поддержка сайтов"
-],
-[
-546,
-"Информационная безопасность"
-],
-[
-620,
-"Киберспорт"
-],
-[
-43,
-"Компьютерная анимация и мультимедиа"
-],
-[
-44,
-"Контент"
-],
-[
-604,
-"Мобильная разработка"
-],
-[
-650,
-"Нейросети / Искусственный интеллект"
-],
-[
-45,
-"Оптимизация, SEO"
-],
-[
-46,
-"Передача данных и доступ в интернет"
-],
-[
-47,
-"Разработка и сопровождение банковского ПО"
-],
-[
-48,
-"Разработка, программирование"
-],
-[
-49,
-"Сетевые технологии"
-],
-[
-50,
-"Системная интеграция"
-],
-[
-51,
-"Системное администрирование"
-],
-[
-52,
-"Системы автоматизированного проектирования (САПР)"
-],
-[
-53,
-"Системы управления предприятием (ERP)"
-],
-[
-54,
-"Сотовые, беспроводные технологии"
-],
-[
-55,
-"Телекоммуникации и связь"
-],
-[
-56,
-"Тестирование, QA"
-],
-[
-614,
-"Техническая документация"
-],
-[
-57,
-"Техническая поддержка"
-],
-[
-613,
-"Управление продуктом"
-],
-[
-605,
-"Управление проектами"
-],
-[
-630,
-"Управление разработкой"
-],
-[
-59,
-"Юзабилити"
-],
-[
-60,
-"Другое"
-],
-[
-61,
-"Начало карьеры, мало опыта"
-]
-]
-},
-"ats": [
-{
-"s": "zeptolab",
-"kind": "workable",
-"n": 4,
-"sample": [
-"Generalist Artist @ ",
-"Open application @ ",
-"Project Manager @ ",
-"Technical Director @ "
-]
-},
-{
-"s": "socialquantum",
-"kind": "smartrecruiters",
-"n": 4,
-"sample": [
-"User Acquisition manager (Трафик менеджер) @ None",
-"Content Manager (Контент менеджер) @ None",
-"Technical Writer (Технический писатель) @ None",
-"HR generalist (Менеджер по персоналу) @ None"
-]
-},
-{
-"s": "sperasoft",
-"kind": "workable",
-"n": 79,
-"sample": [
-"3D Environment Artist (Legendary AAA Stylized Project) @ Yerevan",
-"3D Environment Artist (Legendary AAA Stylized Project) @ Belgrade",
-"3D Environment Artist (Legendary AAA Stylized Project) @ Bucharest",
-"3D Environment Artist (Legendary AAA Stylized Project) @ Astana",
-"3D Environment Artist (Legendary AAA Stylized Project) @ Tashkent",
-"3D Environment Artist / Artysta Środowisk 3D (Legendary AAA Stylized Project) @ Warsaw",
-"3D Props Artist @ Belgrade",
-"3D Props Artist @ Yerevan",
-"3D Vegetation Artist @ Yerevan",
-"3D Vegetation Artist @ Belgrade",
-"Account Manager @ Kraków",
-"Account Manager @ Warsaw",
-"Associate Technical Director @ Belgrade",
-"Associate Technical Director @ Yerevan",
-"Associate Technical Director/Zastępca Dyrektora Technicznego @ Kraków",
-"Associate Technical Director/Zastępca Dyrektora Technicznego @ Warsaw",
-"C++ Developer @ Belgrade",
-"C++ Developer @ Yerevan",
-"C++ Developer / Programista C++ @ Warsaw",
-"C++ Developer / Programista C++ @ Kraków",
-"Co-dev Manager @ Belgrade",
-"Co-dev Manager @ Kraków",
-"Co-dev Manager @ Warsaw",
-"Game Designer (FPS) @ Warsaw",
-"Game Designer (FPS) @ Kraków"
-]
-},
-{
-"s": "voodoo",
-"kind": "ashby",
-"n": 114,
-"sample": [
-"Game Manager - Blitz @ Paris",
-"Publishing Manager - Vietnam @ Hanoi",
-"Publishing Manager - Türkiye @ Istanbul",
-"Performance Marketing Manager - BeReal @ Paris",
-"Lead Creative Manager - Gaming @ Paris",
-"Ad Monetization Manager - Gaming @ Paris",
-"Playable Ads Strategist - Internship @ Paris",
-"Performance Marketing Manager - Gaming @ Paris",
-"Marketing Unity Developer - Growth @ Paris",
-"Marketing Video Artist - Growth @ Paris",
-"Product Manager - Paper.io 2 @ Paris",
-"Senior Technical Product Manager - Advertising solutions @ Paris",
-"Software Engineer - Performance Marketing @ Paris",
-"UI/UX Artist - Castle Busters @ Paris",
-"Playable Ads Strategist @ Paris",
-"Lead Software Engineer - Performance Marketing @ Paris",
-"Senior Data Product Manager - Growth @ Paris",
-"Legal Intern - Commercial/IP - PPI Internship @ Paris",
-"HR Operations Specialist @ Paris",
-"Senior Game Data Analyst - Paper.io 2 @ Barcelona",
-"Staff Backend Engineer - Golang @ Paris",
-"Playable Ads Developer @ Paris",
-"Lead Data Scientist - BI Prediction @ Paris",
-"Senior iOS Engineer - Blitz @ Paris",
-"Legal Intern - Corporate/M&A - PPI Internship @ Paris"
-]
-},
-{
-"s": "tripledotstudios",
-"kind": "greenhouse",
-"n": 97,
-"sample": [
-"2D Artist @ Jakarta",
-"2D Marketing Artist @ Jakarta",
-"3D Artist @ Jakarta",
-"AI Playable Developer @ Jakarta",
-"Animator @ Jakarta",
-"Community Manager @ Jakarta",
-"Creative Producer @ Jakarta",
-"Data Analyst @ Limassol",
-"Data Analyst @ Remote Europe",
-"Data Analyst @ Minsk",
-"Data Analyst @ Berlin",
-"Data Analyst @ Tblisi",
-"Data Analyst @ London",
-"Data Analyst @ Barcelona",
-"Data Analyst @ Warsaw",
-"Data Engineer @ Warsaw",
-"Data Scientist @ Jakarta",
-"Data Scientist @ London",
-"Finance Manager @ London",
-"Fraud Analyst @ London",
-"Fraud Analyst @ Warsaw",
-"Fraud Analyst @ Berlin",
-"Fraud Analyst @ Limassol",
-"Fraud Analyst @ Tblisi",
-"Fraud Analyst @ Barcelona"
-]
-},
-{
-"s": "joom",
-"kind": "smartrecruiters",
-"n": 2,
-"sample": [
-"DevOps engineer @ None",
-"Data analyst @ None"
-]
-},
-{
-"s": "joom",
-"kind": "workable",
-"n": 19,
-"sample": [
-"Business Development Manager at Onfy (m/w/d) @ Berlin",
-"Category Manager (Electronics) at JoomPro @ São Paulo",
-"Chief Marketing Officer at JoomPro @ Lisbon",
-"Closer (outbound and closing sales, SMB) at JoomPro @ São Paulo",
-"CPO Joom Marketplace @ Lisbon",
-"Enterprise Customer Success Manager at JoomPulse @ São Paulo",
-"Head of Customs and Logistics at JoomPro @ São Paulo",
-"Head of Sales at JoomPro @ São Paulo",
-"IP Legal Counsel at Joom @ Lisbon",
-"Lead Backend Developer at JMS @ Lisbon",
-"Privacy and IP Legal Counsel at Joom @ Lisbon",
-"Product Manager, B2B & Partner Platform at Onfy (m/w/x) @ Berlin",
-"Senior Marketing Data Analyst (to Lisbon, Portugal) @ Lisbon",
-"Senior Product Analyst at JoomPulse @ São Paulo",
-"Senior Product Manager at Joom AI @ Lisbon",
-"Senior Product Manager at JoomPulse @ Lisbon",
-"Senior Product Manager at JoomPulse @ São Paulo",
-"Senior Recruiter @ Lisbon",
-"Top-tier/Exceptional Software Engineer @ Lisbon"
-]
-},
-{
-"s": "jetbrains",
-"kind": "greenhouse",
-"n": 48,
-"sample": [
-"Accounts Payable Specialist @ Prague, Czech Republic",
-"Campus Ambassador  @ Shanghai, China",
-"Campus Ambassador (Universities in Europe) @ Remote",
-"Compliance Manager (Export Controls & Sanctions) @ Amsterdam, Netherlands; Berlin, Germany; Limassol, Cyprus; London, United Kingdom; Madrid, Spain; Munich, Germany; Paphos, Cyprus; Prague, Czech Republic; Warsaw, Poland; Yerevan, Armenia",
-"Customer Success Engineer (China) @ Shanghai, China",
-"Customer Success Engineer - LATAM @ Remote, United States",
-"Developer Advocate (Database)  @ Amsterdam, Netherlands; Belgrade, Serbia; Limassol, Cyprus; London, United Kingdom; Madrid, Spain; Prague, Czech Republic; Remote, Germany; Warsaw, Poland; Yerevan, Armenia",
-"Ecosystem QA Lead @ Belgrade, Serbia; Berlin, Germany; Limassol, Cyprus; Madrid, Spain; Munich, Germany; Paphos, Cyprus; Prague, Czech Republic; Warsaw, Poland; Yerevan, Armenia",
-"Entrepeneur in Residence/Product Lead @ Amsterdam, Netherlands; Belgrade, Serbia; Berlin, Germany; Limassol, Cyprus; London, United Kingdom; Madrid, Spain; Munich, Germany; Paphos, Cyprus; Prague, Czech Republic; Remote, Germany; Warsaw, Poland; Yerevan, Armenia",
-"Finance Business Partner  @ Limassol, Cyprus; Paphos, Cyprus; Prague, Czech Republic",
-"Founding GTM Engineering Lead (GrowthBricks) @ Amsterdam, Netherlands; Berlin, Germany; Limassol, Cyprus; Madrid, Spain; Munich, Germany; Warsaw, Poland",
-"Founding ML Engineer (Spectrum) @ Amsterdam, Netherlands; Belgrade, Serbia; Berlin, Germany; Limassol, Cyprus; London, United Kingdom; Madrid, Spain; Munich, Germany; Paphos, Cyprus; Prague, Czech Republic; Remote, Germany; Warsaw, Poland; Yerevan, Armenia",
-"Founding Tech Lead (GrowthBricks) @ Amsterdam, Netherlands; Belgrade, Serbia; Berlin, Germany; Paphos, Cyprus; Remote, Germany; Warsaw, Poland",
-"Global Indirect Tax Manager @ Amsterdam, Netherlands; Prague, Czech Republic; Warsaw, Poland",
-"Growth Marketer (AI-Powered QA Automation) @ Amsterdam, Netherlands; Belgrade, Serbia; Berlin, Germany; Limassol, Cyprus; Madrid, Spain; Munich, Germany; Paphos, Cyprus; Prague, Czech Republic; Warsaw, Poland; Yerevan, Armenia",
-"Head of JS/TS Ecosystem  @ Amsterdam, Netherlands; Belgrade, Serbia; Berlin, Germany; Limassol, Cyprus; London, United Kingdom; Madrid, Spain; Munich, Germany; Paphos, Cyprus; Prague, Czech Republic; Warsaw, Poland; Yerevan, Armenia",
-"Head of ML @ Amsterdam, Netherlands; Belgrade, Serbia; Berlin, Germany; Limassol, Cyprus; London, United Kingdom; Madrid, Spain; Munich, Germany; Paphos, Cyprus; Prague, Czech Republic; Remote, Germany; Warsaw, Poland; Yerevan, Armenia",
-"IT Support specialist @ Yerevan, Armenia",
-"Lead Product Designer (FlySto) @ Limassol, Cyprus; Paphos, Cyprus",
-"Lead Product Designer (YouTrack) @ Amsterdam, Netherlands; Belgrade, Serbia; Berlin, Germany; Limassol, Cyprus; Madrid, Spain; Munich, Germany; Paphos, Cyprus; Prague, Czech Republic; Warsaw, Poland; Yerevan, Armenia",
-"Legal Operations Specialist @ Belgrade, Serbia; Madrid, Spain; Prague, Czech Republic; Warsaw, Poland",
-"Office Administration Team Lead @ Belgrade, Serbia",
-"Procurement Contract Manager (Finance) @ Amsterdam, Netherlands; Prague, Czech Republic",
-"QA Automation Engineer (IJ Platform / Core team) @ Belgrade, Serbia; Berlin, Germany; Limassol, Cyprus; Madrid, Spain; Munich, Germany; Paphos, Cyprus; Prague, Czech Republic; Warsaw, Poland; Yerevan, Armenia",
-"QA Automation Engineer (IJ Platform / JetBrains Runtime) @ Belgrade, Serbia; Berlin, Germany; Limassol, Cyprus; Madrid, Spain; Munich, Germany; Paphos, Cyprus; Prague, Czech Republic; Warsaw, Poland; Yerevan, Armenia"
-]
-},
-{
-"s": "miro",
-"kind": "ashby",
-"n": 21,
-"sample": [
-"Head of CS, DACH @ Munich",
-"Manager, Customer Support AMER @ Austin",
-"Strategic Key Account Executive (DACH) @ London",
-"Technical Account Manager @ Sydney",
-"Strategic Account Executive @ Tokyo",
-"Technical Account Manager, Japan @ Tokyo",
-"Expression of Interest: Enterprise & Strategic Account Executive @ Austin",
-"Vice President Customer Success @ Austin",
-"Solutions Architect @ Tokyo",
-"GTM GM, Manufacturing @ Austin",
-"GTM GM, Fashion @ Austin",
-"Expression of Interest: SMB & Commercial Account Executive @ Austin",
-"Expression of Interest: SMB & Commercial Account Executive @ Austin",
-"Solutions Architect @ Tokyo",
-"Forward Deployed Consultant, Manufacturing @ Austin",
-"Senior Regional Marketing Manager @ Austin",
-"Strategic Account Executive @ Tokyo",
-"Country Manager, Japan @ Tokyo",
-"Commercial Account Executive @ Austin",
-"Strategic Account Executive, LATAM (Spanish) @ Austin",
-"Forward Deployed Consultant, Manufacturing @ Amsterdam"
-]
-},
-{
-"s": "wrike",
-"kind": "greenhouse",
-"n": 66,
-"sample": [
-"Account Development Manager 1 -Evening shift  (15:30 - 00:00)  @ Prague",
-"Account Development Manager 1  -Evening shift  (16:30 - 01:00) CEST @ Nicosia",
-"Account Development Manager 1  -Evening shift  (16:30 - 01:00) CEST @ Estonia - Remote",
-"Account Manager L 4 - DACH @ Prague",
-"Account Manager L4  - DACH @ Ireland - Remote",
-"Business Systems Security Analyst @ Estonia - Remote",
-"Business Systems Security Analyst @ Prague",
-"Business Systems Security Analyst @ Nicosia",
-"Customer Success Manager @ Nicosia",
-"Customer Success Manager  @ Estonia - Remote",
-"Customer Success Manager  @ Dublin, Ireland",
-"Director, Global GTM Strategy & Operations @ US - Remote",
-"Enterprise Account Manager @ Melbourne",
-"Group Product Manager  (Core) @ Cyprus - Remote",
-"Group Product Manager  (Core) @ Prague",
-"Group Product Manager  (Core) @ Czech Republic - Remote",
-"Group Product Manager  (Core) @ Nicosia",
-"Inside Sales Representative AMS [13:30 - 22:00 CET] @ Prague",
-"Inside Sales Representative (German)  @ Prague",
-"Lead Identity & Access Management Specialist @ Nicosia",
-"Lead Identity & Access Management Specialist @ Rennes",
-"Lead Identity & Access Management Specialist @ Prague",
-"Mid SOC Analyst @ Bangalore",
-"Netsuite Developer @ Bangalore",
-"Partner Account Manager @ Tokyo"
-]
-},
-{
-"s": "dodo",
-"kind": "ashby",
-"n": 6,
-"sample": [
-"Forward Deployed Engineer @ San Francisco",
-"Enterprise Sales / GTM @ San Francisco",
-"Account Executive @ San Francisco",
-"Technical Platform Specialist @ San Francisco",
-"Member of Technical Staff @ San Francisco",
-"Senior ML Engineer @ San Francisco"
-]
-},
-{
-"s": "flohealth",
-"kind": "greenhouse",
-"n": 31,
-"sample": [
-"Creative Director @ London",
-"Creative Strategist  @ Vilnius",
-"Creative Strategist  @ Ukraine",
-"Director, Head of Global PR & Communications @ London",
-"Engineering Manager @ Vilnius",
-"Engineering Manager @ London",
-"Freelance Motion Designer (PL/UA) @ Poland",
-"Freelancer - Video Editor (Part-Time, Remote) @ Poland | Ukraine",
-"Frontend Engineer @ Vilnius",
-"Graphic Designer @ Vilnius",
-"Growth Product Manager - Monetisation @ Vilnius",
-"Growth Product Manager – Monetisation @ London",
-"HIPAA Security Engineer @ London",
-"Integrated Marketing Manager @ London",
-"Lead Security Engineer @ London",
-"Machine Learning Engineer @ London",
-"Principal DevEx Engineer @ London",
-"Principal DevEx Engineer @ Vilnius",
-"Product Manager - Web Onboarding @ Vilnius",
-"Product Manager - Web Onboarding @ London",
-"Senior AI/ML engineer @ London",
-"Senior Backend Engineer @ Vilnius",
-"Senior/ Lead Android Engineer @ London",
-"Senior/ Lead Android Engineer @ Vilnius",
-"Senior Product Designer  @ London"
-]
-},
-{
-"s": "lightspeed",
-"kind": "ashby",
-"n": 5,
-"sample": [
-"Residential Design & Preconstruction Specialist @ Northbrook, IL",
-"Robot Learning Engineer @ Northbrook, IL",
-"Robotics Technician @ Northbrook, IL",
-"Perception Engineer @ Northbrook, IL",
-"Mechanical Engineer @ Northbrook, IL"
-]
-},
-{
-"s": "agentio",
-"kind": "ashby",
-"n": 27,
-"sample": [
-"Software Engineer @ New York, NY",
-"Product Designer @ New York, NY",
-"Shape Your Role at Agentio @ New York, NY",
-"Technical Recruiter @ New York, NY",
-"Recruiter— GTM, G&A @ New York, NY",
-"Account Executive, Strategic Partnerships — Creators @ New York, NY",
-"Brand Designer @ New York, NY",
-"Creator Partnerships Intern @ New York, NY",
-"Marketing Science Lead @ New York, NY",
-"Founding Research Engineer, Applied AI @ New York, NY",
-"Growth Marketing Lead @ New York, NY",
-"Brand Communications & Events Lead @ New York, NY",
-"Video Content Producer @ New York, NY",
-"Sales Director @ New York, NY",
-"Product Marketing Lead @ New York, NY",
-"Strategy & Operations, Creator Supply @ New York, NY",
-"Senior Sales Director @ New York, NY",
-"Client Growth Director @ New York, NY",
-"Client Growth Manager @ New York, NY",
-"Head of Creator Growth @ New York, NY",
-"Founding Research Scientist, Applied AI @ New York, NY",
-"Product Marketing Manager, Narrative @ New York, NY",
-"Strategy and Operations, Revenue @ New York, NY",
-"Workplace Experience Associate @ New York, NY",
-"Sales Development Manager @ New York, NY"
-]
-},
-{
-"s": "kion",
-"kind": "recruitee",
-"n": 20,
-"sample": [
-"Pedagogisch professional (pedagogisch medewerker) | Buitenschoolse Opvang | XXL Heidebloemstraat | 15 uur @ Nijmegen, Gelderland, Nederland",
-"Pedagogisch Professional (Pedagogisch Medewerker) | Kinderdagverblijf  | Klimop | 27 uur @ Lent, Gelderland, Nederland",
-"Pedagogisch Professional (Pedagogisch Medewerker) | Buitenschoolse Opvang | Dukendonck | 8 tot 12 uur @ Nijmegen, Gelderland, Nederland",
-"Pedagogisch Professional (pedagogisch medewerker) | Flex | De Uitdaging | 8 tot 32 uur @ Lent, Oosterhout en Noord Nijmegen, Gelderland, Nederland",
-"Pedagogisch Professional (pedagogisch medewerker) | Buitenschoolse Opvang | De Appelhof | 16 tot 20 uur @ Druten, Gelderland, Nederland",
-"Pedagogisch Professional (Pedagogisch Medewerker) | Buitenschoolse Opvang | Leuvensbroek | 12 tot 16 uur @ Nijmegen, Gelderland, Nederland",
-"Pedagogisch Professional  (pedagogisch medewerker) Flex | Kinderdagverblijf en Buitenschoolse Opvang | Malden - Mook - Molenhoek | 8 tot 32 uur @ Malden, Gelderland, Nederland",
-"Pedagogisch Professional (Pedagogisch Medewerker) | Voorschoolse en Buitenschoolse opvang | Twinkel | 20 uur @ Nijmegen, Gelderland, Nederland",
-"Pedagogisch Professional (pedagogisch medewerker) | Buitenschoolse Opvang | De Spil | 20 tot 22 uur @ Nijmegen, Gelderland, Nederland",
-"Communicatieadviseur Kinderopvang | 24 tot 28 uur @ Nijmegen, Gelderland, Nederland",
-"Pedagogisch Professional (pedagogisch medewerker) | Regio Lent Oosterhout en Nijmegen | 4 tot 32 uur @ Nijmegen, Gelderland, Nederland",
-"Bijbaan |  8 tot 20 uur @ Nijmegen, Gelderland, Nederland",
-"Pedagogisch Professional (pedagogisch medewerker) Flex | Kinderdagverblijf | Lent Oosterhout en Nijmegen | 8 tot 27 uur @ Lent, Oosterhout en Noord Nijmegen, Gelderland, Nederland",
-"Pedagogisch Professional (pedagogisch medewerker) | Kinderdagverblijf | De Berenboot |  27 tot 36 uur @ Nijmegen, Gelderland, Nederland",
-"Pedagogisch Professional (pedagogisch medewerker) Flex | Kinderdagverblijf en Buitenschoolse opvang Nijmegen | 8 tot 27 uur @ Nijmegen, Gelderland, Nederland",
-"Pedagogisch Professional (pedagogisch medewerker) | Nijmegen | 8 tot 32 uur @ Nijmegen, Gelderland, Nederland",
-"Pedagogisch Professional (pedagogisch medewerker) | Regio Zuid | 8 tot 32 uur @ Malden, Gelderland, Nederland",
-"Pedagogisch Professional (pedagogisch medewerker) | Regio West | Nijmegen - Maas en Waal | 4 tot 32 uur @ Beneden-Leeuwen, Gelderland, Nederland",
-"Pedagogisch Professional (pedagogisch medewerker) Flex | Kinderdagverblijf en / of Buitenschoolse opvang | Beuningen Ewijk Winssen Deest | 8 tot 27 uur @ Beuningen, Gelderland, Nederland",
-"Ervaren Manager Kinderopvang | 32 tot 36 uur @ Nijmegen, Gelderland, Nederland"
-]
-}
-]
+"superjob": {},
+"ats": []
 }
