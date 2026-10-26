@@ -515,6 +515,50 @@ CHECKS: list[tuple] = [
         update vacancies set employer_slow = true, ranking_weight = 1.5 where title = 'AG own';
         select employer_slow::text from vacancies where title = 'AG own'""",
      "authenticated", E, "false"),
+    ("рейтинг найма: доля ответов и типичное время до ответа", True,
+     f"""insert into vacancies (id, title, source_type, employer_id) values ('99999999-0000-0000-0000-000000000002', 'HR job', 'internal', '{E}');
+        insert into applications (vacancy_id, candidate_id, status, created_at)
+          select '99999999-0000-0000-0000-000000000002', null, 'new', now() - interval '5 days' from generate_series(1, 5);
+        update applications set status = 'rejected'
+         where id in (select id from applications where vacancy_id = '99999999-0000-0000-0000-000000000002' limit 4);
+        do $$ begin perform refresh_employer_slow(); end $$;
+        select employer_stats::text from vacancies where title = 'HR job'""",
+     "postgres", None, '{"rate": 80, "hours": 120}'),
+    ("сборщик открывает опрос о собеседовании", True,
+     f"""insert into applications (id, vacancy_id, candidate_id, status, created_at)
+          values ('99999999-0000-0000-0000-0000000000a1', '99999999-0000-0000-0000-000000000002', '{C}', 'new', now() - interval '6 days');
+        update applications set status = 'interview_scheduled' where id = '99999999-0000-0000-0000-0000000000a1';
+        select length(start_interview_survey('99999999-0000-0000-0000-0000000000a1')::text)::text""",
+     "service_role", None, "36"),
+    ("работодатель НЕ видит секрет опроса", False,
+     "select count(*) from interview_feedback", "authenticated", E, None),
+    ("аноним НЕ видит опросы", False, "select count(*) from interview_feedback", "anon", None, None),
+    ("работодатель НЕ оценивает собеседование за кандидата", True,
+     "select rate_my_interview('99999999-0000-0000-0000-0000000000a1', 5)::text", "authenticated", E, "false"),
+    ("работодатель НЕ оценивает по id отклика вместо секрета", True,
+     "select rate_interview('99999999-0000-0000-0000-0000000000a1', 5)::text", "anon", None, "false"),
+    ("работодатель НЕ запускает опрос сам", False,
+     "select start_interview_survey('99999999-0000-0000-0000-0000000000a1')", "authenticated", E, None),
+    ("кандидат оценивает собеседование по ссылке из бота", True,
+     "select rate_interview((select token from interview_feedback where application_id = '99999999-0000-0000-0000-0000000000a1'), 4)::text",
+     "postgres", None, "true"),
+    ("кандидат меняет оценку на сайте и видит её", True,
+     "do $$ begin perform rate_my_interview('99999999-0000-0000-0000-0000000000a1', 5); end $$; select rating::text from my_interview_ratings()",
+     "authenticated", C, "5"),
+    ("оценка вне 1–5 не принимается", False,
+     "select rate_my_interview('99999999-0000-0000-0000-0000000000a1', 9)", "authenticated", C, None),
+    ("от трёх оценок в сводке есть средняя", True,
+     f"""insert into applications (id, vacancy_id, candidate_id, status) values
+          ('99999999-0000-0000-0000-0000000000a2', '99999999-0000-0000-0000-000000000002', null, 'new'),
+          ('99999999-0000-0000-0000-0000000000a3', '99999999-0000-0000-0000-000000000002', null, 'new');
+        update applications set status = 'interview_scheduled' where id in ('99999999-0000-0000-0000-0000000000a2', '99999999-0000-0000-0000-0000000000a3');
+        insert into interview_feedback (application_id, rating, rated_at) values
+          ('99999999-0000-0000-0000-0000000000a2', 4, now()), ('99999999-0000-0000-0000-0000000000a3', 4, now());
+        do $$ begin perform refresh_employer_slow(); end $$;
+        select (employer_stats ->> 'rating') || ' ' || (employer_stats ->> 'ratings') from vacancies where title = 'HR job';
+        delete from applications where vacancy_id = '99999999-0000-0000-0000-000000000002';
+        delete from vacancies where title = 'HR job';""",
+     "postgres", None, "4.3 3"),
     ("ротация «Работы России»: старые удаляются, с откликами — в архив, свежие остаются", True,
      f"""insert into vacancies (title, source_type, source_post, posted_at) values
           ('TV old', 'external', 'trudvsem/old', now() - interval '5 days'),

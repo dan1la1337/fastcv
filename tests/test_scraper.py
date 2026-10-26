@@ -637,10 +637,11 @@ class FakeBot:
             return [u for u in self.updates if u["update_id"] >= payload["offset"]]
         raise AssertionError(method)
 
-    def send(self, chat_id, text):
+    def send(self, chat_id, text, buttons=None):
         if chat_id in self.fail_for:
             raise main.TelegramError(self.fail_for[chat_id], "blocked")
         self.sent.append((chat_id, text))
+        self.buttons = buttons
 
 
 class FakeTelegramStore:
@@ -678,6 +679,30 @@ def test_digest_sends_matches_and_stops_for_blocked_users():
     text = bot.sent[0][1]
     assert "Python Developer — Acme · совпадение 91%" in text
     assert "https://fastcv.ru/vacancy/v1" in text
+
+
+class FakeSurveyStore(FakeTelegramStore):
+    def __init__(self, due):
+        super().__init__()
+        self.due, self.started = due, []
+
+    def interview_surveys_due(self):
+        return self.due
+
+    def start_interview_survey(self, application_id):
+        self.started.append(application_id)
+        return f"tok-{application_id}"
+
+
+def test_interview_survey_links_carry_secret_not_application_id():
+    store = FakeSurveyStore([{"application_id": "a1", "chat_id": 1, "title": "QA Engineer", "company": "Acme"},
+                             {"application_id": "a2", "chat_id": 2, "title": "QA", "company": None}])
+    bot = FakeBot(fail_for={2: 403})
+    assert main.send_interview_surveys(store, bot) == 1
+    assert store.started == ["a1", "a2"] and store.stopped == [2]
+    assert "собеседование в «Acme» на «QA Engineer»" in bot.sent[0][1]
+    urls = [b["url"] for b in bot.buttons[0]]
+    assert urls == [f"https://fastcv.ru/feedback/tok-a1?r={n}" for n in range(1, 6)]
 
 
 # --- дозаполнение компании у старых вакансий ------------------------------------

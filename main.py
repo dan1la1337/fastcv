@@ -616,6 +616,12 @@ class Store:
     def mark_notified(self, user_id: str) -> None:
         self.db.table("profiles").update({"telegram_notified_at": datetime.now(timezone.utc).isoformat()}).eq("id", user_id).execute()
 
+    def interview_surveys_due(self) -> list[dict]:
+        return self.db.rpc("interview_surveys_due", {}).execute().data or []
+
+    def start_interview_survey(self, application_id: str) -> str:
+        return str(self.db.rpc("start_interview_survey", {"application": application_id}).execute().data)
+
     def stop_notifications(self, chat_id: int) -> None:
         """Пользователь заблокировал бота — больше ему не пишем."""
         self.db.table("profiles").update({"telegram_notify": False, "telegram_chat_id": None}).eq("telegram_chat_id", chat_id).execute()
@@ -1031,8 +1037,11 @@ class TelegramBot:
             raise TelegramError(int(body.get("error_code") or 0), str(body.get("description") or "")[:200])
         return body.get("result")
 
-    def send(self, chat_id: int, text: str) -> None:
-        self.call("sendMessage", {"chat_id": chat_id, "text": text[:4000], "disable_web_page_preview": True})
+    def send(self, chat_id: int, text: str, buttons: Optional[list[list[dict]]] = None) -> None:
+        payload: dict = {"chat_id": chat_id, "text": text[:4000], "disable_web_page_preview": True}
+        if buttons:
+            payload["reply_markup"] = {"inline_keyboard": buttons}
+        self.call("sendMessage", payload)
 
 
 class TelegramError(Exception):
@@ -1062,6 +1071,31 @@ def send_digests(store: Store, bot: TelegramBot) -> int:
             if e.code == 403:  # бот заблокирован пользователем
                 store.stop_notifications(row["chat_id"])
             print(f"⚠️ Подборка не доставлена: {e}")
+    return sent
+
+
+def survey_message(row: dict, token: str) -> tuple[str, list[list[dict]]]:
+    """Опрос через 2 дня после приглашения: оценка собеседования 1–5 (план 1.13, слой 2).
+    Кнопки — ссылки на сайт с секретом опроса: так не нужен отдельный режим вебхука."""
+    company = f" в «{row['company']}»" if row.get("company") else ""
+    text = (f"Как прошло собеседование{company} на «{row['title']}»?\n\n"
+            "Оцените от 1 до 5 — анонимно. Из оценок кандидатов складывается рейтинг работодателя на FastCV.")
+    buttons = [[{"text": f"{n} ⭐", "url": f"{SITE_URL}/feedback/{token}?r={n}"} for n in range(1, 6)]]
+    return text, buttons
+
+
+def send_interview_surveys(store: Store, bot: TelegramBot) -> int:
+    sent = 0
+    for row in store.interview_surveys_due():
+        try:
+            token = store.start_interview_survey(row["application_id"])
+            text, buttons = survey_message(row, token)
+            bot.send(row["chat_id"], text, buttons)
+            sent += 1
+        except TelegramError as e:
+            if e.code == 403:
+                store.stop_notifications(row["chat_id"])
+            print(f"⚠️ Опрос о собеседовании не доставлен: {e}")
     return sent
 
 
@@ -1419,6 +1453,11 @@ def main() -> None:
             print(f"Telegram: отправлено подборок {sent}")
         except Exception as e:  # подписка не должна ронять сбор
             print(f"⚠️ Подборки в Telegram: {type(e).__name__}: {str(e)[:200]}")
+        try:
+            surveys = send_interview_surveys(store, TelegramBot(jobs_token))
+            print(f"Telegram: опросов о собеседованиях {surveys}")
+        except Exception as e:
+            print(f"⚠️ Опросы о собеседованиях: {type(e).__name__}: {str(e)[:200]}")
     # Письма об откликах: работодателям — о новых, кандидатам — о приглашении или отказе
     resend_key = env("RESEND_API_KEY")
     if resend_key:
