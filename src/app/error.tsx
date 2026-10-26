@@ -11,7 +11,7 @@ export default function Error({ error, retry }: { error: Error & { digest?: stri
   return (
     <main className="min-h-screen text-neutral-100 flex items-center justify-center px-4">
       <div className="max-w-md text-center space-y-4">
-        <h1 className="font-display text-xl font-semibold">Что-то пошло не так</h1>
+        <h1 className="font-display text-xl font-bold">Что-то пошло не так</h1>
         <p className="text-sm text-neutral-400">
           Мы уже видим ошибку в логах. Попробуйте ещё раз — обычно это помогает.
         </p>

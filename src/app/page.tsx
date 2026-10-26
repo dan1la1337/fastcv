@@ -22,5 +22,7 @@ export default async function Home() {
   } catch {
     // без счётчика первый экран всё равно открывается
   }
-  return <Feed initialRows={rows} initialTotal={total} hero={<Hero stats={stats} />} />;
+  // В карточке ленты видно три строки описания: остальное не везём в HTML первой страницы
+  const light = rows?.map(r => ({ ...r, description: r.description && r.description.length > 320 ? r.description.slice(0, 320) + "…" : r.description })) ?? null;
+  return <Feed initialRows={light} initialTotal={total} hero={<Hero stats={stats} />} />;
 }
