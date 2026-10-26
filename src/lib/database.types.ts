@@ -349,6 +349,8 @@ export type Database = {
           employer_verified: boolean
           employer_slow: boolean
           employer_stats: Json
+          last_seen_at: string | null
+          closed_reports: number
           id: string
           is_remote: boolean | null
           level: string | null
@@ -390,6 +392,8 @@ export type Database = {
           employer_verified?: boolean
           employer_slow?: boolean
           employer_stats?: Json
+          last_seen_at?: string | null
+          closed_reports?: number
           id?: string
           is_remote?: boolean | null
           level?: string | null
@@ -431,6 +435,8 @@ export type Database = {
           employer_verified?: boolean
           employer_slow?: boolean
           employer_stats?: Json
+          last_seen_at?: string | null
+          closed_reports?: number
           id?: string
           is_remote?: boolean | null
           level?: string | null
@@ -509,6 +515,8 @@ export type Database = {
       link_telegram_chat: { Args: { chat: number; code: string }; Returns: boolean }
       start_company_verification: { Args: { domain: string }; Returns: string }
       check_company_verification: { Args: never; Returns: boolean }
+      report_vacancy_closed: { Args: { vacancy: string }; Returns: number }
+      my_closed_report: { Args: { vacancy: string }; Returns: boolean }
       rate_interview: { Args: { token: string; rating: number }; Returns: boolean }
       rate_my_interview: { Args: { application: string; rating: number }; Returns: boolean }
       my_interview_ratings: { Args: never; Returns: { application_id: string; rating: number }[] }

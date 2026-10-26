@@ -3,10 +3,10 @@
 import { useEffect, useRef, useState } from "react";
 import { supabase } from "@/lib/supabase";
 import {
-  AREAS, DEFAULT_FILTERS, DIRECTIONS, experienceLabel, sourceOf, freshnessLabel, LEVELS, WORK_FORMATS, fetchVacancyPage, formatLabel, formatSalary, levelLabel, plural, PAGE_SIZE,
+  AREAS, DEFAULT_FILTERS, DIRECTIONS, experienceLabel, sourceOf, freshnessLabel, ghostSignal, LEVELS, WORK_FORMATS, fetchVacancyPage, formatLabel, formatSalary, levelLabel, plural, PAGE_SIZE,
   VACANCY_FORMS, SOURCES, type SourceKind, type Area, type Level, type Vacancy, type VacancyFilters, type WorkFormat,
 } from "@/lib/vacancies";
-import { Clock, Search, MapPin, ChevronDown, Sparkles, Loader2, ExternalLink, Globe, SlidersHorizontal, Briefcase, Building2, Target, Bookmark, BookmarkCheck, EyeOff, Undo2 } from "lucide-react";
+import { Clock, Search, MapPin, ChevronDown, Sparkles, Loader2, ExternalLink, Globe, SlidersHorizontal, Briefcase, Building2, Target, Bookmark, BookmarkCheck, EyeOff, Ghost, Undo2 } from "lucide-react";
 import { fetchMarked, fetchMarks, setMark, type MarkKind } from "@/lib/marks";
 import { toast } from "@/components/Toaster";
 import { fetchMatches, fetchRecommended, type Match } from "@/lib/matching";
@@ -378,6 +378,11 @@ export default function Feed({ initialRows, initialTotal, hero }: { initialRows:
               <span className="inline-flex items-center gap-1" title="Когда вакансию впервые опубликовали и во скольких каналах" suppressHydrationWarning>
                 <Clock className="w-3.5 h-3.5" />{freshnessLabel(item)}
               </span>
+              {ghostSignal(item) && (
+                <span className="inline-flex items-center gap-1 text-amber-300" title={ghostSignal(item)!}>
+                  <Ghost className="w-3.5 h-3.5" aria-hidden="true" />Возможно, неактуальна
+                </span>
+              )}
             </p>
           </div>
           </div>
