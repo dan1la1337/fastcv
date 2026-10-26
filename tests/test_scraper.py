@@ -879,3 +879,126 @@ def test_gemini_overloaded_model_is_skipped_for_the_rest_of_the_run(monkeypatch)
         normalize("текст")
     assert calls["models"][-2:] == ["model-b", "model-b"]
     assert calls["n"] == len(outcomes)
+
+
+# --- пакетный разбор и история каналов (26.10) ----------------------------------
+
+
+def dated_page(channel: str, ids: list[int], day: str, before: int | None = None) -> str:
+    return page(channel, ids, before=before).replace("2026-10-22T10:00:00+00:00", f"{day}T10:00:00+00:00")
+
+
+def test_history_walks_back_until_cutoff():
+    now = main.datetime(2026, 10, 26, tzinfo=main.timezone.utc)
+    pages = {
+        "https://t.me/s/ch?before=41": dated_page("ch", list(range(21, 41)), "2026-10-20", before=21),
+        "https://t.me/s/ch?before=21": dated_page("ch", list(range(1, 21)), "2026-09-01", before=1),
+    }
+    posts, cursor = main.collect_history("ch", 41, pages.__getitem__, days=30, now=now)
+    assert [p.post_id for p in posts] == list(range(40, 20, -1))   # от новых к старым, без старше 30 дней
+    assert cursor is None                                          # история дочитана
+
+
+def test_history_stops_after_page_limit_with_cursor():
+    def fetch(url):
+        before = int(url.split("before=")[1])
+        return page("ch", list(range(before - 20, before)), before=before - 20)
+
+    now = main.datetime(2026, 10, 23, tzinfo=main.timezone.utc)
+    posts, cursor = main.collect_history("ch", 500, fetch, days=30, max_pages=2, now=now)
+    assert len(posts) == 40 and cursor == 460
+
+
+class _Batcher:
+    """Нормализатор с пакетным режимом, как make_gemini_normalizer."""
+
+    def __init__(self, fail_after: int | None = None):
+        self.batches: list[int] = []
+        self.fail_after = fail_after
+
+    def __call__(self, text):
+        return per_post_job(text)
+
+    def many(self, texts):
+        if self.fail_after is not None and len(self.batches) >= self.fail_after:
+            raise main.AIUnavailable("503")
+        self.batches.append(len(texts))
+        return [per_post_job(t) for t in texts]
+
+
+def _feeds(new_ids: dict[str, list[int]], history: dict[str, list[int]] | None = None):
+    history = history or {}
+
+    def fetch(url):
+        channel = url.split("/s/")[1].split("?")[0]
+        if "before=" in url:
+            ids = [i for i in history.get(channel, []) if i < int(url.split("before=")[1])]
+            return page(channel, ids[-20:])
+        return page(channel, new_ids[channel], before=new_ids[channel][0])
+    return fetch
+
+
+def test_batched_run_sends_posts_of_many_channels_in_one_request(monkeypatch):
+    monkeypatch.setattr(main, "HISTORY_PAGES", 1)
+    store = FakeStore(rows=[{"username": "a", "last_post_id": 10, "history_before": 0},
+                            {"username": "b", "last_post_id": 20, "history_before": 0}])
+    ai = _Batcher()
+    fetch = _feeds({"a": list(range(5, 17)), "b": list(range(15, 25))})
+    summary = main.run_batched(store, ai, store.rows, fetch=fetch, pause=lambda s: None)
+    assert ai.batches == [10]                       # 6 + 4 новых поста — одним запросом
+    assert summary.saved == 10
+    assert store.channel_updates["a"]["last_post_id"] == 16
+    assert store.channel_updates["b"]["last_post_id"] == 24
+    assert store.channel_updates["a"]["history_before"] == 0   # история уже дочитана — не трогаем
+
+
+def test_batched_run_reads_channel_history_after_new_posts(monkeypatch):
+    store = FakeStore(rows=[{"username": "a", "last_post_id": 30, "history_before": None}])
+    ai = _Batcher()
+    fetch = _feeds({"a": [29, 30, 31, 32]}, history={"a": list(range(1, 31))})
+    main.run_batched(store, ai, store.rows, fetch=fetch, pause=lambda s: None)
+    update = store.channel_updates["a"]
+    assert update["last_post_id"] == 32
+    assert update["history_before"] == 0            # дошли до начала канала
+    saved = {v["source_post"] for v in store.inserted}
+    assert "a/1" in saved and "a/32" in saved
+
+
+def test_batched_run_keeps_unprocessed_posts_when_ai_stops(monkeypatch):
+    monkeypatch.setattr(main, "AI_BATCH", 2)
+    store = FakeStore(rows=[{"username": "a", "last_post_id": 10, "history_before": 0, "failed_runs": 0}])
+    ai = _Batcher(fail_after=1)
+    fetch = _feeds({"a": [11, 12, 13, 14]})
+    summary = main.run_batched(store, ai, store.rows, fetch=fetch, pause=lambda s: None)
+    update = store.channel_updates["a"]
+    assert update["last_post_id"] == 12             # 13 и 14 — в следующий раз
+    assert "last_parsed_at" not in update           # канал пойдёт первым в очереди
+    assert summary.results[0].ai_stopped
+
+
+def test_gemini_batch_returns_one_result_per_post_and_fills_gaps(monkeypatch):
+    from google import genai
+
+    class Resp:
+        def __init__(self, parsed):
+            self.parsed = parsed
+            self.text = ""
+
+    replies = [[main.BatchItem(post=0, vacancy=job(title="A")), main.BatchItem(post=2, vacancy=job(title="C"))],
+               job(title="B")]
+    sent = []
+
+    class Models:
+        def generate_content(self, **kwargs):
+            sent.append(kwargs["contents"])
+            return Resp(replies[len(sent) - 1])
+
+    class Client:
+        def __init__(self, api_key, http_options=None):
+            self.models = Models()
+
+    monkeypatch.setattr(genai, "Client", Client)
+    normalize = main.make_gemini_normalizer("key", MODELS)
+    result = normalize.many(["пост a", "пост b", "пост c"])
+    assert [v.title for v in result] == ["A", "B", "C"]   # на пропущенный пост — отдельный запрос
+    assert '<post id=1>' in sent[0] and sent[1].startswith("<post>")

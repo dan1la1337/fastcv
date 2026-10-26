@@ -429,6 +429,41 @@ CHECKS: list[tuple] = [
           (5, 'Руководитель маркетинга продукта'),
           (6, 'Менеджер по продажам')) v(n, t)""",
      "postgres", None, "data_ml,product,backend,backend,marketing,sales"),
+    ("направления: ИТ-руководство, фронтенд, DevOps, мобильная разработка, QA, геймдев", True,
+     """select string_agg(vacancy_direction(t), ',' order by n) from (values
+          (1, 'CTO в финтех-стартап'),
+          (2, 'Руководитель отдела разработки'),
+          (3, 'Руководитель отдела информационной безопасности'),
+          (4, 'JavaScript-разработчик'),
+          (5, 'Node.js / TypeScript backend developer'),
+          (6, 'Системный инженер Linux'),
+          (7, 'KMP-разработчик'),
+          (8, 'Инженер по автотестам'),
+          (9, 'Программист игр на C++'),
+          (10, 'Тимлид команды платежей')) v(n, t)""",
+     "postgres", None, "management,management,security,frontend,backend,devops,mobile,qa,gamedev,backend"),
+    ("ИТ-вакансии «Работы России» и SuperJob живут 30 дней, остальные ротируются", True,
+     """insert into vacancies (title, source_type, source_post, posted_at, direction) values
+          ('IT tv dev', 'external', 'trudvsem/it1', now() - interval '5 days', 'devops'),
+          ('IT tv old', 'external', 'trudvsem/it2', now() - interval '40 days', 'devops'),
+          ('IT tv shop', 'external', 'trudvsem/it3', now() - interval '5 days', 'sales'),
+          ('IT sj dev', 'external', 'superjob/it4', now() - interval '9 hours', 'frontend'),
+          ('IT sj shop', 'external', 'superjob/it5', now() - interval '9 hours', 'sales');
+        create temp table pr1 as select prune_trudvsem(2);
+        create temp table pr2 as select prune_imported('superjob', 8);
+        select string_agg(title, ',' order by title) from vacancies where title like 'IT %';
+        delete from vacancies where title like 'IT %';""",
+     "service_role", None, "IT sj dev,IT tv dev"),
+    ("закрытые на SuperJob ИТ-вакансии убираются, открытые и чужие остаются", True,
+     """insert into vacancies (title, source_type, source_post, posted_at, direction, created_at) values
+          ('SC open', 'external', 'superjob/101', now() - interval '3 days', 'qa', now() - interval '2 days'),
+          ('SC closed', 'external', 'superjob/102', now() - interval '3 days', 'qa', now() - interval '2 days'),
+          ('SC shop', 'external', 'superjob/103', now() - interval '3 days', 'sales', now() - interval '2 days');
+        create temp table pc as select prune_superjob_closed(array['101'], now() - interval '30 days') n;
+        select (select n::text from pc) || ' ' || string_agg(title, ',' order by title) from vacancies where title like 'SC %';
+        delete from vacancies where title like 'SC %';""",
+     "service_role", None, "1 SC open,SC shop"),
+    ("сайт НЕ удаляет вакансии SuperJob", False, "select prune_superjob_closed(array['1'], now())", "authenticated", C, None),
     ("ротация «Работы России»: старые удаляются, с откликами — в архив, свежие остаются", True,
      f"""insert into vacancies (title, source_type, source_post, posted_at) values
           ('TV old', 'external', 'trudvsem/old', now() - interval '5 days'),

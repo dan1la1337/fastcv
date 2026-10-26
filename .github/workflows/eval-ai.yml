@@ -9,6 +9,10 @@ on:
         description: 'Модели Gemini через запятую (пусто — как у сборщика)'
         type: string
         default: ''
+      batch:
+        description: 'Разбирать посты пачками, как сборщик'
+        type: boolean
+        default: true
 
 jobs:
   eval:
@@ -27,4 +31,5 @@ jobs:
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           GEMINI_MODELS: ${{ inputs.models }}
+          EVAL_BATCH: ${{ inputs.batch }}
         run: python -u eval_ai.py

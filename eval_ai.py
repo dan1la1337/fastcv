@@ -64,8 +64,28 @@ def main() -> None:
     models = tuple(m.strip() for m in (os.getenv("GEMINI_MODELS") or "").split(",") if m.strip()) or GEMINI_MODELS
     rows = (db.table("ai_golden").select("source, text, expected")
             .not_.is_("expected", "null").order("id").execute().data or [])
-    result = score(rows, make_gemini_normalizer(os.environ["GEMINI_API_KEY"], models),
-                   pause=lambda: time.sleep(AI_PAUSE_SECONDS))
+    normalize = make_gemini_normalizer(os.environ["GEMINI_API_KEY"], models)
+    batch = (os.getenv("EVAL_BATCH") or "").lower() == "true"
+    if batch:
+        # Как в сборщике: посты пачками по AI_BATCH в одном обращении
+        from main import AI_BATCH
+        answers: dict[str, Any] = {}
+        for i in range(0, len(rows), AI_BATCH):
+            chunk = [r["text"] for r in rows[i:i + AI_BATCH]]
+            try:
+                answers.update(zip(chunk, normalize.many(chunk)))
+            except Exception as e:  # noqa: BLE001 — пачка не разобрана: посты пойдут как ошибки ИИ
+                print("Пачка не разобрана:", type(e).__name__)
+            time.sleep(AI_PAUSE_SECONDS)
+
+        def from_batch(text: str):
+            if text not in answers:
+                raise RuntimeError("нет ответа в пачке")
+            return answers[text]
+        result = score(rows, from_batch)
+    else:
+        result = score(rows, normalize, pause=lambda: time.sleep(AI_PAUSE_SECONDS))
+    result["batch"] = batch
     result["models"] = list(models)
     result["at"] = datetime.now(timezone.utc).isoformat()
     print(f"Постов: {result['cases']}, ИИ не ответил: {result['ai_failed']}")
