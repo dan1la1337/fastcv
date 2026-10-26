@@ -1,0 +1,35 @@
+name: Visual baselines
+
+# Снять эталоны скриншот-тестов (e2e/visual.spec.ts) на своей ветке и закоммитить их туда же.
+# Запускать вручную, когда дизайн меняется намеренно: Actions → Visual baselines → Run workflow → ветка.
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  baselines:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      NEXT_PUBLIC_SUPABASE_URL: https://zcyccnlweanhcsumplbx.supabase.co
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: sb_publishable_tK5iei3B-RnmUCRmuWZBzQ_7DykeHGP
+      NEXT_TELEMETRY_DISABLED: 1
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - run: npx next build
+      - name: Snapshots
+        run: npx playwright test e2e/visual.spec.ts --update-snapshots
+      - name: Commit
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add e2e/visual.spec.ts-snapshots
+          git diff --cached --quiet || git commit -m "test: visual baselines" && git push
