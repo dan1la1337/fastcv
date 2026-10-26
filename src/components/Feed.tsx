@@ -49,10 +49,16 @@ export default function Feed({ initialRows, initialTotal, hero }: { initialRows:
   const [savedLoading, setSavedLoading] = useState(false);
   const [matches, setMatches] = useState<Record<string, Match>>({});
   // Города для фильтра — только те, где есть вакансии, по убыванию числа вакансий
-  const [cityOptions, setCityOptions] = useState<SelectOption[]>([]);
+  const [cities, setCities] = useState<{ city: string; country: string | null; vacancies: number }[]>([]);
+  // Страны для фильтра: Россия первой, остальные по числу вакансий
+  const [countryOptions, setCountryOptions] = useState<SelectOption[]>([]);
   useEffect(() => {
-    supabase.from("vacancy_cities").select("city, vacancies").order("vacancies", { ascending: false }).limit(300)
-      .then(({ data }) => setCityOptions((data ?? []).map(c => ({ value: c.city, label: c.city, count: c.vacancies }))));
+    supabase.from("vacancy_cities").select("city, country, vacancies").order("vacancies", { ascending: false }).limit(300)
+      .then(({ data }) => setCities(data ?? []));
+    supabase.from("vacancy_countries").select("country, vacancies").order("vacancies", { ascending: false })
+      .then(({ data }) => setCountryOptions((data ?? [])
+        .sort((a, b) => Number(b.country === "Россия") - Number(a.country === "Россия"))
+        .map(c => ({ value: c.country, label: c.country, count: c.vacancies }))));
   }, []);
   // Справочник для оценки скрытой зарплаты: десятки строк, грузим один раз
   const [benchmarks, setBenchmarks] = useState<SalaryBenchmark[]>([]);
@@ -72,6 +78,15 @@ export default function Feed({ initialRows, initialTotal, hero }: { initialRows:
   const [minSalary, setMinSalary] = useState<number>(0);
   const [onlyWithSalary, setOnlyWithSalary] = useState<boolean>(false);
   const [city, setCity] = useState("");
+  const [country, setCountry] = useState("");
+  // Выбрана страна — в списке городов только её города
+  const cityOptions: SelectOption[] = cities
+    .filter(c => !country || c.country === country)
+    .map(c => ({ value: c.city, label: c.city, count: c.vacancies }));
+  function chooseCountry(value: string) {
+    setCountry(value);
+    if (value && city && !cities.some(c => c.city === city && c.country === value)) setCity("");
+  }
 
   const [selectedDirection, setSelectedDirection] = useState<string | null>(null);
   const [area, setArea] = useState<Area | "">("");
@@ -112,6 +127,7 @@ export default function Feed({ initialRows, initialTotal, hero }: { initialRows:
     formats,
     minSalary,
     withSalary: onlyWithSalary,
+    country,
     city,
     direction: selectedDirection ?? "",
     area,
@@ -347,7 +363,12 @@ export default function Feed({ initialRows, initialTotal, hero }: { initialRows:
                 {[item.level && levelLabel(item.level), experienceLabel(item.experience_min)].filter(Boolean).join(" · ")}
               </span>
             )}
-              {item.city && <span className="inline-flex items-center gap-1"><MapPin className="w-3.5 h-3.5" />{item.city}</span>}
+              {(item.city || item.country) && (
+                <span className="inline-flex items-center gap-1"><MapPin className="w-3.5 h-3.5" />
+                  {/* Зарубежный город — со страной: «Белград, Сербия» */}
+                  {[item.city, item.country !== "Россия" || !item.city ? item.country : null].filter(Boolean).join(", ")}
+                </span>
+              )}
               {item.work_format === "remote" || (!item.work_format && item.is_remote)
                 ? <span className="inline-flex items-center gap-1"><Globe className="w-3.5 h-3.5" />Удалённо</span>
                 : item.work_format && <span className="inline-flex items-center gap-1"><Building2 className="w-3.5 h-3.5" />{formatLabel(item.work_format)}</span>}
@@ -511,7 +532,7 @@ export default function Feed({ initialRows, initialTotal, hero }: { initialRows:
       {hero}
       <main id="feed" className="max-w-6xl mx-auto px-4 py-6 lg:py-8 grid grid-cols-1 lg:grid-cols-4 gap-4 lg:gap-8 relative z-0 scroll-mt-20">
         {(() => {
-          const active = [search.trim(), formats.length > 0, minSalary > 0, onlyWithSalary, city.trim(), selectedDirection, area, selectedLevels.length > 0, sources.length > 0].filter(Boolean).length;
+          const active = [search.trim(), formats.length > 0, minSalary > 0, onlyWithSalary, country, city.trim(), selectedDirection, area, selectedLevels.length > 0, sources.length > 0].filter(Boolean).length;
           return (
             <button
               onClick={() => setFiltersOpen(open => !open)}
@@ -617,6 +638,13 @@ export default function Feed({ initialRows, initialTotal, hero }: { initialRows:
                   </button>
                 ))}
               </div>
+            </div>
+
+            {/* Страна */}
+            <div className="space-y-3 pt-2 border-t border-white/[0.08]">
+              <label className="text-xs font-bold text-neutral-500 uppercase tracking-wider">Страна</label>
+              <SearchSelect label="Страна" placeholder="Начните вводить страну…" emptyLabel="Все страны"
+                options={countryOptions} value={country} onChange={chooseCountry} />
             </div>
 
             {/* Город */}

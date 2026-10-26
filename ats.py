@@ -40,6 +40,18 @@ CITIES = {
 }
 
 
+# Страна из строки места в API (бывает только страна: «Estonia - Remote»)
+COUNTRIES = {
+    "serbia": "Сербия", "armenia": "Армения", "cyprus": "Кипр", "poland": "Польша", "estonia": "Эстония",
+    "latvia": "Латвия", "lithuania": "Литва", "georgia": "Грузия", "kazakhstan": "Казахстан", "uzbekistan": "Узбекистан",
+    "belarus": "Беларусь", "germany": "Германия", "netherlands": "Нидерланды", "united kingdom": "Великобритания",
+    "uk": "Великобритания", "ireland": "Ирландия", "spain": "Испания", "portugal": "Португалия", "france": "Франция",
+    "czech republic": "Чехия", "czechia": "Чехия", "romania": "Румыния", "indonesia": "Индонезия",
+    "united states": "США", "usa": "США", "china": "Китай", "japan": "Япония", "turkey": "Турция", "türkiye": "Турция",
+    "united arab emirates": "ОАЭ", "uae": "ОАЭ", "vietnam": "Вьетнам", "montenegro": "Черногория",
+}
+
+
 @dataclass(frozen=True)
 class Board:
     key: str                 # часть source_post: career/<key>/<id>
@@ -72,6 +84,13 @@ def city_of(location: str) -> tuple[Optional[str], bool]:
         if part in CITIES:
             return CITIES[part], remote
     return None, remote
+
+
+def country_of(location: str) -> Optional[str]:
+    for part in re.split(r"[;,/|]|\s-\s", (location or "").lower()):
+        if part.strip() in COUNTRIES:
+            return COUNTRIES[part.strip()]
+    return None
 
 
 def fetch_jobs(board: Board, get: Callable[[str], dict]) -> list[dict]:
@@ -120,6 +139,8 @@ def rows_for(board: Board, jobs: list[dict]) -> list[dict]:
             "city": cities[0] if cities else None,
             "is_remote": remote,
             "work_format": "remote" if remote and not cities else None,
+            # Страну по городу определит база; это — для вакансий, где указана только страна
+            "country": next((c for c in (country_of(j["location"]) for j in group) if c), None),
             "posted_at": first.get("posted_at") or datetime.now(timezone.utc).isoformat(),
             "ranking_weight": RANKING_WEIGHT,
         }

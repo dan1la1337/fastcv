@@ -324,6 +324,7 @@ export type Database = {
           city: string | null
           company_id: string | null
           company_name: string | null
+          country: string | null
           contact_type: string | null
           contact_value: string | null
           created_at: string | null
@@ -361,6 +362,7 @@ export type Database = {
           city?: string | null
           company_id?: string | null
           company_name?: string | null
+          country?: string | null
           contact_type?: string | null
           contact_value?: string | null
           created_at?: string | null
@@ -398,6 +400,7 @@ export type Database = {
           city?: string | null
           company_id?: string | null
           company_name?: string | null
+          country?: string | null
           contact_type?: string | null
           contact_value?: string | null
           created_at?: string | null
@@ -450,7 +453,11 @@ export type Database = {
     }
     Views: {
       vacancy_cities: {
-        Row: { city: string; vacancies: number }
+        Row: { city: string; country: string | null; vacancies: number }
+        Relationships: []
+      }
+      vacancy_countries: {
+        Row: { country: string; vacancies: number }
         Relationships: []
       }
       direction_counts: {

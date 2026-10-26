@@ -42,7 +42,7 @@ def job(**overrides) -> VacancyAI:
     data = dict(is_job=True, title="Python Developer", company="Kaspi.kz", description="Описание", salary_min=200000,
                 salary_max=None, salary_currency="RUB", city=None, is_remote=True, contact_type="telegram",
                 contact_value="@hr", stack=["Python", "python", " Django "],
-                level="senior", direction="backend", work_format="remote", hiring_type=None, scope_note=None, experience_min=None)
+                level="senior", direction="backend", work_format="remote", hiring_type=None, scope_note=None, experience_min=None, country=None)
     data.update(overrides)
     return VacancyAI(**data)
 
@@ -793,6 +793,13 @@ def test_backfill_fills_hiring_type_but_keeps_existing_company():
     assert (checked, filled) == (1, 0)
     assert store.companies == {}  # компания уже была — не перезаписываем
     assert store.types == {"v": "outsource"}
+
+
+def test_country_from_ai_saved_with_new_vacancy():
+    store = FakeStore()
+    process_post(Post("ch", 1, "Ищем Python-разработчика, удалённо из Казахстана, 500 000 тенге", None, "u"),
+                 store, lambda text: job(country=" Казахстан ", company="Kaspi"))
+    assert store.inserted[0]["country"] == "Казахстан"
 
 
 def test_hiring_type_saved_with_new_vacancy():

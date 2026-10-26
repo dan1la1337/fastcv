@@ -464,6 +464,21 @@ CHECKS: list[tuple] = [
         delete from vacancies where title like 'SC %';""",
      "service_role", None, "1 SC open,SC shop"),
     ("сайт НЕ удаляет вакансии SuperJob", False, "select prune_superjob_closed(array['1'], now())", "authenticated", C, None),
+    ("страна вакансии: по городу, по ответу ИИ, по источнику", True,
+     """insert into vacancies (title, source_type, source_post, city, country) values
+          ('CO msk', 'external', 'tg/1', 'Москва', null),
+          ('CO tash', 'external', 'tg/2', 'Ташкент', 'Россия'),
+          ('CO ai', 'external', 'tg/3', null, 'Казахстан'),
+          ('CO tv', 'external', 'trudvsem/co4', null, null),
+          ('CO latin', 'external', 'tg/5', 'Springfield', null),
+          ('CO town', 'external', 'tg/6', 'Старый Оскол', null),
+          ('CO ats', 'external', 'career/jetbrains/7', null, null),
+          ('CO site', 'external', 'career/tbank/8', null, null);
+        update vacancies set city = 'Белград' where title = 'CO town';
+        select string_agg(title || ':' || coalesce(country, '-'), ',' order by title) from vacancies where title like 'CO %';
+        delete from vacancies where title like 'CO %';""",
+     "postgres", None, "CO ai:Казахстан,CO ats:-,CO latin:-,CO msk:Россия,CO site:Россия,CO tash:Узбекистан,CO town:Сербия,CO tv:Россия"),
+    ("сайт видит справочник стран", True, "select (count(*) >= 0)::text from vacancy_countries", "anon", None, "true"),
     ("ротация «Работы России»: старые удаляются, с откликами — в архив, свежие остаются", True,
      f"""insert into vacancies (title, source_type, source_post, posted_at) values
           ('TV old', 'external', 'trudvsem/old', now() - interval '5 days'),

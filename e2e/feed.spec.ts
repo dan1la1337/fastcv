@@ -125,3 +125,15 @@ test("фильтр по источнику: только Telegram — во вс�
   await page.getByRole("button", { name: "Все", exact: true }).first().click();
   await expect.poll(() => total(page)).toBe(all);
 });
+
+test("фильтр по стране: Россия первой, лента не растёт", async ({ page }) => {
+  await page.goto("/");
+  await openFilters(page);
+  const all = await total(page);
+  await page.getByRole("button", { name: "Страна" }).click();
+  const list = page.getByRole("listbox", { name: "Страна" });
+  await expect(list.getByRole("option").first()).toContainText("Россия");
+  await list.getByRole("option").first().click();
+  await expect.poll(() => total(page)).toBeLessThanOrEqual(all);
+  await expect(page.locator("#feed section h2").first()).toBeVisible();
+});
