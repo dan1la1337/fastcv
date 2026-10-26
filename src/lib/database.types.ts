@@ -241,6 +241,10 @@ export type Database = {
           skills: Json | null
           telegram_chat_id: number | null
           telegram_link_code: string | null
+          company_domain: string | null
+          company_verify_token: string | null
+          company_verified_at: string | null
+          company_checked_at: string | null
           telegram_notified_at: string | null
           telegram_notify: boolean
           trust_score: number | null
@@ -262,6 +266,10 @@ export type Database = {
           skills?: Json | null
           telegram_chat_id?: number | null
           telegram_link_code?: string | null
+          company_domain?: string | null
+          company_verify_token?: string | null
+          company_verified_at?: string | null
+          company_checked_at?: string | null
           telegram_notified_at?: string | null
           telegram_notify?: boolean
           trust_score?: number | null
@@ -283,6 +291,10 @@ export type Database = {
           skills?: Json | null
           telegram_chat_id?: number | null
           telegram_link_code?: string | null
+          company_domain?: string | null
+          company_verify_token?: string | null
+          company_verified_at?: string | null
+          company_checked_at?: string | null
           telegram_notified_at?: string | null
           telegram_notify?: boolean
           trust_score?: number | null
@@ -331,6 +343,7 @@ export type Database = {
           description: string | null
           direction: string | null
           employer_id: string | null
+          employer_verified: boolean
           id: string
           is_remote: boolean | null
           level: string | null
@@ -369,6 +382,7 @@ export type Database = {
           description?: string | null
           direction?: string | null
           employer_id?: string | null
+          employer_verified?: boolean
           id?: string
           is_remote?: boolean | null
           level?: string | null
@@ -407,6 +421,7 @@ export type Database = {
           description?: string | null
           direction?: string | null
           employer_id?: string | null
+          employer_verified?: boolean
           id?: string
           is_remote?: boolean | null
           level?: string | null
@@ -483,6 +498,8 @@ export type Database = {
       is_app_admin: { Args: never; Returns: boolean }
       create_telegram_link_code: { Args: never; Returns: string }
       link_telegram_chat: { Args: { chat: number; code: string }; Returns: boolean }
+      start_company_verification: { Args: { domain: string }; Returns: string }
+      check_company_verification: { Args: never; Returns: boolean }
       set_telegram_bot: { Args: { username: string }; Returns: undefined }
       consume_ai_quota: {
         Args: { max_calls: number; quota_kind: string; window_seconds: number }
