@@ -73,6 +73,11 @@ def test_api_failure_archives_nothing():
     assert stats["tripledot"] == {"error": "ConnectionError"} and store.archived == []
 
 
+def test_country_only_location():
+    assert ats.country_of("Estonia - Remote") == "Эстония"
+    assert ats.country_of("Remote Europe") is None
+
+
 def test_city_of():
     assert ats.city_of("Belgrade, Serbia") == ("Белград", False)
     assert ats.city_of("Estonia - Remote") == (None, True)

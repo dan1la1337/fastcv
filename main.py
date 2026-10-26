@@ -241,6 +241,7 @@ class VacancyAI(BaseModel):
     hiring_type: Optional[HiringType]
     scope_note: Optional[str]
     experience_min: Optional[float]
+    country: Optional[str]
 
 
 PROMPT = """Ты нормализатор вакансий для доски объявлений о работе.
@@ -303,6 +304,10 @@ PROMPT = """Ты нормализатор вакансий для доски о�
   что именно смешано: «Кроме бэкенда — настройка Kubernetes с нуля и вёрстка на Vue».
   Обычные смежные требования (бэкенд + SQL + Docker, фронтенд + немного Node.js) — не повод;
   в сомнении — null;
+- country: страна, где работа, по-русски (Россия, Казахстан, Сербия, США…): страна города, если он
+  указан; для удалённой работы — страна, где нужно жить или откуда компания нанимает («только РФ»,
+  «удалёнка из Казахстана»); если пост на русском, зарплата в рублях и нет признаков другой
+  страны — Россия; «из любой страны», «worldwide» или неясно — null;
 - contact_type и contact_value: "telegram" и username без @, либо "email" и адрес;
   если контакта нет или это только ссылка на сайт — оба null;
 - stack: ключевые технологии и инструменты из текста (Python, React, PostgreSQL, Figma…),
@@ -769,6 +774,8 @@ def save_post(prepared: Prepared, vacancy: VacancyAI, store: Store) -> Outcome:
         "hiring_type": vacancy.hiring_type,
         "scope_note": (vacancy.scope_note or "").strip()[:300] or None,
         "experience_min": clean_experience(vacancy.experience_min),
+        # Город точнее: база возьмёт страну из него, а ответ ИИ — для вакансий без города
+        "country": (vacancy.country or "").strip()[:60] or None,
         "ranking_weight": 1.0,
         "source_type": "external",
     })

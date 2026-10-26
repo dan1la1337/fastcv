@@ -9,6 +9,8 @@ export interface Vacancy {
   salary_max: number | null;
   salary_currency: string | null;
   city: string | null;
+  /** Страна (по городу, для удалёнки без города — по ответу ИИ сборщика); null — неизвестна. */
+  country?: string | null;
   is_remote: boolean | null;
   contact_type: string | null;
   contact_value: string | null;
@@ -37,7 +39,7 @@ export interface Vacancy {
 
 /** Колонки для показа: без служебных (search_tsv, title_key, text_fingerprint, raw_hash) — они только раздувают ответ. */
 // Одной строкой-литералом: по ней supabase-js выводит тип строк ответа
-export const VACANCY_COLUMNS = "id, title, company_name, description, salary_min, salary_max, salary_currency, city, is_remote, contact_type, contact_value, created_at, posted_at, source_type, source_url, stack, employer_id, archived_at, level, direction, work_format, hiring_type, first_seen_at, channels_count, scope_note, experience_min";
+export const VACANCY_COLUMNS = "id, title, company_name, description, salary_min, salary_max, salary_currency, city, country, is_remote, contact_type, contact_value, created_at, posted_at, source_type, source_url, stack, employer_id, archived_at, level, direction, work_format, hiring_type, first_seen_at, channels_count, scope_note, experience_min";
 
 export type Level = "intern" | "junior" | "middle" | "senior" | "lead";
 export type WorkFormat = "remote" | "hybrid" | "office";
@@ -105,6 +107,8 @@ export interface VacancyFilters {
   formats: WorkFormat[];
   minSalary: number;
   withSalary: boolean;
+  /** Страна (vacancies.country); пусто — все страны. */
+  country: string;
   city: string;
   /** Направление (vacancies.direction); пусто — все. */
   direction: string;
@@ -137,6 +141,7 @@ export const DEFAULT_FILTERS: VacancyFilters = {
   formats: [],
   minSalary: 0,
   withSalary: false,
+  country: "",
   city: "",
   direction: "",
   area: "",
@@ -293,6 +298,7 @@ export async function fetchVacancyPage(
   if (filters.direction) query = query.eq("direction", filters.direction);
   else if (filters.area) query = query.in("direction", DIRECTIONS.filter(d => d.group === filters.area).map(d => d.id));
   if (filters.levels.length) query = query.in("level", filters.levels);
+  if (filters.country) query = query.eq("country", filters.country);
   const city = filters.city.trim();
   if (city) query = query.ilike("city", `%${city.replace(/[%_\\]/g, "\\$&")}%`);
 
