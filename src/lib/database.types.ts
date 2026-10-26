@@ -344,6 +344,7 @@ export type Database = {
           direction: string | null
           employer_id: string | null
           employer_verified: boolean
+          employer_slow: boolean
           id: string
           is_remote: boolean | null
           level: string | null
@@ -383,6 +384,7 @@ export type Database = {
           direction?: string | null
           employer_id?: string | null
           employer_verified?: boolean
+          employer_slow?: boolean
           id?: string
           is_remote?: boolean | null
           level?: string | null
@@ -422,6 +424,7 @@ export type Database = {
           direction?: string | null
           employer_id?: string | null
           employer_verified?: boolean
+          employer_slow?: boolean
           id?: string
           is_remote?: boolean | null
           level?: string | null
