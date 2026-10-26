@@ -593,6 +593,33 @@ CHECKS: list[tuple] = [
      "postgres", None, "1\n2\n3\n3 true"),
     ("работодатель не отмечает закрытой свою вакансию", False,
      "select report_vacancy_closed('99999999-0000-0000-0000-0000000000b2')", "authenticated", E, None),
+    ("работодатель задаёт до трёх вопросов блица; пустые отбрасываются", True,
+     f"""insert into vacancies (id, title, source_type, employer_id, blitz_questions)
+          values ('99999999-0000-0000-0000-0000000000c1', 'BZ job', 'internal', '{E}', '["  Почему мы?  ", "", "Опыт с Kafka?"]');
+        select blitz_questions::text from vacancies where title = 'BZ job'""",
+     "authenticated", E, '["Почему мы?", "Опыт с Kafka?"]'),
+    ("четыре вопроса блица — нельзя", False,
+     """update vacancies set blitz_questions = '["a", "b", "c", "d"]' where title = 'BZ job'""", "authenticated", E, None),
+    ("внешняя вакансия без блица", True,
+     """insert into vacancies (title, source_type, blitz_questions) values ('BZ ext', 'external', '["x"]');
+        select blitz_questions::text from vacancies where title = 'BZ ext'""", "service_role", None, "[]"),
+    ("отклик без ответов на блиц не принимается", False,
+     f"insert into applications (vacancy_id, candidate_id) values ('99999999-0000-0000-0000-0000000000c1', '{C}')",
+     "authenticated", C, None),
+    ("отклик с одним пустым ответом не принимается", False,
+     f"""insert into applications (vacancy_id, candidate_id, blitz_answers) values ('99999999-0000-0000-0000-0000000000c1', '{C}', '["Интересно", " "]')""",
+     "authenticated", C, None),
+    ("кандидат отвечает на блиц — в базе пары вопрос-ответ", True,
+     f"""insert into applications (id, vacancy_id, candidate_id, blitz_answers, blitz_summary)
+          values ('99999999-0000-0000-0000-0000000000c2', '99999999-0000-0000-0000-0000000000c1', '{C}', '["Нравится продукт", "2 года"]', 'подделка');
+        select blitz_answers::text || ' ' || coalesce(blitz_summary, 'нет') from applications where id = '99999999-0000-0000-0000-0000000000c2'""",
+     "authenticated", C, '[{"a": "Нравится продукт", "q": "Почему мы?"}, {"a": "2 года", "q": "Опыт с Kafka?"}] нет'),
+    ("работодатель НЕ правит ответы кандидата", False,
+     """update applications set blitz_answers = '[]' where id = '99999999-0000-0000-0000-0000000000c2'""", "authenticated", E, None),
+    ("работодатель сохраняет ИИ-выжимку ответов", True,
+     """update applications set blitz_summary = 'Мотивирован, опыт 2 года' where id = '99999999-0000-0000-0000-0000000000c2';
+        select blitz_summary from applications where id = '99999999-0000-0000-0000-0000000000c2'""",
+     "authenticated", E, "Мотивирован, опыт 2 года"),
     ("ротация «Работы России»: старые удаляются, с откликами — в архив, свежие остаются", True,
      f"""insert into vacancies (title, source_type, source_post, posted_at) values
           ('TV old', 'external', 'trudvsem/old', now() - interval '5 days'),
