@@ -31,6 +31,7 @@ ROBOTS_AGENT = "FastCVBot"
 RANKING_WEIGHT = 1.0          # как Telegram: иначе тысячи вакансий одной компании закрыли бы ленту
 TIME_BUDGET_SECONDS = 10 * 60   # из них «Работе России» отдали 3 минуты: там 40k вакансий и мало ИТ
 MAX_NEW_PER_COMPANY = 150     # за запуск: остальные страницы дочитаем в следующие
+REFRESH_PER_RUN = 40          # старых вакансий с шаблонным описанием дочитываем за запуск на компанию
 PAGE_TEXT_LIMIT = 6000
 # Сайты банков подписаны сертификатами НУЦ Минцифры, которых нет в стандартном наборе
 RUSSIAN_CA = ["https://gu-st.ru/content/Other/doc/russian_trusted_root_ca.cer",
@@ -183,6 +184,40 @@ _CITY_IN = re.compile(r"^(.{3,}?)\s+в\s+([А-ЯЁ][а-яё]+(?:[ -][А-ЯЁ][а
 _CITY_FIELD = re.compile(r"Город:\s*([А-ЯЁ][а-яё]+(?:[ -][А-ЯЁ][а-яё]+)?)")
 
 
+# Разделы страницы вакансии, с которых начинается её суть (а не меню и общий текст о компании)
+_SECTION = re.compile(
+    r"(Чем предстоит заниматься|Что (?:нужно|предстоит|будешь|будете) делать|Обязанности|Основные задачи|"
+    r"Твои задачи|Ваши задачи|Задачи|Описание вакансии|Описание|О команде|О проекте|Мы ожидаем|Требования)\s*:?\s+",
+    re.I)
+# Шаблонные SEO-описания карьерных сайтов: одинаковые у всех вакансий компании
+TEMPLATE_PHRASES = ("Работа в банке без опыта", "работа в Сбере", "Присоединяйся к финтех-компании",
+                    "Белая зарплата, ДМС", "Ждем вас в нашу команду", "Работа и карьера в Тинькофф",
+                    "Актуальные вакансии")
+TEMPLATE_DESCRIPTION = re.compile("|".join(re.escape(p) for p in TEMPLATE_PHRASES), re.I)
+
+
+def body_description(page: str, limit: int = 650) -> Optional[str]:
+    """Суть вакансии из текста страницы: с первого раздела «Обязанности», «Задачи» и т. п.
+    Заголовок раздела отделяем двоеточием, текст обрезаем по концу предложения."""
+    text = page_text(page)
+    match = _SECTION.search(text)
+    if not match:
+        return None
+    rest = text[match.end():]
+    chunk = f"{match.group(1)}: {rest}"[:limit]
+    if len(rest) > limit - len(match.group(1)) - 2:
+        cut = max(chunk.rfind(". "), chunk.rfind("; "))
+        chunk = chunk[:cut + 1] if cut > limit // 2 else chunk.rstrip() + "…"
+    return chunk.strip() or None
+
+
+def better_description(page: str, current: Optional[str]) -> Optional[str]:
+    """Описание с тела страницы, если текущее пустое или шаблонное."""
+    if current and not TEMPLATE_DESCRIPTION.search(current):
+        return current
+    return body_description(page) or (None if current and TEMPLATE_DESCRIPTION.search(current) else current)
+
+
 def row_from_meta(page: str, company: Company, vid: str, url: str) -> Optional[dict]:
     """Без ИИ: название из H1 или заголовка страницы, описание из meta description.
     Направление и уровень по названию определит база (триггер vacancies_normalize)."""
@@ -195,7 +230,7 @@ def row_from_meta(page: str, company: Company, vid: str, url: str) -> Optional[d
     title = re.split(r"\s+[-–|]\s+(?:работа\b|вакансии\b|" + re.escape(company.name) + r"|т-банк)", title, flags=re.I)[0]
     title = re.split(r"\s+[|–]\s+", title)[0]
     title = re.sub(r"\s+вакансия\s+в\s+\S+$", "", title, flags=re.I).strip(" ,.-")
-    description = clean((_META_DESC.search(page) or [None, None])[1], 700)
+    description = better_description(page, clean((_META_DESC.search(page) or [None, None])[1], 700))
     city = None
     if match := _CITY_IN.match(title):          # «Продавец в Москва» (МТС)
         title, city = match.group(1), match.group(2)
@@ -372,6 +407,8 @@ def import_careers(store, normalize: Callable[[str], object], fetcher: Optional[
                 posting = job_posting(page)
                 if posting:
                     row = row_from_posting(posting, company, vid, url)
+                    if row:
+                        row["description"] = better_description(page, row["description"])
                 elif (row := row_from_meta(page, company, vid, url)) is not None:
                     pass
                 else:
@@ -390,6 +427,15 @@ def import_careers(store, normalize: Callable[[str], object], fetcher: Optional[
                     "title": "(не вакансия)", "company_name": company.name,
                     "archived_at": datetime.now(timezone.utc).isoformat()}])
                 info["saved"] += 1 if row else 0
+            # Уже собранные вакансии с пустым или шаблонным описанием — дочитываем понемногу
+            for post, url in store.career_weak_descriptions(company.key, REFRESH_PER_RUN):
+                if clock() > company_deadline:
+                    break
+                page = fetcher.get(url, company.pause)
+                description = body_description(page) if page else None
+                if description:
+                    store.update_description(post, description)
+                    info["refreshed"] = info.get("refreshed", 0) + 1
         except Blocked as e:
             info["blocked"] = str(e)
         except requests.RequestException as e:

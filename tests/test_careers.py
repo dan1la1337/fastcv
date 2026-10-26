@@ -47,6 +47,15 @@ class Store:
         self.rows += rows
         return len(rows)
 
+    weak: list = []
+    updated: dict = {}
+
+    def career_weak_descriptions(self, key, limit):
+        return self.weak[:limit]
+
+    def update_description(self, post, description):
+        self.updated[post] = description
+
 
 def site(**extra):
     pages = {"https://job.acme.ru/robots.txt": ROBOTS, "https://job.acme.ru/sitemap.xml": INDEX,
@@ -202,3 +211,35 @@ def test_heavier_company_gets_more_time():
     stats = careers.import_careers(Store(), ai, site(**{"https://job.acme.ru/sitemap-vacancies.xml": many}, **pages),
                                    [light, heavy], clock=clock, time_budget=800)
     assert stats["heavy"]["saved"] > 2 * stats["light"]["saved"] > 0
+
+
+ALFA_PAGE = """<html><head><title>Менеджер — Альфа-Банк</title>
+<meta name="description" content="Вакансия менеджер в Москве в Альфа-Банке. Работа в банке без опыта, стажировка и обучение. Актуальные вакансии.">
+</head><body><nav>Все вакансии</nav><h1>Менеджер прямых продаж</h1><p>от 95 000 Волгоград Откликнуться</p>
+<h2>Чем предстоит заниматься</h2><ul><li>Привлекать клиентов малого бизнеса;</li><li>Проводить деловые встречи.</li></ul>
+<h2>Наши пожелания</h2><p>Высшее образование.</p></body></html>"""
+
+
+def test_template_meta_description_replaced_by_page_body():
+    row = careers.row_from_meta(ALFA_PAGE, careers.COMPANIES[0], "1", "https://x/1")
+    assert row["description"].startswith("Чем предстоит заниматься: Привлекать клиентов малого бизнеса")
+    assert "Работа в банке без опыта" not in row["description"]
+
+
+def test_good_meta_description_is_kept():
+    page = ALFA_PAGE.replace("Вакансия менеджер в Москве в Альфа-Банке. Работа в банке без опыта, стажировка и обучение. Актуальные вакансии.",
+                             "Привлекать клиентов и вести переговоры.")
+    assert careers.row_from_meta(page, careers.COMPANIES[0], "1", "u")["description"] == "Привлекать клиентов и вести переговоры."
+
+
+def test_body_description_cut_at_sentence():
+    page = "<h1>X</h1><p>Обязанности " + "Делать задачу. " * 80 + "</p>"
+    text = careers.body_description(page, limit=200)
+    assert text.startswith("Обязанности: Делать задачу.") and text.endswith(".") and len(text) <= 200
+
+
+def test_weak_descriptions_refreshed_from_pages():
+    store = Store()
+    store.weak = [("career/acme/9", "https://job.acme.ru/vacancy/9")]
+    careers.import_careers(store, ai, site(**{"https://job.acme.ru/vacancy/9": ALFA_PAGE}), [CO], clock=lambda: 0)
+    assert store.updated["career/acme/9"].startswith("Чем предстоит заниматься")
