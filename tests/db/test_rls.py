@@ -635,9 +635,9 @@ CHECKS: list[tuple] = [
                (select count(*) from vacancy_marks where user_id = '00000000-0000-0000-0000-0000000000e1') || ' ' ||
                (select string_agg(jsonb_array_length(blitz_questions)::text, ',' order by title desc)
                   from vacancies where employer_id = '00000000-0000-0000-0000-0000000000e2') || ' ' ||
-               (select name || ':' || pref_level from profiles where id = '00000000-0000-0000-0000-0000000000e1')""",
+               (select name || ':' || coalesce(pref_level, '-') || ':' || jsonb_array_length(skills) from profiles where id = '00000000-0000-0000-0000-0000000000e1')""",
      "postgres", None,
-     '{"vacancies_created": 3, "vacancies_replaced": 3, "applications_removed": 1} 0 0 0,2,0 Анна Смирнова:middle'),
+     '{"vacancies_created": 3, "vacancies_replaced": 3, "applications_removed": 1} 0 0 0,2,0 Анна Смирнова:-:0'),
     ("сервис (скрипт) вызывает сброс демо", True,
      "select reset_demo('00000000-0000-0000-0000-0000000000e1', '00000000-0000-0000-0000-0000000000e2') ->> 'vacancies_created'",
      "service_role", None, "3"),
