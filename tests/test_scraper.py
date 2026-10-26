@@ -1002,3 +1002,14 @@ def test_gemini_batch_returns_one_result_per_post_and_fills_gaps(monkeypatch):
     result = normalize.many(["пост a", "пост b", "пост c"])
     assert [v.title for v in result] == ["A", "B", "C"]   # на пропущенный пост — отдельный запрос
     assert '<post id=1>' in sent[0] and sent[1].startswith("<post>")
+
+
+def test_history_goes_first_to_weak_directions(monkeypatch):
+    monkeypatch.setattr(main, "HISTORY_POSTS_PER_RUN", 5)
+    rows = [{"username": "mkt", "category": "marketing", "last_post_id": 30, "history_before": None},
+            {"username": "fe", "category": "frontend", "last_post_id": 30, "history_before": None}]
+    store = FakeStore(rows=rows)
+    fetch = _feeds({"mkt": [29, 30], "fe": [29, 30]}, history={"mkt": list(range(1, 31)), "fe": list(range(1, 31))})
+    main.run_batched(store, _Batcher(), rows, fetch=fetch, pause=lambda s: None)
+    assert store.channel_updates["fe"]["history_before"] == 26     # 5 постов истории — фронтенду
+    assert store.channel_updates["mkt"]["history_before"] == 31     # маркетинг подождёт: история не тронута
