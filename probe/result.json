@@ -1,599 +1,1137 @@
 {
-"channels": [
-{
-"u": "analyst_job",
-"status": 200,
-"title": "analyst_job",
-"posts": 2,
-"week": 0,
-"last": "2026-05-31",
-"jobshare": 0.0,
-"cyr": 0.0,
-"sample": "🟡 This community is now protected by Collab.Land Token-gate your community and verify members automa"
-},
-{
-"u": "analyst_job_geeklink",
-"status": 200,
-"title": "Вакансии аналитиков, Data Analyst и Scientist",
-"posts": 20,
-"week": 0,
-"last": "2026-08-24",
-"jobshare": 0.95,
-"cyr": 0.89,
-"sample": "💼 ВАКАНСИЯ: Системный аналитик Компания: Malkin.tech Зарплата: 200-250 тысяч рублей Локация/Format: "
-},
-{
-"u": "androidev",
-"status": 302
-},
-{
-"u": "bitrix24_work",
-"status": 302
-},
-{
-"u": "bitrix_1c_job",
-"status": 200,
-"title": "Вакансии 1С и Bitrix-разработчиков",
-"posts": 20,
-"week": 0,
-"last": "2026-10-15",
-"jobshare": 0.95,
-"cyr": 0.91,
-"sample": "💼 ВАКАНСИЯ: Senior-разработчик 1С: ERP+УХ. Фриланс Компания: Taglex Зарплата: 3500 час Локация/Forma"
-},
-{
-"u": "bitrixworkrabota",
-"status": 302
-},
-{
-"u": "choicy_work",
-"status": 200,
-"title": "🌎 CHOICY.WORK: Global карьера | вакансии | стартапы | удалён",
-"posts": 20,
-"week": 5,
-"last": "2026-10-26",
-"jobshare": 1.0,
-"cyr": 0.79,
-"sample": "User Acquisition manager (Google/Meta) #remote SternMeister — сертифицированный AZAV онлайн-образова"
-},
-{
-"u": "dartlang_jobs",
-"status": 200,
-"title": "Dart Jobs",
-"posts": 20,
-"week": 1,
-"last": "2026-10-22",
-"jobshare": 1.0,
-"cyr": 0.83,
-"sample": "Вакансия Flutter / Full-stack разработчик (AI-native) в Xmethod.de Привет! Мы команда Xmethod.de — а"
-},
-{
-"u": "devops_job_geeklink",
-"status": 200,
-"title": "Вакансии DevOps и системных администраторов",
-"posts": 20,
-"week": 0,
-"last": "2026-09-16",
-"jobshare": 0.95,
-"cyr": 0.72,
-"sample": "👤 РЕЗЮМЕ: Middle DevOps / Infrastructure Engineer Опыт: 4 года Зарплата: 270000-320000 Навыки: Kuber"
-},
-{
-"u": "devopssre_jobs",
-"status": 200,
-"title": "DevOps/SRE_Jobs",
-"posts": 20,
-"week": 0,
-"last": "2026-09-29",
-"jobshare": 1.0,
-"cyr": 0.79,
-"sample": "Публикатор: Alina Romashka Обсуждение: #вакансия #devops #hft #linux #performance #lowlatency #remot"
-},
-{
-"u": "django_jobs_board",
-"status": 200,
-"title": "django_jobs_board",
-"posts": 20,
-"week": 0,
-"last": "2026-10-18",
-"jobshare": 0.65,
-"cyr": 0.61,
-"sample": "#резюме #cv Формат работы: part-time, проектно, удаленно В поиске работы Python-разработчиком. Сумма"
-},
-{
-"u": "dotnetrujobs",
-"status": 302
-},
-{
-"u": "elixir_jobs",
-"status": 200,
-"title": "Elixir Jobs",
-"posts": 20,
-"week": 0,
-"last": "2026-10-15",
-"jobshare": 0.0,
-"cyr": 0.0,
-"sample": "Full-stack Engineer (Elixir, LiveView, React) Treat Health (Helsinki, Finland) Full time - On-site h"
-},
-{
-"u": "fastcodecareer",
-"status": 200,
-"title": "1С Stars: Вакансии, работа от FastCode 1C",
-"posts": 20,
-"week": 0,
-"last": "2026-10-09",
-"jobshare": 0.7,
-"cyr": 0.95,
-"sample": "💻 , Аналитик 1С, ГРОСССОФТ, удаленка, от 200тыс., стаж от 5 лет 1С Методолог-аналитик 1С (блоки Бюдж"
-},
-{
-"u": "flutterroles",
-"status": 200,
-"title": "Flutter Jobs/Internships",
-"posts": 20,
-"week": 0,
-"last": "2026-03-10",
-"jobshare": 0.58,
-"cyr": 0.0,
-"sample": "The owner of this channel has been inactive for the last 11 months. If they remain inactive for the "
-},
-{
-"u": "fordev",
-"status": 302
-},
-{
-"u": "forwebdev",
-"status": 200,
-"title": "For Web — фронтенд, дизайн, программирование",
-"posts": 20,
-"week": 0,
-"last": "2025-05-12",
-"jobshare": 0.0,
-"cyr": 0.67,
-"sample": "GSAP теперь бесплатен: продвинутая библиотека для анимаций и все её платные плагины теперь доступны "
-},
-{
-"u": "front_end_dev",
-"status": 200,
-"title": "FrontEndDev",
-"posts": 20,
-"week": 15,
-"last": "2026-10-26",
-"jobshare": 0.05,
-"cyr": 0.78,
-"sample": "GitHub добавил API для истории звёзд без приватных данных GitHub выпустил REST API endpoint для исто"
-},
-{
-"u": "front_end_jobs",
-"status": 302
-},
-{
-"u": "frontend_jobs_channel",
-"status": 200,
-"title": "Frontend Jobs 🚀",
-"posts": 20,
-"week": 0,
-"last": "2023-09-08",
-"jobshare": 1.0,
-"cyr": 0.8,
-"sample": "#вакансия #frontend #react #reactnative #mobile #typescript #redux #senior UTORG - международная ком"
-},
-{
-"u": "gamedev_unity_unreal_engine_jobs",
-"status": 200,
-"title": "Вакансии GameDev, Unity и Unreal Engine разработчиков",
-"posts": 20,
-"week": 0,
-"last": "2026-08-07",
-"jobshare": 0.95,
-"cyr": 0.82,
-"sample": "👤 РЕЗЮМЕ: 3D-художник Опыт: 3 года Зарплата: От 80000 руб. Навыки: Photoshop, ZBrush, Blender, Subst"
-},
-{
-"u": "gamedevjobtinder",
-"status": 302
-},
-{
-"u": "geeklink_ru",
-"status": 200,
-"title": "Вакансии и резюме в IT. GeekLink.io",
-"posts": 20,
-"week": 0,
-"last": "2026-03-10",
-"jobshare": 0.68,
-"cyr": 0.86,
-"sample": "✨ AI-подбор каналов для постинга вакансий и резюме Теперь в боте https://t.me/it_jobs_resumes_bot AI"
-},
-{
-"u": "golang_job_geeklink",
-"status": 200,
-"title": "Вакансии Golang-разработчиков",
-"posts": 20,
-"week": 0,
-"last": "2026-07-23",
-"jobshare": 0.95,
-"cyr": 0.78,
-"sample": "💼 ВАКАНСИЯ: Tech Lead / Solution Architect (Java / Go) Компания: BuyerTech Зарплата: 400000 Локация/"
-},
-{
-"u": "haskell_job",
-"status": 200,
-"title": "Haskell Jobs",
-"posts": 20,
-"week": 0,
-"last": "2026-08-17",
-"jobshare": 0.74,
-"cyr": 0.3,
-"sample": "Всем привет! Мы ищем middle haskell разработчика (удаленно, можно оформиться в РФ или в Киргизии, а "
-},
-{
-"u": "hireproproduct",
-"status": 200,
-"title": "Hire ProProduct - Продуктовые вакансии",
-"posts": 20,
-"week": 2,
-"last": "2026-10-25",
-"jobshare": 0.89,
-"cyr": 0.88,
-"sample": "📩 Узнать стоимость и условия размещения: @unit1211209"
-},
-{
-"u": "it_jobs_apply",
-"status": 200,
-"title": "IT / Tech jobs",
-"posts": 20,
-"week": 0,
-"last": "2026-05-18",
-"jobshare": 0.0,
-"cyr": 0.87,
-"sample": "Системный аналитик в Силовые машины"
-},
-{
-"u": "it_vac",
-"status": 200,
-"title": "IT Jobs | вакансии, фриланс",
-"posts": 20,
-"week": 14,
-"last": "2026-10-26",
-"jobshare": 0.55,
-"cyr": 0.94,
-"sample": "Оператор Telegram-сообщества ✔️ Доход от 70 000 ₽ + бонусы ✔️ Удалённая работа ✔️ Свободный график ✔"
-},
-{
-"u": "itarchitect_jobs",
-"status": 302
-},
-{
-"u": "itlenta",
-"status": 302
-},
-{
-"u": "java_jobs",
-"status": 302
-},
-{
-"u": "job_1c_sql",
-"status": 302
-},
-{
-"u": "job_gamedev",
-"status": 200,
-"title": "Работа в Геймдеве Вакансии 3D художники аниматоры gamedev, u",
-"posts": 20,
-"week": 0,
-"last": "2026-09-27",
-"jobshare": 0.9,
-"cyr": 0.86,
-"sample": "Ищем Game Mathematician / специалиста по математике игровых механик Разрабатываем крупный сайт по от"
-},
-{
-"u": "job_java",
-"status": 302
-},
-{
-"u": "jobgeeks",
-"status": 302
-},
-{
-"u": "jobs1c",
-"status": 302
-},
-{
-"u": "jobscode_infull",
-"status": 200,
-"title": "Jobs Code | In full",
-"posts": 20,
-"week": 20,
-"last": "2026-10-26",
-"jobshare": 1.0,
-"cyr": 0.84,
-"sample": "Backend-разработчик (TypeScript, Junior-Middle) от 80 000 до 150 000 ₽ Спиридонов Павел Игоревич Bac"
-},
-{
-"u": "jobsfordevsandops",
-"status": 200,
-"title": "Слёрм Карьера — вакансии в IT",
-"posts": 20,
-"week": 0,
-"last": "2024-12-16",
-"jobshare": 0.75,
-"cyr": 0.9,
-"sample": "Прод на паузу, шампанское в продакшен 🥂 🍾 17 декабря откладываем все дела и встречаемся в прямом эфи"
-},
-{
-"u": "jsspeak",
-"status": 302
-},
-{
-"u": "nomadjobs",
-"status": 200,
-"title": "Nomad Jobs. IT вакансии для начинающих",
-"posts": 20,
-"week": 0,
-"last": "2024-12-06",
-"jobshare": 0.6,
-"cyr": 0.84,
-"sample": "Email-маркетолог в Unisender — продуктовая аккредитованная IT-компания, которая помогает бизнесу вес"
-},
-{
-"u": "procxx",
-"status": 302
-},
-{
-"u": "procxxjobs",
-"status": 200,
-"title": "Pro.* Jobs",
-"posts": 20,
-"week": 0,
-"last": "2026-09-09",
-"jobshare": 0.95,
-"cyr": 0.8,
-"sample": "#c #developer ☁️ Позиция: Разработчик C ( Senior ) 🏙 Компания: «HuntTech» 💪 Опыт: от 5 лет 💰 ЗП: Вил"
-},
-{
-"u": "product_project_job",
-"status": 200,
-"title": "Вакансии Product и Project-менеджеров",
-"posts": 20,
-"week": 0,
-"last": "2026-09-09",
-"jobshare": 0.95,
-"cyr": 0.83,
-"sample": "👤 РЕЗЮМЕ: Junior Project Manager / Project Coordinator Опыт: Более 7 лет общего профессионального оп"
-},
-{
-"u": "projects_jobs",
-"status": 302
-},
-{
-"u": "python_django_work",
-"status": 302
-},
-{
-"u": "python_vacancy",
-"status": 302
-},
-{
-"u": "qa_chillout_jobs",
-"status": 200,
-"title": "QA Jobs",
-"posts": 17,
-"week": 0,
-"last": "2026-10-14",
-"jobshare": 0.94,
-"cyr": 0.79,
-"sample": "Middle QA Automation Engineer | Paphos, Cyprus 🇨🇾 Ищем Middle QA Automation Engineer в офис в Пафосе"
-},
-{
-"u": "rabotafrontend",
-"status": 200,
-"title": "FrontEnd Работа",
-"posts": 14,
-"week": 6,
-"last": "2026-10-26",
-"jobshare": 0.87,
-"cyr": 0.81,
-"sample": "Frontend Developer Формат: удалённо/гибрид/офис Компания: Altenar Полная занятость #remote #office #"
-},
-{
-"u": "react_js_jobs",
-"status": 302
-},
-{
-"u": "react_native_jobs",
-"status": 302
-},
-{
-"u": "relocation_vacancies",
-"status": 200,
-"title": "Вакансии с релокацией | релокация, relocation, relocate",
-"posts": 20,
-"week": 0,
-"last": "2025-02-02",
-"jobshare": 0.35,
-"cyr": 0.28,
-"sample": "#IT DevOps Engineer (CI/CD) в Cisco Локация: Белград"
-},
-{
-"u": "ru_python",
-"status": 302
-},
-{
-"u": "ru_pythonjobs",
-"status": 200,
-"title": "Вакансии для Python-разработчиков / Python Jobs",
-"posts": 3,
-"week": 0,
-"last": "2026-03-25",
-"jobshare": 0.67,
-"cyr": 0.86,
-"sample": "Вакансии для Python-разработчиков / Python Jobs pinned a photo"
-},
-{
-"u": "runello_rus_c",
-"status": 200,
-"title": "C#/.Net Job Offers",
-"posts": 20,
-"week": 20,
-"last": "2026-10-25",
-"jobshare": 1.0,
-"cyr": 0.57,
-"sample": "Инженер-программист (Trainee/Junior) Грейд: Trainee/Junior Стек: C#, .NET, Java, Spring Boot, ASP.NE"
-},
-{
-"u": "runello_rus_c20",
-"status": 200,
-"title": "C++ / Embedded Job Offers",
-"posts": 20,
-"week": 20,
-"last": "2026-10-26",
-"jobshare": 1.0,
-"cyr": 0.73,
-"sample": "Cinematic Artist (Unreal Engine) Грейд: Middle Стек: Unreal Engine, Unreal Engine 5, Blueprints, Cin"
-},
-{
-"u": "runello_rus_html",
-"status": 200,
-"title": "HTML / CSS Job Offers",
-"posts": 4,
-"week": 2,
-"last": "2026-10-26",
-"jobshare": 0.75,
-"cyr": 0.88,
-"sample": "Верстальщик Стек: HTML5, CSS3, JavaScript, Figma, Git, Flexbox, Grid, ChatGPT Энсайн — IT-компания, "
-},
-{
-"u": "saba_hunter",
-"status": 302
-},
-{
-"u": "sql_jobs",
-"status": 302
-},
-{
-"u": "symfony_careers",
-"status": 200,
-"title": "Symfony Jobs",
-"posts": 20,
-"week": 0,
-"last": "2024-12-12",
-"jobshare": 0.5,
-"cyr": 0.55,
-"sample": "Вакансія: #remote #fulltime Компанія: Netpeak Core Локація: Ремоут Ставка: $2000-2400 Операційна пла"
-},
-{
-"u": "sysadm_in_job",
-"status": 302
-},
-{
-"u": "sysadmin_rabota",
-"status": 302
-},
-{
-"u": "teamlead_job_it",
-"status": 200,
-"title": "Вакансии для Lead разработчиков, аналитиков, дизайнеров",
-"posts": 20,
-"week": 0,
-"last": "2026-07-27",
-"jobshare": 0.95,
-"cyr": 0.78,
-"sample": "💼 ВАКАНСИЯ: Техлид 1С Компания: УЛЬТРА ФИШ Зарплата: 350 000 Локация/Format: Москва, м. Румянцево #в"
-},
-{
-"u": "theyseeku_it",
-"status": 200,
-"title": "Удаленка — IT и Digital",
-"posts": 20,
-"week": 20,
-"last": "2026-10-26",
-"jobshare": 1.0,
-"cyr": 0.89,
-"sample": "Backend-разработчик (TypeScript, Junior-Middle) от 80 000 до 150 000 ₽ Спиридонов Павел Игоревич Bac"
-},
-{
-"u": "tzprofi_job",
-"status": 302
-},
-{
-"u": "ue_pub",
-"status": 200,
-"title": "Unreal Engine Jobs",
-"posts": 20,
-"week": 1,
-"last": "2026-10-20",
-"jobshare": 0.85,
-"cyr": 0.84,
-"sample": "Technical Animator, Unreal Engine 5.6 (проектная работа) Мы ITSALIVE.studio - мы сфокусированы на со"
-},
-{
-"u": "uejobs",
-"status": 200,
-"title": "Unreal Engine Jobs 🎮 (Работа, вакансии, стажировки)",
-"posts": 20,
-"week": 4,
-"last": "2026-10-26",
-"jobshare": 0.3,
-"cyr": 0.25,
-"sample": "PRINCIPAL C++ ENGINEER (TOBSPR GAMES) 🕹 Factory simulation game 🧠 Principal 💰 Negotiable ⏰ Full-time"
-},
-{
-"u": "uiux_jobs",
-"status": 302
-},
-{
-"u": "unityjobs_pub",
-"status": 200,
-"title": "Unity Jobs",
-"posts": 20,
-"week": 0,
-"last": "2026-10-19",
-"jobshare": 0.89,
-"cyr": 0.83,
-"sample": "Друзья, подборка каналов для вас! Будем рады, если вступите! 👌 Канал с игровыми вакансиям - https://"
-},
-{
-"u": "uxui_jobs",
-"status": 302
-},
-{
-"u": "wordpress_jobs",
-"status": 200,
-"title": "WordPress Jobs",
-"posts": 20,
-"week": 0,
-"last": "2026-10-06",
-"jobshare": 0.47,
-"cyr": 0.78,
-"sample": "Ламповое комьюнити про ИТ, ИИ и digital Наш канал вошел в подборку тг-каналов про ИТ, диджитал и Tec"
-},
-{
-"u": "xamarin_jobs",
-"status": 302
-},
-{
-"u": "ya_jobs",
-"status": 200,
-"title": "Яндекс нанимает | Вакансии для разработчиков",
-"posts": 20,
-"week": 0,
-"last": "2026-10-09",
-"jobshare": 0.95,
-"cyr": 0.94,
-"sample": "Разработчик на Go в команду еком-продуктов для бизнеса 🌐 Мы создаём новый амбициозный проект, которы"
-},
-{
-"u": "yii_jobs",
-"status": 200,
-"title": "Yii Вакансии и резюме",
-"posts": 20,
-"week": 0,
-"last": "2026-09-21",
-"jobshare": 0.7,
-"cyr": 0.88,
-"sample": "#resume , ищу проектную работу 👨‍🔧 Виктор Бабанов, решаю сложные технические проблемы . - Вхожу в co"
+"stats": {
+"sperasoft": {
+"archived": 0,
+"live": 38,
+"new": 38
+},
+"tripledot": {
+"archived": 0,
+"live": 53,
+"new": 53
+},
+"jetbrains": {
+"archived": 0,
+"live": 48,
+"new": 48
 }
-],
-"superjob": {},
-"ats": []
+},
+"dirs": {
+"gamedev": 91,
+"null": 48
+},
+"rows": [
+{
+"source_post": "career/sperasoft/06C1F764FA",
+"title": "3D Environment Artist (Legendary AAA Stylized Project)",
+"city": "Ереван",
+"is_remote": true,
+"posted_at": "2026-08-25",
+"d": "Города: Ереван, Белград, Бухарест, Астана, Ташкент. Sperasoft has been one of ke"
+},
+{
+"source_post": "career/sperasoft/AB1CACDE97",
+"title": "3D Environment Artist / Artysta Środowisk 3D (Legendary AAA Stylized Project)",
+"city": "Варшава",
+"is_remote": true,
+"posted_at": "2026-08-25",
+"d": "[EN] Sperasoft is a leading game co-development company. We work closely with ou"
+},
+{
+"source_post": "career/sperasoft/A4FB95A790",
+"title": "3D Props Artist",
+"city": "Белград",
+"is_remote": false,
+"posted_at": "2026-05-11",
+"d": "Города: Белград, Ереван. Sperasoft is seeking a skilled and passionate 3D Props "
+},
+{
+"source_post": "career/sperasoft/4A9E815B8D",
+"title": "3D Vegetation Artist",
+"city": "Ереван",
+"is_remote": false,
+"posted_at": "2026-05-11",
+"d": "Города: Ереван, Белград. Sperasoft is looking for a talented, experienced 3D veg"
+},
+{
+"source_post": "career/sperasoft/ED9BBEEAA2",
+"title": "Account Manager",
+"city": "Краков",
+"is_remote": false,
+"posted_at": "2026-10-23",
+"d": "Города: Краков, Варшава. [EN] Own the development and maintenance of strong rela"
+},
+{
+"source_post": "career/sperasoft/156A681583",
+"title": "Associate Technical Director",
+"city": "Белград",
+"is_remote": false,
+"posted_at": "2026-10-06",
+"d": "Города: Белград, Ереван. We're looking for a Associate Technical Director with a"
+},
+{
+"source_post": "career/sperasoft/ECA4950B39",
+"title": "Associate Technical Director/Zastępca Dyrektora Technicznego",
+"city": "Краков",
+"is_remote": false,
+"posted_at": "2026-10-06",
+"d": "Города: Краков, Варшава. [EN] We're looking for a Associate Technical Director w"
+},
+{
+"source_post": "career/sperasoft/101EFB7E4A",
+"title": "C++ Developer",
+"city": "Белград",
+"is_remote": false,
+"posted_at": "2026-04-24",
+"d": "Города: Белград, Ереван. Sperasoft is a leading game co-development company. We "
+},
+{
+"source_post": "career/sperasoft/6240E1552E",
+"title": "C++ Developer / Programista C++",
+"city": "Варшава",
+"is_remote": true,
+"posted_at": "2026-10-26",
+"d": "Города: Варшава, Краков. [EN] Sperasoft is a leading game co-development company"
+},
+{
+"source_post": "career/sperasoft/120BE75994",
+"title": "Co-dev Manager",
+"city": "Белград",
+"is_remote": false,
+"posted_at": "2026-10-23",
+"d": "Города: Белград, Краков, Варшава. [EN] Own the development and maintenance of st"
+},
+{
+"source_post": "career/sperasoft/3C32FB51F4",
+"title": "Game Designer (FPS)",
+"city": "Варшава",
+"is_remote": false,
+"posted_at": "2026-10-01",
+"d": "Города: Варшава, Краков, Бухарест, Ереван, Белград. Sperasoft is a leading game "
+},
+{
+"source_post": "career/sperasoft/428BCE906D",
+"title": "Junior Build and Release Engineer",
+"city": "Ереван",
+"is_remote": false,
+"posted_at": "2026-08-20",
+"d": "Города: Ереван, Белград. We are seeking a Build and Release Engineer to help imp"
+},
+{
+"source_post": "career/sperasoft/BBF4B2F789",
+"title": "Junior Build and Release Engineer / Młodszy Inżynier ds. Budowy Oprogramowania",
+"city": "Варшава",
+"is_remote": false,
+"posted_at": "2026-08-20",
+"d": "Города: Варшава, Краков. We are seeking a Build and Release Engineer to help imp"
+},
+{
+"source_post": "career/sperasoft/7411A608E4",
+"title": "Junior Functional Tester",
+"city": "Ереван",
+"is_remote": false,
+"posted_at": "2026-06-25",
+"d": "Please, note! The working schedule for this position is from 8:00 till 16:30 We "
+},
+{
+"source_post": "career/sperasoft/1776D0E0AE",
+"title": "Lead Level Artist",
+"city": "Ереван",
+"is_remote": true,
+"posted_at": "2026-08-13",
+"d": "Города: Ереван, Белград, Бухарест. AMC Studio is a world-leading 3D art and game"
+},
+{
+"source_post": "career/sperasoft/8A84342282",
+"title": "Lead Level Artist / Główny Artysta Lokacji",
+"city": "Варшава",
+"is_remote": false,
+"posted_at": "2026-04-13",
+"d": "[EN] We are currently growing our team and looking for a strong, experienced art"
+},
+{
+"source_post": "career/sperasoft/5ACD6F471D",
+"title": "Lead Props/Environment 3D Artist",
+"city": "Белград",
+"is_remote": true,
+"posted_at": "2026-09-25",
+"d": "Города: Белград, Ереван, Бухарест. Right now, our team is porting one of the mos"
+},
+{
+"source_post": "career/sperasoft/07BA55F4D5",
+"title": "Lead Props/Environment 3D Artist / Główny Artysta Obiektów i Środowiska",
+"city": "Варшава",
+"is_remote": true,
+"posted_at": "2026-08-18",
+"d": "[EN] Right now, our team is porting one of the most atmospheric game universes o"
+},
+{
+"source_post": "career/sperasoft/B307AB5B86",
+"title": "Level Artist / Artysta Lokacji",
+"city": "Варшава",
+"is_remote": true,
+"posted_at": "2026-09-30",
+"d": "[EN] We are looking for an experienced Level Artist to join our art team. As a L"
+},
+{
+"source_post": "career/sperasoft/029C8B46E7",
+"title": "Level Designer",
+"city": "Варшава",
+"is_remote": false,
+"posted_at": "2026-09-16",
+"d": "Города: Варшава, Краков, Ереван, Белград, Бухарест. Responsibilities : Own the p"
+},
+{
+"source_post": "career/sperasoft/001F37B64E",
+"title": "Material artist",
+"city": "Ереван",
+"is_remote": true,
+"posted_at": "2026-10-19",
+"d": "Города: Ереван, Белград, Бухарест. Sperasoft is seeking a Material Artist to int"
+},
+{
+"source_post": "career/sperasoft/C4F7FFD27B",
+"title": "Material Artist (stylization)",
+"city": "Ереван",
+"is_remote": false,
+"posted_at": "2026-10-19",
+"d": "Города: Ереван, Белград. Sperasoft is hiring a Material Artist for stylized proj"
+},
+{
+"source_post": "career/sperasoft/13969D81F1",
+"title": "Material Artist (stylization) / Artysta ds. Materiałów i Tekstur (stylizacja)",
+"city": "Варшава",
+"is_remote": true,
+"posted_at": "2026-09-01",
+"d": "Города: Варшава, Краков. [EN] Sperasoft is hiring a Material Artist for stylized"
+},
+{
+"source_post": "career/sperasoft/161AE8CA34",
+"title": "Material Artist / Artysta ds. Materiałów i Tekstur",
+"city": "Варшава",
+"is_remote": true,
+"posted_at": "2026-10-13",
+"d": "[EN] Sperasoft is seeking a Material Artist to integrate with our art team. You "
+},
+{
+"source_post": "career/sperasoft/82A81E7D76",
+"title": "Mid-Senior 3D Props Artist",
+"city": "Бухарест",
+"is_remote": true,
+"posted_at": "2026-09-11",
+"d": "AMC Studio is a world-leading 3D art and game development studio based in Buchar"
+},
+{
+"source_post": "career/sperasoft/E567B33DB1",
+"title": "Mid-Senior 3D Props Artist / Samodzielny/Starszy Artysta Obiektów 3D",
+"city": "Варшава",
+"is_remote": false,
+"posted_at": "2026-09-11",
+"d": "Города: Варшава, Краков. [EN] Sperasoft is seeking a skilled and passionate 3D P"
+},
+{
+"source_post": "career/sperasoft/5C907FA301",
+"title": "Project Manager (Korean Speaker)",
+"city": "Варшава",
+"is_remote": true,
+"posted_at": "2026-06-17",
+"d": "Города: Варшава, Краков. Responsibilities: Analyzing and investigating new proje"
+},
+{
+"source_post": "career/sperasoft/6019924628",
+"title": "Senior 3D Vegetation Artist / Starszy Artysta Roślinności 3D",
+"city": "Варшава",
+"is_remote": true,
+"posted_at": "2026-05-26",
+"d": "[EN] Sperasoft is a leading game co-development company. We work closely with ou"
+},
+{
+"source_post": "career/sperasoft/5E33A57F5A",
+"title": "Senior Landscape Artist",
+"city": "Ереван",
+"is_remote": false,
+"posted_at": "2026-05-26",
+"d": "Города: Ереван, Белград. Sperasoft is looking for experienced Senior Landscape a"
+},
+{
+"source_post": "career/sperasoft/4BFEE9CA49",
+"title": "Senior Landscape Artist / Starszy Artysta Krajobrazowy",
+"city": "Варшава",
+"is_remote": true,
+"posted_at": "2026-07-30",
+"d": "[EN] Sperasoft is looking for experienced Senior Landscape artist to join AAA+ p"
+},
+{
+"source_post": "career/sperasoft/4F3BBCBCB2",
+"title": "Senior Level Artist",
+"city": "Белград",
+"is_remote": true,
+"posted_at": "2026-05-07",
+"d": "Города: Белград, Ереван, Бухарест. AMC Studio is a world-leading 3D art and game"
+},
+{
+"source_post": "career/sperasoft/50CDF99893",
+"title": "Technical UI Artist",
+"city": "Белград",
+"is_remote": false,
+"posted_at": "2026-10-19",
+"d": "We are seeking a skilled Technical Artist or UI Artist to join our team. This po"
+},
+{
+"source_post": "career/sperasoft/23049C19AD",
+"title": "Technical UI Artist / Techniczny Artysta UI",
+"city": "Варшава",
+"is_remote": false,
+"posted_at": "2026-09-21",
+"d": "[EN] Sperasoft is a leading game co-development company. We work closely with ou"
+},
+{
+"source_post": "career/sperasoft/0CEEA96D40",
+"title": "UI Artist",
+"city": "Белград",
+"is_remote": false,
+"posted_at": "2026-09-08",
+"d": "Responsibilities: Develop game UI, including reworking existing screens and elem"
+},
+{
+"source_post": "career/sperasoft/4B704CA8EF",
+"title": "UI Artist / Artysta UI",
+"city": "Варшава",
+"is_remote": false,
+"posted_at": "2026-09-08",
+"d": "[EN] Responsibilities: Develop game UI, including reworking existing screens and"
+},
+{
+"source_post": "career/sperasoft/17A1C3E5A5",
+"title": "Unreal Engine 4/5 C++ Developer",
+"city": "Ереван",
+"is_remote": true,
+"posted_at": "2026-04-24",
+"d": "Города: Ереван, Белград, Астана, Ташкент. We are looking for Engineers experienc"
+},
+{
+"source_post": "career/sperasoft/930271FC7F",
+"title": "Unreal Engine 4/5 C++ Developer / Programista C++ (Unreal Engine 4/5)",
+"city": "Краков",
+"is_remote": true,
+"posted_at": "2026-04-23",
+"d": "Города: Краков, Варшава. [EN] We are looking for Engineers experienced in Unreal"
+},
+{
+"source_post": "career/sperasoft/00B7538FEE",
+"title": "С++ Developer",
+"city": "Ереван",
+"is_remote": false,
+"posted_at": "2026-01-15",
+"d": "Sperasoft is a leading game co-development company headquartered in the heart of"
+},
+{
+"source_post": "career/tripledot/5010999101",
+"title": "2D Artist",
+"city": "Джакарта",
+"is_remote": false,
+"posted_at": "2026-10-20T07:18:53-04:00",
+"d": "Who are we? Tripledot Studios is one of the largest independent mobile games com"
+},
+{
+"source_post": "career/tripledot/5000303101",
+"title": "2D Marketing Artist",
+"city": "Джакарта",
+"is_remote": false,
+"posted_at": "2026-10-08T02:55:27-04:00",
+"d": "Who are we? Tripledot Studios is one of the largest independent mobile games com"
+},
+{
+"source_post": "career/tripledot/4973861101",
+"title": "3D Artist",
+"city": "Джакарта",
+"is_remote": false,
+"posted_at": "2026-09-15T00:08:16-04:00",
+"d": "Who are we? Tripledot Studios is one of the largest independent mobile games com"
+},
+{
+"source_post": "career/tripledot/5000279101",
+"title": "AI Playable Developer",
+"city": "Джакарта",
+"is_remote": false,
+"posted_at": "2026-10-08T01:02:36-04:00",
+"d": "Who are we? Tripledot Studios is one of the largest independent mobile games com"
+},
+{
+"source_post": "career/tripledot/4976251101",
+"title": "Animator",
+"city": "Джакарта",
+"is_remote": false,
+"posted_at": "2026-09-16T04:18:01-04:00",
+"d": "Who are we? Tripledot Studios is one of the largest independent mobile games com"
+},
+{
+"source_post": "career/tripledot/4943845101",
+"title": "Community Manager",
+"city": "Джакарта",
+"is_remote": false,
+"posted_at": "2026-08-03T23:20:52-04:00",
+"d": "Who are we? Tripledot Studios is one of the largest independent mobile games com"
+},
+{
+"source_post": "career/tripledot/5002871101",
+"title": "Creative Producer",
+"city": "Джакарта",
+"is_remote": false,
+"posted_at": "2026-10-10T08:43:24-04:00",
+"d": "Who are we? Tripledot Studios is one of the largest independent mobile games com"
+},
+{
+"source_post": "career/tripledot/4986773101",
+"title": "Data Analyst",
+"city": "Тбилиси",
+"is_remote": true,
+"posted_at": "2026-09-28T09:38:45-04:00",
+"d": "Города: Тбилиси, Минск, Лимассол, Берлин, Лондон, Барселона и др.. Who are we? T"
+},
+{
+"source_post": "career/tripledot/4965121101",
+"title": "Data Engineer",
+"city": "Варшава",
+"is_remote": false,
+"posted_at": "2026-09-01T06:58:41-04:00",
+"d": "Who are we? Tripledot Studios is one of the largest independent mobile games com"
+},
+{
+"source_post": "career/tripledot/4939207101",
+"title": "Data Scientist",
+"city": "Лондон",
+"is_remote": false,
+"posted_at": "2026-07-28T04:09:03-04:00",
+"d": "Города: Лондон, Джакарта. Who are we? Tripledot Studios is one of the largest in"
+},
+{
+"source_post": "career/tripledot/4988215101",
+"title": "Finance Manager",
+"city": "Лондон",
+"is_remote": false,
+"posted_at": "2026-09-28T09:53:12-04:00",
+"d": "Who are we? Tripledot Studios is one of the largest independent mobile games com"
+},
+{
+"source_post": "career/tripledot/4988608101",
+"title": "Fraud Analyst",
+"city": "Лондон",
+"is_remote": true,
+"posted_at": "2026-09-28T09:44:55-04:00",
+"d": "Города: Лондон, Барселона, Варшава, Тбилиси, Лимассол, Берлин и др.. Who are we?"
+},
+{
+"source_post": "career/tripledot/4944287101",
+"title": "Game Designer (Hybrid Casual)",
+"city": "Варшава",
+"is_remote": false,
+"posted_at": "2026-08-05T11:52:03-04:00",
+"d": "Города: Варшава, Минск, Тбилиси, Лимассол. Who are we? Tripledot Studios is one "
+},
+{
+"source_post": "career/tripledot/4955732101",
+"title": "Game Designer - Lion Studios (f/m/d) - Turkish Market",
+"city": "Берлин",
+"is_remote": false,
+"posted_at": "2026-08-19T04:47:26-04:00",
+"d": "Who are we? Tripledot Studios is one of the largest independent mobile games com"
+},
+{
+"source_post": "career/tripledot/4965778101",
+"title": "Game Designer - Lion Studios - Turkish Market",
+"city": null,
+"is_remote": true,
+"posted_at": "2026-09-01T11:45:28-04:00",
+"d": "Who are we? Tripledot Studios is one of the largest independent mobile games com"
+},
+{
+"source_post": "career/tripledot/5015075101",
+"title": "Game Level Designer",
+"city": null,
+"is_remote": false,
+"posted_at": "2026-10-23T10:41:46-04:00",
+"d": "Who are we? Tripledot Studios is one of the largest independent mobile games com"
+},
+{
+"source_post": "career/tripledot/4970870101",
+"title": "Game Producer (Hybrid Casual)",
+"city": "Лимассол",
+"is_remote": false,
+"posted_at": "2026-09-09T06:53:03-04:00",
+"d": "Города: Лимассол, Тбилиси, Минск, Барселона, Варшава. Who are we? Tripledot Stud"
+},
+{
+"source_post": "career/tripledot/5012753101",
+"title": "Growth Director",
+"city": null,
+"is_remote": false,
+"posted_at": "2026-10-21T15:48:03-04:00",
+"d": "Who are we? Tripledot Studios is one of the largest independent mobile games com"
+},
+{
+"source_post": "career/tripledot/4952291101",
+"title": "Head of Engineering",
+"city": null,
+"is_remote": false,
+"posted_at": "2026-08-19T11:58:51-04:00",
+"d": "Who are we? Tripledot Studios is one of the largest independent mobile games com"
+},
+{
+"source_post": "career/tripledot/4971685101",
+"title": "HR Business Partner",
+"city": "Варшава",
+"is_remote": false,
+"posted_at": "2026-09-22T07:30:28-04:00",
+"d": "Who are we? Tripledot Studios is one of the largest independent mobile games com"
+},
+{
+"source_post": "career/tripledot/4997087101",
+"title": "HR Director",
+"city": "Джакарта",
+"is_remote": false,
+"posted_at": "2026-10-05T21:19:35-04:00",
+"d": "Who are we? Tripledot Studios is one of the largest independent mobile games com"
+},
+{
+"source_post": "career/tripledot/4982952101",
+"title": "Lead Data & AI Scientist",
+"city": null,
+"is_remote": false,
+"posted_at": "2026-09-23T06:52:41-04:00",
+"d": "Who are we? Tripledot Studios is one of the largest independent mobile games com"
+},
+{
+"source_post": "career/tripledot/4986126101",
+"title": "Lead Level Designer",
+"city": "Джакарта",
+"is_remote": false,
+"posted_at": "2026-09-27T23:27:46-04:00",
+"d": "Who are we? Tripledot Studios is one of the largest independent mobile games com"
+},
+{
+"source_post": "career/tripledot/4999209101",
+"title": "Lead Product Manager",
+"city": null,
+"is_remote": true,
+"posted_at": "2026-10-06T16:34:41-04:00",
+"d": "Who are we? Tripledot Studios is one of the largest independent mobile games com"
+},
+{
+"source_post": "career/tripledot/4988531101",
+"title": "Lead QA Engineer",
+"city": "Минск",
+"is_remote": false,
+"posted_at": "2026-09-28T09:46:39-04:00",
+"d": "Города: Минск, Тбилиси. Who are we? Tripledot Studios is one of the largest inde"
+},
+{
+"source_post": "career/tripledot/5014459101",
+"title": "Marketing Analyst",
+"city": "Джакарта",
+"is_remote": false,
+"posted_at": "2026-10-23T00:15:33-04:00",
+"d": "Who are we? Tripledot Studios is one of the largest independent mobile games com"
+},
+{
+"source_post": "career/tripledot/4963839101",
+"title": "Marketing Creatives Producer",
+"city": "Тбилиси",
+"is_remote": false,
+"posted_at": "2026-08-31T03:41:48-04:00",
+"d": "Города: Тбилиси, Лимассол, Минск. Who are we? Tripledot Studios is one of the la"
+},
+{
+"source_post": "career/tripledot/5013155101",
+"title": "Marketing Manager",
+"city": "Лондон",
+"is_remote": false,
+"posted_at": "2026-10-22T09:07:59-04:00",
+"d": "Who are we? Tripledot Studios is one of the largest independent mobile games com"
+},
+{
+"source_post": "career/tripledot/5002870101",
+"title": "Motion Designer",
+"city": "Джакарта",
+"is_remote": false,
+"posted_at": "2026-10-10T08:38:33-04:00",
+"d": "Who are we? Tripledot Studios is one of the largest independent mobile games com"
+},
+{
+"source_post": "career/tripledot/5003048101",
+"title": "Product Analyst",
+"city": null,
+"is_remote": false,
+"posted_at": "2026-10-11T22:27:10-04:00",
+"d": "Who are we? Tripledot Studios is one of the largest independent mobile games com"
+},
+{
+"source_post": "career/tripledot/4939385101",
+"title": "Product Director (Hybrid Casual)",
+"city": "Лимассол",
+"is_remote": false,
+"posted_at": "2026-07-28T03:31:15-04:00",
+"d": "Города: Лимассол, Варшава. Who are we? Tripledot Studios is one of the largest i"
+},
+{
+"source_post": "career/tripledot/4965757101",
+"title": "Product Manager - Lion Studios",
+"city": null,
+"is_remote": true,
+"posted_at": "2026-09-01T11:44:49-04:00",
+"d": "Who are we? Tripledot Studios is one of the largest independent mobile games com"
+},
+{
+"source_post": "career/tripledot/4955754101",
+"title": "Product Manager - Lion Studios (f/m/d)",
+"city": "Берлин",
+"is_remote": false,
+"posted_at": "2026-08-20T06:34:04-04:00",
+"d": "Who are we? Tripledot Studios is one of the largest independent mobile games com"
+},
+{
+"source_post": "career/tripledot/4953783101",
+"title": "Senior Ad Monetisation Analyst",
+"city": "Лимассол",
+"is_remote": true,
+"posted_at": "2026-08-17T10:40:56-04:00",
+"d": "Города: Лимассол, Варшава, Барселона, Лондон, Берлин. Who are we? Tripledot Stud"
+},
+{
+"source_post": "career/tripledot/4998359101",
+"title": "Senior Data Engineer",
+"city": "Лондон",
+"is_remote": false,
+"posted_at": "2026-10-08T04:50:49-04:00",
+"d": "Who are we? Tripledot Studios is one of the largest independent mobile games com"
+},
+{
+"source_post": "career/tripledot/4971954101",
+"title": "Senior DevOps Engineer",
+"city": "Варшава",
+"is_remote": false,
+"posted_at": "2026-09-09T08:36:44-04:00",
+"d": "Who are we? Tripledot Studios is one of the largest independent mobile games com"
+},
+{
+"source_post": "career/tripledot/4981480101",
+"title": "Senior Growth Manager",
+"city": "Варшава",
+"is_remote": false,
+"posted_at": "2026-09-22T05:45:01-04:00",
+"d": "Who are we? Tripledot Studios is one of the largest independent mobile games com"
+},
+{
+"source_post": "career/tripledot/4999078101",
+"title": "Senior Level Designer",
+"city": "Барселона",
+"is_remote": false,
+"posted_at": "2026-10-07T05:27:09-04:00",
+"d": "Города: Барселона, Варшава, Минск. Who are we? Tripledot Studios is one of the l"
+},
+{
+"source_post": "career/tripledot/4983098101",
+"title": "Senior Machine Learning Engineer",
+"city": "Лондон",
+"is_remote": false,
+"posted_at": "2026-09-23T12:14:48-04:00",
+"d": "Города: Лондон, Барселона. Who are we? Tripledot Studios is one of the largest i"
+},
+{
+"source_post": "career/tripledot/4941941101",
+"title": "Senior Product Manager",
+"city": "Барселона",
+"is_remote": false,
+"posted_at": "2026-07-31T03:30:19-04:00",
+"d": "Who are we? Tripledot Studios is one of the largest independent mobile games com"
+},
+{
+"source_post": "career/tripledot/5009623101",
+"title": "Senior Project Manager",
+"city": "Джакарта",
+"is_remote": false,
+"posted_at": "2026-10-22T23:25:22-04:00",
+"d": "Who are we? Tripledot Studios is one of the largest independent mobile games com"
+},
+{
+"source_post": "career/tripledot/4820731101",
+"title": "Senior Unity Software Engineer",
+"city": "Джакарта",
+"is_remote": false,
+"posted_at": "2026-03-24T23:28:38-04:00",
+"d": "Who are we? Tripledot Studios is one of the largest independent mobile games com"
+},
+{
+"source_post": "career/tripledot/4948636101",
+"title": "Senior Unity UI Animator",
+"city": "Тбилиси",
+"is_remote": false,
+"posted_at": "2026-08-07T12:30:42-04:00",
+"d": "Города: Тбилиси, Лимассол, Минск. Who are we? Tripledot Studios is one of the la"
+},
+{
+"source_post": "career/tripledot/4982610101",
+"title": "Sound Designer",
+"city": "Джакарта",
+"is_remote": false,
+"posted_at": "2026-09-22T07:09:24-04:00",
+"d": "Who are we? Tripledot Studios is one of the largest independent mobile games com"
+},
+{
+"source_post": "career/tripledot/4982866101",
+"title": "Studio Manager Turkey Market - Lion Studios",
+"city": null,
+"is_remote": true,
+"posted_at": "2026-09-23T08:19:26-04:00",
+"d": "Who are we? Tripledot Studios is one of the largest independent mobile games com"
+},
+{
+"source_post": "career/tripledot/5012446101",
+"title": "Talent Acquisition Manager",
+"city": "Лондон",
+"is_remote": false,
+"posted_at": "2026-10-26T08:59:10-04:00",
+"d": "Who are we? Tripledot Studios is one of the largest independent mobile games com"
+},
+{
+"source_post": "career/tripledot/4949610101",
+"title": "Talent Acquisition Partner",
+"city": "Джакарта",
+"is_remote": false,
+"posted_at": "2026-08-10T09:16:53-04:00",
+"d": "Города: Джакарта, Варшава. Who are we? Tripledot Studios is one of the largest i"
+},
+{
+"source_post": "career/tripledot/4821131101",
+"title": "Technical Artist",
+"city": "Джакарта",
+"is_remote": false,
+"posted_at": "2026-03-26T03:29:37-04:00",
+"d": "Who are we? Tripledot Studios is one of the largest independent mobile games com"
+},
+{
+"source_post": "career/tripledot/5011356101",
+"title": "Technical Project Manager",
+"city": null,
+"is_remote": false,
+"posted_at": "2026-10-22T08:28:54-04:00",
+"d": "Who are we? Tripledot Studios is one of the largest independent mobile games com"
+},
+{
+"source_post": "career/tripledot/4976209101",
+"title": "UI Artist",
+"city": "Джакарта",
+"is_remote": false,
+"posted_at": "2026-09-16T04:17:28-04:00",
+"d": "Who are we? Tripledot Studios is one of the largest independent mobile games com"
+},
+{
+"source_post": "career/tripledot/4969494101",
+"title": "Unity Software Engineer",
+"city": "Джакарта",
+"is_remote": false,
+"posted_at": "2026-09-07T00:33:14-04:00",
+"d": "Who are we? Tripledot Studios is one of the largest independent mobile games com"
+},
+{
+"source_post": "career/tripledot/4980920101",
+"title": "UX Designer",
+"city": "Джакарта",
+"is_remote": false,
+"posted_at": "2026-09-21T03:36:24-04:00",
+"d": "Who are we? Tripledot Studios is one of the largest independent mobile games com"
+},
+{
+"source_post": "career/tripledot/4982056101",
+"title": "VFX Artist / Animator",
+"city": "Джакарта",
+"is_remote": false,
+"posted_at": "2026-09-22T04:12:31-04:00",
+"d": "Who are we? Tripledot Studios is one of the largest independent mobile games com"
+},
+{
+"source_post": "career/jetbrains/4932739101",
+"title": "Accounts Payable Specialist",
+"city": "Прага",
+"is_remote": false,
+"posted_at": "2026-08-10T10:16:33-04:00",
+"d": "Do you manage numbers with precision, but you care even more about the systems b"
+},
+{
+"source_post": "career/jetbrains/4708214101",
+"title": "Campus Ambassador",
+"city": null,
+"is_remote": false,
+"posted_at": "2025-11-10T05:30:23-05:00",
+"d": "Would you like to get hands-on experience with the latest technologies and gain "
+},
+{
+"source_post": "career/jetbrains/4696941101",
+"title": "Campus Ambassador (Universities in Europe)",
+"city": null,
+"is_remote": true,
+"posted_at": "2025-10-30T14:30:59-04:00",
+"d": "Would you like to get hands-on experience with the latest technologies and gain "
+},
+{
+"source_post": "career/jetbrains/4696829101",
+"title": "Compliance Manager (Export Controls & Sanctions)",
+"city": "Амстердам",
+"is_remote": false,
+"posted_at": "2025-10-28T13:33:59-04:00",
+"d": "JetBrains builds world-class developer tools trusted by 11 million users, includ"
+},
+{
+"source_post": "career/jetbrains/4828073101",
+"title": "Customer Success Engineer (China)",
+"city": null,
+"is_remote": false,
+"posted_at": "2026-04-07T23:39:30-04:00",
+"d": "About JetBrains At JetBrains, code is our passion. Ever since we started, back i"
+},
+{
+"source_post": "career/jetbrains/4991149101",
+"title": "Customer Success Engineer - LATAM",
+"city": null,
+"is_remote": true,
+"posted_at": "2026-10-09T04:00:43-04:00",
+"d": "At JetBrains, code is our passion. Since we started in 2000, we have strived to "
+},
+{
+"source_post": "career/jetbrains/4918398101",
+"title": "Developer Advocate (Database)",
+"city": "Амстердам",
+"is_remote": true,
+"posted_at": "2026-07-17T10:39:08-04:00",
+"d": "You know database development inside out, and you love talking about the tools t"
+},
+{
+"source_post": "career/jetbrains/5003095101",
+"title": "Ecosystem QA Lead",
+"city": "Белград",
+"is_remote": false,
+"posted_at": "2026-10-26T12:47:23-04:00",
+"d": "You’re the kind of person who looks at a complex, deeply interconnected system a"
+},
+{
+"source_post": "career/jetbrains/5011030101",
+"title": "Entrepeneur in Residence/Product Lead",
+"city": "Амстердам",
+"is_remote": true,
+"posted_at": "2026-10-26T06:37:49-04:00",
+"d": "Are you a builder who thrives in ambiguity, gets energy from talking to real use"
+},
+{
+"source_post": "career/jetbrains/4964171101",
+"title": "Finance Business Partner",
+"city": "Лимассол",
+"is_remote": false,
+"posted_at": "2026-09-09T12:16:22-04:00",
+"d": "JetBrains is a well-known international software development company. Ever since"
+},
+{
+"source_post": "career/jetbrains/4988356101",
+"title": "Founding GTM Engineering Lead (GrowthBricks)",
+"city": "Амстердам",
+"is_remote": false,
+"posted_at": "2026-10-12T06:18:00-04:00",
+"d": "Founding GTM Engineering Lead (GrowthBricks) Are you someone who likes to build "
+},
+{
+"source_post": "career/jetbrains/4769511101",
+"title": "Founding ML Engineer (Spectrum)",
+"city": "Амстердам",
+"is_remote": true,
+"posted_at": "2026-01-30T10:00:19-05:00",
+"d": "Software engineers and AI agents alike suffer from the same problem: finding tha"
+},
+{
+"source_post": "career/jetbrains/4977893101",
+"title": "Founding Tech Lead (GrowthBricks)",
+"city": "Амстердам",
+"is_remote": true,
+"posted_at": "2026-09-29T05:05:10-04:00",
+"d": "Founding Tech Lead (GrowthBricks) Are you a hands-on engineer who loves zero-to-"
+},
+{
+"source_post": "career/jetbrains/4927313101",
+"title": "Global Indirect Tax Manager",
+"city": "Амстердам",
+"is_remote": false,
+"posted_at": "2026-07-15T03:49:00-04:00",
+"d": "Are you a tax professional who looks at complex global regulations and sees a pu"
+},
+{
+"source_post": "career/jetbrains/4970724101",
+"title": "Growth Marketer (AI-Powered QA Automation)",
+"city": "Амстердам",
+"is_remote": false,
+"posted_at": "2026-09-10T08:14:21-04:00",
+"d": "Do you care about building a user base from scratch, testing unproven acquisitio"
+},
+{
+"source_post": "career/jetbrains/4764092101",
+"title": "Head of JS/TS Ecosystem",
+"city": "Амстердам",
+"is_remote": false,
+"posted_at": "2026-06-22T11:32:11-04:00",
+"d": "As Head of JS/TS Ecosystem, you will own the mid- and long-term strategy for Jet"
+},
+{
+"source_post": "career/jetbrains/4754381101",
+"title": "Head of ML",
+"city": "Амстердам",
+"is_remote": true,
+"posted_at": "2026-02-06T06:18:07-05:00",
+"d": "At JetBrains, code is our passion. Ever since we started back in 2000, we have b"
+},
+{
+"source_post": "career/jetbrains/4936592101",
+"title": "IT Support specialist",
+"city": "Ереван",
+"is_remote": false,
+"posted_at": "2026-07-27T02:55:52-04:00",
+"d": "JetBrains has 10 offices around the world, and all of them are connected via ded"
+},
+{
+"source_post": "career/jetbrains/4790552101",
+"title": "Lead Product Designer (FlySto)",
+"city": "Лимассол",
+"is_remote": false,
+"posted_at": "2026-03-05T13:29:04-05:00",
+"d": "FlySto is a startup project with a small, distributed team. We have a server, we"
+},
+{
+"source_post": "career/jetbrains/4907838101",
+"title": "Lead Product Designer (YouTrack)",
+"city": "Амстердам",
+"is_remote": false,
+"posted_at": "2026-07-09T05:36:06-04:00",
+"d": "You see software development and team organization not as a rigid set of rules, "
+},
+{
+"source_post": "career/jetbrains/4921224101",
+"title": "Legal Operations Specialist",
+"city": "Белград",
+"is_remote": false,
+"posted_at": "2026-07-08T05:54:25-04:00",
+"d": "You love finding order in operational chaos. If you look at a broken process and"
+},
+{
+"source_post": "career/jetbrains/4991197101",
+"title": "Office Administration Team Lead",
+"city": "Белград",
+"is_remote": false,
+"posted_at": "2026-10-01T03:36:10-04:00",
+"d": "Are you an operational lead who loves creating order out of chaos and making an "
+},
+{
+"source_post": "career/jetbrains/4947435101",
+"title": "Procurement Contract Manager (Finance)",
+"city": "Амстердам",
+"is_remote": false,
+"posted_at": "2026-08-06T15:39:55-04:00",
+"d": "Do you look at complex processes and vendor contracts and think, \"This shouldn’t"
+},
+{
+"source_post": "career/jetbrains/4867022101",
+"title": "QA Automation Engineer (IJ Platform / Core team)",
+"city": "Белград",
+"is_remote": false,
+"posted_at": "2026-05-20T08:58:20-04:00",
+"d": "Do you care about how things work under the hood and don't shy away from complex"
+},
+{
+"source_post": "career/jetbrains/4795218101",
+"title": "QA Automation Engineer (IJ Platform / JetBrains Runtime)",
+"city": "Белград",
+"is_remote": false,
+"posted_at": "2026-06-24T11:59:57-04:00",
+"d": "Are you driven to dig deep into runtime behavior, uncover complex failures, and "
+},
+{
+"source_post": "career/jetbrains/4777935101",
+"title": "QA Automation Engineer (IntelliJ IDEA Java Build Tools)",
+"city": "Белград",
+"is_remote": false,
+"posted_at": "2026-07-02T13:20:19-04:00",
+"d": "At JetBrains, code is our passion. Ever since we started, back in 2000, we have "
+},
+{
+"source_post": "career/jetbrains/4927320101",
+"title": "QA Engineer (Ultimate team)",
+"city": "Белград",
+"is_remote": true,
+"posted_at": "2026-09-29T05:51:16-04:00",
+"d": "Are you a QA Engineer who cares about code craft and system stability? Do you wa"
+},
+{
+"source_post": "career/jetbrains/4966818101",
+"title": "Release Engineer",
+"city": "Белград",
+"is_remote": true,
+"posted_at": "2026-09-17T09:21:01-04:00",
+"d": "About JetBrains We create intelligent software development tools for developers "
+},
+{
+"source_post": "career/jetbrains/4932805101",
+"title": "Senior GL Accountant",
+"city": "Амстердам",
+"is_remote": false,
+"posted_at": "2026-08-04T08:51:38-04:00",
+"d": "Are you interested in solving the puzzle of creating efficient and scalable high"
+},
+{
+"source_post": "career/jetbrains/4882315101",
+"title": "Senior IP Counsel",
+"city": "Амстердам",
+"is_remote": false,
+"posted_at": "2026-06-15T05:58:51-04:00",
+"d": "JetBrains is a global software company that creates intelligent tools for softwa"
+},
+{
+"source_post": "career/jetbrains/4923882101",
+"title": "Senior Legal Counsel (Product and Business Development)",
+"city": "Берлин",
+"is_remote": false,
+"posted_at": "2026-07-14T10:35:57-04:00",
+"d": "You understand that good legal counsel doesn’t just mitigate risk. It also foste"
+},
+{
+"source_post": "career/jetbrains/4923382101",
+"title": "Senior Legal Counsel (Regulatory and Data Privacy)",
+"city": "Берлин",
+"is_remote": false,
+"posted_at": "2026-07-14T10:43:56-04:00",
+"d": "You’re a privacy expert who knows how to navigate global regulations without slo"
+},
+{
+"source_post": "career/jetbrains/4937092101",
+"title": "(Senior) Machine Learning Developer (Junie)",
+"city": "Амстердам",
+"is_remote": true,
+"posted_at": "2026-08-03T12:43:23-04:00",
+"d": "Are you an engineer who loves diving deep into ML models, building standalone CL"
+},
+{
+"source_post": "career/jetbrains/4790191101",
+"title": "Senior Marketing Manager",
+"city": null,
+"is_remote": false,
+"posted_at": "2026-03-03T21:23:46-05:00",
+"d": "The mission At JetBrains, code is our passion. For over two decades, we’ve built"
+},
+{
+"source_post": "career/jetbrains/4806218101",
+"title": "Senior Product Designer (AIR)",
+"city": "Амстердам",
+"is_remote": false,
+"posted_at": "2026-03-25T07:08:28-04:00",
+"d": "#LI-HYBRID #LI-YY1 At JetBrains, code is our passion. Ever since we started, bac"
+},
+{
+"source_post": "career/jetbrains/4973134101",
+"title": "Senior Product Manager (Air Context)",
+"city": "Амстердам",
+"is_remote": false,
+"posted_at": "2026-09-24T09:51:51-04:00",
+"d": "Coding agents are only as good as the context they're given. Most explore a repo"
+},
+{
+"source_post": "career/jetbrains/5005323101",
+"title": "Senior Product Manager – JetBrains Air (Agentic Development in IDEs)",
+"city": "Амстердам",
+"is_remote": false,
+"posted_at": "2026-10-20T06:59:57-04:00",
+"d": "Are you comfortable navigating complex software systems, working with coding age"
+},
+{
+"source_post": "career/jetbrains/4963986101",
+"title": "Senior Software Developer (JCP Core Foundation Licensing and Quotation)",
+"city": "Белград",
+"is_remote": true,
+"posted_at": "2026-09-10T10:04:06-04:00",
+"d": "If you want to build and own the systems that decide what JetBrains customers ar"
+},
+{
+"source_post": "career/jetbrains/4791653101",
+"title": "Senior Technical Program Manager (IDE Department)",
+"city": "Амстердам",
+"is_remote": false,
+"posted_at": "2026-04-01T07:30:43-04:00",
+"d": "At JetBrains, we are passionate about boosting developer productivity. Since our"
+},
+{
+"source_post": "career/jetbrains/4961618101",
+"title": "Senior Test Automation Engineer (TeamCity)",
+"city": "Белград",
+"is_remote": true,
+"posted_at": "2026-09-09T08:28:52-04:00",
+"d": "If you want to build and own the automated testing platform that powers a core p"
+},
+{
+"source_post": "career/jetbrains/4983370101",
+"title": "Senior Web UX/UI Designer",
+"city": "Белград",
+"is_remote": false,
+"posted_at": "2026-10-16T09:48:20-04:00",
+"d": "Do you care deeply about visual hierarchy, interaction details, and how a webpag"
+},
+{
+"source_post": "career/jetbrains/4866608101",
+"title": "Software Developer Java/ Node.JS (Web Development Team)",
+"city": "Белград",
+"is_remote": false,
+"posted_at": "2026-05-18T06:10:28-04:00",
+"d": "JetBrains creates professional tools that make developers more productive and he"
+},
+{
+"source_post": "career/jetbrains/4814057101",
+"title": "Staff Forward Deployed Engineer – AI-Native Software Development",
+"city": "Амстердам",
+"is_remote": false,
+"posted_at": "2026-03-26T10:11:25-04:00",
+"d": "At JetBrains, code is our passion. Ever since we started, back in 2000, we have "
+},
+{
+"source_post": "career/jetbrains/4963991101",
+"title": "Staff Software Developer (IAM)",
+"city": "Амстердам",
+"is_remote": true,
+"posted_at": "2026-09-04T09:25:12-04:00",
+"d": "At JetBrains, code is our passion. Ever since we started back in 2000, we have s"
+},
+{
+"source_post": "career/jetbrains/4979567101",
+"title": "Support Engineer (TeamCity)",
+"city": null,
+"is_remote": true,
+"posted_at": "2026-10-01T05:14:37-04:00",
+"d": "Do you care about keeping developer tools running reliably, enjoy digging into t"
+},
+{
+"source_post": "career/jetbrains/4937064101",
+"title": "Team Lead Kotlin Infrastructure",
+"city": "Амстердам",
+"is_remote": true,
+"posted_at": "2026-09-21T08:10:09-04:00",
+"d": "Are you an engineering leader who views developer infrastructure not as a collec"
+},
+{
+"source_post": "career/jetbrains/4956003101",
+"title": "Technical Product Marketing Manager (.NET Developer Tools)",
+"city": "Белград",
+"is_remote": false,
+"posted_at": "2026-09-09T12:07:36-04:00",
+"d": "You care about developer tools, clear technical storytelling, and helping softwa"
+},
+{
+"source_post": "career/jetbrains/4968633101",
+"title": "VP of PR/External Communications Lead",
+"city": "Амстердам",
+"is_remote": false,
+"posted_at": "2026-09-28T09:36:46-04:00",
+"d": "At JetBrains, code is our passion. Ever since we started back in 2000, we have b"
+}
+]
 }
