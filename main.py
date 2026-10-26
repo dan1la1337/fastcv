@@ -39,16 +39,28 @@ MAX_PAGES = 5  # сколько страниц истории (~20 постов 
 MIN_TEXT_LEN = 40  # короче — точно не вакансия
 # Модели по очереди: если одна перегружена (503) или упёрлась в лимит (429),
 # запрос уходит в следующую. Переопределяется переменной GEMINI_MODELS.
-GEMINI_MODELS = ("gemini-3.1-flash-lite", "gemini-3.5-flash-lite", "gemini-3.6-flash")
+# 26.10: 3.1-flash-lite быстрая, но часто перегружена; flash-lite-latest стабильно отвечает
+# за ~15 с на пачку из 10 постов; 3.5-flash-lite надёжна, но медленная; 3.6-flash часто 503.
+GEMINI_MODELS = ("gemini-3.1-flash-lite", "gemini-flash-lite-latest", "gemini-3.5-flash-lite", "gemini-3.6-flash")
 AI_ATTEMPTS = 2  # попыток на каждую модель
 AI_TIMEOUT_MS = 60_000  # без таймаута зависший запрос держал весь прогон
 AI_MODEL_STRIKES = 3  # обращений подряд, когда модель перегружена, — дальше в этом запуске без неё
 AI_CIRCUIT_BREAKER = 3  # каналов подряд без ответа Gemini — дальше не пытаемся
 AI_PAUSE_SECONDS = 2
+# Постов в одном обращении к Gemini: пачка из 10 разбирается за 10–30 с, как один пост,
+# поэтому за запуск успеваем в 5–10 раз больше (замер 26.10)
+AI_BATCH = 10
+# История канала: при подключении дочитываем посты за последние HISTORY_DAYS дней
+# (столько вакансия и живёт в ленте), по HISTORY_PAGES страниц за запуск на канал
+HISTORY_DAYS = ARCHIVE_AFTER_DAYS
+HISTORY_PAGES = 3
+HISTORY_POSTS_PER_RUN = 400   # новые посты важнее: история — на остаток времени
+FETCH_SHARE = 0.5             # доля времени запуска на чтение лент, остальное — ИИ
+FETCH_PAUSE_SECONDS = 1
 CHANNEL_PAUSE_SECONDS = 2
 # Время на каналы за один запуск: остальное — «Работа России» и подборки, а у всего
 # задания лимит 30 минут. Недошедшие каналы первыми пойдут в следующий запуск.
-CHANNELS_TIME_BUDGET_SECONDS = 14 * 60
+CHANNELS_TIME_BUDGET_SECONDS = 16 * 60
 # Источники без ИИ, которые тоже source_type = external (source_post = «источник/id»)
 IMPORTED_SOURCES = ("trudvsem", "superjob", "career")
 # Лента не открывается столько запусков подряд (≈3 дня при запуске раз в 2 часа) — канал выключаем
@@ -154,6 +166,35 @@ def collect_new_posts(
     return fresh
 
 
+def collect_history(
+    channel: str,
+    before: int,
+    fetch: Callable[[str], str] = fetch_page,
+    days: int = HISTORY_DAYS,
+    max_pages: int = HISTORY_PAGES,
+    now: Optional[datetime] = None,
+) -> tuple[list[Post], Optional[int]]:
+    """Посты старше before за последние days дней, от новых к старым, и курсор
+    для следующего запуска: id, с которого продолжать, или None — история дочитана."""
+    cutoff = (now or datetime.now(timezone.utc)) - timedelta(days=days)
+    base = f"https://t.me/s/{channel}"
+    found: list[Post] = []
+    cursor: Optional[int] = before
+    for _ in range(max_pages):
+        posts, _more = parse_channel_page(fetch(f"{base}?before={cursor}"), channel)
+        posts = [p for p in posts if p.post_id < cursor]
+        if not posts:
+            return found, None
+        for p in reversed(posts):
+            if p.posted_at and datetime.fromisoformat(p.posted_at) < cutoff:
+                return found, None
+            found.append(p)
+        cursor = posts[0].post_id
+        if cursor <= 1:
+            return found, None
+    return found, cursor
+
+
 # ---------------------------------------------------------------------------
 # Нормализация через Gemini
 # ---------------------------------------------------------------------------
@@ -238,15 +279,20 @@ PROMPT = """Ты нормализатор вакансий для доски о�
      опирайся на опыт и обязанности; если указано несколько («Middle/Senior») — нижний;
      «Junior+» и «Джуниор+» — это junior, «Middle+» — middle;
   null, если не указан ни грейд, ни опыт и обязанности не позволяют его определить;
-- direction: одно из backend, frontend, fullstack, mobile, qa, devops, data_ml (data science,
-  ML, AI, data engineering), analytics, security, gamedev, design, product (продакт- и
+- direction: одно из backend, frontend (включая верстальщиков и JavaScript/TypeScript-разработчиков
+  интерфейсов), fullstack, mobile, qa, devops (включая системных администраторов, системных и
+  сетевых инженеров, SRE, DBA), data_ml (data science,
+  ML, AI, data engineering), analytics, security, gamedev (любые роли в разработке игр:
+  программисты, геймдизайнеры, художники, QA и продюсеры игровых студий), design, product (продакт- и
   проджект-менеджмент), marketing (маркетинг, SMM, PR, реклама), content (редакторы,
   авторы, продюсеры, видео), sales (включая продавцов и кассиров), hr, support, finance, education,
   legal (юристы), medicine (врачи, медсёстры, фармацевты), logistics (водители, курьеры, склад),
   construction (строительство, недвижимость), production (производство, рабочие профессии),
   hospitality (рестораны, гостиницы, туризм), government (госслужба, силовые структуры, охрана),
-  office (секретари, администраторы, делопроизводство), management (генеральные и исполнительные
-  директора), other;
+  office (секретари, администраторы, делопроизводство), management (руководство: генеральные,
+  исполнительные и технические директора, CTO и CIO, руководители разработки, IT-отделов и
+  нескольких команд, head of engineering, engineering manager; тимлид одной команды —
+  по её специализации), other;
 - scope_note: только если в одной вакансии явно смешаны обязанности нескольких разных ролей
   (например, бэкенд-разработчик должен ещё с нуля настраивать Kubernetes и верстать интерфейсы,
   или тестировщик одновременно DevOps и аналитик) — одно короткое предложение по-русски,
@@ -287,6 +333,24 @@ def wrap_post(text: str) -> str:
     return f"<post>\n{clean}\n</post>"
 
 
+class BatchItem(BaseModel):
+    """Ответ на пачку постов: id поста из <post id=N> и разбор этого поста."""
+
+    post: int
+    vacancy: VacancyAI
+
+
+BATCH_NOTE = """
+Постов несколько: каждый в своём блоке <post id=N>. Разбирай каждый пост отдельно, как будто
+он единственный, и не переноси данные из одного поста в другой. Верни список: по одному
+элементу на каждый пост, в поле post — его id, в поле vacancy — разбор.
+"""
+
+
+def wrap_posts(texts: list[str]) -> str:
+    return "\n\n".join(wrap_post(t).replace("<post>", f"<post id={i}>", 1) for i, t in enumerate(texts))
+
+
 class AIUnavailable(Exception):
     """Gemini не ответил после всех попыток (перегрузка, лимит, сбой сети)."""
 
@@ -322,18 +386,16 @@ def make_gemini_normalizer(api_key: str, models: tuple[str, ...] = GEMINI_MODELS
     # иначе каждый пост сначала ждёт две неудачные попытки на ней (25.10 так уходило ~12 с на пост)
     strikes: dict[str, int] = {}
 
-    def _normalize(text: str, failures: list[str]) -> VacancyAI:
+    def _ask(contents: str, cfg, parse: Callable, failures: list[str]):
         stats["calls"] += 1
         healthy = [m for m in models if strikes.get(m, 0) < AI_MODEL_STRIKES] or list(models)
         for model in healthy:
             for attempt in range(AI_ATTEMPTS):
                 try:
-                    response = client.models.generate_content(model=model, contents=wrap_post(text), config=config)
+                    response = client.models.generate_content(model=model, contents=contents, config=cfg)
                     stats["ok"] += 1
                     strikes[model] = 0
-                    if isinstance(response.parsed, VacancyAI):
-                        return response.parsed
-                    return VacancyAI.model_validate_json(response.text)
+                    return parse(response)
                 except errors.APIError as e:
                     if e.code == 404:  # модели нет (сняли с поддержки) — сразу к следующей
                         failures.append(f"{model}: 404")
@@ -350,7 +412,45 @@ def make_gemini_normalizer(api_key: str, models: tuple[str, ...] = GEMINI_MODELS
                     time.sleep(AI_PAUSE_SECONDS * 2 ** attempt)
         raise AIUnavailable("; ".join(failures[-3:]) or "нет ответа")
 
+    def _parse_one(response) -> VacancyAI:
+        if isinstance(response.parsed, VacancyAI):
+            return response.parsed
+        return VacancyAI.model_validate_json(response.text)
+
+    def _normalize(text: str, failures: list[str]) -> VacancyAI:
+        return _ask(wrap_post(text), config, _parse_one, failures)
+
+    batch_config = types.GenerateContentConfig(
+        response_mime_type="application/json",
+        response_schema=list[BatchItem],
+        temperature=0,
+        system_instruction=PROMPT + BATCH_NOTE,
+    )
+
+    def _parse_many(response) -> list[BatchItem]:
+        if isinstance(response.parsed, list):
+            return [x for x in response.parsed if isinstance(x, BatchItem)]
+        return [BatchItem.model_validate(x) for x in json.loads(response.text)]
+
+    def many(texts: list[str]) -> list[VacancyAI]:
+        """Несколько постов одним обращением. Пост, на который модель не ответила
+        в пачке, разбираем отдельно — результат всегда по одному на каждый текст."""
+        if len(texts) == 1:
+            return [normalize(texts[0])]
+        failures: list[str] = []
+        started = time.monotonic()
+        try:
+            items = _ask(wrap_posts(texts), batch_config, _parse_many, failures)
+        finally:
+            stats["seconds"] = round(stats["seconds"] + time.monotonic() - started, 1)
+            for f in failures:
+                stats["errors"][f] = stats["errors"].get(f, 0) + 1
+        by_id = {item.post: item.vacancy for item in items if 0 <= item.post < len(texts)}
+        stats["batched"] = stats.get("batched", 0) + len(by_id)
+        return [by_id[i] if i in by_id else normalize(t) for i, t in enumerate(texts)]
+
     normalize.stats = stats  # type: ignore[attr-defined]
+    normalize.many = many  # type: ignore[attr-defined]
     return normalize
 
 
@@ -388,7 +488,7 @@ class Store:
 
     def active_channels(self) -> list[dict]:
         return (self.db.table("channels")
-                .select("username, last_post_id, failed_runs")
+                .select("username, last_post_id, failed_runs, history_before")
                 .eq("is_active", True)
                 # Сначала каналы, которые дольше всего не проверялись: если предохранитель
                 # Gemini прервёт прогон, в следующий раз очередь дойдёт до остальных
@@ -557,6 +657,9 @@ class Store:
         self.db.table("vacancies").upsert(rows, on_conflict="source_post").execute()
         return len(rows)
 
+    def prune_superjob_closed(self, open_ids: list[str], since: datetime) -> int:
+        return self.db.rpc("prune_superjob_closed", {"open_ids": open_ids, "since": since.isoformat()}).execute().data or 0
+
     def prune_source(self, source: str, keep_hours: int) -> dict:
         return self.db.rpc("prune_imported", {"source": source, "keep_hours": keep_hours}).execute().data or {}
 
@@ -597,18 +700,36 @@ class Store:
 Outcome = Literal["saved", "duplicate", "not_job", "short"]
 
 
-def process_post(post: Post, store: Store, normalize: Callable[[str], VacancyAI]) -> Outcome:
+@dataclass
+class Prepared:
+    post: Post
+    raw_hash: str
+    fingerprint: str
+
+
+def prepare_post(post: Post, store: Store) -> Outcome | Prepared:
+    """Всё, что можно решить без ИИ: короткий пост или уже известный текст."""
     if len(post.text) < MIN_TEXT_LEN:
         return "short"
-
     raw_hash = hashlib.sha256(post.text.encode("utf-8")).hexdigest()
     fingerprint = text_fingerprint(post.text)
     known = store.is_known(post, raw_hash, fingerprint)
     if known:
         note_sighting(store, known, post)
         return "duplicate"
+    return Prepared(post, raw_hash, fingerprint)
 
+
+def process_post(post: Post, store: Store, normalize: Callable[[str], VacancyAI]) -> Outcome:
+    prepared = prepare_post(post, store)
+    if not isinstance(prepared, Prepared):
+        return prepared
     vacancy = normalize(post.text)  # AIUnavailable пробрасывается наверх
+    return save_post(prepared, vacancy, store)
+
+
+def save_post(prepared: Prepared, vacancy: VacancyAI, store: Store) -> Outcome:
+    post, raw_hash, fingerprint = prepared.post, prepared.raw_hash, prepared.fingerprint
     if not vacancy.is_job or not vacancy.title:
         return "not_job"
 
@@ -982,6 +1103,8 @@ def run(store: Store, normalize: Callable[[str], VacancyAI],
         time_budget: float = CHANNELS_TIME_BUDGET_SECONDS) -> RunSummary:
     channels = store.active_channels()
     print(f"Активных каналов: {len(channels)}")
+    if hasattr(normalize, "many"):
+        return finish_run(store, run_batched(store, normalize, channels, clock=clock, time_budget=time_budget))
     results = []
     ai_failures_in_row = 0
     started = clock()
@@ -1005,7 +1128,11 @@ def run(store: Store, normalize: Callable[[str], VacancyAI],
         ai_failures_in_row = ai_failures_in_row + 1 if r.ai_stopped else 0
         time.sleep(CHANNEL_PAUSE_SECONDS)
 
-    summary = RunSummary(len(channels), results, out_of_time=out_of_time)
+    return finish_run(store, RunSummary(len(channels), results, out_of_time=out_of_time))
+
+
+def finish_run(store: Store, summary: RunSummary) -> RunSummary:
+    results = summary.results
     summary.deactivated = store.deactivate_dead_channels(DEAD_AFTER_FAILED_RUNS)
     if summary.deactivated:
         print(f"Выключены каналы без ленты {DEAD_AFTER_FAILED_RUNS} запусков подряд: {', '.join(summary.deactivated)}")
@@ -1017,6 +1144,133 @@ def run(store: Store, normalize: Callable[[str], VacancyAI],
         print(f"Каналы без доступной ленты ({len(unavailable)}): {', '.join('@' + c for c in unavailable)}")
     if any(r.ai_stopped for r in results):
         print("Часть постов отложена до следующего запуска: Gemini был недоступен.")
+    return summary
+
+
+@dataclass
+class ChannelWork:
+    row: dict
+    result: ChannelResult
+    new: list[Post] = field(default_factory=list)        # по возрастанию id
+    history: list[Post] = field(default_factory=list)    # от новых к старым
+    history_next: Optional[int] = None                   # курсор истории после этого запуска
+    history_started: bool = False
+    done: dict[int, Outcome] = field(default_factory=dict)
+
+
+def run_batched(store: Store, normalize, channels: list[dict],
+                clock: Callable[[], float] = time.monotonic,
+                time_budget: float = CHANNELS_TIME_BUDGET_SECONDS,
+                fetch: Callable[[str], str] = fetch_page,
+                pause: Callable[[float], None] = time.sleep) -> RunSummary:
+    """Сначала читаем ленты всех каналов, потом разбираем новые посты пачками по AI_BATCH
+    через одно обращение к Gemini, на остаток времени — историю каналов за HISTORY_DAYS дней.
+    Канал запоминает последний пост, до которого всё разобрано: недоделанное — в следующий раз."""
+    started = clock()
+    works: list[ChannelWork] = []
+    out_of_time = False
+    history_quota = HISTORY_POSTS_PER_RUN
+
+    for row in channels:
+        if clock() - started > time_budget * FETCH_SHARE:
+            out_of_time = True
+            break
+        channel = str(row["username"]).strip().lstrip("@")
+        work = ChannelWork(row, ChannelResult(channel))
+        works.append(work)
+        try:
+            work.new = collect_new_posts(channel, row.get("last_post_id"), fetch)
+        except (ChannelUnavailable, requests.RequestException) as e:
+            work.result.error = str(e)
+            work.result.newly_unavailable = not (row.get("failed_runs") or 0)
+            continue
+        work.result.new_posts = len(work.new)
+        cursor = row.get("history_before")
+        if cursor is None:   # история не начата: идём назад от самого старого из известных постов
+            cursor = work.new[0].post_id if work.new else (row.get("last_post_id") or 0) + 1
+        if cursor and cursor > 1 and history_quota > 0:
+            work.history_started = True
+            try:
+                work.history, work.history_next = collect_history(channel, cursor, fetch)
+            except (ChannelUnavailable, requests.RequestException):
+                work.history, work.history_next = [], cursor
+            work.history = work.history[:history_quota]
+            if work.history and len(work.history) == history_quota:
+                work.history_next = work.history[-1].post_id
+            history_quota -= len(work.history)
+        elif cursor:
+            work.history_next = cursor
+        pause(FETCH_PAUSE_SECONDS)
+
+    # Без ИИ: короткие и уже известные посты
+    pending: list[tuple[ChannelWork, Prepared]] = []
+    for work in works:
+        for post in work.new + work.history:
+            prepared = prepare_post(post, store)
+            if isinstance(prepared, Prepared):
+                pending.append((work, prepared))
+            else:
+                work.done[post.post_id] = prepared
+    # Сначала новые посты всех каналов, потом история
+    pending.sort(key=lambda wp: wp[1].post not in wp[0].new)
+
+    ai_stopped: Optional[str] = None
+    for i in range(0, len(pending), AI_BATCH):
+        if clock() - started > time_budget:
+            out_of_time = True
+            break
+        chunk = pending[i:i + AI_BATCH]
+        try:
+            vacancies = normalize.many([p.post.text for _, p in chunk])
+        except AIUnavailable as e:
+            ai_stopped = f"Gemini недоступен: {e}"
+            break
+        for (work, prepared), vacancy in zip(chunk, vacancies):
+            outcome = save_post(prepared, vacancy, store)
+            work.done[prepared.post.post_id] = outcome
+            if outcome == "saved":
+                work.result.saved += 1
+        pause(AI_PAUSE_SECONDS)
+
+    now = datetime.now(timezone.utc).isoformat()
+    for work in works:
+        r, row = work.result, work.row
+        if r.error:
+            store.update_channel(r.channel, {
+                "last_parsed_at": now, "last_error": r.error[:300],
+                "failed_runs": (row.get("failed_runs") or 0) + 1,
+            })
+            continue
+        last_done = row.get("last_post_id")
+        finished = True
+        for post in work.new:
+            if post.post_id not in work.done:
+                finished = False
+                break
+            last_done = post.post_id
+        history_next = work.history_next
+        for post in work.history:
+            if post.post_id not in work.done:
+                history_next = post.post_id + 1   # продолжим с этого поста
+                break
+        if not finished and ai_stopped:
+            r.ai_stopped, r.error = True, ai_stopped
+        fields = {"last_post_id": last_done, "last_error": r.error, "failed_runs": 0,
+                  # 0 — история дочитана; канал без новых постов не трогаем
+                  "history_before": history_next if history_next is not None else (0 if work.history_started else row.get("history_before"))}
+        if finished:
+            fields["last_parsed_at"] = now   # недоделанные каналы первыми пойдут в следующий запуск
+        store.update_channel(r.channel, fields)
+
+    results = [w.result for w in works]
+    for r in results:
+        status = f"⚠️ {r.error}" if r.error else "ok"
+        print(f"📡 @{r.channel}: новых постов {r.new_posts}, сохранено {r.saved} — {status}")
+    history_total = sum(len(w.history) for w in works)
+    print(f"История каналов: {history_total} постов за {HISTORY_DAYS} дней, к ИИ — {len(pending)} постов всего.")
+    if out_of_time:
+        print("⏱ Время вышло — недоделанное первым пойдёт в следующий запуск.")
+    summary = RunSummary(len(channels), results, out_of_time=out_of_time or (not ai_stopped and len(works) < len(channels)))
     return summary
 
 

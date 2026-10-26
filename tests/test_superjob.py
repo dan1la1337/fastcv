@@ -112,3 +112,58 @@ def test_stops_at_storage_cap_and_time_budget():
     slow = Store()
     stats = superjob.import_superjob(slow, fetch, now=NOW, clock=lambda: next(ticks), time_budget=250)
     assert stats["stopped"] == "time budget" and superjob.CURSOR_KEY in slow.settings
+
+
+def test_it_rubric_gives_direction():
+    it = [{"key": 33, "title": "IT, Интернет, связь, телеком", "positions": [{"key": 56, "title": "Тестирование, QA"}]}]
+    assert superjob.map_vacancy({**SAMPLE, "catalogues": it})["direction"] == "qa"
+    dev = [{"key": 33, "title": "IT", "positions": [{"key": 48, "title": "Разработка, программирование"}]}]
+    assert superjob.map_vacancy({**SAMPLE, "catalogues": dev})["direction"] is None   # по названию
+
+
+def test_it_pass_takes_30_days_and_removes_closed():
+    it = [{"key": 33, "title": "IT", "positions": [{"key": 628, "title": "DevOps"}]}]
+    day = 24 * 3600
+    stamps = [int((NOW - timedelta(days=d)).timestamp()) for d in (1, 5, 12, 29)]
+    calls = []
+
+    def fetch(params):
+        calls.append(params)
+        assert params["catalogues"] == superjob.IT_CATALOGUE
+        a, b = params["date_published_from"], params["date_published_to"] + 1
+        objects = [{**SAMPLE, "id": t, "date_published": t, "profession": "DevOps-инженер", "catalogues": it}
+                   for t in stamps if a <= t < b]
+        return {"total": len(objects), "more": False, "objects": objects}
+
+    class ItStore(Store):
+        def prune_superjob_closed(self, open_ids, since):
+            self.closed_args = (open_ids, since)
+            return 3
+
+    store = ItStore()
+    result = superjob.import_it(store, fetch, now=NOW)
+    assert result == {"it_seen": 4, "it_saved": 4, "it_closed": 3}
+    assert sorted(store.closed_args[0]) == sorted(str(t) for t in stamps)
+    assert store.closed_args[1] == NOW - timedelta(days=30)
+    assert {r["direction"] for r in store.rows} == {"devops"}
+    assert day  # окна по 3 дня: 10 запросов на 30 дней
+    assert len(calls) == 10
+
+
+def test_it_pass_skips_old_non_it_titles():
+    it = [{"key": 33, "title": "IT", "positions": [{"key": 55, "title": "Телекоммуникации и связь"}]}]
+    old = int((NOW - timedelta(days=3)).timestamp())
+
+    def fetch(params):
+        a, b = params["date_published_from"], params["date_published_to"] + 1
+        objects = [{**SAMPLE, "id": old + i, "date_published": old, "profession": p, "catalogues": it}
+                   for i, p in enumerate(["Монтажник связи", "Python-разработчик"]) if a <= old < b]
+        return {"total": len(objects), "more": False, "objects": objects}
+
+    class ItStore(Store):
+        def prune_superjob_closed(self, open_ids, since):
+            return 0
+
+    store = ItStore()
+    superjob.import_it(store, fetch, now=NOW)
+    assert [r["title"] for r in store.rows] == ["Python-разработчик"]
