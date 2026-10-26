@@ -147,7 +147,8 @@ end;
 $$;
 
 -- SuperJob: закрытые на сайте ИТ-вакансии убираем (сборщик раз в запуск сверяет весь
--- 30-дневный список ИТ-вакансий и передаёт id тех, что ещё открыты).
+-- 30-дневный список рубрики «IT» и передаёт id тех, что ещё открыты). Вакансии с ИТ-направлением
+-- из других рубрик в этот список не входят — они, как и раньше, живут 8 часов.
 create or replace function public.prune_superjob_closed(open_ids text[], since timestamptz)
 returns integer
 language sql
@@ -159,7 +160,8 @@ as $$
      where v.source_post like 'superjob/%'
        and v.direction in ('backend', 'frontend', 'fullstack', 'mobile', 'qa', 'devops', 'data_ml', 'analytics', 'security', 'gamedev', 'design', 'product', 'management')
        and coalesce(v.posted_at, v.created_at) >= since
-       and v.created_at < now() - interval '1 hour'
+       -- свежее 8 часов — окно основного импорта всех рубрик, его не трогаем
+       and coalesce(v.posted_at, v.created_at) < now() - interval '8 hours'
        and not (substr(v.source_post, 10) = any(open_ids))
        and not exists (select 1 from public.applications a where a.vacancy_id = v.id)
        and not exists (select 1 from public.vacancy_marks m where m.vacancy_id = v.id)
