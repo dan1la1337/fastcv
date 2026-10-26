@@ -80,6 +80,8 @@ export type Database = {
           hr_replied_at: string | null
           viewed_at: string | null
           answered_at: string | null
+          blitz_answers: Json
+          blitz_summary: string | null
           id: string
           status: string | null
           vacancy_id: string | null
@@ -92,6 +94,8 @@ export type Database = {
           hr_replied_at?: string | null
           viewed_at?: string | null
           answered_at?: string | null
+          blitz_answers?: Json
+          blitz_summary?: string | null
           id?: string
           status?: string | null
           vacancy_id?: string | null
@@ -104,6 +108,8 @@ export type Database = {
           hr_replied_at?: string | null
           viewed_at?: string | null
           answered_at?: string | null
+          blitz_answers?: Json
+          blitz_summary?: string | null
           id?: string
           status?: string | null
           vacancy_id?: string | null
@@ -351,6 +357,7 @@ export type Database = {
           employer_stats: Json
           last_seen_at: string | null
           closed_reports: number
+          blitz_questions: Json
           id: string
           is_remote: boolean | null
           level: string | null
@@ -394,6 +401,7 @@ export type Database = {
           employer_stats?: Json
           last_seen_at?: string | null
           closed_reports?: number
+          blitz_questions?: Json
           id?: string
           is_remote?: boolean | null
           level?: string | null
@@ -437,6 +445,7 @@ export type Database = {
           employer_stats?: Json
           last_seen_at?: string | null
           closed_reports?: number
+          blitz_questions?: Json
           id?: string
           is_remote?: boolean | null
           level?: string | null

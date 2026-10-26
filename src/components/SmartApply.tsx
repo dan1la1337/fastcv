@@ -70,6 +70,16 @@ export default function SmartApply({
   const coverLetter = current?.text ?? "";
   const generationError = current?.error ?? null;
   const setCoverLetter = (text: string) => vacancy && setDraft({ vacancyId: vacancy.id, text, error: null });
+  // Микро-блиц: вопросы работодателя (только у прямых вакансий) и ответы кандидата
+  const questions = vacancy?.source_type === "internal" ? (vacancy.blitz_questions ?? []) : [];
+  const [blitz, setBlitz] = useState<{ vacancyId: string; answers: string[] } | null>(null);
+  const answers = blitz && blitz.vacancyId === vacancy?.id ? blitz.answers : questions.map(() => "");
+  const setAnswer = (i: number, text: string) => {
+    if (!vacancy) return;
+    const next = [...answers];
+    next[i] = text;
+    setBlitz({ vacancyId: vacancy.id, answers: next });
+  };
   const setGenerationError = (error: string | null) =>
     vacancy && setDraft({ vacancyId: vacancy.id, text: coverLetter, error });
 
@@ -138,18 +148,25 @@ export default function SmartApply({
       toast("Сначала войдите в систему.", "error");
       return;
     }
+    if (questions.length && answers.some(a => !a.trim())) {
+      toast("Ответьте на вопросы работодателя — это пара строк.", "error");
+      return;
+    }
     setIsSending(true);
     const { error } = await supabase.from("applications").insert({
       vacancy_id: vacancy.id,
       candidate_id: user.id,
       cover_letter: coverLetter,
-      status: 'new'
+      status: 'new',
+      blitz_answers: questions.length ? answers.map(a => a.trim()) : [],
     });
     setIsSending(false);
 
     if (error) {
       toast(error.code === "23505"
         ? "Вы уже откликались на эту вакансию."
+        : error.message.includes("blitz:")
+          ? (error.message.match(/blitz: (.+)/)?.[1] ?? "Проверьте ответы на вопросы") + "."
         : error.message.includes("apply_limit")
           ? "Сегодня уже 15 откликов — это лимит FastCV против рассылок. Письмо сохранено в буфере, отправить можно завтра."
           : "Не удалось отправить отклик: " + error.message, "error");
@@ -276,6 +293,19 @@ export default function SmartApply({
             <p className="text-xs text-neutral-500">Это письмо вы уже генерировали для этой вакансии. «Переписать» — новый вариант.</p>
           ) : (
             <p className="text-xs text-neutral-500">Текст можно поправить перед отправкой.</p>
+          )}
+          {questions.length > 0 && (
+            <fieldset className="space-y-3 pt-1">
+              <legend className="text-xs text-neutral-500">Вопросы работодателя — ответьте коротко</legend>
+              {questions.map((q, i) => (
+                <div key={i} className="space-y-1.5">
+                  <label htmlFor={`blitz-${vacancy.id}-${i}`} className="block text-sm text-neutral-200">{q}</label>
+                  <textarea id={`blitz-${vacancy.id}-${i}`} rows={2} maxLength={1000} value={answers[i] ?? ""}
+                    onChange={e => setAnswer(i, e.target.value)}
+                    className="w-full bg-[#0B0F19] border border-white/10 rounded-2xl px-4 py-3 text-sm text-neutral-200 focus:outline-none focus:border-teal-300 resize-y" />
+                </div>
+              ))}
+            </fieldset>
           )}
           <div className="flex gap-2.5">
             <button

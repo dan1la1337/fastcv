@@ -9,6 +9,7 @@ import {
 } from "lucide-react";
 import { toMatch, type Match } from "@/lib/matching";
 import MatchRing from "@/components/MatchRing";
+import BlitzAnswers, { type BlitzAnswer } from "@/components/BlitzAnswers";
 import type { VacancyDraft } from "@/lib/vacancy-draft";
 import { supabase, getUserRole } from "@/lib/supabase";
 import { formatSalary, plural, type Vacancy } from "@/lib/vacancies";
@@ -21,6 +22,8 @@ interface Application {
   hr_message: string | null;
   cover_letter: string | null;
   created_at: string;
+  blitz_answers: BlitzAnswer[];
+  blitz_summary: string | null;
   vacancies: { id: string; title: string; employer_id: string };
   profiles: { name: string | null; skills: string[] | null; resume_path: string | null } | null;
 }
@@ -35,10 +38,12 @@ interface VacancyForm {
   isRemote: boolean;
   /** Технологии через запятую. */
   stack: string;
+  /** Микро-блиц: до трёх вопросов кандидату. */
+  questions: [string, string, string];
 }
 
 const EMPTY_FORM: VacancyForm = {
-  title: "", description: "", salaryMin: "", salaryMax: "", currency: "RUB", city: "", isRemote: false, stack: "",
+  title: "", description: "", salaryMin: "", salaryMax: "", currency: "RUB", city: "", isRemote: false, stack: "", questions: ["", "", ""],
 };
 
 const STATUS_LABELS: Record<string, string> = {
@@ -99,7 +104,7 @@ export default function EmployerDashboard() {
       supabase.from("profiles").select("name").eq("id", currentUser.id).maybeSingle(),
       supabase
         .from("applications")
-        .select("id, status, hr_message, cover_letter, created_at, vacancies!inner (id, title, employer_id), profiles (name, skills, resume_path)")
+        .select("id, status, hr_message, cover_letter, created_at, blitz_answers, blitz_summary, vacancies!inner (id, title, employer_id), profiles (name, skills, resume_path)")
         .eq("vacancies.employer_id", currentUser.id)
         .order("created_at", { ascending: false }),
       supabase
@@ -153,6 +158,7 @@ export default function EmployerDashboard() {
         city: vacancy.city ?? "",
         isRemote: Boolean(vacancy.is_remote),
         stack: (vacancy.stack ?? []).join(", "),
+        questions: [0, 1, 2].map(i => vacancy.blitz_questions?.[i] ?? "") as [string, string, string],
       });
     } else {
       setEditingId(null);
@@ -183,6 +189,7 @@ export default function EmployerDashboard() {
       is_remote: form.isRemote,
       company_name: companyName,
       stack: [...new Set(form.stack.split(",").map(s => s.trim()).filter(Boolean))].slice(0, 15),
+      blitz_questions: form.questions.map(q => q.trim()).filter(Boolean),
     };
 
     const { error } = editingId
@@ -397,6 +404,20 @@ export default function EmployerDashboard() {
                   onChange={e => setForm({ ...form, stack: e.target.value })} className={inputClass} />
               </div>
 
+              <fieldset className="space-y-2">
+                <legend className={labelClass}>Микро-блиц: до трёх вопросов кандидату (необязательно)</legend>
+                <p className="text-xs text-neutral-500 -mt-1">Кандидат ответит на них вместе с письмом, а ИИ сделает выжимку ответов.</p>
+                {form.questions.map((q, i) => (
+                  <input key={i} type="text" maxLength={200} aria-label={`Вопрос ${i + 1}`}
+                    placeholder={["Почему вам интересна эта вакансия?", "Был ли опыт с highload? Расскажите коротко", "Когда готовы выйти?"][i]}
+                    value={q} onChange={e => {
+                      const questions = [...form.questions] as [string, string, string];
+                      questions[i] = e.target.value;
+                      setForm({ ...form, questions });
+                    }} className={inputClass} />
+                ))}
+              </fieldset>
+
               <div>
                 <label className={labelClass}>Обязанности и требования</label>
                 <textarea required rows={6} placeholder="Опишите стек, проект и задачи кандидата..."
@@ -548,6 +569,8 @@ export default function EmployerDashboard() {
                       {matches[app.id].missing.map(s => <span key={s} className="px-2.5 py-1 rounded-full bg-amber-300/10 text-amber-200">нет {s}</span>)}
                     </div>
                   )}
+
+                  <BlitzAnswers applicationId={app.id} answers={app.blitz_answers ?? []} summary={app.blitz_summary} />
 
                   <div className="bg-[#0B0F19] border border-white/10 rounded-2xl p-4 text-sm text-neutral-300 leading-relaxed whitespace-pre-line">
                     <p className="text-xs text-neutral-500 mb-2">Сопроводительное письмо</p>

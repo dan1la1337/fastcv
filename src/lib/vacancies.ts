@@ -43,6 +43,8 @@ export interface Vacancy {
   last_seen_at?: string | null;
   /** Сколько кандидатов отметили «Вакансия уже закрыта». */
   closed_reports?: number;
+  /** Микро-блиц: вопросы работодателя кандидату (до трёх). */
+  blitz_questions?: string[];
   channels_count?: number;
   /** Требуемый опыт в годах из текста вакансии (ИИ сборщика); null — не указан. */
   experience_min?: number | null;
@@ -56,7 +58,7 @@ export interface Vacancy {
 
 /** Колонки для показа: без служебных (search_tsv, title_key, text_fingerprint, raw_hash) — они только раздувают ответ. */
 // Одной строкой-литералом: по ней supabase-js выводит тип строк ответа
-export const VACANCY_COLUMNS = "id, title, company_name, description, salary_min, salary_max, salary_currency, city, country, is_remote, contact_type, contact_value, created_at, posted_at, source_type, source_url, stack, employer_id, employer_verified, employer_slow, employer_stats, archived_at, level, direction, work_format, hiring_type, first_seen_at, last_seen_at, closed_reports, channels_count, scope_note, experience_min";
+export const VACANCY_COLUMNS = "id, title, company_name, description, salary_min, salary_max, salary_currency, city, country, is_remote, contact_type, contact_value, created_at, posted_at, source_type, source_url, stack, employer_id, employer_verified, employer_slow, employer_stats, archived_at, level, direction, work_format, hiring_type, first_seen_at, last_seen_at, closed_reports, blitz_questions, channels_count, scope_note, experience_min";
 
 export type Level = "intern" | "junior" | "middle" | "senior" | "lead";
 export type WorkFormat = "remote" | "hybrid" | "office";
