@@ -479,6 +479,8 @@ CHECKS: list[tuple] = [
         delete from vacancies where title like 'CO %';""",
      "postgres", None, "CO ai:Казахстан,CO ats:-,CO latin:-,CO msk:Россия,CO site:Россия,CO tash:Узбекистан,CO town:Сербия,CO tv:Россия"),
     ("сайт видит справочник стран", True, "select (count(*) >= 0)::text from vacancy_countries", "anon", None, "true"),
+    ("функцию-триггер лимита откликов нельзя вызвать через API", False,
+     "select limit_daily_applications()", "authenticated", C, None),
     ("ротация «Работы России»: старые удаляются, с откликами — в архив, свежие остаются", True,
      f"""insert into vacancies (title, source_type, source_post, posted_at) values
           ('TV old', 'external', 'trudvsem/old', now() - interval '5 days'),
