@@ -2,9 +2,10 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { cache } from "react";
-import { AlertTriangle, ArrowLeft, Calendar, ExternalLink } from "lucide-react";
+import { AlertTriangle, ArrowLeft, Calendar, ExternalLink, Ghost } from "lucide-react";
+import ClosedReport from "@/components/ClosedReport";
 import { supabase } from "@/lib/supabase";
-import { VACANCY_COLUMNS, formatLabel, formatSalary, levelLabel, experienceLabel, plural, sourceOf, type Vacancy } from "@/lib/vacancies";
+import { VACANCY_COLUMNS, formatLabel, formatSalary, levelLabel, experienceLabel, plural, sourceOf, ghostSignal, type Vacancy } from "@/lib/vacancies";
 import VacancyApply from "@/components/VacancyApply";
 import VacancyMatch from "@/components/VacancyMatch";
 import MobileApplyBar from "@/components/MobileApplyBar";
@@ -104,6 +105,7 @@ export default async function VacancyPage({ params }: Props) {
     (format || vacancy.city) && { label: "Где", value: [format, vacancy.city].filter(Boolean).join(" · ") },
   ].filter(Boolean) as { label: string; value: string; estimate?: boolean }[];
   const channels = vacancy.source_type === "external" ? vacancy.channels_count ?? 1 : 0;
+  const ghost = vacancy.archived_at ? null : ghostSignal(vacancy);
 
   return (
     <div className="min-h-screen text-neutral-100 font-sans">
@@ -123,6 +125,13 @@ export default async function VacancyPage({ params }: Props) {
         {vacancy.archived_at && (
           <div className="rounded-2xl border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-sm text-amber-300">
             Вакансия в архиве: скорее всего, она уже закрыта.
+          </div>
+        )}
+
+        {ghost && (
+          <div className="flex gap-3 rounded-2xl border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-sm text-amber-200">
+            <Ghost className="w-5 h-5 text-amber-300 shrink-0" aria-hidden="true" />
+            <p><span className="font-semibold">Возможно, вакансия неактуальна.</span> {ghost}. Перед откликом уточните у работодателя.</p>
           </div>
         )}
 
@@ -190,6 +199,7 @@ export default async function VacancyPage({ params }: Props) {
                   </a>
                 )}
                 {!vacancy.archived_at && <ViewCounter vacancyId={vacancy.id} />}
+                {!vacancy.archived_at && <span className="ml-auto"><ClosedReport vacancyId={vacancy.id} /></span>}
               </footer>
             </article>
 

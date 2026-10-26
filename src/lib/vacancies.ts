@@ -39,6 +39,10 @@ export interface Vacancy {
   work_format?: WorkFormat | null;
   /** Когда вакансию впервые заметили (самая ранняя публикация) и во скольких каналах она выходила. */
   first_seen_at?: string | null;
+  /** Последнее появление в источниках (повторные публикации). */
+  last_seen_at?: string | null;
+  /** Сколько кандидатов отметили «Вакансия уже закрыта». */
+  closed_reports?: number;
   channels_count?: number;
   /** Требуемый опыт в годах из текста вакансии (ИИ сборщика); null — не указан. */
   experience_min?: number | null;
@@ -52,7 +56,7 @@ export interface Vacancy {
 
 /** Колонки для показа: без служебных (search_tsv, title_key, text_fingerprint, raw_hash) — они только раздувают ответ. */
 // Одной строкой-литералом: по ней supabase-js выводит тип строк ответа
-export const VACANCY_COLUMNS = "id, title, company_name, description, salary_min, salary_max, salary_currency, city, country, is_remote, contact_type, contact_value, created_at, posted_at, source_type, source_url, stack, employer_id, employer_verified, employer_slow, employer_stats, archived_at, level, direction, work_format, hiring_type, first_seen_at, channels_count, scope_note, experience_min";
+export const VACANCY_COLUMNS = "id, title, company_name, description, salary_min, salary_max, salary_currency, city, country, is_remote, contact_type, contact_value, created_at, posted_at, source_type, source_url, stack, employer_id, employer_verified, employer_slow, employer_stats, archived_at, level, direction, work_format, hiring_type, first_seen_at, last_seen_at, closed_reports, channels_count, scope_note, experience_min";
 
 export type Level = "intern" | "junior" | "middle" | "senior" | "lead";
 export type WorkFormat = "remote" | "hybrid" | "office";
@@ -384,6 +388,31 @@ export function freshnessLabel(
     ? ` · в ${v.channels_count} ${plural(v.channels_count!, ["канале", "каналах", "каналах"])}`
     : "";
   return age + channels;
+}
+
+/** С какого срока повторных публикаций вакансия похожа на «вечную». */
+export const GHOST_REPOST_DAYS = 14;
+
+/**
+ * Детектор вакансий-призраков (план 1.14): почему вакансия может быть неактуальной.
+ * null — сигналов нет.
+ */
+export function ghostSignal(
+  v: Pick<Vacancy, "first_seen_at" | "last_seen_at" | "closed_reports">,
+): string | null {
+  const reports = v.closed_reports ?? 0;
+  if (reports > 0) {
+    return `${reports} ${plural(reports, ["кандидат сообщил", "кандидата сообщили", "кандидатов сообщили"])}, что вакансия уже закрыта`;
+  }
+  const first = Date.parse(v.first_seen_at ?? "");
+  const last = Date.parse(v.last_seen_at ?? "");
+  if (Number.isFinite(first) && Number.isFinite(last)) {
+    const days = Math.floor((last - first) / DAY_MS);
+    if (days >= GHOST_REPOST_DAYS) {
+      return `Её публикуют повторно уже ${days} ${plural(days, ["день", "дня", "дней"])} — так бывает с «вечными» вакансиями, которые не закрывают`;
+    }
+  }
+  return null;
 }
 
 /** Ссылка на страницу компании по её названию. */

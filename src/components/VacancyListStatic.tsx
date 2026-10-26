@@ -1,6 +1,6 @@
 import Link from "next/link";
-import { Briefcase, Building2, Clock, Globe, MapPin } from "lucide-react";
-import { formatLabel, freshnessLabel, formatSalary, levelLabel, type Vacancy } from "@/lib/vacancies";
+import { Briefcase, Building2, Clock, Ghost, Globe, MapPin } from "lucide-react";
+import { formatLabel, freshnessLabel, formatSalary, ghostSignal, levelLabel, type Vacancy } from "@/lib/vacancies";
 import CompanyLine from "@/components/CompanyLine";
 
 /**
@@ -24,6 +24,11 @@ export default function VacancyListStatic({ vacancies }: { vacancies: Vacancy[] 
               ? <span className="inline-flex items-center gap-1"><Globe className="w-3.5 h-3.5" />Удалённо</span>
               : v.work_format && <span className="inline-flex items-center gap-1"><Building2 className="w-3.5 h-3.5" />{formatLabel(v.work_format)}</span>}
             <span className="inline-flex items-center gap-1" suppressHydrationWarning><Clock className="w-3.5 h-3.5" />{freshnessLabel(v)}</span>
+            {ghostSignal(v) && (
+                <span className="inline-flex items-center gap-1 text-amber-300" title={ghostSignal(v)!}>
+                  <Ghost className="w-3.5 h-3.5" aria-hidden="true" />Возможно, неактуальна
+                </span>
+              )}
           </p>
           {v.description && <p className="text-sm text-neutral-400 leading-relaxed line-clamp-2 mt-2">{v.description}</p>}
         </li>

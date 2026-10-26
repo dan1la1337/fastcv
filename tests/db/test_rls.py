@@ -559,6 +559,40 @@ CHECKS: list[tuple] = [
         delete from applications where vacancy_id = '99999999-0000-0000-0000-000000000002';
         delete from vacancies where title = 'HR job';""",
      "postgres", None, "4.3 3"),
+    ("повторная публикация: индекс свежести помнит последнее появление", True,
+     """insert into vacancies (id, title, source_type, source_post) values ('99999999-0000-0000-0000-0000000000b1', 'GH ext', 'external', 'ch/1');
+        insert into vacancy_sightings (source_post, vacancy_id, channel, posted_at) values
+          ('ch/1', '99999999-0000-0000-0000-0000000000b1', 'ch', now() - interval '20 days'),
+          ('other/7', '99999999-0000-0000-0000-0000000000b1', 'other', now() - interval '1 day');
+        select extract(day from last_seen_at - first_seen_at)::text || ' ' || channels_count from vacancies where title = 'GH ext'""",
+     "service_role", None, "19 2"),
+    ("аноним НЕ отмечает вакансию закрытой", False,
+     "select report_vacancy_closed('99999999-0000-0000-0000-0000000000b1')", "anon", None, None),
+    ("кандидат отмечает вакансию закрытой; повтор не считается", True,
+     "do $$ begin perform report_vacancy_closed('99999999-0000-0000-0000-0000000000b1'); end $$; select report_vacancy_closed('99999999-0000-0000-0000-0000000000b1')::text || ' ' || my_closed_report('99999999-0000-0000-0000-0000000000b1')::text",
+     "authenticated", C, "1 true"),
+    ("работодатель НЕ читает, кто отметил", False,
+     "select count(*) from vacancy_closed_reports", "authenticated", E, None),
+    ("три отметки — внешняя вакансия уходит в архив", True,
+     f"""set role authenticated; set request.jwt.claim.sub = '{X}';
+        select report_vacancy_closed('99999999-0000-0000-0000-0000000000b1');
+        set request.jwt.claim.sub = '{E2}';
+        select report_vacancy_closed('99999999-0000-0000-0000-0000000000b1');
+        reset role;
+        select closed_reports || ' ' || (archived_at is not null)::text from vacancies where title = 'GH ext'""",
+     "postgres", None, "2\n3\n3 true"),
+    ("вакансия работодателя от отметок только получает значок, сам он счётчик не сбросит", True,
+     f"""insert into vacancies (id, title, source_type, employer_id) values ('99999999-0000-0000-0000-0000000000b2', 'GH own', 'internal', '{E}');
+        set role authenticated;
+        set request.jwt.claim.sub = '{C}'; select report_vacancy_closed('99999999-0000-0000-0000-0000000000b2');
+        set request.jwt.claim.sub = '{X}'; select report_vacancy_closed('99999999-0000-0000-0000-0000000000b2');
+        set request.jwt.claim.sub = '{E2}'; select report_vacancy_closed('99999999-0000-0000-0000-0000000000b2');
+        set request.jwt.claim.sub = '{E}'; update vacancies set closed_reports = 0 where title = 'GH own';
+        reset role;
+        select closed_reports || ' ' || (archived_at is null)::text from vacancies where title = 'GH own'""",
+     "postgres", None, "1\n2\n3\n3 true"),
+    ("работодатель не отмечает закрытой свою вакансию", False,
+     "select report_vacancy_closed('99999999-0000-0000-0000-0000000000b2')", "authenticated", E, None),
     ("ротация «Работы России»: старые удаляются, с откликами — в архив, свежие остаются", True,
      f"""insert into vacancies (title, source_type, source_post, posted_at) values
           ('TV old', 'external', 'trudvsem/old', now() - interval '5 days'),
