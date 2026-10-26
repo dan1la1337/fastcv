@@ -685,6 +685,19 @@ class Store:
                 return found
             start += 1000
 
+    def career_weak_descriptions(self, company: str, limit: int) -> list[tuple[str, str]]:
+        """Активные вакансии компании с пустым или шаблонным описанием: (source_post, адрес)."""
+        from careers import TEMPLATE_PHRASES
+        weak = ",".join(["description.is.null"] + [f"description.ilike.*{p}*" for p in TEMPLATE_PHRASES])
+        rows = (self.db.table("vacancies").select("source_post, source_url")
+                .like("source_post", f"career/{company}/%").is_("archived_at", "null")
+                .or_(weak).not_.is_("source_url", "null")
+                .order("created_at", desc=True).limit(limit).execute().data or [])
+        return [(r["source_post"], r["source_url"]) for r in rows]
+
+    def update_description(self, source_post: str, description: str) -> None:
+        self.db.table("vacancies").update({"description": description}).eq("source_post", source_post).execute()
+
     def archive_career(self, company: str, ids: list[str]) -> int:
         now = datetime.now(timezone.utc).isoformat()
         for i in range(0, len(ids), 200):
