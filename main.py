@@ -59,6 +59,8 @@ HISTORY_PAGES = 3
 HISTORY_POSTS_PER_RUN = 800   # новые посты важнее: история — на остаток времени
 FETCH_SHARE = 0.5             # доля времени запуска на чтение лент, остальное — ИИ
 FETCH_PAUSE_SECONDS = 1
+# Чьи истории дочитываем первыми (channels.category): направления, где вакансий меньше всего
+HISTORY_FIRST = ("frontend", "qa", "devops", "mobile", "gamedev", "management", "general", "junior", "backend", "product")
 CHANNEL_PAUSE_SECONDS = 2
 # Время на каналы за один запуск: остальное — «Работа России» и подборки, а у всего
 # задания лимит 30 минут. Недошедшие каналы первыми пойдут в следующий запуск.
@@ -490,7 +492,7 @@ class Store:
 
     def active_channels(self) -> list[dict]:
         return (self.db.table("channels")
-                .select("username, last_post_id, failed_runs, history_before")
+                .select("username, category, last_post_id, failed_runs, history_before")
                 .eq("is_active", True)
                 # Сначала каналы, которые дольше всего не проверялись: если предохранитель
                 # Gemini прервёт прогон, в следующий раз очередь дойдёт до остальных
@@ -1187,10 +1189,18 @@ def run_batched(store: Store, normalize, channels: list[dict],
             work.result.newly_unavailable = not (row.get("failed_runs") or 0)
             continue
         work.result.new_posts = len(work.new)
+        pause(FETCH_PAUSE_SECONDS)
+
+    # История: сначала каналы направлений, где вакансий меньше всего (HISTORY_FIRST)
+    order = {c: i for i, c in enumerate(HISTORY_FIRST)}
+    for work in sorted(works, key=lambda w: order.get(w.row.get("category") or "", len(order))):
+        if work.result.error:
+            continue
+        row, channel = work.row, work.result.channel
         cursor = row.get("history_before")
         if cursor is None:   # история не начата: идём назад от самого старого из известных постов
             cursor = work.new[0].post_id if work.new else (row.get("last_post_id") or 0) + 1
-        if cursor and cursor > 1 and history_quota > 0:
+        if cursor and cursor > 1 and history_quota > 0 and clock() - started <= time_budget * FETCH_SHARE:
             work.history_started = True
             try:
                 work.history, work.history_next = collect_history(channel, cursor, fetch)
@@ -1200,9 +1210,9 @@ def run_batched(store: Store, normalize, channels: list[dict],
             if work.history and len(work.history) == history_quota:
                 work.history_next = work.history[-1].post_id
             history_quota -= len(work.history)
+            pause(FETCH_PAUSE_SECONDS)
         elif cursor:
             work.history_next = cursor
-        pause(FETCH_PAUSE_SECONDS)
 
     # Без ИИ: короткие и уже известные посты
     pending: list[tuple[ChannelWork, Prepared]] = []
