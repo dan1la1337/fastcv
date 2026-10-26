@@ -20,6 +20,8 @@ export interface Vacancy {
   source_url: string | null;
   stack: string[] | null;
   employer_id: string | null;
+  /** Работодатель на FastCV подтвердил домен компании (TXT-запись в DNS). */
+  employer_verified?: boolean;
   archived_at?: string | null;
   level?: Level | null;
   direction?: string | null;
@@ -39,7 +41,7 @@ export interface Vacancy {
 
 /** Колонки для показа: без служебных (search_tsv, title_key, text_fingerprint, raw_hash) — они только раздувают ответ. */
 // Одной строкой-литералом: по ней supabase-js выводит тип строк ответа
-export const VACANCY_COLUMNS = "id, title, company_name, description, salary_min, salary_max, salary_currency, city, country, is_remote, contact_type, contact_value, created_at, posted_at, source_type, source_url, stack, employer_id, archived_at, level, direction, work_format, hiring_type, first_seen_at, channels_count, scope_note, experience_min";
+export const VACANCY_COLUMNS = "id, title, company_name, description, salary_min, salary_max, salary_currency, city, country, is_remote, contact_type, contact_value, created_at, posted_at, source_type, source_url, stack, employer_id, employer_verified, archived_at, level, direction, work_format, hiring_type, first_seen_at, channels_count, scope_note, experience_min";
 
 export type Level = "intern" | "junior" | "middle" | "senior" | "lead";
 export type WorkFormat = "remote" | "hybrid" | "office";

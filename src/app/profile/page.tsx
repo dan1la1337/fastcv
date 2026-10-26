@@ -7,6 +7,7 @@ import { Briefcase, FileText, Loader2, LogOut, Save, Sparkles, Trash2, Upload, U
 import type { ResumeDraft } from "@/lib/resume-draft";
 import TelegramSubscription from "@/components/TelegramSubscription";
 import DeleteAccount from "@/components/DeleteAccount";
+import CompanyVerification from "@/components/CompanyVerification";
 import { supabase, getUserRole, type UserRole } from "@/lib/supabase";
 import { AREAS, DIRECTIONS, WORK_FORMATS, experienceFields, type Level, type WorkFormat } from "@/lib/vacancies";
 import ExperienceInput from "@/components/ExperienceInput";
@@ -383,6 +384,7 @@ export default function ProfilePage() {
         )}
 
         {isCandidate && user && <TelegramSubscription userId={user.id} />}
+        {!isCandidate && user && <CompanyVerification userId={user.id} />}
 
         {user && <DeleteAccount userId={user.id} />}
       </div>

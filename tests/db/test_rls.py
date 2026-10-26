@@ -481,6 +481,21 @@ CHECKS: list[tuple] = [
     ("сайт видит справочник стран", True, "select (count(*) >= 0)::text from vacancy_countries", "anon", None, "true"),
     ("функцию-триггер лимита откликов нельзя вызвать через API", False,
      "select limit_daily_applications()", "authenticated", C, None),
+    ("работодатель не может сам вписать себе подтверждение компании", False,
+     f"update profiles set company_verified_at = now() where id = '{E}'", "authenticated", E, None),
+    ("работодатель не может сам поставить значок своей вакансии", True,
+     f"""insert into vacancies (title, source_type, employer_id, employer_verified) values ('VB own', 'internal', '{E}', true);
+        update vacancies set employer_verified = true where title = 'VB own';
+        select employer_verified::text from vacancies where title = 'VB own'""",
+     "authenticated", E, "false"),
+    ("домен компании: почтовые сервисы не принимаются", False,
+     "select start_company_verification('gmail.com')", "authenticated", E, None),
+    ("домен компании: код для TXT-записи выдаётся работодателю", True,
+     f"""create temp table cv as select start_company_verification('https://www.acme-corp.ru/jobs') c;
+         select length(c)::text || ' ' || (select company_domain from profiles where id = '{E}') from cv""",
+     "authenticated", E, "32 acme-corp.ru"),
+    ("кандидат не подтверждает компанию", False,
+     "select start_company_verification('acme.ru')", "authenticated", C, None),
     ("ротация «Работы России»: старые удаляются, с откликами — в архив, свежие остаются", True,
      f"""insert into vacancies (title, source_type, source_post, posted_at) values
           ('TV old', 'external', 'trudvsem/old', now() - interval '5 days'),
