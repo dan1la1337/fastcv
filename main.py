@@ -24,6 +24,7 @@ import os
 import re
 import sys
 import time
+from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta, timezone
 from typing import Callable, Literal, Optional
@@ -50,11 +51,12 @@ AI_PAUSE_SECONDS = 2
 # Постов в одном обращении к Gemini: пачка из 10 разбирается за 10–30 с, как один пост,
 # поэтому за запуск успеваем в 5–10 раз больше (замер 26.10)
 AI_BATCH = 10
+AI_PARALLEL = 3   # пачек одновременно; бесплатный лимит — 15 запросов в минуту, мы укладываемся
 # История канала: при подключении дочитываем посты за последние HISTORY_DAYS дней
 # (столько вакансия и живёт в ленте), по HISTORY_PAGES страниц за запуск на канал
 HISTORY_DAYS = ARCHIVE_AFTER_DAYS
 HISTORY_PAGES = 3
-HISTORY_POSTS_PER_RUN = 400   # новые посты важнее: история — на остаток времени
+HISTORY_POSTS_PER_RUN = 800   # новые посты важнее: история — на остаток времени
 FETCH_SHARE = 0.5             # доля времени запуска на чтение лент, остальное — ИИ
 FETCH_PAUSE_SECONDS = 1
 CHANNEL_PAUSE_SECONDS = 2
@@ -1215,22 +1217,30 @@ def run_batched(store: Store, normalize, channels: list[dict],
     pending.sort(key=lambda wp: wp[1].post not in wp[0].new)
 
     ai_stopped: Optional[str] = None
-    for i in range(0, len(pending), AI_BATCH):
-        if clock() - started > time_budget:
-            out_of_time = True
-            break
-        chunk = pending[i:i + AI_BATCH]
-        try:
-            vacancies = normalize.many([p.post.text for _, p in chunk])
-        except AIUnavailable as e:
-            ai_stopped = f"Gemini недоступен: {e}"
-            break
-        for (work, prepared), vacancy in zip(chunk, vacancies):
-            outcome = save_post(prepared, vacancy, store)
-            work.done[prepared.post.post_id] = outcome
-            if outcome == "saved":
-                work.result.saved += 1
-        pause(AI_PAUSE_SECONDS)
+    chunks = [pending[i:i + AI_BATCH] for i in range(0, len(pending), AI_BATCH)]
+    # Пачки уходят в Gemini по AI_PARALLEL одновременно: ответ на пачку ~15 с, и почти всё это
+    # время — ожидание модели. Сохраняем по порядку: на первой неудаче останавливаемся.
+    with ThreadPoolExecutor(max_workers=AI_PARALLEL) as pool:
+        for w in range(0, len(chunks), AI_PARALLEL):
+            if clock() - started > time_budget:
+                out_of_time = True
+                break
+            wave = chunks[w:w + AI_PARALLEL]
+            futures = [pool.submit(normalize.many, [p.post.text for _, p in chunk]) for chunk in wave]
+            for chunk, future in zip(wave, futures):
+                try:
+                    vacancies = future.result()
+                except AIUnavailable as e:
+                    ai_stopped = f"Gemini недоступен: {e}"
+                    break
+                for (work, prepared), vacancy in zip(chunk, vacancies):
+                    outcome = save_post(prepared, vacancy, store)
+                    work.done[prepared.post.post_id] = outcome
+                    if outcome == "saved":
+                        work.result.saved += 1
+            if ai_stopped:
+                break
+            pause(AI_PAUSE_SECONDS)
 
     now = datetime.now(timezone.utc).isoformat()
     for work in works:
