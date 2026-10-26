@@ -620,6 +620,31 @@ CHECKS: list[tuple] = [
      """update applications set blitz_summary = 'Мотивирован, опыт 2 года' where id = '99999999-0000-0000-0000-0000000000c2';
         select blitz_summary from applications where id = '99999999-0000-0000-0000-0000000000c2'""",
      "authenticated", E, "Мотивирован, опыт 2 года"),
+    ("сброс демо: следы показа стираются, вакансии и профиль — заново", True,
+     """insert into auth.users values ('00000000-0000-0000-0000-0000000000e1', '{"role":"candidate"}'),
+                                      ('00000000-0000-0000-0000-0000000000e2', '{"role":"employer"}');
+        do $$ begin perform reset_demo('00000000-0000-0000-0000-0000000000e1', '00000000-0000-0000-0000-0000000000e2'); end $$;
+        insert into applications (vacancy_id, candidate_id, blitz_answers)
+          select id, '00000000-0000-0000-0000-0000000000e1', '["Бронирование", "Через 2 недели"]'
+            from vacancies where employer_id = '00000000-0000-0000-0000-0000000000e2' and title like 'Python%';
+        insert into vacancy_marks (user_id, vacancy_id, kind)
+          select '00000000-0000-0000-0000-0000000000e1', id, 'saved' from vacancies where title = 'Ext';
+        create temp table dr as select reset_demo('00000000-0000-0000-0000-0000000000e1', '00000000-0000-0000-0000-0000000000e2') r;
+        select (select r::text from dr) || ' ' ||
+               (select count(*) from applications where candidate_id = '00000000-0000-0000-0000-0000000000e1') || ' ' ||
+               (select count(*) from vacancy_marks where user_id = '00000000-0000-0000-0000-0000000000e1') || ' ' ||
+               (select string_agg(jsonb_array_length(blitz_questions)::text, ',' order by title desc)
+                  from vacancies where employer_id = '00000000-0000-0000-0000-0000000000e2') || ' ' ||
+               (select name || ':' || pref_level from profiles where id = '00000000-0000-0000-0000-0000000000e1')""",
+     "postgres", None,
+     '{"vacancies_created": 3, "vacancies_replaced": 3, "applications_removed": 1} 0 0 0,2,0 Анна Смирнова:middle'),
+    ("сервис (скрипт) вызывает сброс демо", True,
+     "select reset_demo('00000000-0000-0000-0000-0000000000e1', '00000000-0000-0000-0000-0000000000e2') ->> 'vacancies_created'",
+     "service_role", None, "3"),
+    ("сброс демо не перепутает роли", False,
+     "select reset_demo('00000000-0000-0000-0000-0000000000e2', '00000000-0000-0000-0000-0000000000e1')", "service_role", None, None),
+    ("сайт НЕ вызывает сброс демо", False,
+     "select reset_demo('00000000-0000-0000-0000-0000000000e1', '00000000-0000-0000-0000-0000000000e2')", "authenticated", E, None),
     ("ротация «Работы России»: старые удаляются, с откликами — в архив, свежие остаются", True,
      f"""insert into vacancies (title, source_type, source_post, posted_at) values
           ('TV old', 'external', 'trudvsem/old', now() - interval '5 days'),

@@ -1,0 +1,35 @@
+name: Demo Reset
+
+# Сброс демо одной кнопкой (план 1.16): Actions → Demo Reset → Run workflow.
+# Адреса демо-аккаунтов — в Settings → Secrets and variables → Actions → Variables:
+# DEMO_CANDIDATE_EMAIL и DEMO_EMPLOYER_EMAIL. Сами аккаунты заводятся обычной регистрацией.
+on:
+  workflow_dispatch:
+    inputs:
+      check_only:
+        description: 'Только проверить, что демо-аккаунты находятся (ничего не менять)'
+        type: boolean
+        default: false
+
+concurrency:
+  group: demo-reset
+  cancel-in-progress: false
+
+jobs:
+  reset:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.11'
+          cache: pip
+      - run: pip install -r requirements.txt
+      - name: Reset demo accounts
+        env:
+          SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          DEMO_CANDIDATE_EMAIL: ${{ vars.DEMO_CANDIDATE_EMAIL }}
+          DEMO_EMPLOYER_EMAIL: ${{ vars.DEMO_EMPLOYER_EMAIL }}
+        run: python demo_reset.py ${{ inputs.check_only && '--check' || '' }}
