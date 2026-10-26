@@ -23,6 +23,10 @@ USER_AGENT = "Mozilla/5.0 (compatible; FastCVBot/1.0; +https://fastcv.ru)"
 RANKING_WEIGHT = 1.0
 _TAG = re.compile(r"<[^>]+>")
 _SPACE = re.compile(r"\s+")
+# В игровой студии геймдев — те, кто делает игры; продажи, найм, финансы и т. п. — по названию
+_NOT_DEV = re.compile(r"account|sales|recruit|talent|\bhr\b|people|financ|payroll|legal|counsel|"
+                      r"marketing|office|procurement|business development|\bpr\b|communication|"
+                      r"user acquisition|monetization|accountant", re.I)
 
 # Город из API → как в ленте FastCV
 CITIES = {
@@ -119,8 +123,9 @@ def rows_for(board: Board, jobs: list[dict]) -> list[dict]:
             "posted_at": first.get("posted_at") or datetime.now(timezone.utc).isoformat(),
             "ranking_weight": RANKING_WEIGHT,
         }
-        if board.direction:
-            row["direction"] = board.direction
+        # Ключ есть у всех строк: в пакетной записи столбцы берутся одни на все строки;
+        # None — направление определит база по названию
+        row["direction"] = board.direction if board.direction and not _NOT_DEV.search(row["title"] or "") else None
         rows.append(row)
     return rows
 

@@ -45,6 +45,12 @@ def test_same_title_in_many_cities_is_one_vacancy():
     assert analyst["city"] is None and analyst["is_remote"] and analyst["work_format"] == "remote"
 
 
+def test_non_dev_roles_in_game_studio_are_not_gamedev():
+    jobs = [{"id": "1", "title": "Account Manager", "url": "u", "location": "Krakow", "description": "", "posted_at": None}]
+    [row] = ats.rows_for(ats.BOARDS[0], jobs)
+    assert row["direction"] is None    # решит база по названию
+
+
 def test_workable_fields():
     [row] = ats.rows_for(ats.BOARDS[0], ats.fetch_jobs(ats.BOARDS[0], get))
     assert row["source_post"] == "career/sperasoft/AB12" and row["city"] == "Ереван"
