@@ -3,14 +3,16 @@
 import { useEffect, useRef, useState } from "react";
 import type { User } from "@supabase/supabase-js";
 import { useRouter } from "next/navigation";
-import Link from "next/link";
 import { Briefcase, FileText, Loader2, LogOut, Save, Sparkles, Trash2, Upload, UserCircle } from "lucide-react";
 import type { ResumeDraft } from "@/lib/resume-draft";
 import TelegramSubscription from "@/components/TelegramSubscription";
 import DeleteAccount from "@/components/DeleteAccount";
 import { supabase, getUserRole, type UserRole } from "@/lib/supabase";
-import { DIRECTIONS, WORK_FORMATS, experienceFields, type Level, type WorkFormat } from "@/lib/vacancies";
+import { AREAS, DIRECTIONS, WORK_FORMATS, experienceFields, type Level, type WorkFormat } from "@/lib/vacancies";
 import ExperienceInput from "@/components/ExperienceInput";
+import Logo from "@/components/Logo";
+import { toast } from "@/components/Toaster";
+import { saveErrorText } from "@/lib/auth-errors";
 
 const MAX_DIRECTIONS = 5; // как в ограничении profiles_pref_directions_check
 
@@ -20,9 +22,9 @@ const inputClass =
   "w-full bg-[#0B0F19] border border-white/12 rounded-2xl px-4 py-3 text-sm text-neutral-200 focus:outline-none focus:border-teal-300 transition-colors";
 const labelClass = "block text-xs font-bold text-neutral-500 uppercase tracking-wider mb-2";
 const chip = (active: boolean) =>
-  `text-xs px-3 py-1.5 rounded-lg border transition-colors ${active
+  `text-xs px-3 py-1.5 rounded-full border transition-colors ${active
     ? "bg-teal-300 border-teal-300 text-neutral-950"
-    : "bg-neutral-950 border-white/15 text-neutral-400 hover:border-neutral-500 hover:text-neutral-200"}`;
+    : "bg-white/[0.04] border-white/15 text-neutral-400 hover:border-white/30 hover:text-neutral-200"}`;
 
 export default function ProfilePage() {
   const router = useRouter();
@@ -105,9 +107,11 @@ export default function ProfilePage() {
     });
 
     setSaving(false);
-    setNotice(error
-      ? { kind: "error", text: "Не удалось сохранить профиль: " + error.message }
-      : { kind: "ok", text: role === "candidate" ? "Профиль сохранён. Подборка «Для вас» на главной обновлена." : "Профиль сохранён." });
+    const result = error
+      ? { kind: "error" as const, text: saveErrorText(error.message) }
+      : { kind: "ok" as const, text: role === "candidate" ? "Профиль сохранён. Подборка «Для вас» на главной обновлена." : "Профиль сохранён." };
+    setNotice(result);
+    toast(result.text, result.kind);   // кнопка внизу, плашка — вверху страницы
   }
 
   async function uploadResume(file: File) {
@@ -216,9 +220,7 @@ export default function ProfilePage() {
     <div className="min-h-screen text-neutral-100 font-sans p-4 sm:p-8">
       <div className="max-w-2xl mx-auto space-y-8">
         <div className="flex items-center justify-between">
-          <Link href="/" className="inline-flex items-center gap-2 hover:opacity-80 transition-opacity">
-            <span className="font-display font-bold text-lg tracking-tight text-neutral-100">fastcv</span>
-          </Link>
+          <Logo />
           <button onClick={handleLogout} className="text-sm text-neutral-400 hover:text-white flex items-center gap-2 transition-colors">
             <LogOut className="w-4 h-4" /> Выйти
           </button>
@@ -266,18 +268,25 @@ export default function ProfilePage() {
 
                 <div>
                   <span className={labelClass}>Направления (до {MAX_DIRECTIONS})</span>
-                  <div className="flex flex-wrap gap-2">
-                    {DIRECTIONS.map(d => {
-                      const on = prefDirections.includes(d.id);
-                      const full = !on && prefDirections.length >= MAX_DIRECTIONS;
-                      return (
-                        <button key={d.id} type="button" disabled={full} aria-pressed={on}
-                          onClick={() => setPrefDirections(prev => on ? prev.filter(x => x !== d.id) : [...prev, d.id])}
-                          className={chip(on) + (full ? " opacity-40 cursor-not-allowed" : "")}>
-                          {d.label}
-                        </button>
-                      );
-                    })}
+                  <div className="space-y-3">
+                    {AREAS.map(a => (
+                      <div key={a.id}>
+                        <p className="text-[11px] text-neutral-500 mb-1.5">{a.label}</p>
+                        <div className="flex flex-wrap gap-2">
+                          {DIRECTIONS.filter(d => d.group === a.id).map(d => {
+                            const on = prefDirections.includes(d.id);
+                            const full = !on && prefDirections.length >= MAX_DIRECTIONS;
+                            return (
+                              <button key={d.id} type="button" disabled={full} aria-pressed={on}
+                                onClick={() => setPrefDirections(prev => on ? prev.filter(x => x !== d.id) : [...prev, d.id])}
+                                className={chip(on) + (full ? " opacity-40 cursor-not-allowed" : "")}>
+                                {d.label}
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    ))}
                   </div>
                 </div>
 
