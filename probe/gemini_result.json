@@ -1,1 +1,375 @@
-{"fatal": "Traceback (most recent call last):\n  File \"/home/runner/work/fastcv/fastcv/probe/gemini.py\", line 9, in <module>\n    import main\nModuleNotFoundError: No module named 'main'\n"}
+{
+ "posts": 24,
+ "models": {
+  "gemini-3.1-flash-lite": {
+   "single": [
+    1.6,
+    24.4,
+    2.2,
+    4.6
+   ],
+   "errors": [],
+   "batch": [
+    {
+     "s": 10.1,
+     "n": 10,
+     "got": 10,
+     "jobs": 9,
+     "titles": [
+      [
+       0,
+       "Senior Software Engineer",
+       "backend"
+      ],
+      [
+       1,
+       "Front-End Lead",
+       "frontend"
+      ],
+      [
+       2,
+       "Founding Forward Deployed Engineer",
+       "backend"
+      ],
+      [
+       3,
+       "Разработчик Vertica / Инженер данных",
+       "backend"
+      ],
+      [
+       4,
+       "Middle Frontend Engineer",
+       "frontend"
+      ],
+      [
+       5,
+       "Frontend-разработчик",
+       "frontend"
+      ],
+      [
+       6,
+       "QA Engineer Auto",
+       "qa"
+      ],
+      [
+       7,
+       "QA engineer",
+       "qa"
+      ],
+      [
+       8,
+       null,
+       null
+      ],
+      [
+       9,
+       "Инженер по тестированию",
+       "qa"
+      ]
+     ]
+    },
+    {
+     "err": "503 503 UNAVAILABLE. {'error': {'code': 503, 'message': 'This model is currently experiencing high demand. Spikes in demand ",
+     "s": 17.2
+    }
+   ]
+  },
+  "gemini-3.5-flash-lite": {
+   "single": [
+    17.7,
+    17.7,
+    19.2,
+    35.9
+   ],
+   "errors": [],
+   "batch": [
+    {
+     "s": 30.6,
+     "n": 10,
+     "got": 10,
+     "jobs": 9,
+     "titles": [
+      [
+       0,
+       "Senior Software Engineer",
+       "backend"
+      ],
+      [
+       1,
+       "Front-End Lead",
+       "frontend"
+      ],
+      [
+       2,
+       "Founding Forward Deployed Engineer",
+       "backend"
+      ],
+      [
+       3,
+       "Разработчик Vertica / Инженер данных",
+       "data_ml"
+      ],
+      [
+       4,
+       "Middle Frontend Engineer",
+       "frontend"
+      ],
+      [
+       5,
+       "Frontend-разработчик",
+       "frontend"
+      ],
+      [
+       6,
+       "QA Engineer Auto",
+       "qa"
+      ],
+      [
+       7,
+       "QA Engineer",
+       "qa"
+      ],
+      [
+       8,
+       null,
+       null
+      ],
+      [
+       9,
+       "Инженер по тестированию",
+       "qa"
+      ]
+     ]
+    },
+    {
+     "s": 25.7,
+     "n": 10,
+     "got": 10,
+     "jobs": 10,
+     "titles": [
+      [
+       0,
+       "Руководитель QA",
+       "qa"
+      ],
+      [
+       1,
+       "QA Manual Engineer",
+       "qa"
+      ],
+      [
+       2,
+       "TeamLead DevOps",
+       "devops"
+      ],
+      [
+       3,
+       "Администратор IT систем / SRE",
+       "devops"
+      ],
+      [
+       4,
+       "Salesforce DevOps Engineer",
+       "devops"
+      ],
+      [
+       5,
+       "DevOps Engineer",
+       "devops"
+      ],
+      [
+       6,
+       "Ведущий системный администратор инфраструктуры",
+       "devops"
+      ],
+      [
+       7,
+       "Senior DevOps Engineer",
+       "devops"
+      ],
+      [
+       8,
+       "Android разработчик",
+       "mobile"
+      ],
+      [
+       9,
+       "iOS разработчик",
+       "mobile"
+      ]
+     ]
+    }
+   ]
+  },
+  "gemini-3.6-flash": {
+   "single": [
+    6.2,
+    4.0,
+    6.7,
+    3.9
+   ],
+   "errors": [],
+   "batch": [
+    {
+     "err": "503 503 UNAVAILABLE. {'error': {'code': 503, 'message': 'This model is currently experiencing high demand. Spikes in demand ",
+     "s": 9.5
+    },
+    {
+     "err": "503 503 UNAVAILABLE. {'error': {'code': 503, 'message': 'This model is currently experiencing high demand. Spikes in demand ",
+     "s": 4.9
+    }
+   ]
+  },
+  "gemini-flash-lite-latest": {
+   "single": [
+    13.4,
+    13.8,
+    9.6,
+    13.2
+   ],
+   "errors": [],
+   "batch": [
+    {
+     "s": 16.2,
+     "n": 10,
+     "got": 10,
+     "jobs": 9,
+     "titles": [
+      [
+       0,
+       "Senior Software Engineer",
+       "backend"
+      ],
+      [
+       1,
+       "Front-End Lead",
+       "frontend"
+      ],
+      [
+       2,
+       "Founding Forward Deployed Engineer",
+       "backend"
+      ],
+      [
+       3,
+       "Разработчик Vertica / Инженер данных",
+       "backend"
+      ],
+      [
+       4,
+       "Middle Frontend Engineer",
+       "frontend"
+      ],
+      [
+       5,
+       "Frontend-разработчик",
+       "frontend"
+      ],
+      [
+       6,
+       "QA Engineer Auto",
+       "qa"
+      ],
+      [
+       7,
+       "QA Engineer",
+       "qa"
+      ],
+      [
+       8,
+       null,
+       null
+      ],
+      [
+       9,
+       "Инженер по тестированию",
+       "qa"
+      ]
+     ]
+    },
+    {
+     "s": 18.2,
+     "n": 10,
+     "got": 10,
+     "jobs": 10,
+     "titles": [
+      [
+       0,
+       "Руководитель QA",
+       "qa"
+      ],
+      [
+       1,
+       "QA Manual Engineer",
+       "qa"
+      ],
+      [
+       2,
+       "TeamLead DevOps",
+       "devops"
+      ],
+      [
+       3,
+       "Администратор IT систем / SRE",
+       "devops"
+      ],
+      [
+       4,
+       "Salesforce DevOps Engineer",
+       "devops"
+      ],
+      [
+       5,
+       "DevOps Engineer",
+       "devops"
+      ],
+      [
+       6,
+       "Ведущий системный администратор инфраструктуры",
+       "devops"
+      ],
+      [
+       7,
+       "Senior DevOps Engineer",
+       "devops"
+      ],
+      [
+       8,
+       "Android разработчик",
+       "mobile"
+      ],
+      [
+       9,
+       "iOS разработчик",
+       "mobile"
+      ]
+     ]
+    }
+   ]
+  },
+  "gemini-flash-latest": {
+   "single": [],
+   "errors": [
+    "503 38.2s",
+    "503 4.5s",
+    "503 64.6s",
+    "504 88.5s"
+   ],
+   "batch": []
+  },
+  "gemini-2.5-flash-lite": {
+   "single": [],
+   "errors": [
+    "404 0.1s"
+   ],
+   "batch": []
+  },
+  "gemini-2.5-flash": {
+   "single": [],
+   "errors": [
+    "404 0.3s"
+   ],
+   "batch": []
+  }
+ }
+}
