@@ -1404,6 +1404,15 @@ def main() -> None:
                 {"at": datetime.now(timezone.utc).isoformat(), "companies": career_stats}, ensure_ascii=False))
         except Exception as e:
             print(f"⚠️ Сайты компаний: {type(e).__name__}: {str(e)[:200]}")
+        # Открытые API систем найма (Greenhouse, Workable): игровые студии и JetBrains
+        try:
+            import ats
+            ats_stats = ats.run(store)
+            print(f"Системы найма: {ats_stats}")
+            store.set_setting("ats_last_run", json.dumps(
+                {"at": datetime.now(timezone.utc).isoformat(), "boards": ats_stats}, ensure_ascii=False))
+        except Exception as e:
+            print(f"⚠️ Системы найма: {type(e).__name__}: {str(e)[:200]}")
     # «Работа России»: открытые данные без ИИ. Отключается переменной TRUDVSEM=off
     if (env("TRUDVSEM") or "on").lower() != "off":
         try:
