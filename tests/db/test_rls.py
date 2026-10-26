@@ -95,9 +95,10 @@ CHECKS: list[tuple] = [
      f"insert into vacancies (title, source_type, employer_id) values ('Fake', 'internal', '{C}')", "authenticated", C, None),
     ("работодатель НЕ публикует от чужого имени", False,
      f"insert into vacancies (title, source_type, employer_id) values ('Fake', 'internal', '{E2}')", "authenticated", E, None),
-    ("работодатель НЕ задирает ranking_weight", False,
-     f"insert into vacancies (title, source_type, employer_id, ranking_weight) values ('Top', 'internal', '{E}', 100)",
-     "authenticated", E, None),
+    ("работодатель НЕ задирает ranking_weight: вес вакансий работодателей ставит база", True,
+     f"""insert into vacancies (title, source_type, employer_id, ranking_weight) values ('Top', 'internal', '{E}', 100);
+         select ranking_weight::text from vacancies where title = 'Top'""",
+     "authenticated", E, "1.5"),
     ("работодатель НЕ выдаёт свою вакансию за внешнюю", False,
      f"insert into vacancies (title, source_type, employer_id) values ('Fake', 'external', '{E}')", "authenticated", E, None),
     ("чужой работодатель НЕ удаляет вакансию", True,
@@ -496,6 +497,24 @@ CHECKS: list[tuple] = [
      "authenticated", E, "32 acme-corp.ru"),
     ("кандидат не подтверждает компанию", False,
      "select start_company_verification('acme.ru')", "authenticated", C, None),
+    ("отклик без ответа 10 дней — вакансия работодателя ниже и со значком; ответил — всё вернулось", True,
+     f"""insert into vacancies (id, title, source_type, employer_id) values ('99999999-0000-0000-0000-000000000001', 'AG job', 'internal', '{E}');
+        insert into applications (vacancy_id, candidate_id, status, created_at)
+          values ('99999999-0000-0000-0000-000000000001', '{C}', 'new', now() - interval '11 days');
+        do $$ begin perform refresh_employer_slow(); end $$;
+        create temp table ag1 as select employer_slow, ranking_weight from vacancies where title = 'AG job';
+        update applications set status = 'rejected' where vacancy_id = '99999999-0000-0000-0000-000000000001';
+        do $$ begin perform refresh_employer_slow(); end $$;
+        select (select employer_slow::text || ':' || ranking_weight from ag1) || ' ' ||
+               (select employer_slow::text || ':' || ranking_weight from vacancies where title = 'AG job');
+        delete from applications where vacancy_id = '99999999-0000-0000-0000-000000000001';
+        delete from vacancies where title = 'AG job';""",
+     "postgres", None, "true:0.9 false:1.5"),
+    ("работодатель не снимет значок «Отвечает редко» сам", True,
+     f"""insert into vacancies (title, source_type, employer_id) values ('AG own', 'internal', '{E}');
+        update vacancies set employer_slow = true, ranking_weight = 1.5 where title = 'AG own';
+        select employer_slow::text from vacancies where title = 'AG own'""",
+     "authenticated", E, "false"),
     ("ротация «Работы России»: старые удаляются, с откликами — в архив, свежие остаются", True,
      f"""insert into vacancies (title, source_type, source_post, posted_at) values
           ('TV old', 'external', 'trudvsem/old', now() - interval '5 days'),
