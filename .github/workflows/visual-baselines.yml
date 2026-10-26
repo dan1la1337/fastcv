@@ -1,15 +1,19 @@
 name: Visual baselines
 
 # Снять эталоны скриншот-тестов (e2e/visual.spec.ts) на своей ветке и закоммитить их туда же.
-# Запускать вручную, когда дизайн меняется намеренно: Actions → Visual baselines → Run workflow → ветка.
+# Когда дизайн меняется намеренно: коммит с «[baselines]» в сообщении на ветке PR
+# или Actions → Visual baselines → Run workflow.
 on:
   workflow_dispatch:
+  push:
+    branches-ignore: [main]
 
 permissions:
   contents: write
 
 jobs:
   baselines:
+    if: github.event_name == 'workflow_dispatch' || contains(github.event.head_commit.message, '[baselines]')
     runs-on: ubuntu-latest
     timeout-minutes: 20
     env:
