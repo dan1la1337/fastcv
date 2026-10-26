@@ -15,11 +15,14 @@ import type { User } from "@supabase/supabase-js";
 import Link from "next/link";
 import Logo from "@/components/Logo";
 import MatchRing from "@/components/MatchRing";
-import SmartApply from "@/components/SmartApply";
+import dynamic from "next/dynamic";
 import CompanyLine from "@/components/CompanyLine";
 import { estimateSalary, fetchSalaryBenchmarks, type SalaryBenchmark } from "@/lib/salary";
 import SalaryEstimate from "@/components/SalaryEstimate";
 import SearchSelect, { type SelectOption } from "@/components/SearchSelect";
+
+// Окно Smart Apply нужно только по клику: его код не грузим вместе с лентой
+const SmartApply = dynamic(() => import("@/components/SmartApply"), { ssr: false });
 
 /**
  * Лента вакансий с фильтрами. Первую страницу без фильтров сервер отдаёт сразу
@@ -794,7 +797,7 @@ export default function Feed({ initialRows, initialTotal, hero }: { initialRows:
         </section>
       </main>
 
-      <SmartApply vacancy={applyVacancy} user={user} onClose={() => setApplyVacancy(null)} />
+      {applyVacancy && <SmartApply vacancy={applyVacancy} user={user} onClose={() => setApplyVacancy(null)} />}
     </div>
   );
 }

@@ -11,7 +11,8 @@ import { OPERATOR } from "@/lib/legal";
 // Кириллица обязательна: иначе русский текст рисуется системным шрифтом
 const inter = Inter({ variable: "--font-inter", subsets: ["latin", "cyrillic"] });
 const unbounded = Unbounded({ variable: "--font-unbounded", subsets: ["latin", "cyrillic"], weight: ["600", "700"] });
-const jetbrains = JetBrains_Mono({ variable: "--font-jetbrains", subsets: ["latin", "cyrillic"], weight: ["500"] });
+// Моноширинный — только для мелких счётчиков: не задерживаем им первую отрисовку
+const jetbrains = JetBrains_Mono({ variable: "--font-jetbrains", subsets: ["latin", "cyrillic"], weight: ["500"], preload: false });
 
 // Признак входа до первой отрисовки: вошедшим не показываем экран-приветствие (.guest-only).
 // Куки сессии Supabase читаются из браузера; сама сессия здесь не проверяется — только скрытие блока
