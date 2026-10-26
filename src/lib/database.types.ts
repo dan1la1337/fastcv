@@ -79,6 +79,7 @@ export type Database = {
           hr_message: string | null
           hr_replied_at: string | null
           viewed_at: string | null
+          answered_at: string | null
           id: string
           status: string | null
           vacancy_id: string | null
@@ -90,6 +91,7 @@ export type Database = {
           hr_message?: string | null
           hr_replied_at?: string | null
           viewed_at?: string | null
+          answered_at?: string | null
           id?: string
           status?: string | null
           vacancy_id?: string | null
@@ -101,6 +103,7 @@ export type Database = {
           hr_message?: string | null
           hr_replied_at?: string | null
           viewed_at?: string | null
+          answered_at?: string | null
           id?: string
           status?: string | null
           vacancy_id?: string | null
@@ -345,6 +348,7 @@ export type Database = {
           employer_id: string | null
           employer_verified: boolean
           employer_slow: boolean
+          employer_stats: Json
           id: string
           is_remote: boolean | null
           level: string | null
@@ -385,6 +389,7 @@ export type Database = {
           employer_id?: string | null
           employer_verified?: boolean
           employer_slow?: boolean
+          employer_stats?: Json
           id?: string
           is_remote?: boolean | null
           level?: string | null
@@ -425,6 +430,7 @@ export type Database = {
           employer_id?: string | null
           employer_verified?: boolean
           employer_slow?: boolean
+          employer_stats?: Json
           id?: string
           is_remote?: boolean | null
           level?: string | null
@@ -503,6 +509,9 @@ export type Database = {
       link_telegram_chat: { Args: { chat: number; code: string }; Returns: boolean }
       start_company_verification: { Args: { domain: string }; Returns: string }
       check_company_verification: { Args: never; Returns: boolean }
+      rate_interview: { Args: { token: string; rating: number }; Returns: boolean }
+      rate_my_interview: { Args: { application: string; rating: number }; Returns: boolean }
+      my_interview_ratings: { Args: never; Returns: { application_id: string; rating: number }[] }
       set_telegram_bot: { Args: { username: string }; Returns: undefined }
       consume_ai_quota: {
         Args: { max_calls: number; quota_kind: string; window_seconds: number }

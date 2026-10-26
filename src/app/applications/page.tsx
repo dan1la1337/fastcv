@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { ArrowLeft, ExternalLink, Loader2, MessageSquare } from "lucide-react";
 import { supabase, getUserRole } from "@/lib/supabase";
 import { plural } from "@/lib/vacancies";
+import InterviewStars from "@/components/InterviewStars";
 
 interface Application {
   id: string;
@@ -28,6 +29,8 @@ const STATUS: Record<string, { text: string; style: string }> = {
 export default function CandidateApplications() {
   const [applications, setApplications] = useState<Application[]>([]);
   const [loading, setLoading] = useState(true);
+  /** Оценки собеседований по откликам (рейтинг найма) */
+  const [ratings, setRatings] = useState<Record<string, number>>({});
   const router = useRouter();
 
   useEffect(() => {
@@ -50,12 +53,21 @@ export default function CandidateApplications() {
         .eq("candidate_id", user.id)
         .order("created_at", { ascending: false });
 
+      const { data: rated } = await supabase.rpc("my_interview_ratings");
       if (cancelled) return;
+      setRatings(Object.fromEntries((rated ?? []).map(r => [r.application_id, r.rating])));
       setApplications((data ?? []) as unknown as Application[]);
       setLoading(false);
     })();
     return () => { cancelled = true; };
   }, [router]);
+
+  async function rate(id: string, rating: number) {
+    const before = ratings[id];
+    setRatings(r => ({ ...r, [id]: rating }));
+    const { data, error } = await supabase.rpc("rate_my_interview", { application: id, rating });
+    if (error || !data) setRatings(r => ({ ...r, [id]: before }));
+  }
 
   if (loading) {
     return (
@@ -130,6 +142,16 @@ export default function CandidateApplications() {
                     }`}>
                       <p className="text-xs font-bold text-neutral-500 uppercase tracking-wider mb-2">Ответ работодателя</p>
                       <p className="whitespace-pre-line">{app.hr_message}</p>
+                    </div>
+                  )}
+
+                  {!external && app.status === "interview_scheduled" && (
+                    <div className="flex flex-wrap items-center justify-between gap-2 rounded-2xl border border-white/10 px-4 py-3">
+                      <p className="text-sm text-neutral-300">
+                        {ratings[app.id] ? "Ваша оценка собеседования" : "Как прошло собеседование?"}
+                        <span className="block text-xs text-neutral-500">Анонимно: работодатель видит только среднюю оценку</span>
+                      </p>
+                      <InterviewStars value={ratings[app.id] ?? null} onRate={n => rate(app.id, n)} />
                     </div>
                   )}
 
