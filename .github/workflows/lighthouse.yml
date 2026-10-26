@@ -13,8 +13,10 @@ on:
 permissions:
   contents: write  # комментарий к коммиту с результатами
 
+# Превью Vercel тоже присылают deployment_status: их запуски пропускаются, но раньше
+# отменяли идущий замер прода. Теперь у них своя группа, замер прода не трогают.
 concurrency:
-  group: lighthouse
+  group: ${{ (github.event_name == 'deployment_status' && github.event.deployment.environment != 'Production') && format('lighthouse-skip-{0}', github.run_id) || 'lighthouse' }}
   cancel-in-progress: true
 
 jobs:
