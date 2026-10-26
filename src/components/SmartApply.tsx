@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { User } from "@supabase/supabase-js";
 import { supabase } from "@/lib/supabase";
 import type { Vacancy } from "@/lib/vacancies";
@@ -17,6 +17,16 @@ const LETTER_OPTIONS = {
 } as const;
 type LetterSettings = { tone: string; length: string; language: string };
 const LETTER_LABELS = { tone: "Тон", length: "Длина", language: "Язык" } as const;
+
+// Что ИИ делает, пока пишет письмо: шаги сменяются, пока ждём ответ (обычно 3–8 с)
+const STEPS = ["Читаю вакансию", "Сверяю с вашим профилем и навыками", "Пишу письмо"];
+const STEP_MS = 1400;
+// Готовое письмо «печатается»: за TYPE_MS вне зависимости от длины
+const TYPE_MS = 1800;
+
+function reducedMotion(): boolean {
+  return typeof window !== "undefined" && window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+}
 
 /** Username Telegram из контакта вакансии; null, если это не похоже на username. */
 function telegramUsername(value: string): string | null {
@@ -49,6 +59,12 @@ export default function SmartApply({
   const [isGenerating, setIsGenerating] = useState(false);
   const [settings, setSettings] = useState<LetterSettings>({ tone: "neutral", length: "medium", language: "auto" });
   const [isSending, setIsSending] = useState(false);
+  // Шаг «размышления» ИИ и сколько символов письма уже «напечатано» (null — письмо показано целиком)
+  const [step, setStep] = useState(0);
+  const [typed, setTyped] = useState<number | null>(null);
+  const timers = useRef<number[]>([]);
+  const stopTimers = () => { timers.current.forEach(t => window.clearInterval(t)); timers.current = []; };
+  useEffect(() => stopTimers, []);
   const router = useRouter();
   const current = draft && vacancy && draft.vacancyId === vacancy.id ? draft : null;
   const coverLetter = current?.text ?? "";
@@ -72,6 +88,9 @@ export default function SmartApply({
     if (!vacancy) return;
     setIsGenerating(true);
     setGenerationError(null);
+    setStep(0);
+    stopTimers();
+    timers.current.push(window.setInterval(() => setStep(n => Math.min(n + 1, STEPS.length - 1)), STEP_MS));
 
     try {
       // Сессия уходит в cookies сама: токен вручную передавать не нужно
@@ -83,12 +102,24 @@ export default function SmartApply({
       });
       const data = await res.json();
       if (res.ok && data.text) {
+        stopTimers();
         setCoverLetter(data.text);
         setLetterSource({ vacancyId: vacancy.id, source: data.source ?? "ai" });
+        if (!reducedMotion()) {
+          const total: number = data.text.length;
+          const started = performance.now();
+          setTyped(0);
+          timers.current.push(window.setInterval(() => {
+            const shown = Math.round(total * Math.min(1, (performance.now() - started) / TYPE_MS));
+            if (shown >= total) { stopTimers(); setTyped(null); } else setTyped(shown);
+          }, 30));
+        }
       } else {
+        stopTimers();
         setGenerationError(data.error || "Не удалось сгенерировать письмо. Попробуйте ещё раз.");
       }
     } catch {
+      stopTimers();
       setGenerationError("Не удалось связаться с сервером. Попробуйте ещё раз.");
     } finally {
       setIsGenerating(false);
@@ -181,6 +212,25 @@ export default function SmartApply({
               </div>
             </div>
           ))}
+          {isGenerating && (
+            <ol aria-live="polite" className="glass rounded-2xl p-4 space-y-2.5">
+              {STEPS.map((label, i) => (
+                <li key={label} className={`flex items-center gap-2.5 text-sm transition-opacity duration-500 ${i <= step ? "opacity-100" : "opacity-30"}`}>
+                  {i < step
+                    ? <Check className="w-4 h-4 text-teal-300 shrink-0" />
+                    : i === step
+                      ? <span aria-hidden="true" className="ai-shimmer w-4 h-4 rounded-full shrink-0" />
+                      : <span aria-hidden="true" className="w-4 h-4 rounded-full border border-white/20 shrink-0" />}
+                  <span className={i === step ? "text-white" : "text-neutral-400"}>{label}{i === step ? "…" : ""}</span>
+                </li>
+              ))}
+              <li aria-hidden="true" className="pt-1 space-y-1.5">
+                <span className="ai-shimmer block h-2 rounded-full w-11/12 opacity-30" />
+                <span className="ai-shimmer block h-2 rounded-full w-9/12 opacity-30" />
+                <span className="ai-shimmer block h-2 rounded-full w-10/12 opacity-30" />
+              </li>
+            </ol>
+          )}
           {user ? (
             <button
               onClick={generateCoverLetter}
@@ -204,12 +254,20 @@ export default function SmartApply({
       ) : (
         <div className="space-y-3">
           <label htmlFor={`letter-${vacancy.id}`} className="text-xs text-neutral-500">Сопроводительное письмо</label>
-          <textarea
-            id={`letter-${vacancy.id}`}
-            value={coverLetter}
-            onChange={(e) => setCoverLetter(e.target.value)}
-            className="letter-write w-full h-64 bg-[#0B0F19] border border-white/10 rounded-2xl p-4 text-sm text-neutral-200 focus:outline-none focus:border-teal-300 leading-relaxed resize-none"
-          />
+          {typed !== null ? (
+            // Письмо «печатается»; по клику — сразу целиком
+            <div onClick={() => { stopTimers(); setTyped(null); }} aria-hidden="true"
+              className="w-full h-64 overflow-hidden bg-[#0B0F19] border border-teal-300/40 rounded-2xl p-4 text-sm text-neutral-200 leading-relaxed whitespace-pre-wrap cursor-text">
+              {coverLetter.slice(0, typed)}<span className="inline-block w-[2px] h-4 align-[-2px] bg-teal-300 animate-pulse" />
+            </div>
+          ) : (
+            <textarea
+              id={`letter-${vacancy.id}`}
+              value={coverLetter}
+              onChange={(e) => setCoverLetter(e.target.value)}
+              className="w-full h-64 bg-[#0B0F19] border border-white/10 rounded-2xl p-4 text-sm text-neutral-200 focus:outline-none focus:border-teal-300 leading-relaxed resize-none"
+            />
+          )}
           {letterSource?.vacancyId === vacancy.id && letterSource.source === "template" ? (
             <p className="text-xs text-amber-400">
               ИИ сейчас не отвечает, поэтому письмо собрано по шаблону из вашего профиля. Отредактируйте его или нажмите «Переписать» чуть позже.
@@ -222,7 +280,7 @@ export default function SmartApply({
           <div className="flex gap-2.5">
             <button
               onClick={sendApplication}
-              disabled={isSending}
+              disabled={isSending || typed !== null}
               className="flex-1 inline-flex items-center justify-center gap-2 bg-teal-300 hover:bg-teal-200 text-neutral-950 h-12 rounded-full text-sm font-semibold transition-colors disabled:opacity-50"
             >
               {isSending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />} Откликнуться с письмом
@@ -279,8 +337,8 @@ export default function SmartApply({
       {/* --- МОДАЛЬНОЕ ОКНО ДЛЯ EMAIL-ВАКАНСИЙ (БЕЗ ПРИНУДИТЕЛЬНОГО OUTLOOK) --- */}
       {successContactModal.open && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-in fade-in">
-          <div className="bg-neutral-900 border border-neutral-800 rounded-2xl w-full max-w-lg p-6 space-y-6 shadow-2xl relative">
-            <div className="flex items-center justify-between border-b border-neutral-800 pb-4">
+          <div className="bg-[#0B0F19]/95 border border-white/12 rounded-3xl w-full max-w-lg p-6 space-y-6 shadow-2xl relative">
+            <div className="flex items-center justify-between border-b border-white/10 pb-4">
               <div className="flex items-center gap-2.5 text-emerald-400">
                 <div className="w-8 h-8 rounded-full bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center">
                   <Check className="w-4 h-4" />
@@ -298,14 +356,14 @@ export default function SmartApply({
               </p>
 
               {/* Поле с адресом почты и кнопкой копирования */}
-              <div className="flex items-center justify-between bg-neutral-950 border border-neutral-800 rounded-xl p-3.5">
+              <div className="flex items-center justify-between bg-white/[0.04] border border-white/12 rounded-2xl p-3.5">
                 <div className="flex items-center gap-3 overflow-hidden">
                   <Mail className="w-4 h-4 text-teal-300 shrink-0" />
                   <span className="text-sm font-mono text-neutral-200 truncate">{successContactModal.value}</span>
                 </div>
                 <button
                   onClick={() => handleCopy(successContactModal.value)}
-                  className="flex items-center gap-1.5 px-3 py-1.5 bg-neutral-800 hover:bg-neutral-700 text-neutral-200 rounded-lg text-xs font-medium transition-colors shrink-0 ml-2"
+                  className="flex items-center gap-1.5 px-3 py-1.5 bg-white/[0.08] hover:bg-white/[0.14] text-neutral-200 rounded-full text-xs font-medium transition-colors shrink-0 ml-2"
                 >
                   {copiedEmail ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
                   {copiedEmail ? "Скопировано" : "Скопировать"}
@@ -318,14 +376,14 @@ export default function SmartApply({
                   href={`https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(successContactModal.value)}&su=${encodeURIComponent("Отклик на вакансию: " + successContactModal.vacancyTitle)}`}
                   target="_blank"
                   rel="noreferrer"
-                  className="flex items-center justify-center gap-2 py-2.5 px-4 bg-neutral-800 hover:bg-neutral-700 border border-neutral-700 rounded-xl text-xs font-semibold text-neutral-200 transition-colors"
+                  className="flex items-center justify-center gap-2 py-2.5 px-4 bg-white/[0.08] hover:bg-white/[0.14] border border-white/15 rounded-full text-xs font-semibold text-neutral-200 transition-colors"
                 >
                   <ExternalLink className="w-3.5 h-3.5 text-red-400" /> Открыть в Gmail
                 </a>
 
                 <a
                   href={`mailto:${encodeURIComponent(successContactModal.value)}?subject=${encodeURIComponent("Отклик на вакансию: " + successContactModal.vacancyTitle)}`}
-                  className="flex items-center justify-center gap-2 py-2.5 px-4 bg-teal-300 hover:bg-teal-200 rounded-xl text-xs font-semibold text-neutral-950 transition-colors"
+                  className="flex items-center justify-center gap-2 py-2.5 px-4 bg-teal-300 hover:bg-teal-200 rounded-full text-xs font-semibold text-neutral-950 transition-colors"
                 >
                   <Mail className="w-3.5 h-3.5" /> Написать на почту
                 </a>
@@ -334,7 +392,7 @@ export default function SmartApply({
 
             <button
               onClick={() => setSuccessContactModal({ ...successContactModal, open: false })}
-              className="w-full py-2.5 bg-neutral-950 hover:bg-neutral-800 border border-neutral-800 text-neutral-400 text-xs font-medium rounded-xl transition-colors"
+              className="w-full py-2.5 bg-transparent hover:bg-white/[0.06] border border-white/12 text-neutral-400 text-xs font-medium rounded-full transition-colors"
             >
               Закрыть
             </button>
