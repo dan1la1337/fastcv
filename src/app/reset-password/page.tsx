@@ -1,5 +1,6 @@
 "use client";
 
+import Logo from "@/components/Logo";
 import { useState } from "react";
 import Link from "next/link";
 import { ArrowLeft, Loader2, MailCheck } from "lucide-react";
@@ -34,6 +35,7 @@ export default function ResetPasswordPage() {
   return (
     <div className="min-h-screen flex items-center justify-center p-4">
       <div className={card}>
+        <div className="text-center mb-6"><Logo /></div>
         {sent ? (
           <div className="text-center space-y-4">
             <MailCheck className="w-10 h-10 text-teal-300 mx-auto" />
