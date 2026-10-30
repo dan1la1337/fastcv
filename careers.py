@@ -449,6 +449,8 @@ def import_careers(store, normalize: Callable[[str], object], fetcher: Optional[
             info["blocked"] = str(e)
         except requests.RequestException as e:
             info["error"] = f"{type(e).__name__}: {str(e)[:120]}"
+        except Exception as e:  # сбой одной компании (база, разбор) не должен останавливать остальные
+            info["error"] = f"{type(e).__name__}: {str(e)[:120]}"
         if clock() - started > time_budget:
             info["stopped"] = "time budget"
     return stats

@@ -694,7 +694,9 @@ class Store:
     def career_weak_descriptions(self, company: str, limit: int) -> list[tuple[str, str]]:
         """Активные вакансии компании с пустым или шаблонным описанием: (source_post, адрес)."""
         from careers import TEMPLATE_PHRASES
-        weak = ",".join(["description.is.null"] + [f"description.ilike.*{p}*" for p in TEMPLATE_PHRASES])
+        # Значения в кавычках: в фразах бывают запятые («Белая зарплата, ДМС»), а запятая
+        # в фильтре or= разделяет условия — без кавычек PostgREST отвечает ошибкой
+        weak = ",".join(["description.is.null"] + [f'description.ilike."*{p}*"' for p in TEMPLATE_PHRASES])
         rows = (self.db.table("vacancies").select("source_post, source_url")
                 .like("source_post", f"career/{company}/%").is_("archived_at", "null")
                 .or_(weak).not_.is_("source_url", "null")
