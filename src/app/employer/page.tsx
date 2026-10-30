@@ -12,6 +12,7 @@ import MatchRing from "@/components/MatchRing";
 import BlitzAnswers, { type BlitzAnswer } from "@/components/BlitzAnswers";
 import type { VacancyDraft } from "@/lib/vacancy-draft";
 import EmployerReviews from "@/components/EmployerReviews";
+import UpcomingInterviews from "@/components/UpcomingInterviews";
 import { supabase, getUserRole } from "@/lib/supabase";
 import { formatSalary, plural, type Vacancy } from "@/lib/vacancies";
 
@@ -284,7 +285,7 @@ export default function EmployerDashboard() {
       return;
     }
     setApplications(prev => prev.map(app => app.id === reply.appId ? { ...app, status: reply.status, hr_message: message } : app));
-    setNotice({ kind: "ok", text: reply.status === "interview_scheduled" ? "Приглашение отправлено — кандидат увидит его в «Моих откликах»." : "Ответ отправлен кандидату." });
+    setNotice({ kind: "ok", text: reply.status === "interview_scheduled" ? "Приглашение отправлено. Предложите время в чате (кнопка «Написать» → значок календаря) — кандидат выберет удобный вариант." : "Ответ отправлен кандидату." });
     setReply(null);
   }
 
@@ -331,6 +332,8 @@ export default function EmployerDashboard() {
             <Plus className="w-4 h-4" /> Новая вакансия
           </button>
         </div>
+
+        <UpcomingInterviews />
 
         <div role="tablist" aria-label="Разделы кабинета" className="inline-flex gap-1 p-1 rounded-full bg-white/[0.06]">
           <button role="tab" aria-selected={activeTab === "applications"} onClick={() => setActiveTab("applications")} className={tabClass("applications")}>

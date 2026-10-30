@@ -3,10 +3,12 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, ExternalLink, Loader2, MessageCircle, MessageSquare } from "lucide-react";
+import { ArrowLeft, CalendarCheck, ExternalLink, Loader2, MessageCircle, MessageSquare } from "lucide-react";
 import { supabase, getUserRole } from "@/lib/supabase";
 import { plural } from "@/lib/vacancies";
 import HiringReviewForm, { type MyReview } from "@/components/HiringReviewForm";
+import type { Upcoming } from "@/components/UpcomingInterviews";
+import { slotLabel, slotRange } from "@/lib/interviews";
 import InterviewStars from "@/components/InterviewStars";
 
 interface Application {
@@ -39,6 +41,8 @@ export default function CandidateApplications() {
   const [ratings, setRatings] = useState<Record<string, number>>({});
   /** Отзывы о процессе найма (рейтинг работодателя) */
   const [reviews, setReviews] = useState<Record<string, MyReview>>({});
+  /** Назначенные собеседования по откликам */
+  const [interviews, setInterviews] = useState<Record<string, Upcoming>>({});
   const router = useRouter();
 
   useEffect(() => {
@@ -61,11 +65,13 @@ export default function CandidateApplications() {
         .eq("candidate_id", user.id)
         .order("created_at", { ascending: false });
 
-      const [{ data: rated }, { data: mine }] = await Promise.all([
+      const [{ data: rated }, { data: mine }, { data: upcoming }] = await Promise.all([
         supabase.rpc("my_interview_ratings"),
         supabase.rpc("my_hiring_reviews"),
+        supabase.rpc("my_upcoming_interviews"),
       ]);
       if (cancelled) return;
+      setInterviews(Object.fromEntries((upcoming ?? []).filter(u => u.application_id).map(u => [u.application_id!, u as Upcoming])));
       setReviews(Object.fromEntries((mine ?? []).map(r => [r.application_id, r as MyReview])));
       setRatings(Object.fromEntries((rated ?? []).map(r => [r.application_id, r.rating])));
       const cutoff = Date.now() - 10 * 864e5;
@@ -157,6 +163,15 @@ export default function CandidateApplications() {
                       <p className="text-xs font-bold text-neutral-500 uppercase tracking-wider mb-2">Ответ работодателя</p>
                       <p className="whitespace-pre-line">{app.hr_message}</p>
                     </div>
+                  )}
+
+                  {interviews[app.id] && (
+                    <Link href={`/messages?c=${interviews[app.id].conversation_id}`}
+                      className="flex flex-wrap items-center gap-x-2 gap-y-1 rounded-2xl border border-emerald-400/30 bg-emerald-400/[0.07] px-4 py-3 text-sm text-white hover:border-emerald-300/60">
+                      <CalendarCheck className="w-4 h-4 text-emerald-300" aria-hidden="true" />
+                      Собеседование: <b>{slotLabel(interviews[app.id].starts_at)}</b>
+                      <span className="text-neutral-400">({slotRange(interviews[app.id].starts_at, interviews[app.id].duration_min)})</span>
+                    </Link>
                   )}
 
                   {!external && app.status === "interview_scheduled" && (

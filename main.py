@@ -720,6 +720,12 @@ class Store:
     def mark_chat_notified(self, conversation_id: str, side: str) -> None:
         self.db.rpc("mark_chat_notified", {"conversation": conversation_id, "side": side}).execute()
 
+    def pending_interview_reminders(self) -> list[dict]:
+        return self.db.rpc("pending_interview_reminders", {}).execute().data or []
+
+    def mark_interview_reminded(self, slot_id: str) -> None:
+        self.db.rpc("mark_interview_reminded", {"slot": slot_id}).execute()
+
     def pending_notifications(self) -> list[dict]:
         return self.db.rpc("pending_notifications", {}).execute().data or []
 
@@ -1485,6 +1491,15 @@ def main() -> None:
             print(f"Уведомления о сообщениях: {chat}")
         except Exception as e:
             print(f"⚠️ Уведомления о сообщениях: {type(e).__name__}")
+        # Напоминания о собеседованиях накануне — обеим сторонам
+        try:
+            import notifications
+            reminders = notifications.send_interview_reminders(
+                store, notifications.make_sender(resend_key) if resend_key else None,
+                TelegramBot(jobs_token).send if jobs_token else None)
+            print(f"Напоминания о собеседованиях: {reminders}")
+        except Exception as e:
+            print(f"⚠️ Напоминания о собеседованиях: {type(e).__name__}")
     # Письма об откликах: работодателям — о новых, кандидатам — о приглашении или отказе
     if resend_key:
         try:

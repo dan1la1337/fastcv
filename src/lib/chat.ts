@@ -52,6 +52,7 @@ export function dayLabel(iso: string, now: Date = new Date()): string {
 export function preview(c: Pick<Conversation, "last_body" | "last_kind" | "last_mine" | "i_am">): string {
   if (c.last_kind === "application") return c.i_am === "candidate" ? "Вы откликнулись на вакансию" : "Новый отклик на вакансию";
   if (c.last_kind === "offer" && c.i_am === "candidate") return "Работодатель предлагает вакансию";
+  if (c.last_kind === "slots") return c.last_mine ? "Вы предложили время собеседования" : "Предложено время собеседования — выберите вариант";
   if (!c.last_body) return "";
   return (c.last_mine ? "Вы: " : "") + c.last_body.replace(/\s+/g, " ");
 }

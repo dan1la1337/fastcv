@@ -31,6 +31,8 @@ C = "11111111-1111-1111-1111-111111111111"   # кандидат
 E = "22222222-2222-2222-2222-222222222222"   # работодатель
 X = "33333333-3333-3333-3333-333333333333"   # другой кандидат
 E2 = "44444444-4444-4444-4444-444444444444"  # другой работодатель
+# первый диалог работодателя E с кандидатом C
+CONV = f"(select id from conversations where employer_id = auth.uid() and candidate_id = '{C}' order by created_at, id limit 1)"
 
 
 def psql(sql: str, db: str = DB, role: str = "postgres", uid: str | None = None, file: Path | None = None):
@@ -825,6 +827,68 @@ CHECKS: list[tuple] = [
                (company_rating('Acme Rating') ->> 'summary');
         delete from applications where vacancy_id = '99999999-0000-0000-0000-0000000000f2'; delete from review_summaries; delete from vacancies where id = '99999999-0000-0000-0000-0000000000f2';""",
      "postgres", None, "3\n\n0:Хвалят скорость, ругают тишину"),
+    # --- запись на собеседование по слотам ---
+    ("работодатель предлагает три варианта времени, кандидат их видит", True,
+     f"""set role authenticated; set request.jwt.claim.sub = '{E}';
+        create temp table sl as select propose_interview_slots(
+          {CONV},
+          array[now() + interval '2 days', now() + interval '1 day', now() + interval '1 day'], 60, ' https://meet.example/abc ') m;
+        select (m ->> 'kind') || ':' || jsonb_array_length(m -> 'meta' -> 'slot_ids') from sl;
+        set request.jwt.claim.sub = '{C}';
+        select count(*)::text || ':' || min(place) from interview_slots where status = 'open';""",
+     "postgres", None, "slots:2\n2:https://meet.example/abc"),
+    ("кандидат НЕ предлагает время", False,
+     f"select propose_interview_slots((select id from conversations where candidate_id = auth.uid() limit 1), array[now() + interval '1 day'], 30, null)",
+     "authenticated", C, None),
+    ("время в прошлом не предложить", False,
+     f"select propose_interview_slots({CONV}, array[now() + interval '10 minutes'], 30, null)", "authenticated", E, None),
+    ("больше шести вариантов не предложить", False,
+     f"select propose_interview_slots({CONV}, array(select now() + make_interval(days => d) from generate_series(1, 7) d), 30, null)",
+     "authenticated", E, None),
+    ("чужие варианты не видны и не бронируются", False,
+     "select book_interview_slot((select id from interview_slots limit 1))", "authenticated", X, None),
+    ("посторонний не видит варианты", True, "select count(*)::text from interview_slots", "authenticated", X, "0"),
+    ("кандидат записывается: остальные варианты снимаются, работодатель видит запись", True,
+     f"""set role authenticated; set request.jwt.claim.sub = '{C}';
+        create temp table b as select book_interview_slot((select id from interview_slots where status = 'open' order by starts_at limit 1)) m;
+        select (m ->> 'kind') || ':' || (m -> 'meta' ->> 'action') from b;
+        select string_agg(status, ',' order by starts_at) from interview_slots;
+        set request.jwt.claim.sub = '{E}';
+        select i_am || ':' || other_name || ':' || duration_min from my_upcoming_interviews();""",
+     "postgres", None, "booking:booked\nbooked,withdrawn\nemployer:Иван:60"),
+    ("снятый вариант уже не выбрать", False,
+     "select book_interview_slot((select id from interview_slots where status = 'withdrawn' limit 1))", "authenticated", C, None),
+    ("перенос: новое предложение и новая запись отменяют прежнюю", True,
+     f"""set role authenticated; set request.jwt.claim.sub = '{E}';
+        do $$ begin perform propose_interview_slots({CONV}, array[now() + interval '3 days'], 45, null); end $$;
+        set request.jwt.claim.sub = '{C}';
+        do $$ begin perform book_interview_slot((select id from interview_slots where status = 'open')); end $$;
+        select string_agg(status || ':' || duration_min, ',' order by starts_at) from interview_slots;""",
+     "postgres", None, "cancelled:60,withdrawn:60,booked:45"),
+    ("посторонний НЕ отменяет запись", False,
+     "select cancel_interview_slot((select id from interview_slots where status = 'booked'), null)", "authenticated", X, None),
+    ("напоминание накануне — обеим сторонам один раз", True,
+     """update interview_slots set starts_at = now() + interval '3 hours' where status = 'booked';
+        select string_agg(side || ':' || other_name, ',' order by side) from pending_interview_reminders();
+        do $$ begin perform mark_interview_reminded((select id from interview_slots where status = 'booked')); end $$;
+        select count(*)::text from pending_interview_reminders();""",
+     "postgres", None, "candidate:Работодатель,employer:Иван\n0"),
+    ("сайт НЕ читает очередь напоминаний", False, "select * from pending_interview_reminders()", "authenticated", E, None),
+    ("работодатель отменяет запись с причиной — сообщение в чат", True,
+     f"""set role authenticated; set request.jwt.claim.sub = '{E}';
+        select cancel_interview_slot((select id from interview_slots where status = 'booked'), 'Заболел интервьюер') ->> 'body';
+        select count(*)::text from my_upcoming_interviews();""",
+     "postgres", None, None),
+    ("предложение времени по отклику — это приглашение", True,
+     f"""insert into vacancies (id, title, source_type, employer_id) values ('99999999-0000-0000-0000-0000000000a7', 'Slots job', 'internal', '{E}');
+        insert into applications (id, vacancy_id, candidate_id) values ('99999999-0000-0000-0000-0000000000a8', '99999999-0000-0000-0000-0000000000a7', '{X}');
+        set role authenticated; set request.jwt.claim.sub = '{E}';
+        do $$ begin perform propose_interview_slots((select id from conversations where application_id = '99999999-0000-0000-0000-0000000000a8'), array[now() + interval '1 day'], 30, null); end $$;
+        reset role;
+        select status || ':' || (answered_at is not null)::text from applications where id = '99999999-0000-0000-0000-0000000000a8';
+        select string_agg(kind, ',' order by id) from messages where conversation_id = (select id from conversations where application_id = '99999999-0000-0000-0000-0000000000a8');
+        delete from applications where id = '99999999-0000-0000-0000-0000000000a8'; delete from vacancies where id = '99999999-0000-0000-0000-0000000000a7';""",
+     "postgres", None, "interview_scheduled:true\napplication,status,slots"),
     ("ротация «Работы России»: старые удаляются, с откликами — в архив, свежие остаются", True,
      f"""insert into vacancies (title, source_type, source_post, posted_at) values
           ('TV old', 'external', 'trudvsem/old', now() - interval '5 days'),

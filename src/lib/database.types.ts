@@ -157,6 +157,24 @@ export type Database = {
           },
         ]
       }
+      interview_slots: {
+        Row: {
+          id: string
+          conversation_id: string
+          employer_id: string
+          candidate_id: string
+          starts_at: string
+          duration_min: number
+          place: string | null
+          status: string
+          booked_at: string | null
+          reminded_at: string | null
+          created_at: string
+        }
+        Insert: never
+        Update: never
+        Relationships: []
+      }
       resume_marks: {
         Row: { employer_id: string; candidate_id: string; created_at: string }
         Insert: { employer_id: string; candidate_id: string; created_at?: string }
@@ -598,6 +616,19 @@ export type Database = {
         Returns: {
           id: string; vacancy_title: string | null; stage: string; rating: number; pros: string | null
           cons: string | null; reply: string | null; created_at: string; hidden: boolean
+        }[]
+      }
+      propose_interview_slots: {
+        Args: { conversation: string; starts: string[]; duration: number; place: string | null }
+        Returns: Json
+      }
+      book_interview_slot: { Args: { slot: string }; Returns: Json }
+      cancel_interview_slot: { Args: { slot: string; reason: string | null }; Returns: Json }
+      my_upcoming_interviews: {
+        Args: never
+        Returns: {
+          slot_id: string; conversation_id: string; application_id: string | null; i_am: string; other_name: string
+          vacancy_title: string; starts_at: string; duration_min: number; place: string | null
         }[]
       }
       reply_hiring_review: { Args: { review: string; reply: string | null }; Returns: undefined }
