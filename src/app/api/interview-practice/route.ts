@@ -98,7 +98,7 @@ ${employerQuestions.length ? `Вопросы работодателя: ${fence(e
 Навыки: ${fence(stringList(profile?.skills).slice(0, 40).join(", ")) || "не указаны"}
 О себе: ${fence((profile?.description ?? "").slice(0, 1500))}
 </candidate>`;
-    const raw = apiKey ? await geminiText(apiKey, QUESTIONS_INSTRUCTION, input, { temperature: 0.8, maxOutputTokens: 1200, json: true }) : null;
+    const raw = apiKey ? await geminiText(apiKey, QUESTIONS_INSTRUCTION, input, { temperature: 0.8, maxOutputTokens: 2000, json: true }) : null;
     let questions: PracticeQuestion[] = raw ? toQuestions(parseModelJson(raw), employerQuestions) : [];
     let source: "ai" | "template" = "ai";
     if (questions.length < 4) {
@@ -117,7 +117,7 @@ ${fence(question)}
 <answer>
 ${fence(answer)}
 </answer>`;
-  const raw = apiKey ? await geminiText(apiKey, GRADE_INSTRUCTION, input, { temperature: 0.2, maxOutputTokens: 900, json: true }) : null;
+  const raw = apiKey ? await geminiText(apiKey, GRADE_INSTRUCTION, input, { temperature: 0.2, maxOutputTokens: 2000, json: true }) : null;
   const grade = raw ? toGrade(parseModelJson(raw)) : null;
   if (!grade) return NextResponse.json({ error: "ИИ сейчас не отвечает. Попробуйте через минуту." }, { status: 503 });
   return NextResponse.json({ grade });
