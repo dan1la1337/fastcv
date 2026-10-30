@@ -5,7 +5,7 @@ import type { User } from "@supabase/supabase-js";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import {
-  Archive, Briefcase, CheckCircle2, Eye, FileText, Loader2, MessageCircle, Pencil, Plus, RotateCcw, Send, Sparkles, XCircle,
+  Archive, Briefcase, CheckCircle2, Eye, FileText, Loader2, MessageCircle, Pencil, Plus, RotateCcw, Send, Sparkles, Users, XCircle,
 } from "lucide-react";
 import { toMatch, type Match } from "@/lib/matching";
 import MatchRing from "@/components/MatchRing";
@@ -315,6 +315,14 @@ export default function EmployerDashboard() {
             </p>
           </div>
           <span className="flex-1" />
+          <Link href="/resumes"
+            className="inline-flex items-center gap-2 h-11 px-5 rounded-full border border-white/15 text-sm text-neutral-200 hover:border-white/30 transition-colors">
+            <Users className="w-4 h-4" /> База резюме
+          </Link>
+          <Link href="/messages"
+            className="inline-flex items-center gap-2 h-11 px-5 rounded-full border border-white/15 text-sm text-neutral-200 hover:border-white/30 transition-colors">
+            <MessageCircle className="w-4 h-4" /> Сообщения
+          </Link>
           <button
             onClick={() => openForm()}
             className="inline-flex items-center gap-2 h-11 px-5 rounded-full bg-teal-300 hover:bg-teal-200 text-neutral-950 text-sm font-semibold transition-colors"

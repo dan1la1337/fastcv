@@ -7,6 +7,7 @@ import { Briefcase, FileText, Loader2, LogOut, Save, Sparkles, Trash2, Upload, U
 import type { ResumeDraft } from "@/lib/resume-draft";
 import TelegramSubscription from "@/components/TelegramSubscription";
 import DeleteAccount from "@/components/DeleteAccount";
+import ResumeVisibility from "@/components/ResumeVisibility";
 import CompanyVerification from "@/components/CompanyVerification";
 import { supabase, getUserRole, type UserRole } from "@/lib/supabase";
 import { AREAS, DIRECTIONS, WORK_FORMATS, experienceFields, type Level, type WorkFormat } from "@/lib/vacancies";
@@ -236,7 +237,7 @@ export default function ProfilePage() {
         )}
 
         <div className="glass rounded-3xl p-6 sm:p-8 shadow-xl">
-          <h1 className="font-display text-2xl font-bold mb-6 text-white">Личный кабинет</h1>
+          <h1 id="top" className="font-display text-2xl font-bold mb-6 text-white scroll-mt-6">Личный кабинет</h1>
 
           <form onSubmit={saveProfile} className="space-y-6">
             <div>
@@ -341,7 +342,7 @@ export default function ProfilePage() {
             <div>
               <h2 className="text-lg font-bold text-white">Резюме</h2>
               <p className="text-sm text-neutral-400 mt-1">
-                PDF до 5 МБ. Его увидят только работодатели, на чьи вакансии вы откликнулись.
+                PDF до 5 МБ. Его увидят работодатели, на чьи вакансии вы откликнулись, а если резюме открыто в базе — и другие работодатели.
               </p>
             </div>
 
@@ -383,6 +384,7 @@ export default function ProfilePage() {
           </div>
         )}
 
+        {isCandidate && user && <ResumeVisibility userId={user.id} />}
         {isCandidate && user && <TelegramSubscription userId={user.id} />}
         {!isCandidate && user && <CompanyVerification userId={user.id} />}
 

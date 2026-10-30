@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { usePathname, useSearchParams } from "next/navigation";
-import { Bookmark, Briefcase, LayoutList, MessageCircle, MessageSquare, UserRound } from "lucide-react";
+import { Bookmark, Briefcase, LayoutList, MessageCircle, MessageSquare, UserRound, Users } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { useUnread, UnreadDot } from "@/components/chat/useUnread";
 
@@ -21,6 +21,7 @@ const CANDIDATE: Item[] = [
 const EMPLOYER: Item[] = [
   FEED,
   { href: "/employer", label: "Кабинет", icon: Briefcase, active: p => p.startsWith("/employer") },
+  { href: "/resumes", label: "Резюме", icon: Users, active: p => p.startsWith("/resumes") },
   MESSAGES,
   PROFILE,
 ];

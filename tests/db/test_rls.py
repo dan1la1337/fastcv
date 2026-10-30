@@ -723,6 +723,61 @@ CHECKS: list[tuple] = [
         select (select count(*) from conversations where application_id = '99999999-0000-0000-0000-0000000000d2')::text;
         delete from vacancies where id = '99999999-0000-0000-0000-0000000000d1';""",
      "postgres", None, "0"),
+    ("резюме по умолчанию скрыто; кандидат открывает его работодателям", True,
+     """select resume_public::text from profiles where id = auth.uid();
+        update profiles set resume_public = true, resume_headline = '  Python-разработчик  ', skills = '["Python", "Django"]',
+          pref_directions = '{backend}', pref_level = 'middle', pref_formats = '{remote}', pref_salary = 250000,
+          experience_years = 3, description = 'Бэкенд маркетплейса на Django' where id = auth.uid();
+        select resume_headline || ':' || (resume_published_at is not null)::text from profiles where id = auth.uid()""",
+     "authenticated", C, "false\nPython-разработчик:true"),
+    ("работодатель не «открывает» резюме себе", True,
+     "update profiles set resume_public = true where id = auth.uid(); select resume_public::text from profiles where id = auth.uid()",
+     "authenticated", E, "false"),
+    ("работодатель находит открытое резюме по фильтрам и словам", True,
+     """select count(*)::text || ' ' || string_agg(headline || ':' || salary, ',') from resume_board(
+          search => 'django', dirs => '{backend}', lvls => '{middle}', fmts => '{remote}', max_salary => 300000)""",
+     "authenticated", E, "1 Python-разработчик:250000"),
+    ("фильтр отсекает неподходящее", True,
+     "select count(*)::text from resume_board(search => 'kotlin')", "authenticated", E, "0"),
+    ("закрытые резюме в базе не видны", True,
+     "select count(*)::text from resume_board() where id = '33333333-3333-3333-3333-333333333333'", "authenticated", E, "0"),
+    ("кандидат НЕ смотрит базу резюме", False, "select * from resume_board()", "authenticated", C, None),
+    ("аноним НЕ смотрит базу резюме", False, "select * from resume_board()", "anon", None, None),
+    ("работодатель сохраняет кандидата, только себе", True,
+     f"""insert into resume_marks (employer_id, candidate_id) values (auth.uid(), '{C}');
+        select count(*)::text || ' ' || (select bool_and(saved)::text from resume_board(only_saved => true)) from resume_board(only_saved => true)""",
+     "authenticated", E, "1 true"),
+    ("кандидат НЕ видит, кто его сохранил", True, "select count(*)::text from resume_marks", "authenticated", C, "0"),
+    ("работодатель пишет кандидату из базы с вакансией — открывается диалог", True,
+     f"""insert into vacancies (id, title, source_type, employer_id) values ('99999999-0000-0000-0000-0000000000e9', 'RB job', 'internal', '{E}');
+        set role authenticated; set request.jwt.claim.sub = '{E}';
+        create temp table rb as select start_conversation('{C}', '99999999-0000-0000-0000-0000000000e9', 'Здравствуйте! Посмотрите вакансию') c;
+        reset role;
+        select m.kind || ':' || (m.meta ->> 'vacancy_title') from messages m
+         where m.conversation_id = (select c from rb) order by m.id desc limit 1""",
+     "postgres", None, "offer:RB job"),
+    ("кандидат видит диалог из базы резюме у себя", True,
+     "select last_kind || ':' || (unread > 0)::text from my_conversations() order by last_message_at desc limit 1",
+     "authenticated", C, "offer:true"),
+    ("повторное сообщение из базы идёт в тот же диалог", True,
+     f"""do $$ begin perform start_conversation('{C}', null, 'Ещё вопрос'); end $$;
+        select count(*)::text from messages m join conversations c on c.id = m.conversation_id
+         where c.employer_id = auth.uid() and c.candidate_id = '{C}' and m.body in ('Здравствуйте! Посмотрите вакансию', 'Ещё вопрос')
+         group by c.id""",
+     "authenticated", E, "2"),
+    ("кандидат НЕ начинает диалог из базы резюме", False,
+     f"select start_conversation('{E}', null, 'привет')", "authenticated", C, None),
+    ("нельзя написать кандидату со скрытым резюме", False,
+     """insert into auth.users values ('00000000-0000-0000-0000-0000000000f1', '{"role":"candidate"}');
+        set role authenticated; set request.jwt.claim.sub = '22222222-2222-2222-2222-222222222222';
+        select start_conversation('00000000-0000-0000-0000-0000000000f1', null, 'привет');""",
+     "postgres", None, None),
+    ("кандидат скрыл резюме — из базы пропал", True,
+     """set role authenticated; set request.jwt.claim.sub = '11111111-1111-1111-1111-111111111111';
+        update profiles set resume_public = false where id = auth.uid();
+        set request.jwt.claim.sub = '22222222-2222-2222-2222-222222222222';
+        select count(*)::text from resume_board();""",
+     "postgres", None, "0"),
     ("ротация «Работы России»: старые удаляются, с откликами — в архив, свежие остаются", True,
      f"""insert into vacancies (title, source_type, source_post, posted_at) values
           ('TV old', 'external', 'trudvsem/old', now() - interval '5 days'),
