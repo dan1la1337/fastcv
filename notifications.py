@@ -116,3 +116,44 @@ def send_notifications(store, send: Callable[[str, dict], None]) -> dict:
         store.mark_notified("candidate_status", [row["application_id"]])
         sent += 1
     return {"sent": sent, "failed": failed, "queued": len(queue)}
+
+
+def chat_text(row: dict) -> str:
+    n = row["unread"]
+    return (f"💬 {n} {plural(n, ('новое сообщение', 'новых сообщения', 'новых сообщений'))} от {row['other_name']} "
+            f"по вакансии «{row['vacancy_title']}».\n\nОтветить: {SITE}/messages?c={row['conversation_id']}")
+
+
+def chat_email(row: dict) -> dict:
+    n = row["unread"]
+    who, title = html.escape(row["other_name"]), html.escape(row["vacancy_title"])
+    body = (f"<p>{who} {plural(n, ('написал', 'написал', 'написал'))} вам в чате по вакансии «{title}»: "
+            f"{n} {plural(n, ('непрочитанное сообщение', 'непрочитанных сообщения', 'непрочитанных сообщений'))}.</p>"
+            f'<p><a href="{SITE}/messages?c={row["conversation_id"]}">Открыть чат</a></p>')
+    return {"subject": f"Новое сообщение от {row['other_name']}: {row['vacancy_title']}",
+            "html": _page("Новое сообщение", body)}
+
+
+def send_chat_notifications(store, send_email: Callable[[str, dict], None] | None,
+                            send_telegram: Callable[[int, str], None] | None) -> dict:
+    """О непрочитанных сообщениях — в Telegram, если бот подключён, иначе письмом.
+    Отметку ставим, если ушло хоть одним способом: иначе напомним в следующий запуск."""
+    sent = failed = 0
+    for row in store.pending_chat_notifications():
+        delivered = False
+        if send_telegram and row.get("telegram_chat_id"):
+            try:
+                send_telegram(row["telegram_chat_id"], chat_text(row))
+                delivered = True
+            except Exception:
+                failed += 1
+        if not delivered and send_email and row.get("email") and sent < MAX_PER_RUN:
+            try:
+                send_email(row["email"], chat_email(row))
+                delivered = True
+            except requests.RequestException:
+                failed += 1
+        if delivered:
+            store.mark_chat_notified(row["conversation_id"], row["side"])
+            sent += 1
+    return {"sent": sent, "failed": failed}

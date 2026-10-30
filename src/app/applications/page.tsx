@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, ExternalLink, Loader2, MessageSquare } from "lucide-react";
+import { ArrowLeft, ExternalLink, Loader2, MessageCircle, MessageSquare } from "lucide-react";
 import { supabase, getUserRole } from "@/lib/supabase";
 import { plural } from "@/lib/vacancies";
 import InterviewStars from "@/components/InterviewStars";
@@ -17,6 +17,8 @@ interface Application {
   /** Когда работодатель впервые открыл отклик (ставит база). */
   viewed_at: string | null;
   vacancies: { id: string; title: string; company_name: string | null; source_type: string; source_url: string | null } | null;
+  /** Чат с работодателем — есть у откликов на вакансии работодателей с FastCV */
+  conversations: { id: string } | null;
 }
 
 const STATUS: Record<string, { text: string; style: string }> = {
@@ -49,7 +51,7 @@ export default function CandidateApplications() {
 
       const { data } = await supabase
         .from("applications")
-        .select("id, status, hr_message, cover_letter, created_at, viewed_at, vacancies (id, title, company_name, source_type, source_url)")
+        .select("id, status, hr_message, cover_letter, created_at, viewed_at, vacancies (id, title, company_name, source_type, source_url), conversations (id)")
         .eq("candidate_id", user.id)
         .order("created_at", { ascending: false });
 
@@ -162,6 +164,13 @@ export default function CandidateApplications() {
                       </summary>
                       <p className="mt-3 whitespace-pre-line leading-relaxed">{app.cover_letter}</p>
                     </details>
+                  )}
+
+                  {app.conversations?.id && (
+                    <Link href={`/messages?c=${app.conversations.id}`}
+                      className="inline-flex items-center gap-1.5 text-sm text-teal-300 hover:text-teal-200 transition-colors">
+                      <MessageCircle className="w-4 h-4" /> Чат с работодателем
+                    </Link>
                   )}
 
                   {external && v?.source_url && (

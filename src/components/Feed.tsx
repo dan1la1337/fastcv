@@ -20,6 +20,7 @@ import CompanyLine from "@/components/CompanyLine";
 import { estimateSalary, fetchSalaryBenchmarks, type SalaryBenchmark } from "@/lib/salary";
 import SalaryEstimate from "@/components/SalaryEstimate";
 import SearchSelect, { type SelectOption } from "@/components/SearchSelect";
+import { useUnread, UnreadDot } from "@/components/chat/useUnread";
 
 // Окно Smart Apply нужно только по клику: его код не грузим вместе с лентой
 const SmartApply = dynamic(() => import("@/components/SmartApply"), { ssr: false });
@@ -199,6 +200,7 @@ export default function Feed({ initialRows, initialTotal, hero }: { initialRows:
   // Надежное определение роли: проверяем и метаданные аутентификации, и таблицу profiles
   const userRole = userProfile?.role || user?.user_metadata?.role;
   const isEmployer = userRole === 'employer';
+  const unread = useUnread(Boolean(user));
   const isCandidate = Boolean(user) && userProfile?.role === "candidate";
   const profileSkills = Array.isArray(userProfile?.skills) ? userProfile.skills : [];
   const hasPrefs = Boolean(userProfile?.pref_directions?.length || profileSkills.length || userProfile?.pref_level);
@@ -517,6 +519,10 @@ export default function Feed({ initialRows, initialTotal, hero }: { initialRows:
                   </Link>
                 )}
 
+                <Link href="/messages" aria-label="Сообщения"
+                  className="relative px-3 py-2 rounded-full text-sm text-neutral-300 hover:text-white hover:bg-white/[0.06] transition-colors hidden sm:inline-flex items-center gap-1.5">
+                  Сообщения <UnreadDot count={unread} label="чатов с новыми сообщениями" />
+                </Link>
                 <Link
                   href="/profile"
                   className="w-10 h-10 flex items-center justify-center rounded-full bg-white/10 text-neutral-100 font-semibold cursor-pointer hover:bg-white/15 transition-colors relative z-50"

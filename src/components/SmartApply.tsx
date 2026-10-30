@@ -153,13 +153,13 @@ export default function SmartApply({
       return;
     }
     setIsSending(true);
-    const { error } = await supabase.from("applications").insert({
+    const { data: inserted, error } = await supabase.from("applications").insert({
       vacancy_id: vacancy.id,
       candidate_id: user.id,
       cover_letter: coverLetter,
       status: 'new',
       blitz_answers: questions.length ? answers.map(a => a.trim()) : [],
-    });
+    }).select("id").single();
     setIsSending(false);
 
     if (error) {
@@ -198,9 +198,14 @@ export default function SmartApply({
       if (vacancy.source_url) window.open(vacancy.source_url, '_blank', 'noopener');
       toast("Письмо скопировано. Контакта в посте нет — откликнитесь по ссылке из оригинального поста.", "info");
     } else {
-      // Внутренняя вакансия — отклик уже у работодателя в кабинете
-      toast("Отклик доставлен работодателю.", "ok");
-      router.push('/applications');
+      // Внутренняя вакансия — отклик уже у работодателя, переписка продолжается в чате
+      // Диалог создаёт база тем же запросом; читаем отдельно — в ответе на вставку его ещё не видно
+      const { data: conv } = inserted
+        ? await supabase.from("conversations").select("id").eq("application_id", inserted.id).maybeSingle()
+        : { data: null };
+      const chat = conv?.id;
+      toast(chat ? "Отклик доставлен работодателю. Здесь можно продолжить переписку." : "Отклик доставлен работодателю.", "ok");
+      router.push(chat ? `/messages?c=${chat}` : '/applications');
     }
   };
 

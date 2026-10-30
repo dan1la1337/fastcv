@@ -131,6 +131,54 @@ export type Database = {
           },
         ]
       }
+      conversations: {
+        Row: {
+          id: string
+          application_id: string
+          vacancy_id: string | null
+          candidate_id: string
+          employer_id: string
+          created_at: string
+          last_message_at: string
+          candidate_read_at: string | null
+          employer_read_at: string | null
+          candidate_notified_at: string | null
+          employer_notified_at: string | null
+        }
+        Insert: never
+        Update: never
+        Relationships: [
+          {
+            foreignKeyName: "conversations_application_id_fkey"
+            columns: ["application_id"]
+            isOneToOne: true
+            referencedRelation: "applications"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      messages: {
+        Row: {
+          id: number
+          conversation_id: string
+          sender_id: string | null
+          kind: string
+          body: string
+          meta: Json
+          created_at: string
+        }
+        Insert: never
+        Update: never
+        Relationships: [
+          {
+            foreignKeyName: "messages_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "conversations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       channels: {
         Row: {
           category: string | null
@@ -526,6 +574,27 @@ export type Database = {
       check_company_verification: { Args: never; Returns: boolean }
       report_vacancy_closed: { Args: { vacancy: string }; Returns: number }
       my_closed_report: { Args: { vacancy: string }; Returns: boolean }
+      send_message: { Args: { conversation: string; body: string }; Returns: Json }
+      mark_conversation_read: { Args: { conversation: string }; Returns: undefined }
+      unread_conversations: { Args: never; Returns: number }
+      my_conversations: {
+        Args: never
+        Returns: {
+          id: string
+          application_id: string
+          vacancy_id: string | null
+          vacancy_title: string
+          other_name: string
+          i_am: string
+          status: string | null
+          last_body: string | null
+          last_kind: string | null
+          last_mine: boolean | null
+          last_message_at: string
+          unread: number
+          other_read_at: string | null
+        }[]
+      }
       rate_interview: { Args: { token: string; rating: number }; Returns: boolean }
       rate_my_interview: { Args: { application: string; rating: number }; Returns: boolean }
       my_interview_ratings: { Args: never; Returns: { application_id: string; rating: number }[] }
