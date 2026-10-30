@@ -85,6 +85,10 @@ test.describe("найм от вакансии до оценки собеседо
     await expect(log).toContainText(answer);
     await page.goto("/applications");
     await expect(page.locator("div.glass").filter({ hasText: title })).toContainText("Ждёт ответа работодателя");
+    // Прозрачность воронки: место отклика и активность работодателя
+    const funnel = page.locator("div.glass").filter({ hasText: title }).getByLabel("Где ваш отклик");
+    await expect(funnel).toContainText("Вы откликнулись первым");
+    await expect(funnel).toContainText("Работодатель открыл 0 из 1");
     await close();
   });
 

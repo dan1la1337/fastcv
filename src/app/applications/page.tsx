@@ -3,12 +3,13 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, CalendarCheck, ExternalLink, Loader2, MessageCircle, MessageSquare } from "lucide-react";
+import { ArrowLeft, BarChart3, CalendarCheck, ExternalLink, Loader2, MessageCircle, MessageSquare } from "lucide-react";
 import { supabase, getUserRole } from "@/lib/supabase";
 import { plural } from "@/lib/vacancies";
 import HiringReviewForm, { type MyReview } from "@/components/HiringReviewForm";
 import type { Upcoming } from "@/components/UpcomingInterviews";
 import { slotLabel, slotRange } from "@/lib/interviews";
+import { funnelView, type FunnelView } from "@/lib/funnel";
 import InterviewStars from "@/components/InterviewStars";
 
 interface Application {
@@ -22,6 +23,8 @@ interface Application {
   answered_at: string | null;
   /** Можно оставить отзыв о найме: работодатель ответил или прошло 10 дней */
   reviewable?: boolean;
+  /** Где отклик в воронке работодателя (пока ждёт ответа) */
+  funnel?: FunnelView;
   vacancies: { id: string; title: string; company_name: string | null; source_type: string; source_url: string | null } | null;
   /** Чат с работодателем — есть у откликов на вакансии работодателей с FastCV */
   conversations: { id: string } | null;
@@ -65,18 +68,29 @@ export default function CandidateApplications() {
         .eq("candidate_id", user.id)
         .order("created_at", { ascending: false });
 
-      const [{ data: rated }, { data: mine }, { data: upcoming }] = await Promise.all([
+      const [{ data: rated }, { data: mine }, { data: upcoming }, { data: funnel }] = await Promise.all([
         supabase.rpc("my_interview_ratings"),
         supabase.rpc("my_hiring_reviews"),
         supabase.rpc("my_upcoming_interviews"),
+        supabase.rpc("my_application_funnel"),
       ]);
+      const funnels = new Map((funnel ?? []).map(f => [f.application_id, f]));
       if (cancelled) return;
       setInterviews(Object.fromEntries((upcoming ?? []).filter(u => u.application_id).map(u => [u.application_id!, u as Upcoming])));
       setReviews(Object.fromEntries((mine ?? []).map(r => [r.application_id, r as MyReview])));
       setRatings(Object.fromEntries((rated ?? []).map(r => [r.application_id, r.rating])));
-      const cutoff = Date.now() - 10 * 864e5;
+      const now = Date.now();
+      const cutoff = now - 10 * 864e5;
       setApplications(((data ?? []) as unknown as Application[])
-        .map(a => ({ ...a, reviewable: !!a.answered_at || new Date(a.created_at).getTime() < cutoff })));
+        .map(a => {
+          const f = funnels.get(a.id);
+          const waiting = a.status === "new" || a.status === "viewed";
+          return {
+            ...a,
+            reviewable: !!a.answered_at || new Date(a.created_at).getTime() < cutoff,
+            funnel: f && waiting ? funnelView(f, a.created_at, now) : undefined,
+          };
+        }));
       setLoading(false);
     })();
     return () => { cancelled = true; };
@@ -162,6 +176,24 @@ export default function CandidateApplications() {
                     }`}>
                       <p className="text-xs font-bold text-neutral-500 uppercase tracking-wider mb-2">Ответ работодателя</p>
                       <p className="whitespace-pre-line">{app.hr_message}</p>
+                    </div>
+                  )}
+
+                  {app.funnel && (
+                    <div className="rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3 space-y-1.5 text-sm" aria-label="Где ваш отклик">
+                      <p className="text-xs font-bold text-neutral-500 uppercase tracking-wider inline-flex items-center gap-1.5">
+                        <BarChart3 className="w-3.5 h-3.5" aria-hidden="true" /> Где ваш отклик
+                      </p>
+                      <p className="text-neutral-200">{app.funnel.queue}</p>
+                      {app.funnel.match && <p className="text-neutral-300">{app.funnel.match}</p>}
+                      <p className="text-neutral-300">{app.funnel.activity}</p>
+                      {app.funnel.reply && <p className="text-neutral-300">{app.funnel.reply}</p>}
+                      {app.funnel.weak && (
+                        <p className="text-xs text-amber-200">
+                          Совпадение ниже, чем у большинства. Добавьте в <Link href="/profile" className="underline hover:text-white">профиль</Link> навыки
+                          и опыт, которые есть у вас и упомянуты в вакансии, — оценка пересчитается сразу.
+                        </p>
+                      )}
                     </div>
                   )}
 

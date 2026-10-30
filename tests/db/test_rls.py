@@ -889,6 +889,22 @@ CHECKS: list[tuple] = [
         select string_agg(kind, ',' order by id) from messages where conversation_id = (select id from conversations where application_id = '99999999-0000-0000-0000-0000000000a8');
         delete from applications where id = '99999999-0000-0000-0000-0000000000a8'; delete from vacancies where id = '99999999-0000-0000-0000-0000000000a7';""",
      "postgres", None, "interview_scheduled:true\napplication,status,slots"),
+    # --- прозрачность воронки ---
+    ("воронка: кандидат видит своё место и активность работодателя, без чужих данных", True,
+     f"""insert into vacancies (id, title, source_type, employer_id) values ('99999999-0000-0000-0000-00000000f001', 'Funnel job', 'internal', '{E}');
+        insert into applications (id, vacancy_id, candidate_id, created_at) values
+          ('99999999-0000-0000-0000-00000000f002', '99999999-0000-0000-0000-00000000f001', '{C}', now() - interval '2 hours'),
+          ('99999999-0000-0000-0000-00000000f003', '99999999-0000-0000-0000-00000000f001', '{X}', now() - interval '1 hour'),
+          ('99999999-0000-0000-0000-00000000f004', '99999999-0000-0000-0000-00000000f001', '{E}', now());
+        update applications set status = 'viewed' where id = '99999999-0000-0000-0000-00000000f003';
+        set role authenticated; set request.jwt.claim.sub = '{X}';
+        select total || ':' || place_in_line || ':' || viewed || ':' || coalesce(better_than::text, '-') || ':' || (employer_active_at is not null)::text
+          from my_application_funnel() where application_id = '99999999-0000-0000-0000-00000000f003';
+        select count(*)::text from my_application_funnel() where application_id = '99999999-0000-0000-0000-00000000f002';
+        reset role;
+        delete from applications where vacancy_id = '99999999-0000-0000-0000-00000000f001'; delete from vacancies where id = '99999999-0000-0000-0000-00000000f001';""",
+     "postgres", None, "2:2:1:-:true\n0"),
+    ("аноним не видит воронку", False, "select * from my_application_funnel()", "anon", None, None),
     ("ротация «Работы России»: старые удаляются, с откликами — в архив, свежие остаются", True,
      f"""insert into vacancies (title, source_type, source_post, posted_at) values
           ('TV old', 'external', 'trudvsem/old', now() - interval '5 days'),
