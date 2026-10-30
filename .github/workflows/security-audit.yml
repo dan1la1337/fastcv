@@ -1,0 +1,37 @@
+name: Security Audit
+
+# Ежемесячный аудит безопасности (план 1.2): база (security_audit), зависимости сайта
+# (npm audit) и сборщика (pip-audit), напоминание о ротации ключей. Отчёт — в Telegram
+# владельцу. Ничего не исправляет сам. 1-го числа в 10:37 по Москве (не на :00).
+on:
+  schedule:
+    - cron: '37 7 1 * *'
+  workflow_dispatch:
+
+concurrency:
+  group: security-audit
+  cancel-in-progress: false
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci --ignore-scripts
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.11'
+          cache: pip
+      - run: pip install -q -r requirements.txt pip-audit
+      - name: Audit
+        env:
+          SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: python -u security_audit.py

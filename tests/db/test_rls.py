@@ -645,6 +645,19 @@ CHECKS: list[tuple] = [
      "select reset_demo('00000000-0000-0000-0000-0000000000e2', '00000000-0000-0000-0000-0000000000e1')", "service_role", None, None),
     ("сайт НЕ вызывает сброс демо", False,
      "select reset_demo('00000000-0000-0000-0000-0000000000e1', '00000000-0000-0000-0000-0000000000e2')", "authenticated", E, None),
+    ("аудит безопасности: в базе нет ничего сверх осознанных исключений", True,
+     # pgcrypto в public — особенность тестовой базы (на Supabase он в extensions)
+     """select coalesce(jsonb_agg(x), '[]')::text from jsonb_array_elements(security_audit()) x
+         where x ->> 'kind' <> 'extension_public'""", "service_role", None, "[]"),
+    ("аудит находит новую публичную функцию и таблицу без RLS", True,
+     """create function public.audit_probe() returns int language sql security definer as $$ select 1 $$;
+        grant execute on function public.audit_probe() to anon;
+        create table public.audit_probe_t (id int);
+        select string_agg(x ->> 'kind', ',' order by x ->> 'kind') from jsonb_array_elements(security_audit()) x
+         where x ->> 'name' like 'audit_probe%';
+        drop function public.audit_probe(); drop table public.audit_probe_t;""",
+     "postgres", None, "anon_definer,auth_definer,no_rls,search_path"),
+    ("сайт НЕ вызывает аудит", False, "select security_audit()", "authenticated", E, None),
     ("ротация «Работы России»: старые удаляются, с откликами — в архив, свежие остаются", True,
      f"""insert into vacancies (title, source_type, source_post, posted_at) values
           ('TV old', 'external', 'trudvsem/old', now() - interval '5 days'),
