@@ -82,3 +82,21 @@ def test_city_of():
     assert ats.city_of("Belgrade, Serbia") == ("Белград", False)
     assert ats.city_of("Estonia - Remote") == (None, True)
     assert ats.city_of("Amsterdam, Netherlands; Berlin, Germany") == ("Амстердам", False)
+
+
+LEVER = [
+    {"id": "aa-1", "text": "Senior Android Developer", "hostedUrl": "https://jobs.lever.co/xsolla/aa-1",
+     "categories": {"location": "Cyprus", "allLocations": ["Limassol", "Baku"]}, "workplaceType": "hybrid",
+     "descriptionPlain": "Build the SDK", "createdAt": 1793000000000},
+    {"id": "aa-2", "text": "Fullstack Engineer", "hostedUrl": "https://jobs.lever.co/xsolla/aa-2",
+     "categories": {"location": "CIS"}, "workplaceType": "remote", "descriptionPlain": "Web + API"},
+]
+
+
+def test_lever_postings():
+    board = next(b for b in ats.BOARDS if b.kind == "lever")
+    rows = {r["title"]: r for r in ats.rows_for(board, ats.fetch_jobs(board, lambda url: LEVER))}
+    android, fullstack = rows["Senior Android Developer"], rows["Fullstack Engineer"]
+    assert android["source_post"] == "career/xsolla/aa-1" and android["city"] == "Лимассол"
+    assert android["posted_at"].startswith("2026-10-26") and android["description"] == "Build the SDK"
+    assert fullstack["is_remote"] and fullstack["work_format"] == "remote" and fullstack["city"] is None
