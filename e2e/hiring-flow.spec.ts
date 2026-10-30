@@ -71,12 +71,47 @@ test.describe("найм от вакансии до оценки собеседо
     await page.getByLabel(question).fill(answer);
     await page.getByRole("button", { name: "Откликнуться с письмом" }).click();
     const limit = page.getByText(/лимит FastCV против рассылок/);
-    const sent = page.getByRole("heading", { name: "Мои отклики" });
+    // Отклик на вакансию работодателя открывает чат: первым сообщением — письмо и ответ
+    const sent = page.getByRole("heading", { name: "Сообщения" });
     await expect(sent.or(limit)).toBeVisible({ timeout: 15_000 });
     // Тесты гоняются на каждый PR: при 15 откликах за сутки база законно отказывает
     test.skip(await limit.isVisible(), "у тестового кандидата исчерпан дневной лимит откликов");
+    const log = page.getByRole("log");
+    await expect(log).toContainText("Ваш отклик на вакансию");
+    await expect(log).toContainText("четыре года");
+    await expect(log).toContainText(answer);
+    await page.goto("/applications");
     await expect(page.locator("div.glass").filter({ hasText: title })).toContainText("Ждёт ответа работодателя");
     await close();
+  });
+
+  test("работодатель пишет кандидату в чат, кандидат отвечает", async ({ browser }) => {
+    test.skip(!vacancyId, "вакансия не создана");
+    const hr = await asUser(browser, employer, "/employer");
+    await hr.page.getByRole("button", { name: "Сначала новые" }).click();
+    await hr.page.locator("div.glass").filter({ hasText: title }).first().getByRole("link", { name: "Написать" }).click();
+    await expect(hr.page).toHaveURL(/\/messages\?c=/);
+    await expect(hr.page.getByRole("log")).toContainText(answer);
+    const box = hr.page.getByLabel("Сообщение", { exact: true });
+    await box.fill("Добрый день! Удобно созвониться завтра в 15:00?");
+    await box.press("Enter");
+    await expect(hr.page.getByRole("log")).toContainText("созвониться завтра");
+    await expect(box).toHaveValue("");
+
+    // Кандидат видит непрочитанное в списке и отвечает
+    const cand = await asUser(browser, candidate, "/messages");
+    const item = cand.page.getByRole("list", { name: "Диалоги" }).getByRole("button").filter({ hasText: title });
+    await expect(item).toContainText("созвониться завтра");
+    await item.click();
+    await expect(cand.page.getByRole("log")).toContainText("Удобно созвониться");
+    await cand.page.getByLabel("Сообщение", { exact: true }).fill("Да, удобно. Жду звонка.");
+    await cand.page.getByRole("button", { name: "Отправить" }).click();
+    await expect(cand.page.getByRole("log")).toContainText("Жду звонка");
+
+    // Ответ приходит работодателю без перезагрузки (опрос раз в несколько секунд)
+    await expect(hr.page.getByRole("log")).toContainText("Жду звонка", { timeout: 15_000 });
+    await cand.close();
+    await hr.close();
   });
 
   test("работодатель видит ответ на вопрос и приглашает", async ({ browser }) => {
@@ -92,6 +127,9 @@ test.describe("найм от вакансии до оценки собеседо
     await card.getByRole("button", { name: "Отправить", exact: true }).click();
     await expect(page.getByText(/Приглашение отправлено/)).toBeVisible();
     await expect(card).toContainText("Собеседование назначено");
+    // Приглашение приходит и в чат
+    await card.getByRole("link", { name: "Написать" }).click();
+    await expect(page.getByRole("log")).toContainText("Приглашение на собеседование");
     await close();
   });
 

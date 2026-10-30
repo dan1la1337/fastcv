@@ -5,7 +5,7 @@ import type { User } from "@supabase/supabase-js";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import {
-  Archive, Briefcase, CheckCircle2, Eye, FileText, Loader2, Pencil, Plus, RotateCcw, Send, Sparkles, XCircle,
+  Archive, Briefcase, CheckCircle2, Eye, FileText, Loader2, MessageCircle, Pencil, Plus, RotateCcw, Send, Sparkles, XCircle,
 } from "lucide-react";
 import { toMatch, type Match } from "@/lib/matching";
 import MatchRing from "@/components/MatchRing";
@@ -26,6 +26,8 @@ interface Application {
   blitz_summary: string | null;
   vacancies: { id: string; title: string; employer_id: string };
   profiles: { name: string | null; skills: string[] | null; resume_path: string | null } | null;
+  /** Чат с кандидатом (открывается откликом) */
+  conversations: { id: string } | null;
 }
 
 interface VacancyForm {
@@ -104,7 +106,7 @@ export default function EmployerDashboard() {
       supabase.from("profiles").select("name").eq("id", currentUser.id).maybeSingle(),
       supabase
         .from("applications")
-        .select("id, status, hr_message, cover_letter, created_at, blitz_answers, blitz_summary, vacancies!inner (id, title, employer_id), profiles (name, skills, resume_path)")
+        .select("id, status, hr_message, cover_letter, created_at, blitz_answers, blitz_summary, vacancies!inner (id, title, employer_id), profiles (name, skills, resume_path), conversations (id)")
         .eq("vacancies.employer_id", currentUser.id)
         .order("created_at", { ascending: false }),
       supabase
@@ -623,6 +625,12 @@ export default function EmployerDashboard() {
                         className="mr-auto h-11 px-4 rounded-full border border-white/12 text-neutral-200 hover:border-white/30 text-sm transition-colors flex items-center gap-1.5">
                         <FileText className="w-3.5 h-3.5" /> Резюме (PDF)
                       </button>
+                    )}
+                    {app.conversations?.id && (
+                      <Link href={`/messages?c=${app.conversations.id}`}
+                        className={`${app.profiles?.resume_path ? "" : "mr-auto "}h-11 px-4 rounded-full border border-white/12 text-neutral-200 hover:border-white/30 text-sm transition-colors flex items-center gap-1.5`}>
+                        <MessageCircle className="w-3.5 h-3.5" /> Написать
+                      </Link>
                     )}
                     <button onClick={() => setReply({ appId: app.id, status: "rejected", text: REPLY_TEMPLATES.rejected(app.vacancies.title) })}
                       className="h-11 px-4 rounded-full border border-white/15 text-neutral-300 hover:text-red-300 hover:border-red-400/40 text-sm transition-colors flex items-center gap-1.5">

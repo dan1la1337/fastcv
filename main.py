@@ -613,7 +613,8 @@ class Store:
     def telegram_digest(self, min_score: int) -> list[dict]:
         return self.db.rpc("telegram_digest", {"min_score": min_score}).execute().data or []
 
-    def mark_notified(self, user_id: str) -> None:
+    def mark_digest_sent(self, user_id: str) -> None:
+        # Отдельное имя: ниже есть mark_notified для писем, одноимённый метод перекрывал этот
         self.db.table("profiles").update({"telegram_notified_at": datetime.now(timezone.utc).isoformat()}).eq("id", user_id).execute()
 
     def interview_surveys_due(self) -> list[dict]:
@@ -712,6 +713,12 @@ class Store:
             posts = [f"career/{company}/{vid}" for vid in ids[i:i + 200]]
             self.db.table("vacancies").update({"archived_at": now}).in_("source_post", posts).execute()
         return len(ids)
+
+    def pending_chat_notifications(self) -> list[dict]:
+        return self.db.rpc("pending_chat_notifications", {}).execute().data or []
+
+    def mark_chat_notified(self, conversation_id: str, side: str) -> None:
+        self.db.rpc("mark_chat_notified", {"conversation": conversation_id, "side": side}).execute()
 
     def pending_notifications(self) -> list[dict]:
         return self.db.rpc("pending_notifications", {}).execute().data or []
@@ -1067,7 +1074,7 @@ def send_digests(store: Store, bot: TelegramBot) -> int:
     for row in store.telegram_digest(DIGEST_MIN_SCORE):
         try:
             bot.send(row["chat_id"], digest_text(row["items"]))
-            store.mark_notified(row["user_id"])
+            store.mark_digest_sent(row["user_id"])
             sent += 1
         except TelegramError as e:
             if e.code == 403:  # бот заблокирован пользователем
@@ -1460,8 +1467,18 @@ def main() -> None:
             print(f"Telegram: опросов о собеседованиях {surveys}")
         except Exception as e:
             print(f"⚠️ Опросы о собеседованиях: {type(e).__name__}: {str(e)[:200]}")
-    # Письма об откликах: работодателям — о новых, кандидатам — о приглашении или отказе
+    # Непрочитанные сообщения в чате — письмом и в Telegram-бот (кому он подключён)
     resend_key = env("RESEND_API_KEY")
+    if resend_key or jobs_token:
+        try:
+            import notifications
+            chat = notifications.send_chat_notifications(
+                store, notifications.make_sender(resend_key) if resend_key else None,
+                TelegramBot(jobs_token).send if jobs_token else None)
+            print(f"Уведомления о сообщениях: {chat}")
+        except Exception as e:
+            print(f"⚠️ Уведомления о сообщениях: {type(e).__name__}")
+    # Письма об откликах: работодателям — о новых, кандидатам — о приглашении или отказе
     if resend_key:
         try:
             import notifications

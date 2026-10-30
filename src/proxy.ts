@@ -9,6 +9,7 @@ const PROTECTED: { prefix: string; role: "candidate" | "employer" | null; elsewh
   { prefix: "/employer", role: "employer", elsewhere: "/applications" },
   { prefix: "/applications", role: "candidate", elsewhere: "/employer" },
   { prefix: "/profile", role: null, elsewhere: "/" },
+  { prefix: "/messages", role: null, elsewhere: "/" },
   { prefix: "/welcome", role: "candidate", elsewhere: "/employer" },
 ];
 

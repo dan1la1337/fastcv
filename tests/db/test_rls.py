@@ -658,6 +658,71 @@ CHECKS: list[tuple] = [
         drop function public.audit_probe(); drop table public.audit_probe_t;""",
      "postgres", None, "anon_definer,auth_definer,no_rls,search_path"),
     ("сайт НЕ вызывает аудит", False, "select security_audit()", "authenticated", E, None),
+    ("отклик на вакансию работодателя открывает чат: первым сообщением — письмо и ответы", True,
+     f"""insert into vacancies (id, title, source_type, employer_id, blitz_questions)
+          values ('99999999-0000-0000-0000-0000000000d1', 'CH job', 'internal', '{E}', '["Опыт?"]');
+        set role authenticated; set request.jwt.claim.sub = '{C}';
+        insert into applications (id, vacancy_id, candidate_id, cover_letter, blitz_answers)
+          values ('99999999-0000-0000-0000-0000000000d2', '99999999-0000-0000-0000-0000000000d1', '{C}', 'Здравствуйте!', '["3 года"]');
+        reset role;
+        select m.kind || ':' || m.body || ':' || (m.meta -> 'blitz' -> 0 ->> 'a') || ':' || (m.sender_id = '{C}')::text
+          from messages m join conversations c on c.id = m.conversation_id where c.application_id = '99999999-0000-0000-0000-0000000000d2'""",
+     "postgres", None, "application:Здравствуйте!:3 года:true"),
+    ("отклик на вакансию из Telegram — без чата", True,
+     f"""insert into applications (vacancy_id, candidate_id) select id, '{C}' from vacancies where title = 'Ext';
+        select count(*)::text from conversations c join applications a on a.id = c.application_id
+         join vacancies v on v.id = a.vacancy_id where v.title = 'Ext'""",
+     "postgres", None, "0"),
+    ("работодатель видит отклик в чате как непрочитанный", True,
+     "select (unread_conversations() >= 1)::text || ' ' || (select unread || ':' || other_name || ':' || i_am from my_conversations() where vacancy_title = 'CH job')",
+     "authenticated", E, "true 1:Иван:employer"),
+    ("работодатель отвечает в чат, у кандидата непрочитанное", True,
+     f"""do $$ begin perform mark_conversation_read((select id from conversations where application_id = '99999999-0000-0000-0000-0000000000d2')); end $$;
+        do $$ begin perform send_message((select id from conversations where application_id = '99999999-0000-0000-0000-0000000000d2'), '  Добрый день! Удобно созвониться завтра?  '); end $$;
+        select (select unread from my_conversations() where vacancy_title = 'CH job')::text || ' ' ||
+               (select body from messages where kind = 'text' order by id desc limit 1)""",
+     "authenticated", E, "0 Добрый день! Удобно созвониться завтра?"),
+    ("кандидат видит ответ непрочитанным и отвечает", True,
+     f"""create temp table u as select unread from my_conversations() where vacancy_title = 'CH job';
+        do $$ begin perform send_message((select id from conversations where application_id = '99999999-0000-0000-0000-0000000000d2'), 'Да, после 14:00'); end $$;
+        select (select unread from u)::text || ' ' || (select unread from my_conversations() where vacancy_title = 'CH job')::text
+               || ' ' || (select last_mine::text from my_conversations() where vacancy_title = 'CH job')""",
+     "authenticated", C, "1 0 true"),
+    ("посторонний НЕ видит чужой диалог и сообщения", True,
+     """select (select count(*) from conversations where application_id = '99999999-0000-0000-0000-0000000000d2')::text || ' ' ||
+               (select count(*) from messages m where not exists (select 1 from conversations c where c.id = m.conversation_id))::text""",
+     "authenticated", X, "0 0"),
+    ("посторонний НЕ пишет в чужой диалог", False,
+     f"select send_message((select id from conversations where application_id = '99999999-0000-0000-0000-0000000000d2'), 'спам')",
+     "service_role", None, None),
+    ("участник НЕ пишет в чат напрямую в таблицу", False,
+     f"insert into messages (conversation_id, sender_id, body) select id, '{C}', 'обход' from conversations where application_id = '99999999-0000-0000-0000-0000000000d2'",
+     "authenticated", C, None),
+    ("пустое сообщение не отправляется", False,
+     f"select send_message((select id from conversations where application_id = '99999999-0000-0000-0000-0000000000d2'), '   ')", "authenticated", C, None),
+    ("приглашение из кабинета приходит в чат сообщением", True,
+     f"""update applications set status = 'interview_scheduled', hr_message = 'Ждём во вторник' where id = '99999999-0000-0000-0000-0000000000d2';
+        select kind || ':' || body || ':' || (meta ->> 'status') from messages
+         where conversation_id = (select id from conversations where application_id = '99999999-0000-0000-0000-0000000000d2') order by id desc limit 1""",
+     "authenticated", E, "status:Ждём во вторник:interview_scheduled"),
+    ("лимит: не больше 20 сообщений в минуту", False,
+     f"""do $$ begin for i in 1..25 loop perform send_message((select id from conversations where application_id = '99999999-0000-0000-0000-0000000000d2'), 'msg ' || i); end loop; end $$;""",
+     "authenticated", C, None),
+    ("очередь уведомлений о непрочитанном — только сервису и через 15 минут", True,
+     f"""update messages set created_at = now() - interval '20 minutes'
+          where conversation_id = (select id from conversations where application_id = '99999999-0000-0000-0000-0000000000d2');
+        update conversations set candidate_read_at = null, employer_read_at = now(), candidate_notified_at = null
+          where application_id = '99999999-0000-0000-0000-0000000000d2';
+        select string_agg(side || ':' || unread, ',' order by side) from pending_chat_notifications()
+         where conversation_id = (select id from conversations where application_id = '99999999-0000-0000-0000-0000000000d2')""",
+     "postgres", None, "candidate:2"),
+    ("сайт НЕ читает очередь уведомлений чата с адресами", False,
+     "select * from pending_chat_notifications()", "authenticated", C, None),
+    ("удаление отклика удаляет и чат", True,
+     f"""delete from applications where id = '99999999-0000-0000-0000-0000000000d2';
+        select (select count(*) from conversations where application_id = '99999999-0000-0000-0000-0000000000d2')::text;
+        delete from vacancies where id = '99999999-0000-0000-0000-0000000000d1';""",
+     "postgres", None, "0"),
     ("ротация «Работы России»: старые удаляются, с откликами — в архив, свежие остаются", True,
      f"""insert into vacancies (title, source_type, source_post, posted_at) values
           ('TV old', 'external', 'trudvsem/old', now() - interval '5 days'),

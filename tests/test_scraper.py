@@ -658,7 +658,7 @@ class FakeTelegramStore:
     def telegram_digest(self, min_score):
         return self.digest
 
-    def mark_notified(self, user_id):
+    def mark_digest_sent(self, user_id):
         self.notified.append(user_id)
 
     def stop_notifications(self, chat_id):
