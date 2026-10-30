@@ -95,8 +95,9 @@ test.describe("база резюме", () => {
   });
 
   test("кандидат видит сообщение и скрывает резюме", async ({ browser }) => {
-    const { page, close } = await asUser(browser, candidate, "/messages");
-    await expect(page.getByRole("list", { name: "Диалоги" })).toContainText(token);
+    const { page, close } = await asUser(browser, candidate, chatUrl || "/messages");
+    // Последним в диалоге может быть сообщение о записи — проверяем саму переписку
+    await expect(page.getByRole("log")).toContainText(token);
     await page.goto("/profile");
     const section = page.getByRole("region", { name: "База резюме для работодателей" });
     await section.getByRole("button", { name: "Скрыть резюме" }).click();
