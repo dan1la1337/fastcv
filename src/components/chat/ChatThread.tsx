@@ -2,8 +2,10 @@
 
 import { Fragment, useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { ArrowLeft, Briefcase, Check, CheckCheck, CheckCircle2, Loader2, Send, XCircle } from "lucide-react";
+import { ArrowLeft, Briefcase, CalendarClock, Check, CheckCheck, CheckCircle2, Loader2, Send, XCircle } from "lucide-react";
 import { supabase } from "@/lib/supabase";
+import { SLOT_COLUMNS, type Slot } from "@/lib/interviews";
+import { BookingMessage, ProposeSlots, SlotsMessage, UpcomingInterview } from "@/components/chat/Interview";
 import { chatErrorText, dayLabel, MESSAGE_COLUMNS, MESSAGE_MAX, splitLinks, type Conversation, type Message } from "@/lib/chat";
 
 const POLL_MS = 4_000;
@@ -33,6 +35,10 @@ export default function ChatThread({ conversation, userId, onBack, onChanged }: 
   const [sending, setSending] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [loadError, setLoadError] = useState(false);
+  /** Варианты времени собеседования в этом диалоге и ближайшая запись */
+  const [slots, setSlots] = useState<Record<string, Slot>>({});
+  const [upcoming, setUpcoming] = useState<Slot | null>(null);
+  const [proposing, setProposing] = useState(false);
   const scroller = useRef<HTMLDivElement>(null);
   const input = useRef<HTMLTextAreaElement>(null);
   const stick = useRef(true);         // пользователь внизу ленты — новые сообщения прокручиваем
@@ -54,6 +60,22 @@ export default function ChatThread({ conversation, userId, onBack, onChanged }: 
       return [...(prev ?? []), ...fresh.filter(m => !known.has(m.id))].sort((a, b) => a.id - b.id);
     });
   }, []);
+
+  // Варианты времени перечитываем, когда в переписке появилось предложение, запись или отмена
+  const slotEvents = messages?.filter(m => m.kind === "slots" || m.kind === "booking").length ?? 0;
+  useEffect(() => {
+    if (!slotEvents) return;
+    let alive = true;
+    supabase.from("interview_slots").select(SLOT_COLUMNS).eq("conversation_id", id).order("starts_at")
+      .then(({ data }) => {
+        if (!alive) return;
+        const list = (data ?? []) as Slot[];
+        const now = Date.now();
+        setSlots(Object.fromEntries(list.map(x => [x.id, x])));
+        setUpcoming(list.find(x => x.status === "booked" && Date.parse(x.starts_at) + x.duration_min * 60_000 > now) ?? null);
+      });
+    return () => { alive = false; };
+  }, [slotEvents, id]);
 
   // Первая загрузка: последние HISTORY сообщений
   useEffect(() => {
@@ -136,6 +158,11 @@ export default function ChatThread({ conversation, userId, onBack, onChanged }: 
         </div>
       </header>
 
+      {upcoming && (
+        <UpcomingInterview slot={upcoming} conversation={conversation}
+          onCancelled={b => { stick.current = true; append([b]); onChanged(); }} />
+      )}
+
       <div ref={scroller} role="log" aria-live="polite" aria-label={`Переписка с ${conversation.other_name}`}
         onScroll={e => { const el = e.currentTarget; stick.current = el.scrollHeight - el.scrollTop - el.clientHeight < 80; }}
         className="flex-1 min-h-0 overflow-y-auto px-3 sm:px-5 py-4 space-y-2">
@@ -179,6 +206,11 @@ export default function ChatThread({ conversation, userId, onBack, onChanged }: 
                   )}
                   <p className="text-sm text-neutral-200 whitespace-pre-wrap leading-relaxed"><Linked text={m.body} /></p>
                 </div>
+              ) : m.kind === "slots" ? (
+                <SlotsMessage message={m} slots={slots} mine={mine} isCandidate={conversation.i_am === "candidate"}
+                  onBooked={b => { stick.current = true; append([b]); onChanged(); }} />
+              ) : m.kind === "booking" ? (
+                <BookingMessage message={m} mine={mine} />
               ) : m.kind === "status" ? (
                 <div className="mx-auto max-w-[92%] sm:max-w-[80%] rounded-2xl border border-white/12 bg-white/[0.04] p-4 space-y-2">
                   <p className={`text-xs inline-flex items-center gap-1.5 ${m.meta?.status === "interview_scheduled" ? "text-emerald-300" : "text-neutral-400"}`}>
@@ -210,7 +242,17 @@ export default function ChatThread({ conversation, userId, onBack, onChanged }: 
 
       <form onSubmit={e => { e.preventDefault(); send(); }} className="border-t border-white/10 p-3 space-y-2">
         {error && <p role="alert" className="text-xs text-amber-300 px-1">{error}</p>}
+        {proposing && (
+          <ProposeSlots conversationId={id} onClose={() => setProposing(false)}
+            onSent={m => { setProposing(false); stick.current = true; append([m]); onChanged(); }} />
+        )}
         <div className="flex items-end gap-2">
+          {conversation.i_am === "employer" && !proposing && (
+            <button type="button" onClick={() => setProposing(true)} aria-label="Предложить время собеседования" title="Предложить время собеседования"
+              className="shrink-0 w-11 h-11 inline-flex items-center justify-center rounded-full border border-white/15 text-emerald-300 hover:border-emerald-300/60 transition-colors">
+              <CalendarClock className="w-5 h-5" />
+            </button>
+          )}
           <label htmlFor={`chat-input-${id}`} className="sr-only">Сообщение</label>
           <textarea id={`chat-input-${id}`} ref={input} value={text} rows={1} maxLength={MESSAGE_MAX}
             onChange={e => { setText(e.target.value); e.target.style.height = "auto"; e.target.style.height = `${Math.min(e.target.scrollHeight, 160)}px`; }}

@@ -119,3 +119,31 @@ def test_chat_notification_falls_back_to_email_when_telegram_fails():
 
     result = notifications.send_chat_notifications(store, lambda to, m: mail.append(to), broken)
     assert result == {"sent": 1, "failed": 1} and mail == ["a@x.ru"] and store.marked == [("c1", "candidate")]
+
+
+class ReminderStore:
+    def __init__(self, rows):
+        self.rows, self.marked = rows, []
+
+    def pending_interview_reminders(self):
+        return self.rows
+
+    def mark_interview_reminded(self, slot_id):
+        self.marked.append(slot_id)
+
+
+def _reminder(slot, side, email, tg, other):
+    return {"slot_id": slot, "conversation_id": "c" + slot, "side": side, "email": email, "telegram_chat_id": tg,
+            "other_name": other, "vacancy_title": "Python <dev>", "when_label": "3 ноября, 15:00 МСК",
+            "duration_min": 60, "place": "https://meet.example/x"}
+
+
+def test_interview_reminders_go_to_both_sides_and_mark_slot_once():
+    rows = [_reminder("1", "candidate", "a@x.ru", 42, "Acme"), _reminder("1", "employer", "hr@x.ru", None, "Иван"),
+            _reminder("2", "candidate", None, None, "Acme"), _reminder("2", "employer", None, None, "Пётр")]
+    store, tg, mail = ReminderStore(rows), [], []
+    result = notifications.send_interview_reminders(store, lambda to, m: mail.append((to, m)), lambda chat, t: tg.append((chat, t)))
+    assert result == {"sent": 2, "failed": 0}
+    assert store.marked == ["1"]          # по слоту 2 некуда слать — повторим позже
+    assert tg[0][0] == 42 and "3 ноября, 15:00 МСК" in tg[0][1] and "meet.example" in tg[0][1]
+    assert mail[0][0] == "hr@x.ru" and "Python &lt;dev&gt;" in mail[0][1]["html"]

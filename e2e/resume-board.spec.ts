@@ -24,6 +24,7 @@ async function asUser(browser: Browser, account: { email?: string; password?: st
 
 const token = `e2e${Date.now()}`;
 const headline = `Тестировщик ${token}`;
+let chatUrl = "";
 
 test.describe("база резюме", () => {
   test.skip(!candidate.email || !candidate.password || !employer.email || !employer.password, "нет секретов E2E_*");
@@ -53,6 +54,7 @@ test.describe("база резюме", () => {
     await dialog.getByRole("button", { name: "Отправить" }).click();
     await expect(page).toHaveURL(/\/messages\?c=/);
     await expect(page.getByRole("log")).toContainText(token);
+    chatUrl = new URL(page.url()).pathname + new URL(page.url()).search;
     // Сохранённые
     await page.goto("/resumes");
     await page.getByRole("tab", { name: "Сохранённые" }).click();
@@ -61,9 +63,41 @@ test.describe("база резюме", () => {
     await close();
   });
 
+  test("работодатель предлагает время, кандидат записывается и отменяет", async ({ browser }) => {
+    test.skip(!chatUrl, "диалог не открыт");
+    const hr = await asUser(browser, employer, chatUrl);
+    await hr.page.getByRole("button", { name: "Предложить время собеседования" }).click();
+    const form = hr.page.getByRole("group", { name: "Предложить время собеседования" });
+    await form.getByLabel("Ссылка или адрес").fill("https://meet.example/e2e");
+    await form.getByRole("button", { name: "Отправить варианты" }).click();
+    await expect(hr.page.getByRole("log").getByText("Вы предложили время собеседования").last()).toBeVisible();
+
+    const cand = await asUser(browser, candidate, chatUrl);
+    const options = cand.page.getByRole("list", { name: "Варианты времени" }).last();
+    await options.getByRole("button").first().click();
+    const banner = cand.page.getByLabel("Назначенное собеседование");
+    await expect(banner).toBeVisible();
+    await expect(banner).toContainText("meet.example/e2e");
+    await expect(cand.page.getByRole("log")).toContainText("Вы записались на собеседование");
+
+    // Работодатель видит запись без перезагрузки
+    await expect(hr.page.getByRole("log")).toContainText("Кандидат записался на собеседование", { timeout: 15_000 });
+    await expect(hr.page.getByLabel("Назначенное собеседование")).toBeVisible({ timeout: 15_000 });
+
+    // Отмена — чтобы на staging не копились записи и напоминания
+    await banner.getByRole("button", { name: "Отменить", exact: true }).click();
+    await banner.getByLabel("Причина отмены").fill("e2e");
+    await banner.getByRole("button", { name: "Отменить встречу" }).click();
+    await expect(cand.page.getByRole("log")).toContainText("Вы отменили собеседование");
+    await expect(banner).toBeHidden();
+    await cand.close();
+    await hr.close();
+  });
+
   test("кандидат видит сообщение и скрывает резюме", async ({ browser }) => {
-    const { page, close } = await asUser(browser, candidate, "/messages");
-    await expect(page.getByRole("list", { name: "Диалоги" })).toContainText(token);
+    const { page, close } = await asUser(browser, candidate, chatUrl || "/messages");
+    // Последним в диалоге может быть сообщение о записи — проверяем саму переписку
+    await expect(page.getByRole("log")).toContainText(token);
     await page.goto("/profile");
     const section = page.getByRole("region", { name: "База резюме для работодателей" });
     await section.getByRole("button", { name: "Скрыть резюме" }).click();

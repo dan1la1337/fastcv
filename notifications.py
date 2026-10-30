@@ -157,3 +157,51 @@ def send_chat_notifications(store, send_email: Callable[[str, dict], None] | Non
             store.mark_chat_notified(row["conversation_id"], row["side"])
             sent += 1
     return {"sent": sent, "failed": failed}
+
+
+def interview_text(row: dict) -> str:
+    place = f"\nГде: {row['place']}" if row.get("place") else ""
+    return (f"⏰ Напоминание: собеседование {row['when_label']} ({row['duration_min']} мин) — "
+            f"{row['other_name']}, «{row['vacancy_title']}».{place}\n\n"
+            f"Чат: {SITE}/messages?c={row['conversation_id']}")
+
+
+def interview_email(row: dict) -> dict:
+    who, title = html.escape(row["other_name"]), html.escape(row["vacancy_title"])
+    place = f"<p>Где: {html.escape(row['place'])}</p>" if row.get("place") else ""
+    body = (f"<p>Напоминаем: собеседование <b>{html.escape(row['when_label'])}</b>, {row['duration_min']} мин.</p>"
+            f"<p>{who} · «{title}»</p>{place}"
+            f'<p><a href="{SITE}/messages?c={row["conversation_id"]}">Открыть чат</a> — там можно перенести или отменить встречу.</p>')
+    return {"subject": f"Собеседование {row['when_label']}: {row['vacancy_title']}",
+            "html": _page("Напоминание о собеседовании", body)}
+
+
+def send_interview_reminders(store, send_email: Callable[[str, dict], None] | None,
+                             send_telegram: Callable[[int, str], None] | None) -> dict:
+    """Накануне собеседования — обеим сторонам (Telegram, иначе письмо). Отметку на запись
+    ставим, только если дошло хотя бы одному: иначе повторим в следующий запуск."""
+    sent = failed = 0
+    by_slot: dict[str, list[dict]] = defaultdict(list)
+    for row in store.pending_interview_reminders():
+        by_slot[row["slot_id"]].append(row)
+    for slot_id, rows in by_slot.items():
+        delivered = False
+        for row in rows:
+            if send_telegram and row.get("telegram_chat_id"):
+                try:
+                    send_telegram(row["telegram_chat_id"], interview_text(row))
+                    delivered = True
+                    sent += 1
+                    continue
+                except Exception:
+                    failed += 1
+            if send_email and row.get("email") and sent < MAX_PER_RUN:
+                try:
+                    send_email(row["email"], interview_email(row))
+                    delivered = True
+                    sent += 1
+                except requests.RequestException:
+                    failed += 1
+        if delivered:
+            store.mark_interview_reminded(slot_id)
+    return {"sent": sent, "failed": failed}
