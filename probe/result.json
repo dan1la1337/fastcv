@@ -1,562 +1,524 @@
 {
- "channels": {
-  "ios_jobs": {
-   "status": 200,
-   "posts": 0
-  },
-  "iosdevjobs": {
-   "status": 200,
-   "posts": 0
-  },
-  "ios_jobs_feed": {
-   "status": 200,
-   "posts": 0
-  },
-  "android_jobs": {
-   "status": 200,
-   "posts": 0
-  },
-  "androidjobs": {
-   "status": 200,
-   "posts": 0
-  },
-  "android_jobs_feed": {
-   "status": 200,
-   "posts": 0
-  },
-  "flutter_jobs": {
-   "status": 200,
-   "posts": 0
-  },
-  "flutterjobs": {
-   "status": 200,
-   "posts": 0
-  },
-  "flutter_jobs_feed": {
-   "status": 200,
-   "posts": 0
-  },
-  "kotlin_jobs": {
-   "posts": 19,
-   "mob": 19,
-   "fs": 1,
-   "last": "2026-05-22",
-   "first": "2023-06-14"
-  },
-  "kotlin_jobs_feed": {
-   "status": 200,
-   "posts": 0
-  },
-  "swift_jobs": {
-   "posts": 2,
-   "mob": 0,
-   "fs": 0,
-   "last": "2022-12-05",
-   "first": "2022-08-16"
-  },
-  "swift_jobs_feed": {
-   "status": 200,
-   "posts": 0
-  },
-  "react_native_jobs": {
-   "status": 200,
-   "posts": 0
-  },
-  "reactnativejobs": {
-   "status": 200,
-   "posts": 0
-  },
-  "mobile_jobs": {
-   "status": 200,
-   "posts": 0
-  },
-  "mobilejobs": {
-   "status": 200,
-   "posts": 0
-  },
-  "mobile_jobs_feed": {
-   "status": 200,
-   "posts": 0
-  },
-  "fullstack_jobs": {
-   "status": 200,
-   "posts": 0
-  },
-  "fullstackjobs": {
-   "posts": 1,
-   "mob": 0,
-   "fs": 0,
-   "last": "2024-06-08",
-   "first": "2024-06-08"
-  },
-  "fullstack_jobs_feed": {
-   "status": 200,
-   "posts": 0
-  },
-  "forios": {
-   "posts": 10,
-   "mob": 6,
-   "fs": 0,
-   "last": "2022-09-12",
-   "first": "2021-09-11"
-  },
-  "forandroid": {
-   "status": 200,
-   "posts": 0
-  },
-  "forflutter": {
-   "status": 200,
-   "posts": 0
-  },
-  "forfullstack": {
-   "status": 200,
-   "posts": 0
-  },
-  "forallmobile": {
-   "posts": 12,
-   "mob": 9,
-   "fs": 0,
-   "last": "2026-10-30",
-   "first": "2026-10-16"
-  },
-  "mobiledev_jobs": {
-   "posts": 20,
-   "mob": 20,
-   "fs": 0,
-   "last": "2026-10-30",
-   "first": "2026-08-08"
-  },
-  "mobiledevjobs": {
-   "posts": 20,
-   "mob": 20,
-   "fs": 1,
-   "last": "2026-10-30",
-   "first": "2026-10-28"
-  },
-  "runello_rus_ios": {
-   "status": 200,
-   "posts": 0
-  },
-  "runello_rus_android": {
-   "status": 200,
-   "posts": 0
-  },
-  "runello_rus_flutter": {
-   "status": 200,
-   "posts": 0
-  },
-  "runello_rus_fullstack": {
-   "status": 200,
-   "posts": 0
-  },
-  "runello_jobs_mobile": {
-   "status": 200,
-   "posts": 0
-  },
-  "runello_rus_mobileappdevelopment": {
-   "posts": 14,
-   "mob": 12,
-   "fs": 0,
-   "last": "2026-10-30",
-   "first": "2022-03-08"
-  },
-  "jobs_ios": {
-   "status": 200,
-   "posts": 0
-  },
-  "jobs_android": {
-   "status": 200,
-   "posts": 0
-  },
-  "rabota_ios": {
-   "status": 200,
-   "posts": 0
-  },
-  "rabota_android": {
-   "status": 200,
-   "posts": 0
-  },
-  "ios_vacancy": {
-   "status": 200,
-   "posts": 0
-  },
-  "android_vacancy": {
-   "status": 200,
-   "posts": 0
-  },
-  "flutter_vacancy": {
-   "status": 200,
-   "posts": 0
-  },
-  "mobile_vacancy": {
-   "posts": 20,
-   "mob": 19,
-   "fs": 2,
-   "last": "2026-02-18",
-   "first": "2026-01-19"
-  },
-  "iosjobs": {
-   "status": 200,
-   "posts": 0
-  },
-  "androidjob": {
-   "status": 200,
-   "posts": 0
-  },
-  "flutter_ru_jobs": {
-   "status": 200,
-   "posts": 0
-  },
-  "dart_jobs": {
-   "status": 200,
-   "posts": 0
-  },
-  "kmp_jobs": {
-   "status": 200,
-   "posts": 0
-  },
-  "fullstack_rabota": {
-   "status": 200,
-   "posts": 0
-  },
-  "rabota_fullstack": {
-   "status": 200,
-   "posts": 0
-  },
-  "laravel_jobs": {
-   "posts": 3,
-   "mob": 0,
-   "fs": 0,
-   "last": "2017-12-08",
-   "first": "2017-12-08"
-  },
-  "vuejs_jobs": {
-   "status": 200,
-   "posts": 0
-  },
-  "vue_jobs_feed": {
-   "status": 200,
-   "posts": 0
-  },
-  "react_jobs_feed": {
-   "status": 200,
-   "posts": 0
-  },
-  "nextjs_jobs": {
-   "posts": 20,
-   "mob": 12,
-   "fs": 15,
-   "last": "2025-07-15",
-   "first": "2025-07-02"
-  },
-  "php_jobs_feed": {
-   "status": 200,
-   "posts": 0
-  },
-  "ruby_jobs_feed": {
-   "status": 200,
-   "posts": 0
-  },
-  "django_jobs": {
-   "status": 200,
-   "posts": 0
-  }
+ "https://career.ozon.ru": {
+  "robots": 200,
+  "allowed": true,
+  "home": 403,
+  "sitemaps": [
+   "https://career.ozon.ru/sitemap.xml"
+  ],
+  "urls": 0,
+  "vac_urls": 0,
+  "mob": 0,
+  "fs": 0,
+  "sample": []
  },
- "ats": {
-  "flohealth": {
-   "greenhouse": {
-    "jobs": 33,
-    "mob": 2,
-    "fs": 0,
-    "mob_titles": [
-     "Senior/ Lead Android Engineer",
-     "Senior/ Lead Android Engineer"
-    ],
-    "fs_titles": [],
-    "locations": [
-     "London",
-     "London, England, United Kingdom",
-     "London, Vilnius",
-     "Poland",
-     "Poland | Ukraine",
-     "Ukraine",
-     "Vilnius",
-     "Warsaw"
-    ]
-   }
-  },
-  "bumble": {},
-  "realtimeboardglobal": {
-   "greenhouse": {
-    "jobs": 18,
-    "mob": 0,
-    "fs": 0,
-    "mob_titles": [],
-    "fs_titles": [],
-    "locations": [
-     "Amsterdam, NL; London, UK",
-     "Austin, US",
-     "Austin, US; Los Angeles, US; New York, US; San Francisco, US",
-     "Austin, US; New York, US; San Francisco, US",
-     "Munich, DE",
-     "New York, US; San Francisco, US",
-     "Remote Brazil; Remote Mexico",
-     "Remote LATAM",
-     "Tokyo, JP"
-    ]
-   }
-  },
-  "miro": {
-   "ashby": {
-    "jobs": 18,
-    "mob": 0,
-    "fs": 0,
-    "mob_titles": [],
-    "fs_titles": [],
-    "locations": [
-     "Amsterdam",
-     "Austin",
-     "London",
-     "Munich",
-     "Tokyo"
-    ]
-   }
-  },
-  "joom": {
-   "workable": {
-    "jobs": 20,
-    "mob": 0,
-    "fs": 0,
-    "mob_titles": [],
-    "fs_titles": [],
-    "locations": [
-     "Berlin Germany",
-     "Lisbon Portugal",
-     "São Paulo Brazil"
-    ]
-   },
-   "smartrecruiters": {
-    "jobs": 2,
-    "mob": 0,
-    "fs": 0,
-    "mob_titles": [],
-    "fs_titles": [],
-    "locations": [
-     "Moscow"
-    ]
-   }
-  },
-  "indrive": {},
-  "exness": {},
-  "semrush": {},
-  "palta": {},
-  "mercuryo": {},
-  "xsolla": {
-   "lever": {
-    "jobs": 189,
-    "mob": 5,
-    "fs": 10,
-    "mob_titles": [
-     "(Senior) Android Developer",
-     "Lead Software Engineer (Mobile Native)",
-     "Senior Mobile Software Engineer",
-     "Senior Software Engineer (React Native)",
-     "Senior Software Engineer, Marketing Tools (React Native / Web)"
-    ],
-    "fs_titles": [
-     "Full Stack AI Engineer / Applied AI Engineer",
-     "Full-Stack Engineer",
-     "Full-stack Software Engineer (ShopBuilder)",
-     "Fullstack developer"
-    ],
-    "locations": [
-     "Baku",
-     "Beijing, China",
-     "Berlin, Germany",
-     "British Columbia",
-     "CIS",
-     "Canada",
-     "Cyprus",
-     "Dubai, United Arab Emirates",
-     "Europe",
-     "Ho Chi Minh City, Vietnam",
-     "Iberia, Spain",
-     "Kuala Lumpur"
-    ]
-   }
-  },
-  "ecwid": {},
-  "wrike": {
-   "greenhouse": {
-    "jobs": 71,
-    "mob": 0,
-    "fs": 0,
-    "mob_titles": [],
-    "fs_titles": [],
-    "locations": [
-     "Bangalore",
-     "Cyprus - Remote",
-     "Czech Republic - Remote",
-     "Dublin, Ireland",
-     "Estonia - Remote",
-     "European Union - Remote",
-     "France - Remote",
-     "Ireland - Remote",
-     "Lithuania - Remote",
-     "Melbourne",
-     "Nicosia",
-     "Paris"
-    ]
-   }
-  },
-  "jiji": {},
-  "pinely": {
-   "workable": {
-    "jobs": 15,
-    "mob": 0,
-    "fs": 0,
-    "mob_titles": [],
-    "fs_titles": [],
-    "locations": [
-     "Amsterdam Netherlands"
-    ]
-   },
-   "ashby": {
-    "jobs": 17,
-    "mob": 0,
-    "fs": 0,
-    "mob_titles": [],
-    "fs_titles": [],
-    "locations": [
-     "Amsterdam"
-    ]
-   }
-  },
-  "socialdiscoverygroup": {},
-  "nexters": {},
-  "playkot": {},
-  "belkagames": {},
-  "mytona": {},
-  "appodeal": {
-   "greenhouse": {
-    "jobs": 9,
-    "mob": 0,
-    "fs": 0,
-    "mob_titles": [],
-    "fs_titles": [],
-    "locations": [
-     "Barcelona, Spain",
-     "Parkland, Florida, USA",
-     "Parkland, USA",
-     "USA (Remote) / Barcelona, Spain"
-    ]
-   }
-  },
-  "gismart": {
-   "ashby": {
-    "jobs": 17,
-    "mob": 1,
-    "fs": 0,
-    "mob_titles": [
-     "Flutter Developer (Testora)"
-    ],
-    "fs_titles": [],
-    "locations": [
-     "Kyiv",
-     "Remote",
-     "Remote (Ukraine)"
-    ]
-   }
-  },
-  "exante": {},
-  "everix": {},
-  "playrix": {},
-  "plarium": {},
-  "wargaming": {},
-  "nexters-global": {},
-  "yango": {},
-  "inventive-retail": {},
-  "ozon-tech": {},
-  "avito": {},
-  "skyeng": {},
-  "tabby": {},
-  "revolut": {},
-  "deel": {},
-  "bolt": {},
-  "wolt": {
-   "greenhouse": {
-    "jobs": 199,
-    "mob": 1,
-    "fs": 2,
-    "mob_titles": [
-     "Senior Mobile Engineer, iOS"
-    ],
-    "fs_titles": [
-     " Senior Full-Stack Engineer",
-     "Senior Software Engineer (Fullstack) - Merchant EMEA"
-    ],
-    "locations": [
-     "Aalborg, Denmark",
-     "Aalborg, Denmark; Aarhus, Denmark; Copenhagen, Denmark; Odense, Denmark; Søborg, Denmark",
-     "Almaty, Kazakhstan",
-     "Almaty, Kazakhstan; Astana, Kazakhstan",
-     "Ashdod, Israel",
-     "Astana, Kazakhstan",
-     "Athens, Greece",
-     "Athens, Greece; Limassol, Cyprus",
-     "BERGEN, Norway; OSLO, Norway; Stavanger, Norway; Trondheim, Norway",
-     "Baku, Azerbaijan",
-     "Batumi, Georgia",
-     "Belgrade - Savski Venac, Serbia"
-    ]
-   }
-  },
-  "paysera": {},
-  "kaspi": {},
-  "vk": {},
-  "joomgroup": {},
-  "simple": {},
-  "appquantum": {},
-  "zeptolab": {
-   "workable": {
-    "jobs": 3,
-    "mob": 0,
-    "fs": 0,
-    "mob_titles": [],
-    "fs_titles": [],
-    "locations": [
-     " Armenia",
-     " Georgia"
-    ]
-   }
-  },
-  "hypemasters": {},
-  "playtika": {},
-  "moonactive": {
-   "ashby": {
-    "jobs": 34,
-    "mob": 1,
-    "fs": 2,
-    "mob_titles": [
-     "Mobile User Acquisition Manager"
-    ],
-    "fs_titles": [
-     "Full Stack Developer ",
-     "Full Stack Team Leader"
-    ],
-    "locations": [
-     "Bangkok",
-     "Barcelona",
-     "Kyiv",
-     "London",
-     "Tel Aviv",
-     "Warsaw"
-    ]
-   }
-  },
-  "azur-games": {},
-  "azurgames": {},
-  "nordcurrent": {},
-  "tilting-point": {}
+ "https://job.ozon.ru": {
+  "robots": 200,
+  "allowed": true,
+  "home": 403,
+  "sitemaps": [
+   "https://job.ozon.ru/sitemap.xml"
+  ],
+  "urls": 0,
+  "vac_urls": 0,
+  "mob": 0,
+  "fs": 0,
+  "sample": []
+ },
+ "https://career.rwb.ru": {
+  "robots": 200,
+  "allowed": true,
+  "home": 200,
+  "sitemaps": [
+   "https://career.rwb.ru/sitemap.xml"
+  ],
+  "urls": 2,
+  "vac_urls": 2,
+  "mob": 0,
+  "fs": 0,
+  "sample": [
+   "https://career.rwb.ru/",
+   "https://career.rwb.ru/vacancies"
+  ]
+ },
+ "https://yandex.ru/jobs": {
+  "robots": 200,
+  "allowed": true,
+  "home": 200,
+  "sitemaps": [
+   "https://yandex.ru/support/sitemap.xml",
+   "https://yandex.ru/blog/sitemap.xml",
+   "https://frontend.s3.yandex.net/health/sitemap.xml"
+  ],
+  "urls": 49060,
+  "vac_urls": 0,
+  "mob": 0,
+  "fs": 0,
+  "sample": []
+ },
+ "https://career.kaspersky.ru": {
+  "robots": 0,
+  "allowed": true,
+  "home": 0,
+  "sitemaps": [
+   "https://career.kaspersky.ru/sitemap.xml"
+  ],
+  "urls": 0,
+  "vac_urls": 0,
+  "mob": 0,
+  "fs": 0,
+  "sample": []
+ },
+ "https://careers.kaspersky.com": {
+  "robots": 200,
+  "allowed": true,
+  "home": 200,
+  "sitemaps": [
+   "https://careers.kaspersky.com/sitemap.xml"
+  ],
+  "urls": 0,
+  "vac_urls": 0,
+  "mob": 0,
+  "fs": 0,
+  "sample": []
+ },
+ "https://kode.ru": {
+  "robots": 200,
+  "allowed": true,
+  "home": 200,
+  "sitemaps": [
+   "https://kode.ru/sitemap.xml"
+  ],
+  "urls": 21,
+  "vac_urls": 0,
+  "mob": 0,
+  "fs": 0,
+  "sample": []
+ },
+ "https://surf.ru": {
+  "robots": 200,
+  "allowed": true,
+  "home": 200,
+  "sitemaps": [
+   "https://surf.ru/sitemap.xml"
+  ],
+  "urls": 482,
+  "vac_urls": 1,
+  "mob": 0,
+  "fs": 0,
+  "sample": [
+   "https://surf.ru/career/discuss/"
+  ]
+ },
+ "https://redmadrobot.ru": {
+  "robots": 200,
+  "allowed": true,
+  "home": 200,
+  "sitemaps": [
+   "https://redmadrobot.ru/sitemap.xml"
+  ],
+  "urls": 423,
+  "vac_urls": 28,
+  "mob": 4,
+  "fs": 0,
+  "sample": [
+   "https://redmadrobot.ru/vakansii",
+   "https://redmadrobot.ru/analitika-2/ugroza-vechnoj-vakansii-uzkaya-voronka-kandidatov-sotrudnik-za-million-i-drugie-nepriyatnosti-s-kotorymi-pomogaet-spravlyatsya-kalkulyator-hr",
+   "https://redmadrobot.ru/vakansii/senior-backend-razrabotchik-moskva",
+   "https://redmadrobot.ru/vakansii/android-razrabotchik-moskva",
+   "https://redmadrobot.ru/vakansii/ios-razrabotchik-moskva",
+   "https://redmadrobot.ru/vakansii/android-razrabotchik-samara"
+  ]
+ },
+ "https://career.lamoda.ru": {
+  "robots": 0,
+  "allowed": true,
+  "home": 0,
+  "sitemaps": [
+   "https://career.lamoda.ru/sitemap.xml"
+  ],
+  "urls": 0,
+  "vac_urls": 0,
+  "mob": 0,
+  "fs": 0,
+  "sample": []
+ },
+ "https://lamoda.tech": {
+  "robots": 0,
+  "allowed": true,
+  "home": 0,
+  "sitemaps": [
+   "https://lamoda.tech/sitemap.xml"
+  ],
+  "urls": 0,
+  "vac_urls": 0,
+  "mob": 0,
+  "fs": 0,
+  "sample": []
+ },
+ "https://samokat.tech": {
+  "robots": 403,
+  "allowed": true,
+  "home": 403,
+  "sitemaps": [
+   "https://samokat.tech/sitemap.xml"
+  ],
+  "urls": 0,
+  "vac_urls": 0,
+  "mob": 0,
+  "fs": 0,
+  "sample": []
+ },
+ "https://career.samokat.ru": {
+  "robots": 403,
+  "allowed": true,
+  "home": 403,
+  "sitemaps": [
+   "https://career.samokat.ru/sitemap.xml"
+  ],
+  "urls": 0,
+  "vac_urls": 0,
+  "mob": 0,
+  "fs": 0,
+  "sample": []
+ },
+ "https://magnit.tech": {
+  "robots": 200,
+  "allowed": true,
+  "home": 200,
+  "sitemaps": [
+   "https://magnit.tech/sitemap.xml"
+  ],
+  "urls": 0,
+  "vac_urls": 0,
+  "mob": 0,
+  "fs": 0,
+  "sample": []
+ },
+ "https://job.magnit.ru": {
+  "robots": 0,
+  "allowed": true,
+  "home": 0,
+  "sitemaps": [
+   "https://job.magnit.ru/sitemap.xml"
+  ],
+  "urls": 0,
+  "vac_urls": 0,
+  "mob": 0,
+  "fs": 0,
+  "sample": []
+ },
+ "https://dodo.dev": {
+  "robots": 200,
+  "allowed": true,
+  "home": 200,
+  "sitemaps": [
+   "https://dodo.dev/sitemap.xml"
+  ],
+  "urls": 0,
+  "vac_urls": 0,
+  "mob": 0,
+  "fs": 0,
+  "sample": []
+ },
+ "https://career.vtb.ru": {
+  "robots": 0,
+  "allowed": true,
+  "home": 0,
+  "sitemaps": [
+   "https://career.vtb.ru/sitemap.xml"
+  ],
+  "urls": 0,
+  "vac_urls": 0,
+  "mob": 0,
+  "fs": 0,
+  "sample": []
+ },
+ "https://job.megafon.ru": {
+  "robots": 200,
+  "allowed": true,
+  "home": 200,
+  "sitemaps": [
+   "User-agent:"
+  ],
+  "urls": 0,
+  "vac_urls": 0,
+  "mob": 0,
+  "fs": 0,
+  "sample": []
+ },
+ "https://careers.beeline.ru": {
+  "robots": 0,
+  "allowed": true,
+  "home": 0,
+  "sitemaps": [
+   "https://careers.beeline.ru/sitemap.xml"
+  ],
+  "urls": 0,
+  "vac_urls": 0,
+  "mob": 0,
+  "fs": 0,
+  "sample": []
+ },
+ "https://job.raiffeisen.ru": {
+  "robots": 0,
+  "allowed": true,
+  "home": 0,
+  "sitemaps": [
+   "https://job.raiffeisen.ru/sitemap.xml"
+  ],
+  "urls": 0,
+  "vac_urls": 0,
+  "mob": 0,
+  "fs": 0,
+  "sample": []
+ },
+ "https://sovcombank.ru/vacancies": {
+  "robots": 0,
+  "allowed": true,
+  "home": 0,
+  "sitemaps": [
+   "https://sovcombank.ru/sitemap.xml"
+  ],
+  "urls": 0,
+  "vac_urls": 0,
+  "mob": 0,
+  "fs": 0,
+  "sample": []
+ },
+ "https://kuper.ru/careers": {
+  "robots": 403,
+  "allowed": true,
+  "home": 403,
+  "sitemaps": [
+   "https://kuper.ru/sitemap.xml"
+  ],
+  "urls": 0,
+  "vac_urls": 0,
+  "mob": 0,
+  "fs": 0,
+  "sample": []
+ },
+ "https://lemanapro.ru/career": {
+  "robots": 200,
+  "allowed": true,
+  "home": 403,
+  "sitemaps": [
+   "https://lemanapro.ru/sitemap.xml"
+  ],
+  "urls": 0,
+  "vac_urls": 0,
+  "mob": 0,
+  "fs": 0,
+  "sample": []
+ },
+ "https://hr.lemanapro.ru": {
+  "robots": 0,
+  "allowed": true,
+  "home": 0,
+  "sitemaps": [
+   "https://hr.lemanapro.ru/sitemap.xml"
+  ],
+  "urls": 0,
+  "vac_urls": 0,
+  "mob": 0,
+  "fs": 0,
+  "sample": []
+ },
+ "https://career.sportmaster.ru": {
+  "robots": 0,
+  "allowed": true,
+  "home": 0,
+  "sitemaps": [
+   "https://career.sportmaster.ru/sitemap.xml"
+  ],
+  "urls": 0,
+  "vac_urls": 0,
+  "mob": 0,
+  "fs": 0,
+  "sample": []
+ },
+ "https://lab.sportmaster.ru": {
+  "robots": 0,
+  "allowed": true,
+  "home": 0,
+  "sitemaps": [
+   "https://lab.sportmaster.ru/sitemap.xml"
+  ],
+  "urls": 0,
+  "vac_urls": 0,
+  "mob": 0,
+  "fs": 0,
+  "sample": []
+ },
+ "https://effective.band": {
+  "robots": 200,
+  "allowed": true,
+  "home": 200,
+  "sitemaps": [
+   "https://effective.band/sitemap.xml"
+  ],
+  "urls": 0,
+  "vac_urls": 0,
+  "mob": 0,
+  "fs": 0,
+  "sample": []
+ },
+ "https://e-legion.ru": {
+  "robots": 200,
+  "allowed": true,
+  "home": 200,
+  "sitemaps": [
+   "https://e-legion.ru/sitemap.xml",
+   "https://e-legion.ru/images-sitemap.xml"
+  ],
+  "urls": 171,
+  "vac_urls": 8,
+  "mob": 2,
+  "fs": 0,
+  "sample": [
+   "https://e-legion.ru/about/career/",
+   "https://e-legion.ru/about/career/java-developer",
+   "https://e-legion.ru/about/career/middle-senior-android-developer",
+   "https://e-legion.ru/about/career/middle-senior-android-developer",
+   "https://e-legion.ru/about/career/middle-senior-ios-developer"
+  ]
+ },
+ "https://www.uchi.ru/vacancies": {
+  "robots": 200,
+  "allowed": true,
+  "home": 200,
+  "sitemaps": [
+   "https://www.uchi.ru/sitemap.xml"
+  ],
+  "urls": 0,
+  "vac_urls": 0,
+  "mob": 0,
+  "fs": 0,
+  "sample": []
+ },
+ "https://career.wb.ru": {
+  "robots": 200,
+  "allowed": true,
+  "home": 200,
+  "sitemaps": [
+   "https://career.rwb.ru/sitemap.xml"
+  ],
+  "urls": 2,
+  "vac_urls": 2,
+  "mob": 0,
+  "fs": 0,
+  "sample": [
+   "https://career.rwb.ru/",
+   "https://career.rwb.ru/vacancies"
+  ]
+ },
+ "https://jobs.kaspi.kz": {
+  "robots": 0,
+  "allowed": true,
+  "home": 0,
+  "sitemaps": [
+   "https://jobs.kaspi.kz/sitemap.xml"
+  ],
+  "urls": 0,
+  "vac_urls": 0,
+  "mob": 0,
+  "fs": 0,
+  "sample": []
+ },
+ "https://career.gazprombank.ru": {
+  "robots": 0,
+  "allowed": true,
+  "home": 0,
+  "sitemaps": [
+   "https://career.gazprombank.ru/sitemap.xml"
+  ],
+  "urls": 0,
+  "vac_urls": 0,
+  "mob": 0,
+  "fs": 0,
+  "sample": []
+ },
+ "https://rabota.rshb.ru": {
+  "robots": 0,
+  "allowed": true,
+  "home": 0,
+  "sitemaps": [
+   "https://rabota.rshb.ru/sitemap.xml"
+  ],
+  "urls": 0,
+  "vac_urls": 0,
+  "mob": 0,
+  "fs": 0,
+  "sample": []
+ },
+ "https://team.mail.ru": {
+  "robots": 0,
+  "allowed": true,
+  "home": 0,
+  "sitemaps": [
+   "https://team.mail.ru/sitemap.xml"
+  ],
+  "urls": 0,
+  "vac_urls": 0,
+  "mob": 0,
+  "fs": 0,
+  "sample": []
+ },
+ "https://hr.gazprom-neft.ru": {
+  "robots": 0,
+  "allowed": true,
+  "home": 0,
+  "sitemaps": [
+   "https://hr.gazprom-neft.ru/sitemap.xml"
+  ],
+  "urls": 0,
+  "vac_urls": 0,
+  "mob": 0,
+  "fs": 0,
+  "sample": []
+ },
+ "https://career.domclick.ru": {
+  "robots": 200,
+  "allowed": true,
+  "home": 200,
+  "sitemaps": [
+   "https://career.domclick.ru/sitemap.xml"
+  ],
+  "urls": 20,
+  "vac_urls": 20,
+  "mob": 0,
+  "fs": 0,
+  "sample": [
+   "https://career.domclick.ru",
+   "https://career.domclick.ru/vacancies",
+   "https://career.domclick.ru/vacancy/head-of-product-klastera-obektnaia-model-dom-136675023"
+  ]
+ },
+ "https://job.cian.ru": {
+  "robots": 403,
+  "allowed": true,
+  "home": 200,
+  "sitemaps": [
+   "https://job.cian.ru/sitemap.xml"
+  ],
+  "urls": 0,
+  "vac_urls": 0,
+  "mob": 0,
+  "fs": 0,
+  "sample": []
+ },
+ "https://cian.ru/vacancies": {
+  "robots": 403,
+  "allowed": true,
+  "home": 200,
+  "sitemaps": [
+   "https://cian.ru/sitemap.xml"
+  ],
+  "urls": 0,
+  "vac_urls": 0,
+  "mob": 0,
+  "fs": 0,
+  "sample": []
  }
 }
