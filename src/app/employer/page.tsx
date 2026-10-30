@@ -11,10 +11,11 @@ import { toMatch, type Match } from "@/lib/matching";
 import MatchRing from "@/components/MatchRing";
 import BlitzAnswers, { type BlitzAnswer } from "@/components/BlitzAnswers";
 import type { VacancyDraft } from "@/lib/vacancy-draft";
+import EmployerReviews from "@/components/EmployerReviews";
 import { supabase, getUserRole } from "@/lib/supabase";
 import { formatSalary, plural, type Vacancy } from "@/lib/vacancies";
 
-type Tab = "applications" | "vacancies" | "form";
+type Tab = "applications" | "vacancies" | "reviews" | "form";
 
 interface Application {
   id: string;
@@ -338,6 +339,9 @@ export default function EmployerDashboard() {
           <button role="tab" aria-selected={activeTab === "vacancies"} onClick={() => setActiveTab("vacancies")} className={tabClass("vacancies")}>
             Вакансии · {openVacancies}
           </button>
+          <button role="tab" aria-selected={activeTab === "reviews"} onClick={() => setActiveTab("reviews")} className={tabClass("reviews")}>
+            Отзывы
+          </button>
           {activeTab === "form" && (
             <button role="tab" aria-selected className={tabClass("form")}>{editingId ? "Редактирование" : "Новая вакансия"}</button>
           )}
@@ -452,6 +456,8 @@ export default function EmployerDashboard() {
         )}
 
         {/* Мои вакансии */}
+        {activeTab === "reviews" && <EmployerReviews companyName={companyName} />}
+
         {activeTab === "vacancies" && (
           vacancies.length === 0 ? (
             <div className="text-center py-20 border border-dashed border-white/15 rounded-3xl">

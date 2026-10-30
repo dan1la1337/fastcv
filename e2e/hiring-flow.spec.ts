@@ -150,6 +150,27 @@ test.describe("найм от вакансии до оценки собеседо
     await close();
   });
 
+  test("кандидат оставляет отзыв о найме, работодатель отвечает", async ({ browser }) => {
+    test.skip(!vacancyId, "вакансия не создана");
+    const cand = await asUser(browser, candidate, "/applications");
+    const card = cand.page.locator("div.glass").filter({ hasText: title }).first();
+    await card.getByRole("button", { name: "Оставить отзыв" }).click();
+    await card.getByRole("radiogroup", { name: "Оценка процесса найма" }).getByRole("radio", { name: "5 из 5" }).click();
+    await card.getByLabel("Что понравилось").fill("Ответили за день, понятные этапы.");
+    await card.getByRole("button", { name: "Опубликовать" }).click();
+    await expect(card.getByRole("button", { name: "Изменить отзыв" })).toBeVisible();
+    await cand.close();
+
+    const hr = await asUser(browser, employer, "/employer");
+    await hr.page.getByRole("tab", { name: "Отзывы" }).click();
+    const review = hr.page.locator("div.glass").filter({ hasText: title }).filter({ hasText: "Ответили за день" }).first();
+    await review.getByRole("button", { name: "Ответить публично" }).click();
+    await review.getByLabel("Публичный ответ компании").fill("Спасибо за отзыв!");
+    await review.getByRole("button", { name: "Опубликовать ответ" }).click();
+    await expect(review).toContainText("Ваш ответ");
+    await hr.close();
+  });
+
   test.afterAll(async ({ browser }, info) => {
     if (!vacancyId || info.project.name !== "desktop") return;
     // Закрываем тестовую вакансию, чтобы она не висела в ленте staging

@@ -778,6 +778,53 @@ CHECKS: list[tuple] = [
         set request.jwt.claim.sub = '22222222-2222-2222-2222-222222222222';
         select count(*)::text from resume_board();""",
      "postgres", None, "0"),
+    ("отзыв о найме: рано, пока работодатель не ответил и не прошло 10 дней", False,
+     f"""insert into vacancies (id, title, source_type, employer_id, company_name) values ('99999999-0000-0000-0000-0000000000f2', 'RV job', 'internal', '{E}', 'Acme Rating');
+        insert into applications (id, vacancy_id, candidate_id) values ('99999999-0000-0000-0000-0000000000f3', '99999999-0000-0000-0000-0000000000f2', '{C}'), ('99999999-0000-0000-0000-0000000000f4', '99999999-0000-0000-0000-0000000000f2', '{X}');
+        set role authenticated; set request.jwt.claim.sub = '{C}';
+        select save_hiring_review('99999999-0000-0000-0000-0000000000f3', 4, 'Быстро ответили', null);""",
+     "postgres", None, None),
+    ("после ответа работодателя кандидат оставляет отзыв, повтор — правка", True,
+     f"""insert into vacancies (id, title, source_type, employer_id, company_name) values ('99999999-0000-0000-0000-0000000000f2', 'RV job', 'internal', '{E}', 'Acme Rating');
+        insert into applications (id, vacancy_id, candidate_id) values ('99999999-0000-0000-0000-0000000000f3', '99999999-0000-0000-0000-0000000000f2', '{C}'), ('99999999-0000-0000-0000-0000000000f4', '99999999-0000-0000-0000-0000000000f2', '{X}');
+        update applications set status = 'interview_scheduled' where id = '99999999-0000-0000-0000-0000000000f3';
+        update applications set created_at = now() - interval '12 days' where id = '99999999-0000-0000-0000-0000000000f4';
+        set role authenticated; set request.jwt.claim.sub = '{C}';
+        do $$ begin perform save_hiring_review('99999999-0000-0000-0000-0000000000f3', 2, '  ', 'Долго молчали'); end $$;
+        do $$ begin perform save_hiring_review('99999999-0000-0000-0000-0000000000f3', 4, 'Быстро ответили', null); end $$;
+        set request.jwt.claim.sub = '{X}';
+        do $$ begin perform save_hiring_review('99999999-0000-0000-0000-0000000000f4', 1, null, 'Не ответили'); end $$;
+        reset role;
+        select string_agg(stage || ':' || rating || ':' || coalesce(pros, '-'), ',' order by rating) from hiring_reviews
+         where application_id in ('99999999-0000-0000-0000-0000000000f3', '99999999-0000-0000-0000-0000000000f4')""",
+     "postgres", None, "applied:1:-,interview:4:Быстро ответили"),
+    ("чужой отклик оценить нельзя", False,
+     "select save_hiring_review('99999999-0000-0000-0000-0000000000f3', 5, null, null)", "authenticated", X, None),
+    ("отзывы напрямую из таблицы не читаются", False, "select * from hiring_reviews", "authenticated", E, None),
+    ("работодатель видит отзывы о себе и отвечает публично", True,
+     f"""select count(*)::text from employer_reviews() where vacancy_title = 'RV job';
+        do $$ begin perform reply_hiring_review((select id from employer_reviews() where rating = 1), 'Простите, исправляемся'); end $$;
+        select reply from employer_reviews() where rating = 1""",
+     "authenticated", E, "2\nПростите, исправляемся"),
+    ("другой работодатель НЕ отвечает на чужой отзыв", False,
+     "select reply_hiring_review((select id from hiring_reviews limit 1), 'хак')", "authenticated", E2, None),
+    ("рейтинг компании открыт всем: отзывы анонимные, балл при нехватке данных пустой", True,
+     """select (company_rating('acme rating') ->> 'reviews_count') || ':' || (company_rating('Acme Rating') ->> 'review_rating') || ':' ||
+               coalesce(company_rating('Acme Rating') ->> 'score', 'нет') || ':' ||
+               (select string_agg(x ->> 'reply', '') from jsonb_array_elements(company_rating('Acme Rating') -> 'reviews') x) || ':' ||
+               (company_rating('Acme Rating')::text like '%Иван%')::text""",
+     "anon", None, "2:2.5:нет:Простите, исправляемся:false"),
+    ("неизвестная компания — без рейтинга", True,
+     "select coalesce(company_rating('Нет такой')::text, 'null')", "anon", None, "null"),
+    ("сборщик пишет ИИ-выжимку от трёх отзывов", True,
+     f"""insert into applications (id, vacancy_id, candidate_id, status) values ('99999999-0000-0000-0000-0000000000f5', '99999999-0000-0000-0000-0000000000f2', '{E2}', 'rejected');
+        insert into hiring_reviews (application_id, employer_id, candidate_id, stage, rating) values ('99999999-0000-0000-0000-0000000000f5', '{E}', '{E2}', 'applied', 3);
+        select (select reviews_count from pending_review_summaries() where employer_id = '{E}')::text;
+        select save_review_summary('{E}', 'Хвалят скорость, ругают тишину', 3);
+        select (select count(*) from pending_review_summaries() where employer_id = '{E}')::text || ':' ||
+               (company_rating('Acme Rating') ->> 'summary');
+        delete from applications where vacancy_id = '99999999-0000-0000-0000-0000000000f2'; delete from review_summaries; delete from vacancies where id = '99999999-0000-0000-0000-0000000000f2';""",
+     "postgres", None, "3\n\n0:Хвалят скорость, ругают тишину"),
     ("ротация «Работы России»: старые удаляются, с откликами — в архив, свежие остаются", True,
      f"""insert into vacancies (title, source_type, source_post, posted_at) values
           ('TV old', 'external', 'trudvsem/old', now() - interval '5 days'),

@@ -3,13 +3,14 @@
 import { Star } from "lucide-react";
 
 /** Оценка собеседования 1–5 звёздами (рейтинг найма, план 1.13). */
-export default function InterviewStars({ value, onRate, disabled }: {
+export default function InterviewStars({ value, onRate, disabled, label = "Оценка собеседования" }: {
   value: number | null;
+  label?: string;
   onRate: (rating: number) => void;
   disabled?: boolean;
 }) {
   return (
-    <div role="radiogroup" aria-label="Оценка собеседования" className="inline-flex gap-1">
+    <div role="radiogroup" aria-label={label} className="inline-flex gap-1">
       {[1, 2, 3, 4, 5].map(n => (
         <button key={n} type="button" role="radio" aria-checked={value === n} aria-label={`${n} из 5`}
           disabled={disabled} onClick={() => onRate(n)}

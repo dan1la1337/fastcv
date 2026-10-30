@@ -587,6 +587,20 @@ export type Database = {
       check_company_verification: { Args: never; Returns: boolean }
       report_vacancy_closed: { Args: { vacancy: string }; Returns: number }
       my_closed_report: { Args: { vacancy: string }; Returns: boolean }
+      company_rating: { Args: { company: string }; Returns: Json }
+      save_hiring_review: { Args: { application: string; rating: number; pros: string | null; cons: string | null }; Returns: string }
+      my_hiring_reviews: {
+        Args: never
+        Returns: { application_id: string; rating: number; pros: string | null; cons: string | null; reply: string | null }[]
+      }
+      employer_reviews: {
+        Args: never
+        Returns: {
+          id: string; vacancy_title: string | null; stage: string; rating: number; pros: string | null
+          cons: string | null; reply: string | null; created_at: string; hidden: boolean
+        }[]
+      }
+      reply_hiring_review: { Args: { review: string; reply: string | null }; Returns: undefined }
       start_conversation: { Args: { candidate: string; vacancy: string | null; body: string }; Returns: string }
       resume_board: {
         Args: {

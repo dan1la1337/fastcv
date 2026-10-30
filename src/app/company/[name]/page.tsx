@@ -6,6 +6,8 @@ import { ArrowLeft } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { VACANCY_COLUMNS, plural, VACANCY_FORMS, type Vacancy } from "@/lib/vacancies";
 import VacancyListStatic from "@/components/VacancyListStatic";
+import CompanyRatingCard from "@/components/CompanyRatingCard";
+import type { CompanyRating } from "@/lib/rating";
 
 type Props = { params: Promise<{ name: string }> };
 
@@ -26,10 +28,20 @@ const getVacancies = cache(async (name: string): Promise<Vacancy[]> => {
   return (data ?? []) as Vacancy[];
 });
 
+const getRating = cache(async (name: string): Promise<CompanyRating | null> => {
+  if (!name) return null;
+  const { data } = await supabase.rpc("company_rating", { company: name });
+  return (data as CompanyRating | null) ?? null;
+});
+
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const name = await nameFrom(params);
   const vacancies = await getVacancies(name);
-  if (!vacancies.length) return { title: "Компания не найдена — FastCV", robots: { index: false } };
+  if (!vacancies.length) {
+    return (await getRating(name))
+      ? { title: `Рейтинг найма ${name} — FastCV`, description: `Как ${name} отвечает на отклики и проводит собеседования: отзывы кандидатов FastCV.` }
+      : { title: "Компания не найдена — FastCV", robots: { index: false } };
+  }
   const company = vacancies[0].company_name ?? name;
   const title = `Вакансии ${company} — FastCV`;
   const description = `${vacancies.length} ${plural(vacancies.length, VACANCY_FORMS)} компании ${company}: должности, зарплаты, формат работы. Отклик с сопроводительным письмом от ИИ.`;
@@ -38,9 +50,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function CompanyPage({ params }: Props) {
   const name = await nameFrom(params);
-  const vacancies = await getVacancies(name);
-  if (!vacancies.length) notFound();
-  const company = vacancies[0].company_name ?? name;
+  const [vacancies, rating] = await Promise.all([getVacancies(name), getRating(name)]);
+  if (!vacancies.length && !rating) notFound();
+  const company = vacancies[0]?.company_name ?? name;
 
   return (
     <main className="min-h-screen text-neutral-100 px-4 py-8">
@@ -52,7 +64,8 @@ export default async function CompanyPage({ params }: Props) {
           <h1 className="font-display text-2xl sm:text-3xl font-bold">{company}</h1>
           <p className="text-sm text-neutral-400">{vacancies.length} {plural(vacancies.length, ["открытая вакансия", "открытые вакансии", "открытых вакансий"])}</p>
         </header>
-        <VacancyListStatic vacancies={vacancies} />
+        {rating && <CompanyRatingCard company={company} rating={rating} />}
+        {vacancies.length > 0 && <VacancyListStatic vacancies={vacancies} />}
       </div>
     </main>
   );
