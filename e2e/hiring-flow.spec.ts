@@ -30,6 +30,8 @@ const title = `E2E Python-разработчик ${Date.now()}`;
 const question = "Сколько лет вы пишете на Python?";
 const answer = "Четыре года, из них два — Django в продакшене.";
 let vacancyId = "";
+/** Отклик ушёл: при исчерпанном дневном лимите кандидата дальнейшие шаги не имеют смысла */
+let applied = false;
 
 test.describe("найм от вакансии до оценки собеседования", () => {
   test.skip(!candidate.email || !candidate.password || !employer.email || !employer.password, "нет секретов E2E_*");
@@ -76,6 +78,7 @@ test.describe("найм от вакансии до оценки собеседо
     await expect(sent.or(limit)).toBeVisible({ timeout: 15_000 });
     // Тесты гоняются на каждый PR: при 15 откликах за сутки база законно отказывает
     test.skip(await limit.isVisible(), "у тестового кандидата исчерпан дневной лимит откликов");
+    applied = true;
     const log = page.getByRole("log");
     await expect(log).toContainText("Ваш отклик на вакансию");
     await expect(log).toContainText("четыре года");
@@ -86,7 +89,7 @@ test.describe("найм от вакансии до оценки собеседо
   });
 
   test("работодатель пишет кандидату в чат, кандидат отвечает", async ({ browser }) => {
-    test.skip(!vacancyId, "вакансия не создана");
+    test.skip(!applied, "отклик не отправлен");
     const hr = await asUser(browser, employer, "/employer");
     await hr.page.getByRole("button", { name: "Сначала новые" }).click();
     await hr.page.locator("div.glass").filter({ hasText: title }).first().getByRole("link", { name: "Написать" }).click();
@@ -115,7 +118,7 @@ test.describe("найм от вакансии до оценки собеседо
   });
 
   test("работодатель видит ответ на вопрос и приглашает", async ({ browser }) => {
-    test.skip(!vacancyId, "вакансия не создана");
+    test.skip(!applied, "отклик не отправлен");
     const { page, close } = await asUser(browser, employer, "/employer");
     await page.getByRole("button", { name: "Сначала новые" }).click();
     const card = page.locator("div.glass").filter({ hasText: title }).first();
@@ -134,7 +137,7 @@ test.describe("найм от вакансии до оценки собеседо
   });
 
   test("кандидат видит приглашение и оценивает собеседование", async ({ browser }) => {
-    test.skip(!vacancyId, "вакансия не создана");
+    test.skip(!applied, "отклик не отправлен");
     const { page, close } = await asUser(browser, candidate, "/applications");
     const card = page.locator("div.glass").filter({ hasText: title }).first();
     await expect(card).toContainText("Приглашение на собеседование");
@@ -151,7 +154,7 @@ test.describe("найм от вакансии до оценки собеседо
   });
 
   test("кандидат оставляет отзыв о найме, работодатель отвечает", async ({ browser }) => {
-    test.skip(!vacancyId, "вакансия не создана");
+    test.skip(!applied, "отклик не отправлен");
     const cand = await asUser(browser, candidate, "/applications");
     const card = cand.page.locator("div.glass").filter({ hasText: title }).first();
     await card.getByRole("button", { name: "Оставить отзыв" }).click();
