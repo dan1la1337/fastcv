@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, BarChart3, CalendarCheck, ExternalLink, Loader2, MessageCircle, MessageSquare } from "lucide-react";
+import { ArrowLeft, BarChart3, Sparkles, CalendarCheck, ExternalLink, Loader2, MessageCircle, MessageSquare } from "lucide-react";
 import { supabase, getUserRole } from "@/lib/supabase";
 import { plural } from "@/lib/vacancies";
 import HiringReviewForm, { type MyReview } from "@/components/HiringReviewForm";
@@ -203,6 +203,13 @@ export default function CandidateApplications() {
                       <CalendarCheck className="w-4 h-4 text-emerald-300" aria-hidden="true" />
                       Собеседование: <b>{slotLabel(interviews[app.id].starts_at)}</b>
                       <span className="text-neutral-400">({slotRange(interviews[app.id].starts_at, interviews[app.id].duration_min)})</span>
+                    </Link>
+                  )}
+
+                  {app.status === "interview_scheduled" && v?.id && (
+                    <Link href={`/practice/${v.id}`}
+                      className="inline-flex items-center gap-1.5 text-sm text-teal-300 hover:text-teal-200 transition-colors">
+                      <Sparkles className="w-4 h-4" /> Подготовиться к собеседованию с ИИ
                     </Link>
                   )}
 
