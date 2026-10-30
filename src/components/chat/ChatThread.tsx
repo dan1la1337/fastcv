@@ -2,7 +2,7 @@
 
 import { Fragment, useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { ArrowLeft, Check, CheckCheck, CheckCircle2, Loader2, Send, XCircle } from "lucide-react";
+import { ArrowLeft, Briefcase, Check, CheckCheck, CheckCircle2, Loader2, Send, XCircle } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { chatErrorText, dayLabel, MESSAGE_COLUMNS, MESSAGE_MAX, splitLinks, type Conversation, type Message } from "@/lib/chat";
 
@@ -164,6 +164,20 @@ export default function ChatThread({ conversation, userId, onBack, onChanged }: 
                       ))}
                     </dl>
                   )}
+                </div>
+              ) : m.kind === "offer" ? (
+                <div className={`max-w-[92%] sm:max-w-[80%] ${mine ? "ml-auto" : ""} rounded-2xl border border-indigo-400/30 bg-indigo-400/[0.07] p-4 space-y-2`}>
+                  <p className="text-xs text-indigo-200 inline-flex items-center gap-1.5">
+                    <Briefcase className="w-3.5 h-3.5" aria-hidden="true" />
+                    {mine ? "Вы предложили вакансию" : "Работодатель предлагает вакансию"}
+                    <span className="text-neutral-500">· {time(m.created_at)}</span>
+                  </p>
+                  {m.meta?.vacancy_id && (
+                    <Link href={`/vacancy/${m.meta.vacancy_id}`} className="block font-semibold text-white hover:text-teal-300">
+                      {m.meta.vacancy_title}
+                    </Link>
+                  )}
+                  <p className="text-sm text-neutral-200 whitespace-pre-wrap leading-relaxed"><Linked text={m.body} /></p>
                 </div>
               ) : m.kind === "status" ? (
                 <div className="mx-auto max-w-[92%] sm:max-w-[80%] rounded-2xl border border-white/12 bg-white/[0.04] p-4 space-y-2">

@@ -3,7 +3,7 @@ import { isNetworkError } from "@/lib/auth-errors";
 
 export type Conversation = {
   id: string;
-  application_id: string;
+  application_id: string | null;
   vacancy_id: string | null;
   vacancy_title: string;
   other_name: string;
@@ -22,7 +22,7 @@ export type Message = {
   sender_id: string | null;
   kind: "text" | "application" | "status" | string;
   body: string;
-  meta: { vacancy_title?: string; blitz?: { q: string; a: string }[]; status?: string } | null;
+  meta: { vacancy_id?: string; vacancy_title?: string; blitz?: { q: string; a: string }[]; status?: string } | null;
   created_at: string;
 };
 
@@ -51,6 +51,7 @@ export function dayLabel(iso: string, now: Date = new Date()): string {
 /** Превью последнего сообщения в списке. */
 export function preview(c: Pick<Conversation, "last_body" | "last_kind" | "last_mine" | "i_am">): string {
   if (c.last_kind === "application") return c.i_am === "candidate" ? "Вы откликнулись на вакансию" : "Новый отклик на вакансию";
+  if (c.last_kind === "offer" && c.i_am === "candidate") return "Работодатель предлагает вакансию";
   if (!c.last_body) return "";
   return (c.last_mine ? "Вы: " : "") + c.last_body.replace(/\s+/g, " ");
 }

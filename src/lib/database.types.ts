@@ -134,7 +134,7 @@ export type Database = {
       conversations: {
         Row: {
           id: string
-          application_id: string
+          application_id: string | null
           vacancy_id: string | null
           candidate_id: string
           employer_id: string
@@ -156,6 +156,12 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      resume_marks: {
+        Row: { employer_id: string; candidate_id: string; created_at: string }
+        Insert: { employer_id: string; candidate_id: string; created_at?: string }
+        Update: never
+        Relationships: []
       }
       messages: {
         Row: {
@@ -305,6 +311,9 @@ export type Database = {
           telegram_notified_at: string | null
           telegram_notify: boolean
           trust_score: number | null
+          resume_public: boolean
+          resume_headline: string | null
+          resume_published_at: string | null
         }
         Insert: {
           created_at?: string | null
@@ -330,6 +339,8 @@ export type Database = {
           telegram_notified_at?: string | null
           telegram_notify?: boolean
           trust_score?: number | null
+          resume_public?: boolean
+          resume_headline?: string | null
         }
         Update: {
           created_at?: string | null
@@ -355,6 +366,8 @@ export type Database = {
           telegram_notified_at?: string | null
           telegram_notify?: boolean
           trust_score?: number | null
+          resume_public?: boolean
+          resume_headline?: string | null
         }
         Relationships: []
       }
@@ -574,6 +587,43 @@ export type Database = {
       check_company_verification: { Args: never; Returns: boolean }
       report_vacancy_closed: { Args: { vacancy: string }; Returns: number }
       my_closed_report: { Args: { vacancy: string }; Returns: boolean }
+      start_conversation: { Args: { candidate: string; vacancy: string | null; body: string }; Returns: string }
+      resume_board: {
+        Args: {
+          search?: string | null
+          dirs?: string[] | null
+          lvls?: string[] | null
+          fmts?: string[] | null
+          in_city?: string | null
+          max_salary?: number | null
+          min_experience?: number | null
+          with_pdf?: boolean
+          only_saved?: boolean
+          for_vacancy?: string | null
+          sort_by?: string
+          page_size?: number
+          page_offset?: number
+        }
+        Returns: {
+          id: string
+          name: string | null
+          headline: string | null
+          about: string | null
+          skills: Json
+          experience_years: number | null
+          level: string | null
+          directions: string[] | null
+          formats: string[] | null
+          city: string | null
+          salary: number | null
+          published_at: string | null
+          has_pdf: boolean
+          saved: boolean
+          score: number | null
+          conversation_id: string | null
+          total: number
+        }[]
+      }
       send_message: { Args: { conversation: string; body: string }; Returns: Json }
       mark_conversation_read: { Args: { conversation: string }; Returns: undefined }
       unread_conversations: { Args: never; Returns: number }
@@ -581,7 +631,7 @@ export type Database = {
         Args: never
         Returns: {
           id: string
-          application_id: string
+          application_id: string | null
           vacancy_id: string | null
           vacancy_title: string
           other_name: string

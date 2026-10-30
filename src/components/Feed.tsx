@@ -504,12 +504,18 @@ export default function Feed({ initialRows, initialTotal, hero }: { initialRows:
               <div className="flex items-center gap-3">
                 {/* Если работодатель — показываем Кабинет HR, если соискатель — Мои отклики */}
                 {isEmployer ? (
-                  <Link 
-                    href="/employer"
-                    className="px-4 py-2 rounded-full text-sm text-neutral-300 hover:text-white hover:bg-white/[0.06] transition-colors"
-                  >
-                    Кабинет HR
-                  </Link>
+                  <>
+                    <Link 
+                      href="/employer"
+                      className="px-4 py-2 rounded-full text-sm text-neutral-300 hover:text-white hover:bg-white/[0.06] transition-colors"
+                    >
+                      Кабинет HR
+                    </Link>
+                    <Link href="/resumes"
+                      className="hidden sm:inline-block px-3 py-2 rounded-full text-sm text-neutral-300 hover:text-white hover:bg-white/[0.06] transition-colors">
+                      Резюме
+                    </Link>
+                  </>
                 ) : (
                   <Link 
                     href="/applications"
