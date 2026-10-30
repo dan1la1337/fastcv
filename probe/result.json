@@ -1,524 +1,99 @@
 {
- "https://career.ozon.ru": {
-  "robots": 200,
-  "allowed": true,
-  "home": 403,
-  "sitemaps": [
-   "https://career.ozon.ru/sitemap.xml"
-  ],
-  "urls": 0,
-  "vac_urls": 0,
-  "mob": 0,
-  "fs": 0,
-  "sample": []
- },
- "https://job.ozon.ru": {
-  "robots": 200,
-  "allowed": true,
-  "home": 403,
-  "sitemaps": [
-   "https://job.ozon.ru/sitemap.xml"
-  ],
-  "urls": 0,
-  "vac_urls": 0,
-  "mob": 0,
-  "fs": 0,
-  "sample": []
- },
- "https://career.rwb.ru": {
-  "robots": 200,
-  "allowed": true,
-  "home": 200,
-  "sitemaps": [
-   "https://career.rwb.ru/sitemap.xml"
-  ],
-  "urls": 2,
-  "vac_urls": 2,
-  "mob": 0,
-  "fs": 0,
+ "yandex_robots_jobs": true,
+ "yandex_sitemaps": [
+  "https://yandex.ru/support/sitemap.xml",
+  "https://yandex.ru/blog/sitemap.xml",
+  "https://frontend.s3.yandex.net/health/sitemap.xml",
+  "https://yandex.ru/uslugi/sitemap/sitemap.xml.gz",
+  "https://yandex.ru/turbo/public/sitemap.xml",
+  "https://yandex.ru/tutor/sitemap/?sitemap=sitemap.xml",
+  "https://yandex.ru/turbo/talk-sitemap-index.xml",
+  "https://yandex.ru/games/sitemaps/sitemap.index.xml",
+  "https://yandex.ru/q/sitemap/sitemap-index.xml",
+  "https://yandex.ru/images/sitemap.xml",
+  "https://yandex.ru/medicine/sitemaps/sitemap.xml",
+  "https://yandex.ru/finance/sitemaps/sitemap.xml",
+  "https://yandex.ru/yandexapp/ru/callerid/sitemap.xml",
+  "https://yandex.ru/video/sitemap_index.xml",
+  "https://yandex.ru/pogoda/sitemap-index.xml",
+  "https://yandex.ru/support/sitemap.xml",
+  "https://yandex.ru/blog/sitemap.xml",
+  "https://frontend.s3.yandex.net/health/sitemap.xml",
+  "https://yandex.ru/uslugi/sitemap/sitemap.xml.gz",
+  "https://yandex.ru/turbo/public/sitemap.xml"
+ ],
+ "https://yandex.ru/jobs/sitemap.xml": {
+  "status": 200,
+  "locs": 4,
   "sample": [
-   "https://career.rwb.ru/",
-   "https://career.rwb.ru/vacancies"
+   "https://yandex.ru/jobs/api/sitemap/general.xml",
+   "https://yandex.ru/jobs/api/sitemap/vacancies.xml",
+   "https://yandex.ru/jobs/api/sitemap/vacancies-list.xml",
+   "https://yandex.ru/jobs/api/sitemap/lpc-pages.xml"
   ]
  },
- "https://yandex.ru/jobs": {
-  "robots": 200,
-  "allowed": true,
-  "home": 200,
-  "sitemaps": [
-   "https://yandex.ru/support/sitemap.xml",
-   "https://yandex.ru/blog/sitemap.xml",
-   "https://frontend.s3.yandex.net/health/sitemap.xml"
-  ],
-  "urls": 49060,
-  "vac_urls": 0,
-  "mob": 0,
-  "fs": 0,
+ "https://yandex.ru/jobs/sitemap/sitemap.xml": {
+  "status": 404,
+  "locs": 0,
   "sample": []
  },
- "https://career.kaspersky.ru": {
-  "robots": 0,
-  "allowed": true,
-  "home": 0,
-  "sitemaps": [
-   "https://career.kaspersky.ru/sitemap.xml"
-  ],
-  "urls": 0,
-  "vac_urls": 0,
-  "mob": 0,
-  "fs": 0,
+ "https://yandex.ru/jobs/sitemap_index.xml": {
+  "status": 404,
+  "locs": 0,
   "sample": []
  },
- "https://careers.kaspersky.com": {
-  "robots": 200,
-  "allowed": true,
-  "home": 200,
-  "sitemaps": [
-   "https://careers.kaspersky.com/sitemap.xml"
-  ],
-  "urls": 0,
-  "vac_urls": 0,
-  "mob": 0,
-  "fs": 0,
-  "sample": []
- },
- "https://kode.ru": {
-  "robots": 200,
-  "allowed": true,
-  "home": 200,
-  "sitemaps": [
-   "https://kode.ru/sitemap.xml"
-  ],
-  "urls": 21,
-  "vac_urls": 0,
-  "mob": 0,
-  "fs": 0,
-  "sample": []
- },
- "https://surf.ru": {
-  "robots": 200,
-  "allowed": true,
-  "home": 200,
-  "sitemaps": [
-   "https://surf.ru/sitemap.xml"
-  ],
-  "urls": 482,
-  "vac_urls": 1,
-  "mob": 0,
-  "fs": 0,
+ "yandex_list": {
+  "status": 200,
+  "links": 11,
   "sample": [
-   "https://surf.ru/career/discuss/"
-  ]
- },
- "https://redmadrobot.ru": {
-  "robots": 200,
-  "allowed": true,
-  "home": 200,
-  "sitemaps": [
-   "https://redmadrobot.ru/sitemap.xml"
+   "/jobs/vacancies/Technical-Product-Manager-ML-Platform-YTsaurus-26775",
+   "/jobs/vacancies/city_moscow",
+   "/jobs/vacancies/inzhener-po-testirovaniyu-v-komandu-yandex-robotics-48847",
+   "/jobs/vacancies/itspetsialist-po-rabote-s-servernim-oborudovaniem-v-yandex-infrastructure-49496",
+   "/jobs/vacancies/multitrack-_-noviy-format-nayma-dlya-opitnih-bekenderov-15322",
+   "/jobs/vacancies/operatsionniy-rukovoditel-podderzhki-komandirovok-i-korporativnogo-taksi-49470",
+   "/jobs/vacancies/rukovoditel-gruppi-postavki-sensornih-dannih-v-avtonomniy-transport-47784",
+   "/jobs/vacancies/rukovoditel-klientskogo-servisa-finteha-49492"
   ],
-  "urls": 423,
-  "vac_urls": 28,
-  "mob": 4,
-  "fs": 0,
-  "sample": [
-   "https://redmadrobot.ru/vakansii",
-   "https://redmadrobot.ru/analitika-2/ugroza-vechnoj-vakansii-uzkaya-voronka-kandidatov-sotrudnik-za-million-i-drugie-nepriyatnosti-s-kotorymi-pomogaet-spravlyatsya-kalkulyator-hr",
-   "https://redmadrobot.ru/vakansii/senior-backend-razrabotchik-moskva",
+  "mob": []
+ },
+ "yandex_page": {
+  "status": 200,
+  "jobposting": true,
+  "len": 299722
+ },
+ "rmr": {
+  "vac": 26,
+  "mob": [
    "https://redmadrobot.ru/vakansii/android-razrabotchik-moskva",
-   "https://redmadrobot.ru/vakansii/ios-razrabotchik-moskva",
-   "https://redmadrobot.ru/vakansii/android-razrabotchik-samara"
+   "https://redmadrobot.ru/vakansii/android-razrabotchik-samara",
+   "https://redmadrobot.ru/vakansii/android-razrabotchik-sankt-peterburg",
+   "https://redmadrobot.ru/vakansii/ios-razrabotchik-moskva"
+  ],
+  "fs": [],
+  "jobposting": false,
+  "sample": [
+   "https://redmadrobot.ru/vakansii/android-razrabotchik-moskva",
+   "https://redmadrobot.ru/vakansii/android-razrabotchik-samara",
+   "https://redmadrobot.ru/vakansii/android-razrabotchik-sankt-peterburg",
+   "https://redmadrobot.ru/vakansii/art-direktor",
+   "https://redmadrobot.ru/vakansii/biznes-analitik-moskva"
   ]
  },
- "https://career.lamoda.ru": {
-  "robots": 0,
-  "allowed": true,
-  "home": 0,
-  "sitemaps": [
-   "https://career.lamoda.ru/sitemap.xml"
-  ],
-  "urls": 0,
-  "vac_urls": 0,
-  "mob": 0,
-  "fs": 0,
-  "sample": []
- },
- "https://lamoda.tech": {
-  "robots": 0,
-  "allowed": true,
-  "home": 0,
-  "sitemaps": [
-   "https://lamoda.tech/sitemap.xml"
-  ],
-  "urls": 0,
-  "vac_urls": 0,
-  "mob": 0,
-  "fs": 0,
-  "sample": []
- },
- "https://samokat.tech": {
-  "robots": 403,
-  "allowed": true,
-  "home": 403,
-  "sitemaps": [
-   "https://samokat.tech/sitemap.xml"
-  ],
-  "urls": 0,
-  "vac_urls": 0,
-  "mob": 0,
-  "fs": 0,
-  "sample": []
- },
- "https://career.samokat.ru": {
-  "robots": 403,
-  "allowed": true,
-  "home": 403,
-  "sitemaps": [
-   "https://career.samokat.ru/sitemap.xml"
-  ],
-  "urls": 0,
-  "vac_urls": 0,
-  "mob": 0,
-  "fs": 0,
-  "sample": []
- },
- "https://magnit.tech": {
-  "robots": 200,
-  "allowed": true,
-  "home": 200,
-  "sitemaps": [
-   "https://magnit.tech/sitemap.xml"
-  ],
-  "urls": 0,
-  "vac_urls": 0,
-  "mob": 0,
-  "fs": 0,
-  "sample": []
- },
- "https://job.magnit.ru": {
-  "robots": 0,
-  "allowed": true,
-  "home": 0,
-  "sitemaps": [
-   "https://job.magnit.ru/sitemap.xml"
-  ],
-  "urls": 0,
-  "vac_urls": 0,
-  "mob": 0,
-  "fs": 0,
-  "sample": []
- },
- "https://dodo.dev": {
-  "robots": 200,
-  "allowed": true,
-  "home": 200,
-  "sitemaps": [
-   "https://dodo.dev/sitemap.xml"
-  ],
-  "urls": 0,
-  "vac_urls": 0,
-  "mob": 0,
-  "fs": 0,
-  "sample": []
- },
- "https://career.vtb.ru": {
-  "robots": 0,
-  "allowed": true,
-  "home": 0,
-  "sitemaps": [
-   "https://career.vtb.ru/sitemap.xml"
-  ],
-  "urls": 0,
-  "vac_urls": 0,
-  "mob": 0,
-  "fs": 0,
-  "sample": []
- },
- "https://job.megafon.ru": {
-  "robots": 200,
-  "allowed": true,
-  "home": 200,
-  "sitemaps": [
-   "User-agent:"
-  ],
-  "urls": 0,
-  "vac_urls": 0,
-  "mob": 0,
-  "fs": 0,
-  "sample": []
- },
- "https://careers.beeline.ru": {
-  "robots": 0,
-  "allowed": true,
-  "home": 0,
-  "sitemaps": [
-   "https://careers.beeline.ru/sitemap.xml"
-  ],
-  "urls": 0,
-  "vac_urls": 0,
-  "mob": 0,
-  "fs": 0,
-  "sample": []
- },
- "https://job.raiffeisen.ru": {
-  "robots": 0,
-  "allowed": true,
-  "home": 0,
-  "sitemaps": [
-   "https://job.raiffeisen.ru/sitemap.xml"
-  ],
-  "urls": 0,
-  "vac_urls": 0,
-  "mob": 0,
-  "fs": 0,
-  "sample": []
- },
- "https://sovcombank.ru/vacancies": {
-  "robots": 0,
-  "allowed": true,
-  "home": 0,
-  "sitemaps": [
-   "https://sovcombank.ru/sitemap.xml"
-  ],
-  "urls": 0,
-  "vac_urls": 0,
-  "mob": 0,
-  "fs": 0,
-  "sample": []
- },
- "https://kuper.ru/careers": {
-  "robots": 403,
-  "allowed": true,
-  "home": 403,
-  "sitemaps": [
-   "https://kuper.ru/sitemap.xml"
-  ],
-  "urls": 0,
-  "vac_urls": 0,
-  "mob": 0,
-  "fs": 0,
-  "sample": []
- },
- "https://lemanapro.ru/career": {
-  "robots": 200,
-  "allowed": true,
-  "home": 403,
-  "sitemaps": [
-   "https://lemanapro.ru/sitemap.xml"
-  ],
-  "urls": 0,
-  "vac_urls": 0,
-  "mob": 0,
-  "fs": 0,
-  "sample": []
- },
- "https://hr.lemanapro.ru": {
-  "robots": 0,
-  "allowed": true,
-  "home": 0,
-  "sitemaps": [
-   "https://hr.lemanapro.ru/sitemap.xml"
-  ],
-  "urls": 0,
-  "vac_urls": 0,
-  "mob": 0,
-  "fs": 0,
-  "sample": []
- },
- "https://career.sportmaster.ru": {
-  "robots": 0,
-  "allowed": true,
-  "home": 0,
-  "sitemaps": [
-   "https://career.sportmaster.ru/sitemap.xml"
-  ],
-  "urls": 0,
-  "vac_urls": 0,
-  "mob": 0,
-  "fs": 0,
-  "sample": []
- },
- "https://lab.sportmaster.ru": {
-  "robots": 0,
-  "allowed": true,
-  "home": 0,
-  "sitemaps": [
-   "https://lab.sportmaster.ru/sitemap.xml"
-  ],
-  "urls": 0,
-  "vac_urls": 0,
-  "mob": 0,
-  "fs": 0,
-  "sample": []
- },
- "https://effective.band": {
-  "robots": 200,
-  "allowed": true,
-  "home": 200,
-  "sitemaps": [
-   "https://effective.band/sitemap.xml"
-  ],
-  "urls": 0,
-  "vac_urls": 0,
-  "mob": 0,
-  "fs": 0,
-  "sample": []
- },
- "https://e-legion.ru": {
-  "robots": 200,
-  "allowed": true,
-  "home": 200,
-  "sitemaps": [
-   "https://e-legion.ru/sitemap.xml",
-   "https://e-legion.ru/images-sitemap.xml"
-  ],
-  "urls": 171,
-  "vac_urls": 8,
-  "mob": 2,
-  "fs": 0,
-  "sample": [
-   "https://e-legion.ru/about/career/",
-   "https://e-legion.ru/about/career/java-developer",
+ "elegion": {
+  "vac": 6,
+  "mob": [
    "https://e-legion.ru/about/career/middle-senior-android-developer",
+   "https://e-legion.ru/about/career/middle-senior-ios-developer"
+  ],
+  "fs": [],
+  "jobposting": false,
+  "sample": [
+   "https://e-legion.ru/about/career/account-manager",
+   "https://e-legion.ru/about/career/java-developer",
+   "https://e-legion.ru/about/career/middle-senior-analyst",
    "https://e-legion.ru/about/career/middle-senior-android-developer",
    "https://e-legion.ru/about/career/middle-senior-ios-developer"
   ]
- },
- "https://www.uchi.ru/vacancies": {
-  "robots": 200,
-  "allowed": true,
-  "home": 200,
-  "sitemaps": [
-   "https://www.uchi.ru/sitemap.xml"
-  ],
-  "urls": 0,
-  "vac_urls": 0,
-  "mob": 0,
-  "fs": 0,
-  "sample": []
- },
- "https://career.wb.ru": {
-  "robots": 200,
-  "allowed": true,
-  "home": 200,
-  "sitemaps": [
-   "https://career.rwb.ru/sitemap.xml"
-  ],
-  "urls": 2,
-  "vac_urls": 2,
-  "mob": 0,
-  "fs": 0,
-  "sample": [
-   "https://career.rwb.ru/",
-   "https://career.rwb.ru/vacancies"
-  ]
- },
- "https://jobs.kaspi.kz": {
-  "robots": 0,
-  "allowed": true,
-  "home": 0,
-  "sitemaps": [
-   "https://jobs.kaspi.kz/sitemap.xml"
-  ],
-  "urls": 0,
-  "vac_urls": 0,
-  "mob": 0,
-  "fs": 0,
-  "sample": []
- },
- "https://career.gazprombank.ru": {
-  "robots": 0,
-  "allowed": true,
-  "home": 0,
-  "sitemaps": [
-   "https://career.gazprombank.ru/sitemap.xml"
-  ],
-  "urls": 0,
-  "vac_urls": 0,
-  "mob": 0,
-  "fs": 0,
-  "sample": []
- },
- "https://rabota.rshb.ru": {
-  "robots": 0,
-  "allowed": true,
-  "home": 0,
-  "sitemaps": [
-   "https://rabota.rshb.ru/sitemap.xml"
-  ],
-  "urls": 0,
-  "vac_urls": 0,
-  "mob": 0,
-  "fs": 0,
-  "sample": []
- },
- "https://team.mail.ru": {
-  "robots": 0,
-  "allowed": true,
-  "home": 0,
-  "sitemaps": [
-   "https://team.mail.ru/sitemap.xml"
-  ],
-  "urls": 0,
-  "vac_urls": 0,
-  "mob": 0,
-  "fs": 0,
-  "sample": []
- },
- "https://hr.gazprom-neft.ru": {
-  "robots": 0,
-  "allowed": true,
-  "home": 0,
-  "sitemaps": [
-   "https://hr.gazprom-neft.ru/sitemap.xml"
-  ],
-  "urls": 0,
-  "vac_urls": 0,
-  "mob": 0,
-  "fs": 0,
-  "sample": []
- },
- "https://career.domclick.ru": {
-  "robots": 200,
-  "allowed": true,
-  "home": 200,
-  "sitemaps": [
-   "https://career.domclick.ru/sitemap.xml"
-  ],
-  "urls": 20,
-  "vac_urls": 20,
-  "mob": 0,
-  "fs": 0,
-  "sample": [
-   "https://career.domclick.ru",
-   "https://career.domclick.ru/vacancies",
-   "https://career.domclick.ru/vacancy/head-of-product-klastera-obektnaia-model-dom-136675023"
-  ]
- },
- "https://job.cian.ru": {
-  "robots": 403,
-  "allowed": true,
-  "home": 200,
-  "sitemaps": [
-   "https://job.cian.ru/sitemap.xml"
-  ],
-  "urls": 0,
-  "vac_urls": 0,
-  "mob": 0,
-  "fs": 0,
-  "sample": []
- },
- "https://cian.ru/vacancies": {
-  "robots": 403,
-  "allowed": true,
-  "home": 200,
-  "sitemaps": [
-   "https://cian.ru/sitemap.xml"
-  ],
-  "urls": 0,
-  "vac_urls": 0,
-  "mob": 0,
-  "fs": 0,
-  "sample": []
  }
 }
