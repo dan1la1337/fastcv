@@ -1467,6 +1467,13 @@ def main() -> None:
             print(f"Telegram: опросов о собеседованиях {surveys}")
         except Exception as e:
             print(f"⚠️ Опросы о собеседованиях: {type(e).__name__}: {str(e)[:200]}")
+    # ИИ-выжимка отзывов о найме для страниц компаний (рейтинг работодателя)
+    if gemini_key:
+        try:
+            import reviews
+            print(f"Отзывы о найме: {reviews.run(store.db, reviews.make_writer(gemini_key))}")
+        except Exception as e:  # выжимка не должна ронять сбор
+            print(f"⚠️ Выжимка отзывов: {type(e).__name__}: {str(e)[:200]}")
     # Непрочитанные сообщения в чате — письмом и в Telegram-бот (кому он подключён)
     resend_key = env("RESEND_API_KEY")
     if resend_key or jobs_token:

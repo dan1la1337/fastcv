@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { ArrowLeft, ExternalLink, Loader2, MessageCircle, MessageSquare } from "lucide-react";
 import { supabase, getUserRole } from "@/lib/supabase";
 import { plural } from "@/lib/vacancies";
+import HiringReviewForm, { type MyReview } from "@/components/HiringReviewForm";
 import InterviewStars from "@/components/InterviewStars";
 
 interface Application {
@@ -16,6 +17,9 @@ interface Application {
   created_at: string;
   /** Когда работодатель впервые открыл отклик (ставит база). */
   viewed_at: string | null;
+  answered_at: string | null;
+  /** Можно оставить отзыв о найме: работодатель ответил или прошло 10 дней */
+  reviewable?: boolean;
   vacancies: { id: string; title: string; company_name: string | null; source_type: string; source_url: string | null } | null;
   /** Чат с работодателем — есть у откликов на вакансии работодателей с FastCV */
   conversations: { id: string } | null;
@@ -33,6 +37,8 @@ export default function CandidateApplications() {
   const [loading, setLoading] = useState(true);
   /** Оценки собеседований по откликам (рейтинг найма) */
   const [ratings, setRatings] = useState<Record<string, number>>({});
+  /** Отзывы о процессе найма (рейтинг работодателя) */
+  const [reviews, setReviews] = useState<Record<string, MyReview>>({});
   const router = useRouter();
 
   useEffect(() => {
@@ -51,14 +57,20 @@ export default function CandidateApplications() {
 
       const { data } = await supabase
         .from("applications")
-        .select("id, status, hr_message, cover_letter, created_at, viewed_at, vacancies (id, title, company_name, source_type, source_url), conversations (id)")
+        .select("id, status, hr_message, cover_letter, created_at, viewed_at, answered_at, vacancies (id, title, company_name, source_type, source_url), conversations (id)")
         .eq("candidate_id", user.id)
         .order("created_at", { ascending: false });
 
-      const { data: rated } = await supabase.rpc("my_interview_ratings");
+      const [{ data: rated }, { data: mine }] = await Promise.all([
+        supabase.rpc("my_interview_ratings"),
+        supabase.rpc("my_hiring_reviews"),
+      ]);
       if (cancelled) return;
+      setReviews(Object.fromEntries((mine ?? []).map(r => [r.application_id, r as MyReview])));
       setRatings(Object.fromEntries((rated ?? []).map(r => [r.application_id, r.rating])));
-      setApplications((data ?? []) as unknown as Application[]);
+      const cutoff = Date.now() - 10 * 864e5;
+      setApplications(((data ?? []) as unknown as Application[])
+        .map(a => ({ ...a, reviewable: !!a.answered_at || new Date(a.created_at).getTime() < cutoff })));
       setLoading(false);
     })();
     return () => { cancelled = true; };
@@ -155,6 +167,11 @@ export default function CandidateApplications() {
                       </p>
                       <InterviewStars value={ratings[app.id] ?? null} onRate={n => rate(app.id, n)} />
                     </div>
+                  )}
+
+                  {!external && app.reviewable && (
+                    <HiringReviewForm applicationId={app.id} company={v?.company_name ?? null} review={reviews[app.id] ?? null}
+                      onSaved={r => setReviews(all => ({ ...all, [app.id]: r }))} />
                   )}
 
                   {app.cover_letter && (
