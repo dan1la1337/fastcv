@@ -1,99 +1,16 @@
 {
- "yandex_robots_jobs": true,
- "yandex_sitemaps": [
-  "https://yandex.ru/support/sitemap.xml",
-  "https://yandex.ru/blog/sitemap.xml",
-  "https://frontend.s3.yandex.net/health/sitemap.xml",
-  "https://yandex.ru/uslugi/sitemap/sitemap.xml.gz",
-  "https://yandex.ru/turbo/public/sitemap.xml",
-  "https://yandex.ru/tutor/sitemap/?sitemap=sitemap.xml",
-  "https://yandex.ru/turbo/talk-sitemap-index.xml",
-  "https://yandex.ru/games/sitemaps/sitemap.index.xml",
-  "https://yandex.ru/q/sitemap/sitemap-index.xml",
-  "https://yandex.ru/images/sitemap.xml",
-  "https://yandex.ru/medicine/sitemaps/sitemap.xml",
-  "https://yandex.ru/finance/sitemaps/sitemap.xml",
-  "https://yandex.ru/yandexapp/ru/callerid/sitemap.xml",
-  "https://yandex.ru/video/sitemap_index.xml",
-  "https://yandex.ru/pogoda/sitemap-index.xml",
-  "https://yandex.ru/support/sitemap.xml",
-  "https://yandex.ru/blog/sitemap.xml",
-  "https://frontend.s3.yandex.net/health/sitemap.xml",
-  "https://yandex.ru/uslugi/sitemap/sitemap.xml.gz",
-  "https://yandex.ru/turbo/public/sitemap.xml"
+ "https://yandex.ru/jobs/api/sitemap/vacancies.xml allowed": true,
+ "https://yandex.ru/jobs/vacancies/x-1 allowed": true,
+ "status": 200,
+ "len": 62449,
+ "head": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n    <urlset xmlns=\"http://www.sitemaps.org/schemas/sitemap/0.9\">\n      <url>\n        <loc>https://yandex.ru/jobs/vacancies/analitikrazrabotchik-v-komandu-yandeks-go-4010</loc>\n        <lastmod>2026-10-27T13:23:31.390196Z</lastmod>\n        <changefreq>weekly</ch",
+ "locs": 256,
+ "sample": [
+  "https://yandex.ru/jobs/vacancies/analitikrazrabotchik-v-komandu-yandeks-go-4010",
+  "https://yandex.ru/jobs/vacancies/razrabotchik-bekenda-v-komandu-razrabotki-servisov-kontrolya-kachestva-4187",
+  "https://yandex.ru/jobs/vacancies/razrabotchik-na-c-v-zapravki-8524",
+  "https://yandex.ru/jobs/vacancies/analitik-sovmestnih-poezdok-v-taksi-15267",
+  "https://yandex.ru/jobs/vacancies/multitrack-_-noviy-format-nayma-dlya-opitnih-bekenderov-15322"
  ],
- "https://yandex.ru/jobs/sitemap.xml": {
-  "status": 200,
-  "locs": 4,
-  "sample": [
-   "https://yandex.ru/jobs/api/sitemap/general.xml",
-   "https://yandex.ru/jobs/api/sitemap/vacancies.xml",
-   "https://yandex.ru/jobs/api/sitemap/vacancies-list.xml",
-   "https://yandex.ru/jobs/api/sitemap/lpc-pages.xml"
-  ]
- },
- "https://yandex.ru/jobs/sitemap/sitemap.xml": {
-  "status": 404,
-  "locs": 0,
-  "sample": []
- },
- "https://yandex.ru/jobs/sitemap_index.xml": {
-  "status": 404,
-  "locs": 0,
-  "sample": []
- },
- "yandex_list": {
-  "status": 200,
-  "links": 11,
-  "sample": [
-   "/jobs/vacancies/Technical-Product-Manager-ML-Platform-YTsaurus-26775",
-   "/jobs/vacancies/city_moscow",
-   "/jobs/vacancies/inzhener-po-testirovaniyu-v-komandu-yandex-robotics-48847",
-   "/jobs/vacancies/itspetsialist-po-rabote-s-servernim-oborudovaniem-v-yandex-infrastructure-49496",
-   "/jobs/vacancies/multitrack-_-noviy-format-nayma-dlya-opitnih-bekenderov-15322",
-   "/jobs/vacancies/operatsionniy-rukovoditel-podderzhki-komandirovok-i-korporativnogo-taksi-49470",
-   "/jobs/vacancies/rukovoditel-gruppi-postavki-sensornih-dannih-v-avtonomniy-transport-47784",
-   "/jobs/vacancies/rukovoditel-klientskogo-servisa-finteha-49492"
-  ],
-  "mob": []
- },
- "yandex_page": {
-  "status": 200,
-  "jobposting": true,
-  "len": 299722
- },
- "rmr": {
-  "vac": 26,
-  "mob": [
-   "https://redmadrobot.ru/vakansii/android-razrabotchik-moskva",
-   "https://redmadrobot.ru/vakansii/android-razrabotchik-samara",
-   "https://redmadrobot.ru/vakansii/android-razrabotchik-sankt-peterburg",
-   "https://redmadrobot.ru/vakansii/ios-razrabotchik-moskva"
-  ],
-  "fs": [],
-  "jobposting": false,
-  "sample": [
-   "https://redmadrobot.ru/vakansii/android-razrabotchik-moskva",
-   "https://redmadrobot.ru/vakansii/android-razrabotchik-samara",
-   "https://redmadrobot.ru/vakansii/android-razrabotchik-sankt-peterburg",
-   "https://redmadrobot.ru/vakansii/art-direktor",
-   "https://redmadrobot.ru/vakansii/biznes-analitik-moskva"
-  ]
- },
- "elegion": {
-  "vac": 6,
-  "mob": [
-   "https://e-legion.ru/about/career/middle-senior-android-developer",
-   "https://e-legion.ru/about/career/middle-senior-ios-developer"
-  ],
-  "fs": [],
-  "jobposting": false,
-  "sample": [
-   "https://e-legion.ru/about/career/account-manager",
-   "https://e-legion.ru/about/career/java-developer",
-   "https://e-legion.ru/about/career/middle-senior-analyst",
-   "https://e-legion.ru/about/career/middle-senior-android-developer",
-   "https://e-legion.ru/about/career/middle-senior-ios-developer"
-  ]
- }
+ "matched": 256
 }
