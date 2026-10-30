@@ -51,6 +51,26 @@ def check_freshness(latest: Optional[datetime], now: datetime) -> list[str]:
     return [f"новых вакансий нет {hours:.0f} ч — сбор стоит"] if hours > FRESH_HOURS else []
 
 
+# Источники, которые сборщик проходит каждый запуск: итог пишется в app_settings
+SOURCE_RUNS = {"channels_last_run": "Telegram-каналы", "careers_last_run": "сайты компаний",
+               "ats_last_run": "системы найма"}
+
+
+def check_sources(runs: dict[str, Optional[str]], now: datetime) -> list[str]:
+    """Источник, у которого итог не обновлялся дольше FRESH_HOURS, падает молча — о нём сообщаем."""
+    problems = []
+    for key, label in SOURCE_RUNS.items():
+        try:
+            at = datetime.fromisoformat(json.loads(runs.get(key) or "{}").get("at") or "")
+        except (ValueError, TypeError):
+            problems.append(f"{label}: нет итогов сбора")
+            continue
+        hours = (now - at).total_seconds() / 3600
+        if hours > FRESH_HOURS:
+            problems.append(f"{label}: сбор не завершается {hours:.0f} ч (см. лог сборщика)")
+    return problems
+
+
 def decide(problems: list[str], state: dict, now: datetime) -> tuple[Optional[str], dict]:
     """Что отправить владельцу и новое состояние. Сбой — сразу и раз в REPEAT_HOURS; конец сбоя — один раз."""
     if not problems:
@@ -82,6 +102,7 @@ def main() -> None:
                 .order("created_at", desc=True).limit(1).execute().data)
         latest = datetime.fromisoformat(rows[0]["created_at"]) if rows else None
         problems += check_freshness(latest, now)
+        problems += check_sources({key: store.get_setting(key) for key in SOURCE_RUNS}, now)
     except Exception as e:  # база не отвечает — это тоже сбой
         problems.append(f"база не отвечает ({type(e).__name__})")
     try:

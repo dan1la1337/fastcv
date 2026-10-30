@@ -49,3 +49,12 @@ def test_alert_once_then_repeat_and_recovery():
     message, state = monitor.decide([], state, NOW + timedelta(hours=7))
     assert message.startswith("✅") and "420 мин" in message and state == {}
     assert monitor.decide([], state, NOW + timedelta(hours=8)) == (None, {})
+
+
+def test_silent_source_failure_is_reported():
+    from datetime import datetime, timezone
+    now = datetime(2026, 10, 30, 12, tzinfo=timezone.utc)
+    runs = {"channels_last_run": '{"at": "2026-10-30T11:00:00+00:00"}',
+            "careers_last_run": '{"at": "2026-10-26T21:05:15+00:00"}', "ats_last_run": None}
+    problems = monitor.check_sources(runs, now)
+    assert problems == ["сайты компаний: сбор не завершается 87 ч (см. лог сборщика)", "системы найма: нет итогов сбора"]
