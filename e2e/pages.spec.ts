@@ -136,3 +136,20 @@ test("главная страница сервиса доступна по /abou
   await expect(page.getByRole("heading", { name: "Откуда вакансии" })).toBeVisible();
   await expect(page.getByRole("link", { name: "Разместить вакансию" })).toHaveAttribute("href", "/register/form?role=employer");
 });
+
+test("гость видит «Вакансия уже закрыта?» со ссылкой на вход", async ({ page }) => {
+  await page.goto("/");
+  await page.locator('a[href^="/vacancy/"]').first().click();
+  await expect(page).toHaveURL(/\/vacancy\//);
+  const report = page.getByRole("link", { name: "Вакансия уже закрыта?" });
+  await expect(report).toBeVisible();
+  await expect(report).toHaveAttribute("href", "/login");
+});
+
+test("ссылка опроса о собеседовании с чужим кодом не ставит оценку", async ({ page }) => {
+  await page.goto("/feedback/00000000-0000-4000-8000-000000000000?r=5");
+  await expect(page.getByRole("heading", { name: "Как прошло собеседование?" })).toBeVisible();
+  await expect(page.getByText("Ссылка устарела или опрос уже закрыт")).toBeVisible();
+  await page.goto("/feedback/not-a-token");
+  await expect(page.getByText("Ссылка устарела или опрос уже закрыт")).toBeVisible();
+});
