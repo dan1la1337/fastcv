@@ -13,8 +13,7 @@ SITES = ["https://career.ozon.ru", "https://job.ozon.ru", "https://career.rwb.ru
          "https://hr.lemanapro.ru", "https://career.sportmaster.ru", "https://lab.sportmaster.ru",
          "https://effective.band", "https://e-legion.ru", "https://www.uchi.ru/vacancies", "https://career.wb.ru",
          "https://jobs.kaspi.kz", "https://career.gazprombank.ru", "https://rabota.rshb.ru", "https://team.mail.ru",
-         "https://hr.gazprom-neft.ru", "https://career.domclick.ru", "https://job.cian.ru", "https://cian.ru/vacancies",
-         "https://hh.ru/employer/1740"]  # последний — контроль: robots должен запретить
+         "https://hr.gazprom-neft.ru", "https://career.domclick.ru", "https://job.cian.ru", "https://cian.ru/vacancies"]
 VAC = re.compile(r"vacanc|vakans|/jobs?/|career|position", re.I)
 MOB = re.compile(r"ios|android|flutter|mobile|mobil|kotlin|swift", re.I)
 FS = re.compile(r"full-?stack|fullstek|fulstek", re.I)
