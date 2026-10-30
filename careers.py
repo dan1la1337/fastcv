@@ -75,11 +75,6 @@ COMPANIES = [
     Company("yandex", "Яндекс", "https://yandex.ru", r"^https?://yandex\.ru/jobs/vacancies/[\w-]+-(\d+)/?$",
             sitemaps=("https://yandex.ru/jobs/api/sitemap/vacancies.xml",), weight=2.0,
             prefer=r"razrab|develop|ios|android|flutter|mobil|fullstack|frontend|backend|inzhener|engineer|testirov"),
-    # Студии мобильной разработки: вакансий немного, разметки нет — название и описание со страницы
-    Company("redmadrobot", "Red Mad Robot", "https://redmadrobot.ru", r"^https?://redmadrobot\.ru/vakansii/([\w-]+)/?$",
-            weight=0.3),
-    Company("elegion", "e-Legion", "https://e-legion.ru", r"^https?://e-legion\.ru/about/career/([\w-]+)/?$",
-            weight=0.3),
     Company("x5tech", "X5 Tech", "https://x5.tech", r"^https?://x5\.tech/vacancy/([0-9a-f-]{36})/?$"),
     # Сбер: тысячи вакансий, больше всего в отделениях — ИТ-адреса (по транслиту названия) первыми
     Company("sber", "Сбер", "https://rabota.sber.ru", r"^https?://rabota\.sber\.ru/search/[\w-]+-(\d+)/?$",
@@ -299,6 +294,7 @@ class Fetcher:
         self.session.headers.update({"User-Agent": USER_AGENT, "Accept-Language": "ru"})
         self.sleep = sleep
         self.robots: dict[str, robotparser.RobotFileParser] = {}
+        self.last: str = ""          # что ответил сайт на последний запрос — для итогов сбора
 
     def use_russian_ca(self, path: str = "ru-ca-bundle.pem") -> None:
         import certifi
@@ -328,9 +324,11 @@ class Fetcher:
 
     def get(self, url: str, pause: float) -> Optional[str]:
         if not self.allowed(url):
+            self.last = f"robots.txt запрещает {urlparse(url).path}"
             return None
         self.sleep(pause)
         r = self.session.get(url, timeout=30)
+        self.last = f"{r.status_code} {urlparse(r.url).netloc}{urlparse(r.url).path}"[:150]
         if r.status_code in (403, 429) or "captcha" in r.url.lower():
             raise Blocked(f"{r.status_code} {urlparse(url).netloc}")
         if r.status_code != 200:
@@ -395,6 +393,8 @@ def import_careers(store, normalize: Callable[[str], object], fetcher: Optional[
             live = sitemap_vacancies(fetcher, company)
             known = store.career_ids(company.key)          # id → в архиве ли
             info["live"] = len(live)
+            if not live:              # пустая карта сайта: запоминаем, что ответил сайт
+                info["sitemap"] = getattr(fetcher, "last", "")
             active = [vid for vid, archived in known.items() if not archived]
             # Пропала из карты сайта — в архив. Карта может не отдаться целиком: не архивируем
             # больше половины разом, это скорее сбой, чем массовое закрытие вакансий
