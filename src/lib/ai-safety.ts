@@ -2,7 +2,7 @@
 // и проверка того, что модель вернула.
 
 /** Убираем из пользовательского текста наши служебные теги, чтобы из блока данных нельзя было «выйти». */
-export const fence = (value: string) => value.replace(/<\/?\s*(candidate|vacancy|answers)[^>]*>/gi, "");
+export const fence = (value: string) => value.replace(/<\/?\s*(candidate|vacancy|answers|question|answer)[^>]*>/gi, "");
 
 /**
  * Проверка ответа модели: письмо — обычный текст разумной длины. Ссылки оставляем

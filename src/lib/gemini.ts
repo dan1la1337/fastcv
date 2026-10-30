@@ -12,7 +12,7 @@ export async function geminiText(
   apiKey: string,
   instruction: string,
   input: string,
-  options: { temperature?: number; maxOutputTokens?: number } = {},
+  options: { temperature?: number; maxOutputTokens?: number; json?: boolean } = {},
 ): Promise<string | null> {
   for (const model of GEMINI_MODELS) {
     try {
@@ -22,7 +22,11 @@ export async function geminiText(
         body: JSON.stringify({
           system_instruction: { parts: [{ text: instruction }] },
           contents: [{ role: "user", parts: [{ text: input }] }],
-          generationConfig: { temperature: options.temperature ?? 0.3, maxOutputTokens: options.maxOutputTokens ?? 600 },
+          generationConfig: {
+            temperature: options.temperature ?? 0.3,
+            maxOutputTokens: options.maxOutputTokens ?? 600,
+            ...(options.json && { responseMimeType: "application/json" }),
+          },
         }),
         signal: AbortSignal.timeout(MODEL_TIMEOUT_MS),
       });

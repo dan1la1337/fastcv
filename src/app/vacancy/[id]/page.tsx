@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { cache } from "react";
-import { AlertTriangle, ArrowLeft, Calendar, ExternalLink, Ghost } from "lucide-react";
+import { AlertTriangle, ArrowLeft, Calendar, ChevronRight, ExternalLink, Ghost, MessagesSquare } from "lucide-react";
 import ClosedReport from "@/components/ClosedReport";
 import { supabase } from "@/lib/supabase";
 import { VACANCY_COLUMNS, formatLabel, formatSalary, levelLabel, experienceLabel, plural, sourceOf, ghostSignal, type Vacancy } from "@/lib/vacancies";
@@ -204,6 +204,20 @@ export default async function VacancyPage({ params }: Props) {
             </article>
 
             {!vacancy.archived_at && <VacancyMatch vacancyId={vacancy.id} />}
+
+            {!vacancy.archived_at && (
+              <Link href={`/practice/${vacancy.id}`}
+                className="glass rounded-3xl p-5 flex items-center gap-4 group hover:border-teal-300/40 transition-colors">
+                <span className="shrink-0 w-11 h-11 rounded-2xl bg-teal-300/10 text-teal-300 inline-flex items-center justify-center">
+                  <MessagesSquare className="w-5 h-5" aria-hidden="true" />
+                </span>
+                <span className="flex-1 min-w-0">
+                  <span className="block font-semibold text-white">Тренажёр собеседования</span>
+                  <span className="block text-sm text-neutral-400">ИИ задаст вопросы по этой вакансии, оценит ответы и подскажет, как сделать их сильнее</span>
+                </span>
+                <ChevronRight className="w-5 h-5 text-neutral-500 group-hover:text-teal-300" aria-hidden="true" />
+              </Link>
+            )}
           </div>
 
           {!vacancy.archived_at && (
