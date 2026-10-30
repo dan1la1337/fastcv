@@ -71,10 +71,6 @@ COMPANIES = [
     Company("selectel", "Selectel", "https://selectel.ru", r"^https?://selectel\.ru/careers/all/vacancy/(\d+)/?$"),
     Company("alfa", "Альфа-Банк", "https://job.alfabank.ru",
             r"^https?://job\.alfabank\.ru/vacancies/[^/]+/[^/]+/[^/]*_(\d+)/?$", weight=0.5),
-    # Яндекс: карта вакансий отдельная; страницы с разметкой JobPosting. Разработка — первой
-    Company("yandex", "Яндекс", "https://yandex.ru", r"^https?://yandex\.ru/jobs/vacancies/[\w-]+-(\d+)/?$",
-            sitemaps=("https://yandex.ru/jobs/api/sitemap/vacancies.xml",), weight=2.0,
-            prefer=r"razrab|develop|ios|android|flutter|mobil|fullstack|frontend|backend|inzhener|engineer|testirov"),
     Company("x5tech", "X5 Tech", "https://x5.tech", r"^https?://x5\.tech/vacancy/([0-9a-f-]{36})/?$"),
     # Сбер: тысячи вакансий, больше всего в отделениях — ИТ-адреса (по транслиту названия) первыми
     Company("sber", "Сбер", "https://rabota.sber.ru", r"^https?://rabota\.sber\.ru/search/[\w-]+-(\d+)/?$",
