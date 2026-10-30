@@ -1,16 +1,9 @@
 {
- "https://yandex.ru/jobs/api/sitemap/vacancies.xml allowed": true,
- "https://yandex.ru/jobs/vacancies/x-1 allowed": true,
- "status": 200,
- "len": 62449,
- "head": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n    <urlset xmlns=\"http://www.sitemaps.org/schemas/sitemap/0.9\">\n      <url>\n        <loc>https://yandex.ru/jobs/vacancies/analitikrazrabotchik-v-komandu-yandeks-go-4010</loc>\n        <lastmod>2026-10-27T13:23:31.390196Z</lastmod>\n        <changefreq>weekly</ch",
- "locs": 256,
- "sample": [
-  "https://yandex.ru/jobs/vacancies/analitikrazrabotchik-v-komandu-yandeks-go-4010",
-  "https://yandex.ru/jobs/vacancies/razrabotchik-bekenda-v-komandu-razrabotki-servisov-kontrolya-kachestva-4187",
-  "https://yandex.ru/jobs/vacancies/razrabotchik-na-c-v-zapravki-8524",
-  "https://yandex.ru/jobs/vacancies/analitik-sovmestnih-poezdok-v-taksi-15267",
-  "https://yandex.ru/jobs/vacancies/multitrack-_-noviy-format-nayma-dlya-opitnih-bekenderov-15322"
- ],
- "matched": 256
+ "direct": {
+  "status": 200,
+  "url": "https://yandex.ru/jobs/api/sitemap/vacancies.xml",
+  "len": 62449,
+  "head": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n    <urlset xmlns=\"http://www.sitemaps.org/schemas/sitemap/0.9\">\n      <url>\n        <loc>https://yandex.ru/jobs/vacancies/analitikrazrabotchik-v-komandu-yandeks"
+ },
+ "live": 256
 }
