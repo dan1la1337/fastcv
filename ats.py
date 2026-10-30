@@ -1,8 +1,9 @@
-"""Вакансии из открытых API систем найма (Greenhouse, Workable), которые компании
+"""Вакансии из открытых API систем найма (Greenhouse, Workable, Lever), которые компании
 публикуют для встраивания списка вакансий на свой сайт.
 
 Берём компании с русскоязычными командами, которых нет в Telegram-каналах и на
-карьерных сайтах из careers.py: игровые студии Sperasoft и Tripledot, JetBrains.
+карьерных сайтах из careers.py: игровые студии Sperasoft и Tripledot, JetBrains,
+Xsolla и Flo Health (у последних — мобильная разработка и fullstack).
 Одна должность в нескольких городах — одна вакансия (города через запятую в описании).
 Пропала из API — уходит в архив, как вакансии с сайтов компаний (source_post career/...).
 Без ИИ: поля переносятся напрямую, направление — по компании или по названию (база).
@@ -37,6 +38,7 @@ CITIES = {
     "london": "Лондон", "paris": "Париж", "vilnius": "Вильнюс", "riga": "Рига", "tallinn": "Таллин",
     "istanbul": "Стамбул", "dubai": "Дубай", "lisbon": "Лиссабон", "madrid": "Мадрид", "barcelona": "Барселона",
     "novi sad": "Нови-Сад", "jakarta": "Джакарта", "bishkek": "Бишкек", "baku": "Баку",
+    "kyiv": "Киев", "kuala lumpur": "Куала-Лумпур", "bangkok": "Бангкок", "seoul": "Сеул", "beijing": "Пекин",
 }
 
 
@@ -56,7 +58,7 @@ COUNTRIES = {
 class Board:
     key: str                 # часть source_post: career/<key>/<id>
     name: str                # работодатель на FastCV
-    kind: str                # greenhouse | workable
+    kind: str                # greenhouse | workable | lever
     slug: str                # имя компании в системе найма
     direction: Optional[str] = None   # у игровых студий все роли — геймдев
 
@@ -65,6 +67,8 @@ BOARDS = [
     Board("sperasoft", "Sperasoft", "workable", "sperasoft", "gamedev"),
     Board("tripledot", "Tripledot Studios", "greenhouse", "tripledotstudios", "gamedev"),
     Board("jetbrains", "JetBrains", "greenhouse", "jetbrains"),
+    Board("xsolla", "Xsolla", "lever", "xsolla"),
+    Board("flo", "Flo Health", "greenhouse", "flohealth"),
 ]
 
 
@@ -111,6 +115,18 @@ def fetch_jobs(board: Board, get: Callable[[str], dict]) -> list[dict]:
             jobs.append({"id": j.get("shortcode"), "title": j.get("title"), "url": j.get("url") or j.get("shortlink"),
                          "location": location, "description": j.get("description"),
                          "posted_at": j.get("published_on") or j.get("created_at")})
+    elif board.kind == "lever":
+        data = get(f"https://api.lever.co/v0/postings/{board.slug}?mode=json")
+        for j in data if isinstance(data, list) else []:
+            cats = j.get("categories") or {}
+            location = "; ".join(cats.get("allLocations") or []) or cats.get("location") or ""
+            if j.get("workplaceType") == "remote" and "remote" not in location.lower():
+                location += " - Remote"
+            created = j.get("createdAt")
+            jobs.append({"id": j.get("id"), "title": j.get("text"), "url": j.get("hostedUrl"),
+                         "location": location, "description": j.get("descriptionPlain") or j.get("description"),
+                         "posted_at": datetime.fromtimestamp(created / 1000, timezone.utc).isoformat()
+                         if isinstance(created, (int, float)) else None})
     return [j for j in jobs if j["id"] and j["title"] and j["url"]]
 
 
