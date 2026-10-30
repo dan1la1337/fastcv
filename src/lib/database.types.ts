@@ -624,6 +624,14 @@ export type Database = {
       }
       book_interview_slot: { Args: { slot: string }; Returns: Json }
       cancel_interview_slot: { Args: { slot: string; reason: string | null }; Returns: Json }
+      my_application_funnel: {
+        Args: never
+        Returns: {
+          application_id: string; total: number; place_in_line: number; match_score: number | null; match_rank: number | null
+          better_than: number | null; viewed: number; answered: number; employer_active_at: string | null
+          reply_hours: number | null; reply_rate: number | null
+        }[]
+      }
       my_upcoming_interviews: {
         Args: never
         Returns: {
