@@ -20,10 +20,11 @@ test("работодатель получает ИИ-вердикт по отк�
   const existing = page.getByLabel("ИИ-вердикт").first();
   await expect(button.or(existing)).toBeVisible({ timeout: 15_000 });
   if (await button.isVisible()) {
-    const card = page.locator("div.glass").filter({ has: button }).first();
     await button.click();
-    await expect(card.getByLabel("ИИ-вердикт")).toContainText("Сильный кандидат");
-    await expect(card.getByLabel("ИИ-вердикт")).toContainText("Как вы масштабировали Celery?");
+    // Кнопка заменяется вердиктом — ищем его по тексту подменённого ответа
+    const verdict = page.getByLabel("ИИ-вердикт").filter({ hasText: "Как вы масштабировали Celery?" });
+    await expect(verdict).toBeVisible();
+    await expect(verdict).toContainText("Сильный кандидат");
   }
   await page.getByRole("button", { name: "По вердикту ИИ" }).click();
   await expect(page.getByLabel("ИИ-вердикт").first()).toBeVisible();
