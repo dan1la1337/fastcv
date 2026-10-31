@@ -12,6 +12,8 @@ import MatchRing from "@/components/MatchRing";
 import BlitzAnswers, { type BlitzAnswer } from "@/components/BlitzAnswers";
 import type { VacancyDraft } from "@/lib/vacancy-draft";
 import EmployerReviews from "@/components/EmployerReviews";
+import VacancyInsights from "@/components/VacancyInsights";
+import { fetchSalaryBenchmarks, type SalaryBenchmark } from "@/lib/salary";
 import ScreeningVerdict, { requestScreening } from "@/components/ScreeningVerdict";
 import { FIT_ORDER, type Screening } from "@/lib/screening";
 import UpcomingInterviews from "@/components/UpcomingInterviews";
@@ -100,6 +102,8 @@ export default function EmployerDashboard() {
   // ИИ-вердикты по откликам и пакетный разбор новых
   const [screenings, setScreenings] = useState<Record<string, Screening>>({});
   const [batch, setBatch] = useState<{ done: number; total: number } | null>(null);
+  // Справочник зарплат для сравнения вакансий с рынком
+  const [benchmarks, setBenchmarks] = useState<SalaryBenchmark[]>([]);
   // Ответ кандидату: какой отклик, какой статус и текст письма
   const [reply, setReply] = useState<{ appId: string; status: "interview_scheduled" | "rejected"; text: string } | null>(null);
   const [replying, setReplying] = useState(false);
@@ -127,6 +131,7 @@ export default function EmployerDashboard() {
     setApplications(loaded);
     setVacancies((own ?? []) as Vacancy[]);
 
+    fetchSalaryBenchmarks().then(setBenchmarks);
     const [{ data: scored }, { data: screened }] = await Promise.all([
       supabase.rpc("my_application_matches"),
       supabase.from("application_screenings").select("application_id, screening"),
@@ -551,6 +556,14 @@ export default function EmployerDashboard() {
                         </div>
                       ))}
                     </div>
+                    {!v.archived_at && (
+                      <VacancyInsights benchmarks={benchmarks} vacancy={{
+                        id: v.id, salary_min: v.salary_min, salary_max: v.salary_max, salary_currency: v.salary_currency,
+                        direction: v.direction ?? null, level: v.level ?? null, views,
+                        applications: forVacancy.map(a => ({ status: a.status, created_at: a.created_at })),
+                        matchScores: forVacancy.map(a => matches[a.id]?.score).filter((x): x is number => typeof x === "number"),
+                      }} />
+                    )}
                   </div>
                 );
               })}
