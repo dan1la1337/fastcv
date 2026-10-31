@@ -29,3 +29,25 @@ test("работодатель получает ИИ-вердикт по отк�
   await page.getByRole("button", { name: "По вердикту ИИ" }).click();
   await expect(page.getByLabel("ИИ-вердикт").first()).toBeVisible();
 });
+
+test("работодатель выбирает отклики для массового отказа (без отправки)", async ({ page, isMobile }) => {
+  test.skip(!employer.email || !employer.password, "нет секретов E2E_*");
+  test.skip(isMobile, "достаточно desktop");
+  await page.goto(`/login?next=${encodeURIComponent("/employer")}`);
+  await page.locator('input[type="email"]').fill(employer.email!);
+  await page.locator('input[type="password"]').fill(employer.password!);
+  await page.getByRole("button", { name: "Войти" }).click();
+  await expect(page).toHaveURL(/\/employer/, { timeout: 15_000 });
+
+  const first = page.getByRole("checkbox", { name: /Выбрать отклик/ }).first();
+  await expect(page.getByRole("tab", { name: /Отклики/ })).toBeVisible();
+  test.skip(!(await first.isVisible().catch(() => false)), "нет откликов, ждущих ответа");
+  await first.check();
+  const bar = page.getByLabel("Действия с выбранными");
+  await expect(bar).toContainText("Выбрано: 1");
+  await bar.getByRole("button", { name: "Отказать выбранным" }).click();
+  await expect(bar.getByRole("group", { name: "Причина отказа для всех" })).toBeVisible();
+  await bar.getByRole("button", { name: "Отмена" }).click();
+  await first.uncheck();
+  await expect(bar).toBeHidden();
+});
