@@ -10,6 +10,8 @@ import HiringReviewForm, { type MyReview } from "@/components/HiringReviewForm";
 import type { Upcoming } from "@/components/UpcomingInterviews";
 import { slotLabel, slotRange } from "@/lib/interviews";
 import { funnelView, type FunnelView } from "@/lib/funnel";
+import RejectionAnalysis from "@/components/RejectionAnalysis";
+import type { RejectionAnalysis as Analysis } from "@/lib/rejection";
 import InterviewStars from "@/components/InterviewStars";
 
 interface Application {
@@ -44,6 +46,8 @@ export default function CandidateApplications() {
   const [ratings, setRatings] = useState<Record<string, number>>({});
   /** Отзывы о процессе найма (рейтинг работодателя) */
   const [reviews, setReviews] = useState<Record<string, MyReview>>({});
+  /** Сохранённые разборы отказов */
+  const [analyses, setAnalyses] = useState<Record<string, Analysis>>({});
   /** Назначенные собеседования по откликам */
   const [interviews, setInterviews] = useState<Record<string, Upcoming>>({});
   const router = useRouter();
@@ -68,12 +72,14 @@ export default function CandidateApplications() {
         .eq("candidate_id", user.id)
         .order("created_at", { ascending: false });
 
-      const [{ data: rated }, { data: mine }, { data: upcoming }, { data: funnel }] = await Promise.all([
+      const [{ data: rated }, { data: mine }, { data: upcoming }, { data: funnel }, { data: rejected }] = await Promise.all([
         supabase.rpc("my_interview_ratings"),
         supabase.rpc("my_hiring_reviews"),
         supabase.rpc("my_upcoming_interviews"),
         supabase.rpc("my_application_funnel"),
+        supabase.from("rejection_analyses").select("application_id, analysis"),
       ]);
+      setAnalyses(Object.fromEntries((rejected ?? []).map(r => [r.application_id, r.analysis as unknown as Analysis])));
       const funnels = new Map((funnel ?? []).map(f => [f.application_id, f]));
       if (cancelled) return;
       setInterviews(Object.fromEntries((upcoming ?? []).filter(u => u.application_id).map(u => [u.application_id!, u as Upcoming])));
@@ -226,6 +232,10 @@ export default function CandidateApplications() {
                   {!external && app.reviewable && (
                     <HiringReviewForm applicationId={app.id} company={v?.company_name ?? null} review={reviews[app.id] ?? null}
                       onSaved={r => setReviews(all => ({ ...all, [app.id]: r }))} />
+                  )}
+
+                  {!external && app.status === "rejected" && (
+                    <RejectionAnalysis applicationId={app.id} vacancyId={v?.id ?? null} initial={analyses[app.id] ?? null} />
                   )}
 
                   {app.cover_letter && (

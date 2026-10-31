@@ -905,6 +905,28 @@ CHECKS: list[tuple] = [
         delete from applications where vacancy_id = '99999999-0000-0000-0000-00000000f001'; delete from vacancies where id = '99999999-0000-0000-0000-00000000f001';""",
      "postgres", None, "2:2:1:-:true\n0"),
     ("аноним не видит воронку", False, "select * from my_application_funnel()", "anon", None, None),
+    # --- ИИ-разбор отказа ---
+    ("разбор отказа: кандидат сохраняет и видит только свой разбор по отказу", True,
+     f"""insert into vacancies (id, title, source_type, employer_id) values ('99999999-0000-0000-0000-00000000f101', 'Reject job', 'internal', '{E}');
+        insert into applications (id, vacancy_id, candidate_id, status) values
+          ('99999999-0000-0000-0000-00000000f102', '99999999-0000-0000-0000-00000000f101', '{C}', 'rejected'),
+          ('99999999-0000-0000-0000-00000000f103', '99999999-0000-0000-0000-00000000f101', '{X}', 'rejected');
+        set role authenticated; set request.jwt.claim.sub = '{C}';
+        insert into rejection_analyses (application_id, candidate_id, analysis) values ('99999999-0000-0000-0000-00000000f102', '{C}', '{{"summary": "ok"}}');
+        select analysis ->> 'summary' from rejection_analyses;
+        set request.jwt.claim.sub = '{X}';
+        select count(*)::text from rejection_analyses;""",
+     "postgres", None, "ok\n0"),
+    ("разбор отказа: чужой отклик — нельзя", False,
+     f"insert into rejection_analyses (application_id, candidate_id, analysis) values ('99999999-0000-0000-0000-00000000f103', '{C}', '{{}}')",
+     "authenticated", C, None),
+    ("разбор отказа: без отказа — нельзя", False,
+     f"""update applications set status = 'viewed' where id = '99999999-0000-0000-0000-00000000f103';
+        set role authenticated; set request.jwt.claim.sub = '{X}';
+        insert into rejection_analyses (application_id, candidate_id, analysis) values ('99999999-0000-0000-0000-00000000f103', '{X}', '{{}}');""",
+     "postgres", None, None),
+    ("разбор отказа: работодатель не читает разборы", True,
+     "select count(*)::text from rejection_analyses", "authenticated", E, "0"),
     ("ротация «Работы России»: старые удаляются, с откликами — в архив, свежие остаются", True,
      f"""insert into vacancies (title, source_type, source_post, posted_at) values
           ('TV old', 'external', 'trudvsem/old', now() - interval '5 days'),
