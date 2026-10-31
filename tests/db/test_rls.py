@@ -927,6 +927,26 @@ CHECKS: list[tuple] = [
      "postgres", None, None),
     ("разбор отказа: работодатель не читает разборы", True,
      "select count(*)::text from rejection_analyses", "authenticated", E, "0"),
+    # --- ИИ-скрининг откликов ---
+    ("скрининг: работодатель сохраняет вердикт по отклику на свою вакансию, кандидат его не видит", True,
+     f"""insert into vacancies (id, title, source_type, employer_id) values ('99999999-0000-0000-0000-00000000f201', 'Screen job', 'internal', '{E}');
+        insert into applications (id, vacancy_id, candidate_id) values ('99999999-0000-0000-0000-00000000f202', '99999999-0000-0000-0000-00000000f201', '{C}');
+        set role authenticated; set request.jwt.claim.sub = '{E}';
+        insert into application_screenings (application_id, employer_id, screening) values ('99999999-0000-0000-0000-00000000f202', '{E}', '{{"fit": "strong"}}');
+        select screening ->> 'fit' from application_screenings where application_id = '99999999-0000-0000-0000-00000000f202';
+        set request.jwt.claim.sub = '{C}';
+        select count(*)::text from application_screenings;
+        set request.jwt.claim.sub = '{E2}';
+        select count(*)::text from application_screenings;""",
+     "postgres", None, "strong\n0\n0"),
+    ("скрининг: чужой отклик — нельзя", False,
+     f"insert into application_screenings (application_id, employer_id, screening) values ('99999999-0000-0000-0000-00000000f202', '{E2}', '{{}}')",
+     "authenticated", E2, None),
+    ("скрининг: повторный разбор — удалить и записать заново", True,
+     f"""delete from application_screenings where application_id = '99999999-0000-0000-0000-00000000f202';
+        insert into application_screenings (application_id, employer_id, screening) values ('99999999-0000-0000-0000-00000000f202', '{E}', '{{"fit": "weak"}}');
+        select screening ->> 'fit' from application_screenings""",
+     "authenticated", E, "weak"),
     ("ротация «Работы России»: старые удаляются, с откликами — в архив, свежие остаются", True,
      f"""insert into vacancies (title, source_type, source_post, posted_at) values
           ('TV old', 'external', 'trudvsem/old', now() - interval '5 days'),

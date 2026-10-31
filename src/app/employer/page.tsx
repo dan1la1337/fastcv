@@ -12,6 +12,8 @@ import MatchRing from "@/components/MatchRing";
 import BlitzAnswers, { type BlitzAnswer } from "@/components/BlitzAnswers";
 import type { VacancyDraft } from "@/lib/vacancy-draft";
 import EmployerReviews from "@/components/EmployerReviews";
+import ScreeningVerdict, { requestScreening } from "@/components/ScreeningVerdict";
+import { FIT_ORDER, type Screening } from "@/lib/screening";
 import UpcomingInterviews from "@/components/UpcomingInterviews";
 import { supabase, getUserRole } from "@/lib/supabase";
 import { formatSalary, plural, type Vacancy } from "@/lib/vacancies";
@@ -94,7 +96,10 @@ export default function EmployerDashboard() {
   const [notice, setNotice] = useState<{ kind: "ok" | "error"; text: string } | null>(null);
 
   const [matches, setMatches] = useState<Record<string, Match>>({});
-  const [sortBy, setSortBy] = useState<"new" | "match">("match");
+  const [sortBy, setSortBy] = useState<"new" | "match" | "ai">("match");
+  // ИИ-вердикты по откликам и пакетный разбор новых
+  const [screenings, setScreenings] = useState<Record<string, Screening>>({});
+  const [batch, setBatch] = useState<{ done: number; total: number } | null>(null);
   // Ответ кандидату: какой отклик, какой статус и текст письма
   const [reply, setReply] = useState<{ appId: string; status: "interview_scheduled" | "rejected"; text: string } | null>(null);
   const [replying, setReplying] = useState(false);
@@ -122,7 +127,11 @@ export default function EmployerDashboard() {
     setApplications(loaded);
     setVacancies((own ?? []) as Vacancy[]);
 
-    const { data: scored } = await supabase.rpc("my_application_matches");
+    const [{ data: scored }, { data: screened }] = await Promise.all([
+      supabase.rpc("my_application_matches"),
+      supabase.from("application_screenings").select("application_id, screening"),
+    ]);
+    setScreenings(Object.fromEntries((screened ?? []).map(r => [r.application_id, r.screening as unknown as Screening])));
     setMatches(Object.fromEntries((scored ?? []).map(r => [r.application_id, toMatch(r)])));
 
     // Работодатель открыл кабинет — кандидаты видят, что отклик просмотрен.
@@ -295,6 +304,24 @@ export default function EmployerDashboard() {
         <Loader2 className="w-8 h-8 animate-spin text-teal-300" />
       </div>
     );
+  }
+
+  // Пакетный разбор: отклики без вердикта, ждущие ответа, — по одному, чтобы не упереться в лимиты
+  const unscreened = applications.filter(a => !screenings[a.id] && (a.status === "new" || a.status === "viewed"));
+  async function screenAll() {
+    const queue = unscreened.slice(0, 15);
+    setBatch({ done: 0, total: queue.length });
+    for (const [i, app] of queue.entries()) {
+      const { screening, error } = await requestScreening(app.id);
+      if (error) {
+        setNotice({ kind: "error", text: error });
+        break;
+      }
+      if (screening) setScreenings(all => ({ ...all, [app.id]: screening }));
+      setBatch({ done: i + 1, total: queue.length });
+    }
+    setBatch(null);
+    setSortBy("ai");
   }
 
   const openVacancies = vacancies.filter(v => !v.archived_at).length;
@@ -543,18 +570,30 @@ export default function EmployerDashboard() {
             <div className="grid gap-4">
               <div className="flex flex-wrap items-center justify-between gap-3">
                 <div role="group" aria-label="Сортировка откликов" className="inline-flex gap-1 p-1 rounded-full bg-white/[0.06] text-sm">
-                  {([["match", "По совпадению"], ["new", "Сначала новые"]] as const).map(([id, label]) => (
+                  {([["match", "По совпадению"], ["ai", "По вердикту ИИ"], ["new", "Сначала новые"]] as const).map(([id, label]) => (
                     <button key={id} onClick={() => setSortBy(id)} aria-pressed={sortBy === id}
                       className={`px-4 py-1.5 rounded-full transition-colors ${sortBy === id ? "bg-white/[0.14] text-white" : "text-neutral-400 hover:text-white"}`}>
                       {label}
                     </button>
                   ))}
                 </div>
-                <p className="text-xs text-neutral-500">Порядок зависит только от совпадения с вакансией — не от оплаты</p>
+                {unscreened.length > 0 ? (
+                  <button onClick={screenAll} disabled={!!batch}
+                    className="inline-flex items-center gap-1.5 px-4 h-9 rounded-full border border-indigo-400/30 text-sm text-indigo-200 hover:border-indigo-300/60 disabled:opacity-60">
+                    {batch ? <><Loader2 className="w-4 h-4 animate-spin" /> Разбираю {batch.done} из {batch.total}…</>
+                      : <><Sparkles className="w-4 h-4" /> ИИ-разбор новых откликов · {Math.min(unscreened.length, 15)}</>}
+                  </button>
+                ) : (
+                  <p className="text-xs text-neutral-500">Порядок зависит только от совпадения с вакансией — не от оплаты</p>
+                )}
               </div>
               {(sortBy === "match"
                 ? [...applications].sort((a, b) => (matches[b.id]?.score ?? -1) - (matches[a.id]?.score ?? -1))
-                : applications
+                : sortBy === "ai"
+                  ? [...applications].sort((a, b) =>
+                      (FIT_ORDER[screenings[a.id]?.fit] ?? 3) - (FIT_ORDER[screenings[b.id]?.fit] ?? 3)
+                      || (matches[b.id]?.score ?? -1) - (matches[a.id]?.score ?? -1))
+                  : applications
               ).map(app => (
                 <div key={app.id} className="glass rounded-3xl p-5 sm:p-6 space-y-4">
                   <div className="flex flex-wrap items-center gap-4">
@@ -588,6 +627,9 @@ export default function EmployerDashboard() {
                       {matches[app.id].missing.map(s => <span key={s} className="px-2.5 py-1 rounded-full bg-amber-300/10 text-amber-200">нет {s}</span>)}
                     </div>
                   )}
+
+                  <ScreeningVerdict applicationId={app.id} screening={screenings[app.id]}
+                    onChange={sc => setScreenings(all => ({ ...all, [app.id]: sc }))} />
 
                   <BlitzAnswers applicationId={app.id} answers={app.blitz_answers ?? []} summary={app.blitz_summary} />
 
