@@ -157,6 +157,12 @@ export type Database = {
           },
         ]
       }
+      rejection_analyses: {
+        Row: { application_id: string; candidate_id: string; analysis: Json; created_at: string }
+        Insert: { application_id: string; candidate_id: string; analysis: Json; created_at?: string }
+        Update: never
+        Relationships: []
+      }
       interview_slots: {
         Row: {
           id: string
