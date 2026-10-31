@@ -102,6 +102,10 @@ export default function EmployerDashboard() {
   // ИИ-вердикты по откликам и пакетный разбор новых
   const [screenings, setScreenings] = useState<Record<string, Screening>>({});
   const [batch, setBatch] = useState<{ done: number; total: number } | null>(null);
+  // Массовый отказ: выбранные отклики и причина
+  const [selected, setSelected] = useState<Set<string>>(new Set());
+  const [bulk, setBulk] = useState<{ reason: string | null } | null>(null);
+  const [bulkSending, setBulkSending] = useState(false);
   // Справочник зарплат для сравнения вакансий с рынком
   const [benchmarks, setBenchmarks] = useState<SalaryBenchmark[]>([]);
   // Ответ кандидату: какой отклик, какой статус и текст письма
@@ -309,6 +313,44 @@ export default function EmployerDashboard() {
         <Loader2 className="w-8 h-8 animate-spin text-teal-300" />
       </div>
     );
+  }
+
+  const waitingIds = applications.filter(a => a.status === "new" || a.status === "viewed").map(a => a.id);
+  const weakIds = waitingIds.filter(id => screenings[id]?.fit === "weak");
+  function toggleSelected(id: string) {
+    setSelected(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id); else next.add(id);
+      return next;
+    });
+  }
+
+  // Каждый получает вежливый отказ с названием своей вакансии и, если выбрана, причиной
+  async function sendBulkReject() {
+    if (!bulk) return;
+    const reason = REJECT_REASONS.find(r => r.label === bulk.reason);
+    const chosen = applications.filter(a => selected.has(a.id) && (a.status === "new" || a.status === "viewed"));
+    const byTitle = new Map<string, string[]>();
+    for (const a of chosen) byTitle.set(a.vacancies.title, [...(byTitle.get(a.vacancies.title) ?? []), a.id]);
+    setBulkSending(true);
+    const done: Record<string, string> = {};
+    for (const [title, ids] of byTitle) {
+      const message = (REPLY_TEMPLATES.rejected(title) + (reason ? `\n\n${reason.text}` : "")).slice(0, 2000);
+      const { error } = await supabase.from("applications")
+        .update({ status: "rejected", hr_message: message, hr_replied_at: new Date().toISOString() })
+        .in("id", ids);
+      if (error) {
+        setNotice({ kind: "error", text: "Не все отказы отправлены: " + error.message });
+        break;
+      }
+      ids.forEach(id => { done[id] = message; });
+    }
+    setBulkSending(false);
+    const sent = Object.keys(done).length;
+    setApplications(prev => prev.map(a => done[a.id] ? { ...a, status: "rejected", hr_message: done[a.id] } : a));
+    setSelected(new Set());
+    setBulk(null);
+    if (sent) setNotice({ kind: "ok", text: `Отправлено отказов: ${sent}. Кандидаты увидят ответ в «Моих откликах» и в чате.` });
   }
 
   // Пакетный разбор: отклики без вердикта, ждущие ответа, — по одному, чтобы не упереться в лимиты
@@ -600,6 +642,53 @@ export default function EmployerDashboard() {
                   <p className="text-xs text-neutral-500">Порядок зависит только от совпадения с вакансией — не от оплаты</p>
                 )}
               </div>
+
+              {waitingIds.length > 1 && (
+                <div className="flex flex-wrap items-center gap-2 text-sm" role="group" aria-label="Выбор откликов">
+                  <span className="text-neutral-500">Выбрать:</span>
+                  <button onClick={() => setSelected(new Set(waitingIds))} className="px-3 py-1 rounded-full border border-white/12 text-neutral-300 hover:border-white/30">все ждущие · {waitingIds.length}</button>
+                  {weakIds.length > 0 && (
+                    <button onClick={() => setSelected(new Set(weakIds))} className="px-3 py-1 rounded-full border border-white/12 text-neutral-300 hover:border-white/30">слабые по ИИ · {weakIds.length}</button>
+                  )}
+                  {selected.size > 0 && <button onClick={() => setSelected(new Set())} className="px-3 py-1 text-neutral-400 hover:text-white">снять выбор</button>}
+                </div>
+              )}
+
+              {selected.size > 0 && (
+                <div className="sticky bottom-20 md:bottom-4 z-20 rounded-2xl border border-teal-300/30 bg-[#0B0F19]/95 backdrop-blur p-4 space-y-3 shadow-2xl" aria-label="Действия с выбранными">
+                  <div className="flex flex-wrap items-center gap-3">
+                    <p className="text-sm text-white font-semibold">Выбрано: {selected.size}</p>
+                    <span className="flex-1" />
+                    {!bulk && (
+                      <button onClick={() => setBulk({ reason: null })}
+                        className="h-10 px-4 rounded-full border border-white/15 text-sm text-neutral-200 hover:border-red-400/50 hover:text-red-200 inline-flex items-center gap-1.5">
+                        <XCircle className="w-4 h-4" /> Отказать выбранным
+                      </button>
+                    )}
+                  </div>
+                  {bulk && (
+                    <div className="space-y-3">
+                      <p className="text-xs text-neutral-400">Каждый кандидат получит вежливый отказ с названием своей вакансии. Причина — по желанию, кандидатам она полезна.</p>
+                      <div className="flex flex-wrap gap-2" role="group" aria-label="Причина отказа для всех">
+                        {REJECT_REASONS.map(r => (
+                          <button key={r.label} type="button" aria-pressed={bulk.reason === r.label}
+                            onClick={() => setBulk({ reason: bulk.reason === r.label ? null : r.label })}
+                            className={`px-3 py-1 rounded-full text-xs border transition-colors ${bulk.reason === r.label ? "bg-teal-300 border-teal-300 text-neutral-950" : "border-white/15 text-neutral-300 hover:border-white/30"}`}>
+                            {r.label}
+                          </button>
+                        ))}
+                      </div>
+                      <div className="flex justify-end gap-2">
+                        <button onClick={() => setBulk(null)} className="px-3 h-10 text-sm text-neutral-400 hover:text-white">Отмена</button>
+                        <button onClick={sendBulkReject} disabled={bulkSending}
+                          className="h-10 px-5 rounded-full bg-teal-300 hover:bg-teal-200 text-neutral-950 text-sm font-semibold disabled:opacity-50 inline-flex items-center gap-2">
+                          {bulkSending && <Loader2 className="w-4 h-4 animate-spin" />} Отправить отказы · {selected.size}
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
               {(sortBy === "match"
                 ? [...applications].sort((a, b) => (matches[b.id]?.score ?? -1) - (matches[a.id]?.score ?? -1))
                 : sortBy === "ai"
@@ -608,8 +697,13 @@ export default function EmployerDashboard() {
                       || (matches[b.id]?.score ?? -1) - (matches[a.id]?.score ?? -1))
                   : applications
               ).map(app => (
-                <div key={app.id} className="glass rounded-3xl p-5 sm:p-6 space-y-4">
+                <div key={app.id} className={`glass rounded-3xl p-5 sm:p-6 space-y-4 ${selected.has(app.id) ? "ring-1 ring-teal-300/50" : ""}`}>
                   <div className="flex flex-wrap items-center gap-4">
+                    {(app.status === "new" || app.status === "viewed") && (
+                      <input type="checkbox" checked={selected.has(app.id)} onChange={() => toggleSelected(app.id)}
+                        aria-label={`Выбрать отклик: ${app.profiles?.name || "без имени"}`}
+                        className="w-5 h-5 accent-teal-300 cursor-pointer" />
+                    )}
                     {matches[app.id] && (
                       <MatchRing value={matches[app.id].score} size={64} stroke={matches[app.id].score >= 70 ? "#5EEAD4" : "#818CF8"} />
                     )}
