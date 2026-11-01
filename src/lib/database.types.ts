@@ -328,6 +328,9 @@ export type Database = {
           pref_formats: string[]
           experience_years: number | null
           pref_level: string | null
+          leads_people: boolean
+          level_reason: string | null
+          level_source: string | null
           pref_salary: number | null
           resume_path: string | null
           role: string
@@ -356,6 +359,9 @@ export type Database = {
           pref_formats?: string[]
           experience_years?: number | null
           pref_level?: string | null
+          leads_people?: boolean
+          level_reason?: string | null
+          level_source?: string | null
           pref_salary?: number | null
           resume_path?: string | null
           role: string
@@ -383,6 +389,9 @@ export type Database = {
           pref_formats?: string[]
           experience_years?: number | null
           pref_level?: string | null
+          leads_people?: boolean
+          level_reason?: string | null
+          level_source?: string | null
           pref_salary?: number | null
           resume_path?: string | null
           role?: string

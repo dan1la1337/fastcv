@@ -1,10 +1,8 @@
 "use client";
 
-import { LEVELS, levelForExperience } from "@/lib/vacancies";
-
 /**
- * Опыт работы вместо выбора уровня: кандидат указывает годы, грейд считается по шкале
- * FastCV (до 2 лет — junior, 2–5 — middle, от 5 — senior), «руковожу людьми» — lead.
+ * Опыт работы и «руковожу людьми». Это факты о кандидате, а не грейд: уровень
+ * выбирается отдельно (LevelPicker) — сам или по оценке ИИ из резюме.
  */
 export default function ExperienceInput({ years, leads, onChange, labelClass }: {
   years: string;
@@ -12,10 +10,6 @@ export default function ExperienceInput({ years, leads, onChange, labelClass }: 
   onChange: (years: string, leads: boolean) => void;
   labelClass: string;
 }) {
-  const value = Number(years.replace(",", "."));
-  const valid = years.trim() !== "" && Number.isFinite(value) && value >= 0 && value <= 60;
-  const level = valid ? LEVELS.find(l => l.id === levelForExperience(value, leads))?.label : null;
-
   return (
     <div>
       <label htmlFor="experience-years" className={labelClass}>Опыт работы по специальности</label>
@@ -32,10 +26,7 @@ export default function ExperienceInput({ years, leads, onChange, labelClass }: 
           Руковожу людьми
         </label>
       </div>
-      <p className="text-xs text-neutral-500 mt-2">
-        {level ? <>Ваш уровень: <span className="text-neutral-200 font-medium">{level}</span> · </> : null}
-        до 2 лет — Junior, 2–5 — Middle, от 5 — Senior
-      </p>
+      <p className="text-xs text-neutral-500 mt-2">Сколько лет вы работаете по профессии — по этому сравниваем с требованиями вакансий к опыту.</p>
     </div>
   );
 }
