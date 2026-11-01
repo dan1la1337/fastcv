@@ -15,7 +15,7 @@ const label = 'block text-xs font-bold text-neutral-500 uppercase tracking-wider
 function Logo() {
   return (
     <Link href="/" className="inline-flex items-center gap-2 mb-6 hover:opacity-80 transition-opacity">
-      <span className="font-display font-light text-lg uppercase tracking-[0.08em] text-neutral-100">fastcv</span>
+      <span className="font-display text-xl text-neutral-100">FastCV</span>
     </Link>
   );
 }

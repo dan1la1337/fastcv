@@ -25,7 +25,7 @@ export default function RoleSelectionPage() {
       <div className="max-w-3xl w-full space-y-8">
         <div className="text-center space-y-3">
           <Link href="/" className="inline-flex items-center gap-2 hover:opacity-80 transition-opacity">
-            <span className="font-display font-light text-lg uppercase tracking-[0.08em] text-neutral-100">fastcv</span>
+            <span className="font-display text-xl text-neutral-100">FastCV</span>
           </Link>
           <h1 className="font-display text-3xl font-bold tracking-tight text-white">Добро пожаловать в FastCV</h1>
           <p className="text-neutral-400">Выберите, зачем вы здесь. Тип аккаунта потом изменить нельзя.</p>

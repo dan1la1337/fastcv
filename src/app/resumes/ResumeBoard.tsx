@@ -300,7 +300,7 @@ export default function ResumeBoard() {
                     return (
                       <li key={r.id} className="glass rounded-3xl p-5 sm:p-6 space-y-4">
                         <div className="flex flex-wrap items-start gap-4">
-                          {r.score !== null && <MatchRing value={r.score} size={64} stroke={r.score >= 70 ? "#e6e6e6" : "#a0a0a0"} />}
+                          {r.score !== null && <MatchRing value={r.score} size={64} stroke={r.score >= 70 ? "#f4f4f5" : "#8a8a90"} />}
                           <div className="flex-1 min-w-[14rem]">
                             <h2 className="text-lg font-bold text-white">{r.headline || (r.directions?.length ? directionLabel(r.directions[0]) : "Кандидат")}</h2>
                             <p className="text-sm text-neutral-300 mt-0.5">{r.name || "Имя не указано"}</p>

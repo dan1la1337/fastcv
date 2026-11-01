@@ -7,7 +7,7 @@ import Toaster from "@/components/Toaster";
 import MobileNav from "@/components/MobileNav";
 import { OPERATOR } from "@/lib/legal";
 
-// Дизайн-система Soft: шрифт Poppins, тонкие начертания (300–400, акценты 500–600).
+// Дизайн-система Obsidian Glass: одно семейство — Poppins (300–600).
 // У Poppins нет кириллицы, поэтому русские буквы берёт Montserrat — такой же геометрический гротеск:
 // браузер сам выбирает начертание по символу (Poppins в стеке первым)
 const poppins = Poppins({ variable: "--font-poppins", subsets: ["latin"], weight: ["300", "400", "500", "600"] });
@@ -37,6 +37,15 @@ export default function RootLayout({
         <script dangerouslySetInnerHTML={{ __html: AUTH_HINT }} />
       </head>
       <body className="min-h-full flex flex-col relative">
+        {/* Орбы Obsidian Glass за всеми страницами: стеклу нужно, что размывать.
+            Два размытых пятна mist и три глянцевых шара разного размера, часть срезана краем */}
+        <div aria-hidden="true" className="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
+          <div className="og-orb og-orb--blur orb-drift-a" style={{ width: 460, height: 460, left: -120, top: 80 }} />
+          <div className="og-orb og-orb--blur orb-drift-b" style={{ width: 380, height: 380, right: -90, top: "48%" }} />
+          <div className="og-orb orb-drift-b hidden sm:block" style={{ width: 150, height: 150, right: "9%", top: 96 }} />
+          <div className="og-orb orb-drift-a hidden sm:block" style={{ width: 64, height: 64, right: "3%", bottom: "16%" }} />
+          <div className="og-orb orb-drift-b" style={{ width: 120, height: 120, left: -40, bottom: -30 }} />
+        </div>
         {children}
         <footer className="mt-auto border-t border-white/10 px-4 py-6 text-xs text-neutral-400">
           <div className="max-w-5xl mx-auto flex flex-wrap items-center gap-x-5 gap-y-2">

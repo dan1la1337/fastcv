@@ -49,7 +49,7 @@ function LoginForm() {
       <div className="glass max-w-md w-full rounded-3xl p-8">
         <div className="text-center mb-8">
           <Link href="/" className="inline-flex items-center gap-2 mb-6 hover:opacity-80 transition-opacity">
-            <span className="font-display font-light text-lg uppercase tracking-[0.08em] text-neutral-100">fastcv</span>
+            <span className="font-display text-xl text-neutral-100">FastCV</span>
           </Link>
           <h1 className="font-display text-2xl font-bold text-white">
             С возвращением

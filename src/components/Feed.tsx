@@ -353,7 +353,7 @@ export default function Feed({ initialRows, initialTotal, hero }: { initialRows:
 
         <div className="flex flex-col sm:flex-row justify-between gap-4">
           <div className="flex gap-4 sm:gap-5 items-start pr-24 sm:pr-28">
-          {match && <MatchRing value={match.score} size={64} stroke={match.score >= 70 ? "#e6e6e6" : "#a0a0a0"} />}
+          {match && <MatchRing value={match.score} size={64} stroke={match.score >= 70 ? "#f4f4f5" : "#8a8a90"} />}
           <div className="min-w-0">
             <h2 className="text-lg sm:text-xl font-semibold text-neutral-100 leading-snug">
               <Link href={`/vacancy/${item.id}`} className="hover:text-teal-300 transition-colors">{item.title}</Link>
@@ -395,7 +395,7 @@ export default function Feed({ initialRows, initialTotal, hero }: { initialRows:
 
           <button
             onClick={() => setApplyVacancy(item)}
-            className="lg lg-accent inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-full text-sm font-semibold transition-colors shrink-0 relative z-10 sm:self-end"
+            className="lg inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-full text-sm font-semibold transition-colors shrink-0 relative z-10 sm:self-end"
           >
             <Sparkles className="w-4 h-4" /> Smart Apply
           </button>
