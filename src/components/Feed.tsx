@@ -112,9 +112,12 @@ export default function Feed({ initialRows, initialTotal, hero }: { initialRows:
           .eq("id", data.user.id)
           .single();
         if (profile) setUserProfile(profile);
-        // Ссылка «/?tab=for-you» (после онбординга) сразу открывает подборку
+        // Кандидату с заполненным профилем сразу подборка «Для вас»: зачем ему вся лента.
+        // «/?tab=all» — явно общая лента (например, из ссылки «Все вакансии»).
         const tab = new URLSearchParams(window.location.search).get("tab");
-        if (profile?.role === "candidate" && tab === "for-you") {
+        const filled = Boolean(profile?.pref_directions?.length
+          || (Array.isArray(profile?.skills) && profile.skills.length >= 3));
+        if (profile?.role === "candidate" && (tab === "for-you" || (!tab && filled))) {
           setMode("for-you");
           void loadRecommended(0);
         }

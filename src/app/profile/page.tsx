@@ -10,7 +10,8 @@ import DeleteAccount from "@/components/DeleteAccount";
 import ResumeVisibility from "@/components/ResumeVisibility";
 import CompanyVerification from "@/components/CompanyVerification";
 import { supabase, getUserRole, type UserRole } from "@/lib/supabase";
-import { AREAS, DIRECTIONS, WORK_FORMATS, experienceFields, type Level, type WorkFormat } from "@/lib/vacancies";
+import { AREAS, DIRECTIONS, WORK_FORMATS, levelApplies, parseExperience, type Level, type WorkFormat } from "@/lib/vacancies";
+import LevelPicker from "@/components/LevelPicker";
 import ExperienceInput from "@/components/ExperienceInput";
 import Logo from "@/components/Logo";
 import { toast } from "@/components/Toaster";
@@ -45,6 +46,9 @@ export default function ProfilePage() {
   const [prefLevel, setPrefLevel] = useState<Level | "">("");
   const [experience, setExperience] = useState("");
   const [leadsPeople, setLeadsPeople] = useState(false);
+  // Уровень: кто поставил (ИИ по резюме или сам кандидат) и объяснение ИИ
+  const [levelSource, setLevelSource] = useState<"ai" | "manual" | null>(null);
+  const [levelReason, setLevelReason] = useState<string | null>(null);
   const [prefFormats, setPrefFormats] = useState<WorkFormat[]>([]);
   const [prefCity, setPrefCity] = useState("");
   const [prefSalary, setPrefSalary] = useState("");
@@ -52,6 +56,8 @@ export default function ProfilePage() {
   const [resumePath, setResumePath] = useState<string | null>(null);
   const [resumeBusy, setResumeBusy] = useState(false);
   const [autofilling, setAutofilling] = useState(false);
+  // Текст «О себе» из резюме, если свой уже написан: подставляется по кнопке
+  const [aboutDraft, setAboutDraft] = useState<string | null>(null);
   const fileInput = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -66,7 +72,7 @@ export default function ProfilePage() {
 
       const { data: profile } = await supabase
         .from("profiles")
-        .select("name, description, skills, resume_path, pref_directions, pref_level, pref_format, pref_formats, experience_years, pref_city, pref_salary")
+        .select("name, description, skills, resume_path, pref_directions, pref_level, pref_format, pref_formats, experience_years, pref_city, pref_salary, leads_people, level_reason, level_source")
         .eq("id", user.id)
         .maybeSingle();
       if (profile) {
@@ -78,7 +84,9 @@ export default function ProfilePage() {
         setPrefLevel((profile.pref_level as Level | null) ?? "");
         setPrefFormats(profile.pref_formats?.length ? (profile.pref_formats as WorkFormat[]) : profile.pref_format ? [profile.pref_format as WorkFormat] : []);
         setExperience(profile.experience_years != null ? String(profile.experience_years) : "");
-        setLeadsPeople(profile.pref_level === "lead");
+        setLeadsPeople(profile.leads_people ?? false);
+        setLevelSource((profile.level_source as "ai" | "manual" | null) ?? null);
+        setLevelReason(profile.level_reason ?? null);
         setPrefCity(profile.pref_city ?? "");
         setPrefSalary(profile.pref_salary ? String(profile.pref_salary) : "");
       }
@@ -100,7 +108,11 @@ export default function ProfilePage() {
       skills: skills.split(",").map(s => s.trim()).filter(Boolean),
       ...(role === "candidate" ? {
         pref_directions: prefDirections,
-        ...experienceFields(experience, leadsPeople, prefLevel),
+        experience_years: parseExperience(experience),
+        leads_people: leadsPeople,
+        pref_level: levelApplies(prefDirections) ? prefLevel || null : null,
+        level_source: levelApplies(prefDirections) && prefLevel ? levelSource ?? "manual" : null,
+        level_reason: levelApplies(prefDirections) ? levelReason : null,
         pref_formats: prefFormats,
         pref_format: prefFormats[0] ?? null,
         pref_city: prefCity.trim() || null,
@@ -137,7 +149,11 @@ export default function ProfilePage() {
       const { error } = await supabase.from("profiles").update({ resume_path: path }).eq("id", user.id);
       if (!error) {
         setResumePath(path);
-        setNotice({ kind: "ok", text: "Резюме загружено. Работодатели увидят его в ваших откликах." });
+        setResumeBusy(false);
+        if (fileInput.current) fileInput.current.value = "";
+        // Сразу заполняем профиль по резюме — ради этого его обычно и загружают
+        await autofillFromResume();
+        return;
       } else {
         setNotice({ kind: "error", text: "Файл загружен, но не привязан к профилю: " + error.message });
       }
@@ -184,18 +200,29 @@ export default function ProfilePage() {
         return;
       }
       const draft = data.draft as ResumeDraft;
-      if (!name.trim() && draft.name) setName(draft.name);
-      if (!description.trim() && draft.about) setDescription(draft.about);
+      // Кандидат сам нажал «заполнить по резюме» — подставляем всё, что ИИ нашёл;
+      // текст «О себе» не затираем, если он уже написан. Сохраняет кандидат после проверки.
+      if (draft.name) setName(draft.name);
+      if (draft.about && !description.trim()) setDescription(draft.about);
       if (draft.skills.length) {
         const current = skills.split(",").map(s => s.trim()).filter(Boolean);
         const lower = new Set(current.map(s => s.toLowerCase()));
         setSkills([...current, ...draft.skills.filter(s => !lower.has(s.toLowerCase()))].join(", "));
       }
-      if (!prefDirections.length && draft.directions.length) setPrefDirections(draft.directions.slice(0, MAX_DIRECTIONS));
-      if (!prefLevel && draft.level) setPrefLevel(draft.level as Level);
-      if (!prefCity.trim() && draft.city) setPrefCity(draft.city);
-      if (!prefSalary && draft.salary) setPrefSalary(String(draft.salary));
-      setNotice({ kind: "ok", text: "Поля заполнены по резюме. Проверьте их и нажмите «Сохранить профиль»." });
+      if (draft.directions.length) setPrefDirections(draft.directions.slice(0, MAX_DIRECTIONS));
+      if (draft.experience_years != null) setExperience(String(draft.experience_years));
+      setLeadsPeople(draft.leads_people);
+      if (draft.formats.length) setPrefFormats(draft.formats as WorkFormat[]);
+      if (draft.level) {
+        setPrefLevel(draft.level as Level);
+        setLevelSource("ai");
+        setLevelReason(draft.level_reason);
+      }
+      if (draft.city) setPrefCity(draft.city);
+      if (draft.salary) setPrefSalary(String(draft.salary));
+      setAboutDraft(draft.about && description.trim() && draft.about !== description.trim() ? draft.about : null);
+      setNotice({ kind: "ok", text: "Профиль заполнен по резюме. Проверьте поля и нажмите «Сохранить профиль»." });
+      document.getElementById("profile-form")?.scrollIntoView({ behavior: "smooth", block: "start" });
     } catch {
       setNotice({ kind: "error", text: "Не удалось связаться с сервером. Попробуйте ещё раз." });
     } finally {
@@ -236,10 +263,64 @@ export default function ProfilePage() {
           </div>
         )}
 
+        {isCandidate && (
+          <div className="glass rounded-3xl p-6 sm:p-8 space-y-4">
+            <div>
+              <h2 className="text-lg font-bold text-white inline-flex items-center gap-2">
+                <Sparkles className="w-5 h-5 text-teal-300" aria-hidden="true" /> {resumePath ? "Резюме" : "Заполните профиль за минуту"}
+              </h2>
+              <p className="text-sm text-neutral-400 mt-1">
+                {resumePath
+                  ? "ИИ берёт из резюме навыки, опыт по датам мест работы, руководство людьми и оценивает уровень с объяснением."
+                  : "Загрузите резюме в PDF — ИИ сам заполнит навыки, опыт, уровень и что вы ищете. Останется проверить."}
+                {" "}PDF до 5 МБ; его увидят работодатели, на чьи вакансии вы откликнулись.
+              </p>
+            </div>
+
+            {resumePath && (
+              <button onClick={autofillFromResume} disabled={autofilling}
+                className="w-full flex items-center justify-center gap-2 bg-teal-300/10 hover:bg-teal-300/20 border border-teal-300/30 text-teal-200 rounded-xl py-3 text-sm font-medium transition-colors disabled:opacity-50">
+                {autofilling
+                  ? <><Loader2 className="w-4 h-4 animate-spin" /> ИИ читает резюме…</>
+                  : <><Sparkles className="w-4 h-4" /> Заполнить профиль по резюме заново</>}
+              </button>
+            )}
+
+            {resumePath ? (
+              <div className="flex flex-wrap items-center gap-3 bg-[#0B0F19] border border-white/12 rounded-2xl p-4">
+                <FileText className="w-5 h-5 text-teal-300 shrink-0" />
+                <button onClick={openResume} className="text-sm text-neutral-200 hover:text-teal-300 underline-offset-2 hover:underline">
+                  resume.pdf
+                </button>
+                <div className="ml-auto flex items-center gap-2">
+                  <button onClick={() => fileInput.current?.click()} disabled={resumeBusy}
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-white/10 text-xs text-neutral-300 hover:bg-white/[0.08] disabled:opacity-50">
+                    <Upload className="w-3.5 h-3.5" /> Заменить
+                  </button>
+                  <button onClick={removeResume} disabled={resumeBusy}
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-white/10 text-xs text-neutral-300 hover:text-red-300 hover:bg-red-950/30 disabled:opacity-50">
+                    <Trash2 className="w-3.5 h-3.5" /> Удалить
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <button onClick={() => fileInput.current?.click()} disabled={resumeBusy}
+                className="w-full flex items-center justify-center gap-2 border border-dashed border-teal-300/40 hover:border-teal-300 bg-teal-300/[0.04] rounded-xl py-6 text-sm text-neutral-300 transition-colors disabled:opacity-50">
+                {resumeBusy || autofilling
+                  ? <><Loader2 className="w-5 h-5 animate-spin" /> {autofilling ? "ИИ читает резюме…" : "Загружаем…"}</>
+                  : <><Upload className="w-4 h-4" /> Загрузить резюме (PDF) и заполнить профиль</>}
+              </button>
+            )}
+
+            <input ref={fileInput} type="file" accept="application/pdf" className="hidden"
+              onChange={e => { const f = e.target.files?.[0]; if (f) void uploadResume(f); }} />
+          </div>
+        )}
+
         <div className="glass rounded-3xl p-6 sm:p-8 shadow-xl">
           <h1 id="top" className="font-display text-2xl font-bold mb-6 text-white scroll-mt-6">Личный кабинет</h1>
 
-          <form onSubmit={saveProfile} className="space-y-6">
+          <form id="profile-form" onSubmit={saveProfile} className="space-y-6 scroll-mt-6">
             <div>
               <label className={labelClass}>Тип аккаунта</label>
               <div className="inline-flex items-center gap-2 px-4 py-2 bg-[#0B0F19] border border-white/12 rounded-2xl text-sm font-medium text-neutral-300">
@@ -295,6 +376,11 @@ export default function ProfilePage() {
                 <ExperienceInput years={experience} leads={leadsPeople} labelClass={labelClass}
                   onChange={(y, l) => { setExperience(y); setLeadsPeople(l); }} />
 
+                {levelApplies(prefDirections) && (
+                  <LevelPicker level={prefLevel} source={levelSource} reason={levelReason} labelClass={labelClass}
+                    onChange={l => { setPrefLevel(l); setLevelSource(l ? "manual" : null); }} />
+                )}
+
                 <div>
                   <span className={labelClass}>Формат работы</span>
                   <div className="flex flex-wrap gap-2">
@@ -326,6 +412,12 @@ export default function ProfilePage() {
 
             <div>
               <label className={labelClass}>{isCandidate ? "Опыт работы и о себе" : "Описание компании"}</label>
+              {isCandidate && aboutDraft && (
+                <button type="button" onClick={() => { setDescription(aboutDraft); setAboutDraft(null); }}
+                  className="mb-2 inline-flex items-center gap-1.5 text-xs text-teal-300 hover:text-teal-200">
+                  <Sparkles className="w-3.5 h-3.5" /> Заменить текст на вариант из резюме
+                </button>
+              )}
               <textarea required value={description} onChange={e => setDescription(e.target.value)}
                 placeholder={isCandidate ? "Подробно расскажите о вашем опыте — по нему ИИ пишет сопроводительные письма" : "Расскажите о вашей компании и проектах..."}
                 className={`${inputClass} h-32 resize-y leading-relaxed`} />
@@ -336,53 +428,6 @@ export default function ProfilePage() {
             </button>
           </form>
         </div>
-
-        {isCandidate && (
-          <div className="glass rounded-3xl p-6 sm:p-8 space-y-4">
-            <div>
-              <h2 className="text-lg font-bold text-white">Резюме</h2>
-              <p className="text-sm text-neutral-400 mt-1">
-                PDF до 5 МБ. Его увидят работодатели, на чьи вакансии вы откликнулись, а если резюме открыто в базе — и другие работодатели.
-              </p>
-            </div>
-
-            {resumePath && (
-              <button onClick={autofillFromResume} disabled={autofilling}
-                className="w-full flex items-center justify-center gap-2 bg-teal-300/10 hover:bg-teal-300/20 border border-teal-300/30 text-teal-200 rounded-xl py-3 text-sm font-medium transition-colors disabled:opacity-50">
-                {autofilling
-                  ? <><Loader2 className="w-4 h-4 animate-spin" /> ИИ читает резюме…</>
-                  : <><Sparkles className="w-4 h-4" /> Заполнить профиль по резюме</>}
-              </button>
-            )}
-
-            {resumePath ? (
-              <div className="flex flex-wrap items-center gap-3 bg-[#0B0F19] border border-white/12 rounded-2xl p-4">
-                <FileText className="w-5 h-5 text-teal-300 shrink-0" />
-                <button onClick={openResume} className="text-sm text-neutral-200 hover:text-teal-300 underline-offset-2 hover:underline">
-                  resume.pdf
-                </button>
-                <div className="ml-auto flex items-center gap-2">
-                  <button onClick={() => fileInput.current?.click()} disabled={resumeBusy}
-                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-white/10 text-xs text-neutral-300 hover:bg-white/[0.08] disabled:opacity-50">
-                    <Upload className="w-3.5 h-3.5" /> Заменить
-                  </button>
-                  <button onClick={removeResume} disabled={resumeBusy}
-                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-white/10 text-xs text-neutral-300 hover:text-red-300 hover:bg-red-950/30 disabled:opacity-50">
-                    <Trash2 className="w-3.5 h-3.5" /> Удалить
-                  </button>
-                </div>
-              </div>
-            ) : (
-              <button onClick={() => fileInput.current?.click()} disabled={resumeBusy}
-                className="w-full flex items-center justify-center gap-2 border border-dashed border-white/15 hover:border-teal-300 rounded-xl py-6 text-sm text-neutral-300 transition-colors disabled:opacity-50">
-                {resumeBusy ? <Loader2 className="w-5 h-5 animate-spin" /> : <><Upload className="w-4 h-4" /> Загрузить PDF</>}
-              </button>
-            )}
-
-            <input ref={fileInput} type="file" accept="application/pdf" className="hidden"
-              onChange={e => { const f = e.target.files?.[0]; if (f) void uploadResume(f); }} />
-          </div>
-        )}
 
         {isCandidate && user && <ResumeVisibility userId={user.id} />}
         {isCandidate && user && <TelegramSubscription userId={user.id} />}

@@ -8,7 +8,8 @@ import Logo from "@/components/Logo";
 import { saveErrorText } from "@/lib/auth-errors";
 import { supabase } from "@/lib/supabase";
 import { toast } from "@/components/Toaster";
-import { AREAS, DIRECTIONS, WORK_FORMATS, experienceFields, plural, type Area, type Level, type WorkFormat } from "@/lib/vacancies";
+import { AREAS, DIRECTIONS, WORK_FORMATS, levelApplies, parseExperience, plural, type Area, type Level, type WorkFormat } from "@/lib/vacancies";
+import LevelPicker from "@/components/LevelPicker";
 import ExperienceInput from "@/components/ExperienceInput";
 
 const MAX_DIRECTIONS = 5;
@@ -55,7 +56,7 @@ export default function WelcomePage() {
       setUserId(user.id);
       const { data: profile } = await supabase
         .from("profiles")
-        .select("name, skills, pref_directions, pref_level, pref_format, pref_formats, experience_years, pref_city")
+        .select("name, skills, pref_directions, pref_level, pref_format, pref_formats, experience_years, pref_city, leads_people")
         .eq("id", user.id)
         .maybeSingle();
       if (profile) {
@@ -66,7 +67,7 @@ export default function WelcomePage() {
         setLevel((profile.pref_level as Level | null) ?? "");
         setFormats(profile.pref_formats?.length ? (profile.pref_formats as WorkFormat[]) : profile.pref_format ? [profile.pref_format as WorkFormat] : []);
         setExperience(profile.experience_years != null ? String(profile.experience_years) : "");
-        setLeadsPeople(profile.pref_level === "lead");
+        setLeadsPeople(profile.leads_people ?? false);
         setCity(profile.pref_city ?? "");
         setSkills(Array.isArray(profile.skills) ? profile.skills.join(", ") : "");
       }
@@ -81,7 +82,10 @@ export default function WelcomePage() {
       name: name.trim(),
       skills: [...new Set(skills.split(",").map(s => s.trim()).filter(Boolean))].slice(0, 50),
       pref_directions: directions,
-      ...experienceFields(experience, leadsPeople, level),
+      experience_years: parseExperience(experience),
+      leads_people: leadsPeople,
+      pref_level: levelApplies(directions) ? level || null : null,
+      level_source: levelApplies(directions) && level ? "manual" : null,
       pref_formats: formats,
       pref_format: formats[0] ?? null,
       pref_city: city.trim() || null,
@@ -114,6 +118,14 @@ export default function WelcomePage() {
             Ответьте на пару вопросов — лента выстроится под вас, а у каждой вакансии появится процент совпадения.
           </p>
         </header>
+
+        <Link href="/profile" className="flex items-center gap-3 rounded-2xl border border-teal-300/30 bg-teal-300/[0.06] p-4 hover:border-teal-300/60 transition-colors">
+          <Sparkles className="w-5 h-5 text-teal-300 shrink-0" aria-hidden="true" />
+          <span className="text-sm">
+            <span className="block font-semibold text-white">Есть резюме? Загрузите его — ИИ заполнит всё сам</span>
+            <span className="block text-neutral-400">Навыки, опыт, уровень с объяснением и что вы ищете. Останется проверить.</span>
+          </span>
+        </Link>
 
         <div>
           <label htmlFor="name" className={labelClass}>Как вас зовут</label>
@@ -163,6 +175,11 @@ export default function WelcomePage() {
         <div className="grid sm:grid-cols-2 gap-6">
           <ExperienceInput years={experience} leads={leadsPeople} labelClass={labelClass}
             onChange={(y, l) => { setExperience(y); setLeadsPeople(l); }} />
+          {levelApplies(directions) && (
+            <div className="sm:col-span-2">
+              <LevelPicker level={level} source={level ? "manual" : null} reason={null} labelClass={labelClass} onChange={setLevel} />
+            </div>
+          )}
           <div>
             <span className={labelClass}>Формат</span>
             <div className="flex flex-wrap gap-2">

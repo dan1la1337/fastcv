@@ -75,24 +75,20 @@ export function sourceOf(v: Pick<Vacancy, "source_type" | "source_url">): { badg
 }
 
 /** Грейд по опыту (шкала FastCV): до 2 лет — junior, 2–5 — middle, от 5 — senior; руководство людьми — lead. */
-export function levelForExperience(years: number, leadsPeople = false): Level {
-  if (leadsPeople) return "lead";
-  if (years < 2) return "junior";
-  if (years < 5) return "middle";
-  return "senior";
+/**
+ * Грейды (junior, middle, senior…) — понятие IT и digital. Для «других профессий»
+ * уровень не спрашиваем и не показываем: там важны опыт и навыки.
+ */
+export function levelApplies(directions: string[]): boolean {
+  if (!directions.length) return true;
+  return directions.some(id => DIRECTIONS.find(d => d.id === id)?.group !== "work");
 }
 
-/**
- * Поля профиля из «опыта работы»: годы и грейд по шкале. Опыт не указан — уровень
- * остаётся прежним (например, заполненным из резюме).
- */
-export function experienceFields(years: string, leadsPeople: boolean, fallback: Level | ""): { experience_years: number | null; pref_level: Level | null } {
+/** Годы опыта из поля ввода: число от 0 до 60 с шагом полгода или null. */
+export function parseExperience(years: string): number | null {
   const value = Number(years.replace(",", "."));
-  if (years.trim() === "" || !Number.isFinite(value) || value < 0 || value > 60) {
-    return { experience_years: null, pref_level: leadsPeople ? "lead" : fallback || null };
-  }
-  const rounded = Math.round(value * 2) / 2;
-  return { experience_years: rounded, pref_level: levelForExperience(rounded, leadsPeople) };
+  if (years.trim() === "" || !Number.isFinite(value) || value < 0 || value > 60) return null;
+  return Math.round(value * 2) / 2;
 }
 
 /** «опыт от 3 лет», «опыт от 1,5 года», «без опыта» */
