@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Montserrat, Poppins } from "next/font/google";
+import { Exo_2, Titillium_Web } from "next/font/google";
 import "./globals.css";
 import Link from "next/link";
 import { Suspense } from "react";
@@ -7,11 +7,11 @@ import Toaster from "@/components/Toaster";
 import MobileNav from "@/components/MobileNav";
 import { OPERATOR } from "@/lib/legal";
 
-// Дизайн-система Obsidian Glass: одно семейство — Poppins (300–600).
-// У Poppins нет кириллицы, поэтому русские буквы берёт Montserrat — такой же геометрический гротеск:
-// браузер сам выбирает начертание по символу (Poppins в стеке первым)
-const poppins = Poppins({ variable: "--font-poppins", subsets: ["latin"], weight: ["300", "400", "500", "600"] });
-const montserrat = Montserrat({ variable: "--font-montserrat", subsets: ["cyrillic"], weight: ["300", "400", "500", "600"] });
+// Шрифт — Titillium Web в четырёх толщинах: Light 300, Regular 400, SemiBold 600, Black 900.
+// У Titillium нет кириллицы, поэтому русские буквы рисует Exo 2 — близкий по характеру гротеск
+// в тех же толщинах; браузер выбирает начертание по символу (Titillium в стеке первым)
+const titillium = Titillium_Web({ variable: "--font-titillium", subsets: ["latin"], weight: ["300", "400", "600", "900"] });
+const exo = Exo_2({ variable: "--font-exo", subsets: ["cyrillic"], weight: ["300", "400", "600", "900"] });
 
 // Признак входа до первой отрисовки: вошедшим не показываем экран-приветствие (.guest-only).
 // Куки сессии Supabase читаются из браузера; сама сессия здесь не проверяется — только скрытие блока
@@ -31,7 +31,7 @@ export default function RootLayout({
   return (
     <html
       lang="ru"
-      className={`${poppins.variable} ${montserrat.variable} h-full antialiased`}
+      className={`${titillium.variable} ${exo.variable} h-full antialiased`}
     >
       <head>
         <script dangerouslySetInnerHTML={{ __html: AUTH_HINT }} />
