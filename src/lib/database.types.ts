@@ -328,6 +328,7 @@ export type Database = {
           pref_formats: string[]
           experience_years: number | null
           pref_level: string | null
+          primary_skills: Json
           leads_people: boolean
           level_reason: string | null
           level_source: string | null
@@ -359,6 +360,7 @@ export type Database = {
           pref_formats?: string[]
           experience_years?: number | null
           pref_level?: string | null
+          primary_skills?: Json
           leads_people?: boolean
           level_reason?: string | null
           level_source?: string | null
@@ -389,6 +391,7 @@ export type Database = {
           pref_formats?: string[]
           experience_years?: number | null
           pref_level?: string | null
+          primary_skills?: Json
           leads_people?: boolean
           level_reason?: string | null
           level_source?: string | null
@@ -731,6 +734,7 @@ export type Database = {
         Args: never
         Returns: {
           application_id: string
+          core: Json
           matched: Json
           missing: Json
           score: number
@@ -740,6 +744,7 @@ export type Database = {
         Args: { ids: string[] }
         Returns: {
           id: string
+          core: Json
           matched: Json
           missing: Json
           score: number
@@ -750,6 +755,7 @@ export type Database = {
         Args: { page?: number; page_size?: number }
         Returns: {
           id: string
+          core: Json
           matched: Json
           missing: Json
           score: number

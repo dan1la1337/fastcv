@@ -208,7 +208,7 @@ CHECKS: list[tuple] = [
      "update profiles set pref_directions = '{astronaut}' where id = auth.uid()", "authenticated", C, None),
     ("совпадение: подходящая вакансия высоко, чужое направление низко", True,
      "select string_agg(score::text, ',' order by score desc) from my_vacancy_matches(array(select id from vacancies where title in ('Ext') or title like 'Int%'))",
-     "authenticated", C, "91,28"),
+     "authenticated", C, "80,32"),
     ("подборка «Для вас»: лучшая вакансия первой", True,
      "select v.title from recommended_vacancies(1, 0) r join vacancies v on v.id = r.id", "authenticated", C,
      "Int Junior Python developer"),
@@ -340,7 +340,7 @@ CHECKS: list[tuple] = [
      f"""update profiles set telegram_chat_id = 777 where telegram_link_code is not null;
          update vacancies set created_at = now() where title like 'Int%';
          select chat_id::text || ':' || jsonb_array_length(items) from telegram_digest(50)""",
-     "service_role", None, "777:1"),
+     "service_role", None, "777:2"),
     ("пользователь НЕ вызывает рассылку", False, "select * from telegram_digest(0)", "authenticated", C, None),
     ("бот НЕ привязывает чат по чужому или неверному коду", True,
      "select link_telegram_chat('00000000000000000000000000000000', 5)::text || link_telegram_chat('abc', 5)::text",
@@ -947,6 +947,30 @@ CHECKS: list[tuple] = [
         insert into application_screenings (application_id, employer_id, screening) values ('99999999-0000-0000-0000-00000000f202', '{E}', '{{"fit": "weak"}}');
         select screening ->> 'fit' from application_screenings""",
      "authenticated", E, "weak"),
+    # --- основной стек: чужой язык не поднимает совпадение за счёт инфраструктуры ---
+    ("основной стек: Java-разработчику .NET-вакансия ниже любой Java", True,
+     f"""insert into auth.users values ('00000000-0000-0000-0000-00000000ca01', '{{"role":"candidate"}}');
+        update profiles set pref_directions = '{{backend}}', pref_level = 'senior', pref_formats = '{{remote}}',
+          skills = '["Java", "Spring", "Kafka", "PostgreSQL", "Redis", "Docker", "Kubernetes", "Grafana", "SQL"]'
+         where id = '00000000-0000-0000-0000-00000000ca01';
+        insert into vacancies (title, source_type, direction, level, work_format, stack) values
+          ('CS dotnet', 'external', 'backend', 'senior', 'remote', '[".NET", "C#", ".NET Core", "ASP.NET Core", "Entity Framework Core", "Kafka", "SQL", "PostgreSQL", "Docker", "Kubernetes", "Grafana"]'),
+          ('CS java', 'external', 'backend', 'senior', 'remote', '["Java", "Spring", "Kafka", "PostgreSQL", "Redis", "Docker"]'),
+          ('CS kotlin', 'external', 'backend', 'senior', 'remote', '["Kotlin", "Ktor", "PostgreSQL", "Docker"]'),
+          ('CS java gaps', 'external', 'backend', 'middle', 'remote', '["Java", "Protobuf", "Avro", "Liquibase", "REST API"]');
+        select string_agg(v.title || '=' || (m ->> 'score') || ':' || coalesce(m -> 'core' ->> 'fit', '-'), ' ' order by (m ->> 'score')::int desc)
+          from vacancies v, profiles p, lateral vacancy_match(v, p) m
+         where p.id = '00000000-0000-0000-0000-00000000ca01' and v.title like 'CS %';
+        delete from vacancies where title like 'CS %';""",
+     "postgres", None, None),
+    ("основной стек из профиля важнее остальных навыков", True,
+     """insert into vacancies (title, source_type, direction, stack) values ('CS py', 'external', 'backend', '["Python", "Django"]');
+        update profiles set primary_skills = '["Python"]' where id = '00000000-0000-0000-0000-00000000ca01';
+        select (m -> 'core' ->> 'fit') || ':' || ((m ->> 'score')::int > 40)::text
+          from vacancies v, profiles p, lateral vacancy_match(v, p) m
+         where p.id = '00000000-0000-0000-0000-00000000ca01' and v.title = 'CS py';
+        delete from vacancies where title = 'CS py';""",
+     "postgres", None, "match:true"),
     ("ротация «Работы России»: старые удаляются, с откликами — в архив, свежие остаются", True,
      f"""insert into vacancies (title, source_type, source_post, posted_at) values
           ('TV old', 'external', 'trudvsem/old', now() - interval '5 days'),

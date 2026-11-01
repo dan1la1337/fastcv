@@ -24,6 +24,9 @@ const INSTRUCTION = `Ты опытный IT-рекрутер. Помоги ка�
   языки, фреймворки, базы данных, инструменты, методологии (Python, Django, PostgreSQL, Kafka, Docker, Figma, Scrum…).
   Общепринятое написание (PostgreSQL, а не «постгрес»; JavaScript, а не JS), без версий и повторов,
   без личных качеств («коммуникабельность», «ответственность»);
+- primary_skills: 1–3 главных языка и платформы, на которых кандидат работает сейчас (по последним местам
+  работы): Java, Kotlin, C#, .NET, Python, Go, JavaScript, TypeScript, PHP, Swift, 1С… — без баз данных и
+  инфраструктуры. Для дизайнеров, аналитиков и не-IT профессий — 1–3 главных инструмента (Figma, SQL, Excel…);
 - jobs: все места работы из резюме: start и end в формате ГГГГ-ММ (если месяц не указан — ГГГГ), end = null,
   если работает сейчас; relevant = true, если работа по той же профессии, что и основная в резюме
   (стажировки по профессии — тоже true; подработки не по профессии — false);
@@ -46,6 +49,7 @@ const SCHEMA = {
     name: { type: "STRING", nullable: true },
     about: { type: "STRING", nullable: true },
     skills: { type: "ARRAY", items: { type: "STRING" } },
+    primary_skills: { type: "ARRAY", items: { type: "STRING" } },
     jobs: {
       type: "ARRAY",
       items: {
@@ -67,7 +71,7 @@ const SCHEMA = {
     city: { type: "STRING", nullable: true },
     salary: { type: "INTEGER", nullable: true },
   },
-  required: ["name", "about", "skills", "jobs", "leads_people", "level", "level_reason", "directions", "formats", "city", "salary"],
+  required: ["name", "about", "skills", "primary_skills", "jobs", "leads_people", "level", "level_reason", "directions", "formats", "city", "salary"],
 };
 
 const LEVEL_IDS = new Set<string>(LEVELS.map(l => l.id));
@@ -87,6 +91,7 @@ function clean(raw: unknown): ResumeDraft {
     name: text(r.name, 200),
     about: text(r.about, 3000)?.replace(/https?:\/\/\S+/g, "").trim() || null,
     skills: [...new Map(list(r.skills).map(s => s.trim().slice(0, 40)).filter(Boolean).map(s => [s.toLowerCase(), s])).values()].slice(0, 20),
+    primary_skills: [...new Map(list(r.primary_skills).map(s => s.trim().slice(0, 40)).filter(Boolean).map(s => [s.toLowerCase(), s])).values()].slice(0, 5),
     level,
     level_reason: level ? text(r.level_reason, 1200) : null,
     directions,

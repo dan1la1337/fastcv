@@ -3,6 +3,8 @@ export interface ResumeDraft {
   name: string | null;
   about: string | null;
   skills: string[];
+  /** Основной стек: язык и платформа, на которых кандидат реально работает (1–5) */
+  primary_skills: string[];
   level: string | null;
   /** Почему такой уровень и что добавить в резюме для следующего */
   level_reason: string | null;

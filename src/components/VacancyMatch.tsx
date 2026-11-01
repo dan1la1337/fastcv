@@ -59,6 +59,14 @@ export default function VacancyMatch({ vacancyId }: { vacancyId: string }) {
             ? `Совпадает ${match.matched.length} из ${total} навыков вакансии${match.related.length ? `, ещё ${match.related.length} — по смежному опыту` : ""}.`
             : "Совпадение посчитано по уровню, формату и городу."}
         </p>
+        {match.core && match.core.fit !== "match" && match.core.stack.length > 0 && (
+          <p className={`text-sm ${match.core.fit === "foreign" ? "text-amber-300" : "text-neutral-400"}`}>
+            Основной стек вакансии — {match.core.stack.join(", ")}
+            {match.core.fit === "foreign" && ": это не ваш стек, поэтому совпадение не выше 40%, даже если остальные навыки совпадают."}
+            {match.core.fit === "related" && ": смежный с вашим — засчитан частично."}
+            {match.core.fit === "unknown" && ". Укажите в профиле свой основной стек — совпадение станет точнее."}
+          </p>
+        )}
         <div className="flex flex-wrap gap-2 text-sm">
           {match.matched.map(s => (
             <span key={s} className="px-3 py-1.5 rounded-full bg-teal-300/15 text-teal-200">{s} ✓</span>

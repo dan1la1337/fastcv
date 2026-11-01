@@ -29,6 +29,15 @@ const chip = (active: boolean) =>
     ? "bg-teal-300 border-teal-300 text-neutral-950"
     : "bg-white/[0.04] border-white/15 text-neutral-400 hover:border-white/30 hover:text-neutral-200"}`;
 
+const splitList = (text: string) => [...new Map(text.split(",").map(s => s.trim()).filter(Boolean).map(s => [s.toLowerCase(), s])).values()];
+
+/** Навыки для сохранения: skills — все (основной стек первым), primary_skills — до 5 основных. */
+function skillFields(primary: string, rest: string, candidate: boolean) {
+  const main = splitList(primary).slice(0, 5);
+  const all = splitList([...main, ...splitList(rest)].join(","));
+  return candidate ? { skills: all.slice(0, 50), primary_skills: main } : { skills: all.slice(0, 50) };
+}
+
 export default function ProfilePage() {
   const router = useRouter();
   const [user, setUser] = useState<User | null>(null);
@@ -40,6 +49,8 @@ export default function ProfilePage() {
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [skills, setSkills] = useState("");
+  // Основной стек (язык и платформа) — решает в совпадении; skills — дополнительные навыки
+  const [primarySkills, setPrimarySkills] = useState("");
 
   // Что ищет кандидат: по этому строится подборка «Для вас» и процент совпадения
   const [prefDirections, setPrefDirections] = useState<string[]>([]);
@@ -72,13 +83,17 @@ export default function ProfilePage() {
 
       const { data: profile } = await supabase
         .from("profiles")
-        .select("name, description, skills, resume_path, pref_directions, pref_level, pref_format, pref_formats, experience_years, pref_city, pref_salary, leads_people, level_reason, level_source")
+        .select("name, description, skills, primary_skills, resume_path, pref_directions, pref_level, pref_format, pref_formats, experience_years, pref_city, pref_salary, leads_people, level_reason, level_source")
         .eq("id", user.id)
         .maybeSingle();
       if (profile) {
         setName(profile.name || "");
         setDescription(profile.description || "");
-        setSkills(Array.isArray(profile.skills) ? profile.skills.join(", ") : "");
+        const all = Array.isArray(profile.skills) ? (profile.skills as string[]) : [];
+        const primary = Array.isArray(profile.primary_skills) ? (profile.primary_skills as string[]) : [];
+        const primaryLower = new Set(primary.map(x => x.toLowerCase()));
+        setPrimarySkills(primary.join(", "));
+        setSkills(all.filter(x => !primaryLower.has(x.toLowerCase())).join(", "));
         setResumePath(profile.resume_path ?? null);
         setPrefDirections(profile.pref_directions ?? []);
         setPrefLevel((profile.pref_level as Level | null) ?? "");
@@ -105,7 +120,7 @@ export default function ProfilePage() {
       role, // роль менять нельзя: база отклонит попытку (триггер prevent_role_change)
       name: name.trim(),
       description: description.trim(),
-      skills: skills.split(",").map(s => s.trim()).filter(Boolean),
+      ...skillFields(primarySkills, skills, role === "candidate"),
       ...(role === "candidate" ? {
         pref_directions: prefDirections,
         experience_years: parseExperience(experience),
@@ -204,10 +219,13 @@ export default function ProfilePage() {
       // текст «О себе» не затираем, если он уже написан. Сохраняет кандидат после проверки.
       if (draft.name) setName(draft.name);
       if (draft.about && !description.trim()) setDescription(draft.about);
+      const primary = draft.primary_skills.length ? draft.primary_skills : splitList(primarySkills);
+      if (draft.primary_skills.length) setPrimarySkills(draft.primary_skills.join(", "));
       if (draft.skills.length) {
-        const current = skills.split(",").map(s => s.trim()).filter(Boolean);
+        const primaryLower = new Set(primary.map(s => s.toLowerCase()));
+        const current = splitList(skills).filter(s => !primaryLower.has(s.toLowerCase()));
         const lower = new Set(current.map(s => s.toLowerCase()));
-        setSkills([...current, ...draft.skills.filter(s => !lower.has(s.toLowerCase()))].join(", "));
+        setSkills([...current, ...draft.skills.filter(s => !lower.has(s.toLowerCase()) && !primaryLower.has(s.toLowerCase()))].join(", "));
       }
       if (draft.directions.length) setPrefDirections(draft.directions.slice(0, MAX_DIRECTIONS));
       if (draft.experience_years != null) setExperience(String(draft.experience_years));
@@ -337,10 +355,20 @@ export default function ProfilePage() {
             </div>
 
             {isCandidate && (
-              <div>
-                <label className={labelClass}>Ключевые навыки (через запятую)</label>
-                <input type="text" value={skills} onChange={e => setSkills(e.target.value)}
-                  placeholder="React, Node.js, Python..." className={inputClass} />
+              <div className="space-y-4">
+                <div>
+                  <label htmlFor="primary-skills" className={labelClass}>Основной стек — язык и платформа (до 5)</label>
+                  <input id="primary-skills" type="text" value={primarySkills} onChange={e => setPrimarySkills(e.target.value)}
+                    placeholder="Java, Spring" className={inputClass} />
+                  <p className="text-xs text-neutral-500 mt-1.5">
+                    На чём вы работаете. Решает в совпадении: вакансия на чужом языке не поднимется выше 40%, даже если совпали базы и инфраструктура.
+                  </p>
+                </div>
+                <div>
+                  <label htmlFor="other-skills" className={labelClass}>Дополнительные навыки (через запятую)</label>
+                  <input id="other-skills" type="text" value={skills} onChange={e => setSkills(e.target.value)}
+                    placeholder="PostgreSQL, Kafka, Docker, Kubernetes…" className={inputClass} />
+                </div>
               </div>
             )}
 
