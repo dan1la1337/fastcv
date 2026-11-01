@@ -353,7 +353,7 @@ export default function Feed({ initialRows, initialTotal, hero }: { initialRows:
 
         <div className="flex flex-col sm:flex-row justify-between gap-4">
           <div className="flex gap-4 sm:gap-5 items-start pr-24 sm:pr-28">
-          {match && <MatchRing value={match.score} size={64} stroke={match.score >= 70 ? "#5EEAD4" : "#818CF8"} />}
+          {match && <MatchRing value={match.score} size={64} stroke={match.score >= 70 ? "#e6e6e6" : "#a0a0a0"} />}
           <div className="min-w-0">
             <h2 className="text-lg sm:text-xl font-semibold text-neutral-100 leading-snug">
               <Link href={`/vacancy/${item.id}`} className="hover:text-teal-300 transition-colors">{item.title}</Link>

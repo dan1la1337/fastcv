@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Inter, JetBrains_Mono, Jost } from "next/font/google";
+import { Montserrat, Poppins } from "next/font/google";
 import "./globals.css";
 import Link from "next/link";
 import { Suspense } from "react";
@@ -7,13 +7,11 @@ import Toaster from "@/components/Toaster";
 import MobileNav from "@/components/MobileNav";
 import { OPERATOR } from "@/lib/legal";
 
-// Тема «Бумага»: Inter — текст, Jost — заголовки и логотип, JetBrains Mono — счётчики.
-// Кириллица обязательна: иначе русский текст рисуется системным шрифтом
-const inter = Inter({ variable: "--font-inter", subsets: ["latin", "cyrillic"] });
-// Заголовки — Jost: лёгкий геометрический гротеск в духе «бумажного» неоморфизма
-const jost = Jost({ variable: "--font-jost", subsets: ["latin", "cyrillic"], weight: ["400", "500"] });
-// Моноширинный — только для мелких счётчиков: не задерживаем им первую отрисовку
-const jetbrains = JetBrains_Mono({ variable: "--font-jetbrains", subsets: ["latin", "cyrillic"], weight: ["500"], preload: false });
+// Дизайн-система Soft: шрифт Poppins, тонкие начертания (300–400, акценты 500–600).
+// У Poppins нет кириллицы, поэтому русские буквы берёт Montserrat — такой же геометрический гротеск:
+// браузер сам выбирает начертание по символу (Poppins в стеке первым)
+const poppins = Poppins({ variable: "--font-poppins", subsets: ["latin"], weight: ["300", "400", "500", "600"] });
+const montserrat = Montserrat({ variable: "--font-montserrat", subsets: ["cyrillic"], weight: ["300", "400", "500", "600"] });
 
 // Признак входа до первой отрисовки: вошедшим не показываем экран-приветствие (.guest-only).
 // Куки сессии Supabase читаются из браузера; сама сессия здесь не проверяется — только скрытие блока
@@ -33,7 +31,7 @@ export default function RootLayout({
   return (
     <html
       lang="ru"
-      className={`${inter.variable} ${jost.variable} ${jetbrains.variable} h-full antialiased`}
+      className={`${poppins.variable} ${montserrat.variable} h-full antialiased`}
     >
       <head>
         <script dangerouslySetInnerHTML={{ __html: AUTH_HINT }} />

@@ -52,7 +52,7 @@ export default function VacancyMatch({ vacancyId }: { vacancyId: string }) {
   const total = match.matched.length + match.related.length + match.missing.length;
   return (
     <section aria-label="Совпадение с профилем" className="glass rounded-3xl p-6 flex flex-wrap items-center gap-6">
-      <MatchRing value={match.score} size={140} stroke={match.score >= 70 ? "#5EEAD4" : "#818CF8"} />
+      <MatchRing value={match.score} size={140} stroke={match.score >= 70 ? "#e6e6e6" : "#a0a0a0"} />
       <div className="flex-1 min-w-[16rem] space-y-3">
         <p className="text-neutral-300">
           {total > 0

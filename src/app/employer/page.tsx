@@ -705,7 +705,7 @@ export default function EmployerDashboard() {
                         className="w-5 h-5 accent-teal-300 cursor-pointer" />
                     )}
                     {matches[app.id] && (
-                      <MatchRing value={matches[app.id].score} size={64} stroke={matches[app.id].score >= 70 ? "#5EEAD4" : "#818CF8"} />
+                      <MatchRing value={matches[app.id].score} size={64} stroke={matches[app.id].score >= 70 ? "#e6e6e6" : "#a0a0a0"} />
                     )}
                     <div className="flex-1 min-w-[14rem]">
                       <p className="font-semibold text-white flex flex-wrap items-center gap-2">
