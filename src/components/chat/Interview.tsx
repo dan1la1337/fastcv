@@ -37,11 +37,11 @@ export function CalendarButtons({ event }: { event: CalendarEvent }) {
   return (
     <span className="inline-flex flex-wrap gap-2">
       <button type="button" onClick={() => downloadIcs(event)}
-        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-white/15 text-xs text-neutral-200 hover:border-white/30">
+        className="lg inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs text-neutral-200">
         <CalendarPlus className="w-3.5 h-3.5" aria-hidden="true" /> В календарь (.ics)
       </button>
       <a href={googleCalendarUrl(event)} target="_blank" rel="noopener noreferrer"
-        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-white/15 text-xs text-neutral-200 hover:border-white/30">
+        className="lg inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs text-neutral-200">
         Google Календарь
       </a>
     </span>
@@ -93,7 +93,7 @@ export function SlotsMessage({ message, slots, mine, isCandidate, onBooked }: {
               <li key={s.id}>
                 {isCandidate && active ? (
                   <button type="button" onClick={() => book(s.id)} disabled={!!busy}
-                    className="w-full text-left px-3 py-2 rounded-xl border border-emerald-400/30 hover:border-emerald-300 hover:bg-emerald-400/10 text-sm text-white disabled:opacity-50 inline-flex items-center justify-between gap-2">
+                    className="lg w-full text-left px-3 py-2 rounded-xl text-sm text-white disabled:opacity-50 inline-flex items-center justify-between gap-2">
                     {label}
                     {busy === s.id ? <Loader2 className="w-4 h-4 animate-spin" /> : <span className="text-xs text-emerald-300">Выбрать</span>}
                   </button>
@@ -123,7 +123,7 @@ export function BookingMessage({ message, mine }: { message: Message; mine: bool
   const meta = message.meta as { action?: string; starts_at?: string; duration?: number; reason?: string | null } | null;
   const cancelled = meta?.action === "cancelled";
   return (
-    <div className="mx-auto max-w-[92%] sm:max-w-[80%] rounded-2xl border border-white/12 bg-white/[0.04] p-4 space-y-1.5">
+    <div className="neu-sub mx-auto max-w-[92%] sm:max-w-[80%] rounded-2xl p-4 space-y-1.5">
       <p className={`text-xs inline-flex items-center gap-1.5 ${cancelled ? "text-amber-300" : "text-emerald-300"}`}>
         {cancelled ? <CalendarX className="w-3.5 h-3.5" /> : <CalendarCheck className="w-3.5 h-3.5" />}
         {cancelled ? (mine ? "Вы отменили собеседование" : "Собеседование отменено") : (mine ? "Вы записались на собеседование" : "Кандидат записался на собеседование")}
@@ -181,9 +181,9 @@ export function UpcomingInterview({ slot, conversation, onCancelled }: {
           <label className="sr-only" htmlFor={`cancel-${slot.id}`}>Причина отмены</label>
           <input id={`cancel-${slot.id}`} value={reason} maxLength={500} onChange={e => setReason(e.target.value)}
             placeholder="Причина (по желанию)"
-            className="flex-1 min-w-[12rem] bg-[#0B0F19] border border-white/12 rounded-full px-4 h-9 text-sm text-neutral-100 focus:outline-none focus:border-teal-300" />
+            className="neu-in flex-1 min-w-[12rem] rounded-full px-4 h-9 text-sm text-neutral-100" />
           <button type="button" onClick={cancel} disabled={busy}
-            className="px-4 h-9 rounded-full bg-amber-300 text-neutral-950 text-sm font-semibold disabled:opacity-50 inline-flex items-center gap-2">
+            className="lg px-4 h-9 rounded-full text-neutral-950 text-sm font-semibold disabled:opacity-50 inline-flex items-center gap-2">
             {busy && <Loader2 className="w-4 h-4 animate-spin" />} Отменить встречу
           </button>
           <button type="button" onClick={() => setAsking(false)} className="px-2 h-9 text-sm text-neutral-400 hover:text-white">Не отменять</button>
@@ -219,7 +219,7 @@ export function ProposeSlots({ conversationId, onSent, onClose }: {
   const [place, setPlace] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const field = "bg-[#0B0F19] border border-white/12 rounded-xl px-3 h-10 text-sm text-neutral-100 focus:outline-none focus:border-teal-300";
+  const field = "neu-in rounded-xl px-3 h-10 text-sm text-neutral-100";
 
   async function send() {
     const starts = times.filter(Boolean).map(t => new Date(t).toISOString());
@@ -238,7 +238,7 @@ export function ProposeSlots({ conversationId, onSent, onClose }: {
     <div className="rounded-2xl border border-emerald-400/25 bg-emerald-400/[0.04] p-3 space-y-3" role="group" aria-label="Предложить время собеседования">
       <div className="flex items-center justify-between">
         <p className="text-sm text-white font-semibold">Варианты времени <span className="text-xs text-neutral-500 font-normal">({zoneLabel()})</span></p>
-        <button type="button" onClick={onClose} aria-label="Закрыть" className="p-1 rounded-lg text-neutral-400 hover:text-white hover:bg-white/[0.08]">
+        <button type="button" onClick={onClose} aria-label="Закрыть" className="lg p-1 rounded-lg text-neutral-400 hover:text-white">
           <X className="w-4 h-4" />
         </button>
       </div>
@@ -250,13 +250,13 @@ export function ProposeSlots({ conversationId, onSent, onClose }: {
               onChange={e => setTimes(all => all.map((x, j) => j === i ? e.target.value : x))} className={`${field} flex-1 min-w-0`} />
             {times.length > 1 && (
               <button type="button" onClick={() => setTimes(all => all.filter((_, j) => j !== i))} aria-label={`Убрать вариант ${i + 1}`}
-                className="p-1.5 rounded-lg text-neutral-500 hover:text-white hover:bg-white/[0.08]"><X className="w-4 h-4" /></button>
+                className="lg p-1.5 rounded-lg text-neutral-500 hover:text-white"><X className="w-4 h-4" /></button>
             )}
           </div>
         ))}
         {times.length < MAX_SLOTS && (
           <button type="button" onClick={() => setTimes(all => [...all, ""])}
-            className="h-10 rounded-xl border border-dashed border-white/15 text-sm text-neutral-400 hover:text-white hover:border-white/30 inline-flex items-center justify-center gap-1.5">
+            className="lg h-10 rounded-xl text-sm text-neutral-400 hover:text-white inline-flex items-center justify-center gap-1.5">
             <Plus className="w-4 h-4" /> Ещё вариант
           </button>
         )}
@@ -277,7 +277,7 @@ export function ProposeSlots({ conversationId, onSent, onClose }: {
       {error && <p role="alert" className="text-xs text-amber-300">{error}</p>}
       <div className="flex justify-end">
         <button type="button" onClick={send} disabled={busy}
-          className="px-5 h-10 rounded-full bg-emerald-300 hover:bg-emerald-200 text-neutral-950 text-sm font-semibold disabled:opacity-50 inline-flex items-center gap-2">
+          className="lg lg-accent px-5 h-10 rounded-full text-sm font-semibold disabled:opacity-50 inline-flex items-center gap-2">
           {busy && <Loader2 className="w-4 h-4 animate-spin" />} Отправить варианты
         </button>
       </div>

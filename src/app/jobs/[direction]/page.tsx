@@ -83,7 +83,7 @@ export default async function DirectionPage({ params }: Props) {
           <div className="flex flex-wrap gap-2">
             {DIRECTIONS.filter(d => d.id !== direction.id).map(d => (
               <Link key={d.id} href={`/jobs/${d.id.replace("_", "-")}`}
-                className="text-xs px-3 py-1.5 rounded-lg border border-white/10 text-neutral-300 hover:bg-neutral-900">
+                className="lg text-xs px-3 py-1.5 rounded-lg text-neutral-300">
                 {d.label}
               </Link>
             ))}

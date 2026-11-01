@@ -130,7 +130,7 @@ export default function InterviewPractice({ vacancyId, title }: { vacancyId: str
         <p className="text-xs text-neutral-500">Ответы никуда не сохраняются и работодателю не видны.</p>
         {error && <p role="alert" className="text-sm text-amber-300">{error}</p>}
         <button onClick={start} disabled={loading}
-          className="inline-flex items-center gap-2 h-12 px-6 rounded-full bg-teal-300 hover:bg-teal-200 text-neutral-950 font-semibold disabled:opacity-60">
+          className="lg lg-accent inline-flex items-center gap-2 h-12 px-6 rounded-full font-semibold disabled:opacity-60">
           {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
           {loading ? "Готовлю вопросы…" : "Начать тренировку"}
         </button>
@@ -154,7 +154,7 @@ export default function InterviewPractice({ vacancyId, title }: { vacancyId: str
         </div>
         <ol className="space-y-2">
           {questions.map((q, i) => (
-            <li key={i} className="flex items-start justify-between gap-3 rounded-2xl border border-white/10 px-4 py-3 text-sm">
+            <li key={i} className="neu-sub flex items-start justify-between gap-3 rounded-2xl px-4 py-3 text-sm">
               <span className="text-neutral-200">{i + 1}. {q.q}</span>
               <span className={`shrink-0 font-semibold ${steps[i].grade ? scoreColor(steps[i].grade!.score) : "text-neutral-500"}`}>
                 {steps[i].grade ? `${steps[i].grade!.score}/10` : "пропущен"}
@@ -167,11 +167,11 @@ export default function InterviewPractice({ vacancyId, title }: { vacancyId: str
         )}
         <div className="flex flex-wrap gap-3">
           <button onClick={start} disabled={loading}
-            className="inline-flex items-center gap-2 h-11 px-5 rounded-full border border-white/15 text-sm hover:border-white/30 disabled:opacity-60">
+            className="lg inline-flex items-center gap-2 h-11 px-5 rounded-full text-sm disabled:opacity-60">
             {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <RotateCcw className="w-4 h-4" />} Новые вопросы
           </button>
           <Link href={`/vacancy/${vacancyId}#smart-apply`}
-            className="inline-flex items-center gap-2 h-11 px-5 rounded-full bg-teal-300 hover:bg-teal-200 text-neutral-950 text-sm font-semibold">
+            className="lg lg-accent inline-flex items-center gap-2 h-11 px-5 rounded-full text-sm font-semibold">
             К вакансии «{title.length > 40 ? title.slice(0, 40) + "…" : title}»
           </Link>
         </div>
@@ -184,14 +184,14 @@ export default function InterviewPractice({ vacancyId, title }: { vacancyId: str
   return (
     <section className="glass rounded-3xl p-6 sm:p-8 space-y-5" aria-label={`Вопрос ${current + 1} из ${questions.length}`}>
       <div className="flex items-center gap-3">
-        <div className="flex-1 h-1.5 rounded-full bg-white/10 overflow-hidden" aria-hidden="true">
+        <div className="neu-in flex-1 h-1.5 rounded-full overflow-hidden" aria-hidden="true">
           <div className="h-full bg-teal-300 transition-all" style={{ width: `${(current / questions.length) * 100}%` }} />
         </div>
         <span className="text-xs text-neutral-400 whitespace-nowrap">Вопрос {current + 1} из {questions.length}</span>
       </div>
 
       <div className="space-y-2">
-        <span className="inline-block px-2.5 py-0.5 rounded-full bg-white/[0.08] text-[11px] text-neutral-300">{KIND_LABEL[question!.kind]}</span>
+        <span className="inline-block px-2.5 py-0.5 rounded-full neu-chip text-[11px] text-neutral-300">{KIND_LABEL[question!.kind]}</span>
         <h2 className="text-lg sm:text-xl font-semibold text-white leading-snug">{question!.q}</h2>
         {question!.hint && (showHint
           ? <p className="text-sm text-amber-100/90 inline-flex gap-1.5"><Lightbulb className="w-4 h-4 shrink-0 mt-0.5 text-amber-300" />{question!.hint}</p>
@@ -203,19 +203,19 @@ export default function InterviewPractice({ vacancyId, title }: { vacancyId: str
         <textarea id="practice-answer" ref={area} rows={7} value={step.answer} maxLength={ANSWER_MAX}
           onChange={e => setAnswer(e.target.value)} disabled={grading}
           placeholder={canSpeak ? "Напишите ответ или нажмите на микрофон и отвечайте вслух…" : "Напишите ответ так, как сказали бы на собеседовании…"}
-          className="w-full bg-[#0B0F19] border border-white/12 rounded-2xl px-4 py-3 text-sm text-neutral-100 focus:outline-none focus:border-teal-300 resize-y leading-relaxed" />
+          className="neu-in w-full rounded-2xl px-4 py-3 text-sm text-neutral-100 resize-y leading-relaxed" />
         <div className="flex flex-wrap items-center gap-2">
           {canSpeak && (
             <button type="button" onClick={toggleVoice} disabled={grading} aria-pressed={listening}
-              className={`inline-flex items-center gap-2 h-10 px-4 rounded-full border text-sm transition-colors ${
-                listening ? "border-red-400/60 text-red-300 bg-red-400/10" : "border-white/15 text-neutral-200 hover:border-white/30"}`}>
+              className={`lg inline-flex items-center gap-2 h-10 px-4 rounded-full text-sm transition-colors ${
+                listening ? "lg lg-danger text-red-300" : "lg text-neutral-200"}`}>
               {listening ? <><MicOff className="w-4 h-4" /> Остановить запись</> : <><Mic className="w-4 h-4" /> Ответить голосом</>}
             </button>
           )}
           <span className="flex-1" />
           {!g && <button type="button" onClick={next} className="h-10 px-3 text-sm text-neutral-400 hover:text-white">Пропустить</button>}
           <button type="button" onClick={grade} disabled={grading || step.answer.trim().length < 3}
-            className="inline-flex items-center gap-2 h-10 px-5 rounded-full bg-teal-300 hover:bg-teal-200 text-neutral-950 text-sm font-semibold disabled:opacity-50">
+            className="lg lg-accent inline-flex items-center gap-2 h-10 px-5 rounded-full text-sm font-semibold disabled:opacity-50">
             {grading && <Loader2 className="w-4 h-4 animate-spin" />} {g ? "Проверить снова" : "Проверить ответ"}
           </button>
         </div>
@@ -223,7 +223,7 @@ export default function InterviewPractice({ vacancyId, title }: { vacancyId: str
       </div>
 
       {g && (
-        <div className="rounded-2xl border border-white/12 bg-white/[0.03] p-5 space-y-4" aria-live="polite" aria-label="Разбор ответа">
+        <div className="neu-sub rounded-2xl p-5 space-y-4" aria-live="polite" aria-label="Разбор ответа">
           <div className="flex items-baseline gap-3">
             <span className={`font-display text-3xl font-bold ${scoreColor(g.score)}`}>{g.score}<span className="text-base text-neutral-500">/10</span></span>
             <p className="text-neutral-200">{g.verdict}</p>
@@ -247,7 +247,7 @@ export default function InterviewPractice({ vacancyId, title }: { vacancyId: str
             </details>
           )}
           <div className="flex justify-end">
-            <button onClick={next} className="inline-flex items-center gap-1.5 h-10 px-5 rounded-full bg-white/[0.1] hover:bg-white/[0.16] text-sm font-semibold">
+            <button onClick={next} className="lg inline-flex items-center gap-1.5 h-10 px-5 rounded-full text-sm font-semibold">
               {current + 1 < questions.length ? "Следующий вопрос" : "Итоги"} <ChevronRight className="w-4 h-4" />
             </button>
           </div>

@@ -15,12 +15,12 @@ import ExperienceInput from "@/components/ExperienceInput";
 const MAX_DIRECTIONS = 5;
 
 const inputClass =
-  "w-full bg-[#0B0F19] border border-white/12 rounded-2xl px-4 py-3 text-sm text-neutral-200 focus:outline-none focus:border-teal-300 transition-colors";
+  "w-full neu-in rounded-2xl px-4 py-3 text-sm text-neutral-200 transition-colors";
 const labelClass = "block text-xs font-bold text-neutral-500 uppercase tracking-wider mb-2";
 const chip = (active: boolean) =>
-  `text-sm px-3.5 py-1.5 rounded-full border transition-colors ${active
-    ? "bg-teal-300 border-teal-300 text-neutral-950"
-    : "bg-white/[0.04] border-white/15 text-neutral-300 hover:border-white/30"}`;
+  `text-sm px-3.5 py-1.5 rounded-full transition-colors ${active
+    ? "lg lg-accent"
+    : "lg text-neutral-300 hover:text-neutral-100"}`;
 
 /**
  * Онбординг кандидата за минуту: сразу после регистрации спрашиваем, что он ищет,
@@ -124,7 +124,7 @@ export default function WelcomePage() {
           </p>
         </header>
 
-        <Link href="/profile" className="flex items-center gap-3 rounded-2xl border border-teal-300/30 bg-teal-300/[0.06] p-4 hover:border-teal-300/60 transition-colors">
+        <Link href="/profile" className="lg lg-tint flex items-center gap-3 rounded-2xl p-4 transition-colors">
           <Sparkles className="w-5 h-5 text-teal-300 shrink-0" aria-hidden="true" />
           <span className="text-sm">
             <span className="block font-semibold text-white">Есть резюме? Загрузите его — ИИ заполнит всё сам</span>
@@ -140,11 +140,11 @@ export default function WelcomePage() {
 
         <div className="space-y-3">
           <span className={labelClass}>Направления (до {MAX_DIRECTIONS})</span>
-          <div role="group" aria-label="Раздел" className="inline-flex flex-wrap gap-1 p-1 rounded-full bg-white/[0.04] border border-white/10">
+          <div role="group" aria-label="Раздел" className="neu-in inline-flex flex-wrap gap-1 p-1 rounded-full">
             {AREAS.map(a => (
               <button key={a.id} type="button" aria-pressed={area === a.id} onClick={() => setArea(a.id)}
-                className={`text-sm px-3.5 py-1.5 rounded-full transition-colors ${area === a.id
-                  ? "bg-white/[0.12] text-white" : "text-neutral-400 hover:text-neutral-200"}`}>
+                className={`lg text-sm px-3.5 py-1.5 rounded-full transition-colors ${area === a.id
+                  ? "lg text-white" : "text-neutral-400 hover:text-neutral-200"}`}>
                 {a.label}
               </button>
             ))}
@@ -218,7 +218,7 @@ export default function WelcomePage() {
         </p>
 
         <button type="submit" disabled={saving || !name.trim()}
-          className="w-full flex items-center justify-center gap-2 bg-teal-300 hover:bg-teal-200 text-neutral-950 py-3.5 rounded-full text-sm font-semibold transition-colors disabled:opacity-50">
+          className="lg lg-accent w-full flex items-center justify-center gap-2 py-3.5 rounded-full text-sm font-semibold transition-colors disabled:opacity-50">
           {saving ? <Loader2 className="w-5 h-5 animate-spin" /> : <><Sparkles className="w-4 h-4" /> Показать мои вакансии</>}
         </button>
       </form>

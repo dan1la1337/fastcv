@@ -22,7 +22,7 @@ export default function ConversationList({ items, selected, onSelect }: {
         return (
           <li key={c.id}>
             <button onClick={() => onSelect(c.id)} aria-current={active ? "true" : undefined}
-              className={`w-full text-left px-4 py-3.5 flex gap-3 transition-colors ${active ? "bg-white/[0.08]" : "hover:bg-white/[0.04]"}`}>
+              className={`w-full text-left px-4 py-3.5 flex gap-3 transition-colors ${active ? "lg" : "hover:bg-white/[0.04]"}`}>
               <span aria-hidden="true"
                 className="shrink-0 w-10 h-10 rounded-full bg-indigo-400/15 text-indigo-200 flex items-center justify-center font-semibold">
                 {c.other_name.charAt(0).toUpperCase()}

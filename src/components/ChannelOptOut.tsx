@@ -48,12 +48,12 @@ export default function ChannelOptOut({ initial }: { initial: ExcludedChannel[] 
       <form onSubmit={exclude} className="flex flex-wrap gap-2">
         <label className="sr-only" htmlFor="optout-channel">Канал</label>
         <input id="optout-channel" value={name} onChange={e => setName(e.target.value)} placeholder="@channel или ссылка"
-          className="flex-1 min-w-[12rem] rounded-xl bg-neutral-950 border border-white/10 px-3 py-2 text-sm" />
+          className="neu-in flex-1 min-w-[12rem] rounded-xl px-3 py-2 text-sm" />
         <label className="sr-only" htmlFor="optout-note">Основание</label>
         <input id="optout-note" value={note} onChange={e => setNote(e.target.value)} placeholder="Основание: письмо от 26.10"
-          className="flex-1 min-w-[12rem] rounded-xl bg-neutral-950 border border-white/10 px-3 py-2 text-sm" />
+          className="neu-in flex-1 min-w-[12rem] rounded-xl px-3 py-2 text-sm" />
         <button type="submit" disabled={busy || !name.trim()}
-          className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-red-600 hover:bg-red-500 text-white text-sm font-semibold disabled:opacity-50">
+          className="lg lg-danger inline-flex items-center gap-2 px-4 py-2 rounded-xl text-white text-sm font-semibold disabled:opacity-50">
           {busy ? <Loader2 className="w-4 h-4 animate-spin" /> : <Ban className="w-4 h-4" />} Исключить
         </button>
       </form>

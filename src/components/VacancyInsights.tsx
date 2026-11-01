@@ -35,7 +35,7 @@ export default function VacancyInsights({ vacancy, benchmarks }: {
       {insights.map(x => {
         const Icon = ICON[x.tone];
         return (
-          <li key={x.title} className="rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3 text-sm">
+          <li key={x.title} className="neu-sub rounded-2xl px-4 py-3 text-sm">
             <p className={`font-semibold inline-flex items-center gap-1.5 ${TONE[x.tone]}`}><Icon className="w-4 h-4" aria-hidden="true" /> {x.title}</p>
             <p className="text-neutral-300 mt-1 leading-relaxed">{x.text}</p>
           </li>

@@ -36,7 +36,7 @@ export default function TelegramBotSetup({ current }: { current: string | null }
         {" "}Кнопка берёт токен из TELEGRAM_JOBS_BOT_TOKEN на Vercel; её можно нажимать повторно.
       </p>
       <button onClick={setup} disabled={busy}
-        className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-teal-300 hover:bg-teal-200 text-neutral-950 text-sm font-semibold disabled:opacity-50">
+        className="lg lg-accent inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-semibold disabled:opacity-50">
         {busy ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />} Подключить бота подборок
       </button>
       {message && <p className={`text-sm ${message.ok ? "text-emerald-400" : "text-red-300"}`}>{message.text}</p>}

@@ -221,12 +221,12 @@ export default function SmartApply({
           {user && (Object.keys(LETTER_OPTIONS) as (keyof typeof LETTER_OPTIONS)[]).map(key => (
             <div key={key} className="space-y-1.5">
               <p className="text-xs text-neutral-500">{LETTER_LABELS[key]}</p>
-              <div role="group" aria-label={LETTER_LABELS[key]} className="grid grid-cols-3 gap-1 p-1 rounded-full bg-white/[0.06]">
+              <div role="group" aria-label={LETTER_LABELS[key]} className="neu-in grid grid-cols-3 gap-1 p-1 rounded-full">
                 {LETTER_OPTIONS[key].map(([value, label]) => (
                   <button key={value} type="button" aria-pressed={settings[key] === value}
                     onClick={() => setSettings(prev => ({ ...prev, [key]: value }))}
-                    className={`text-xs sm:text-sm px-2 py-2 rounded-full transition-colors ${settings[key] === value
-                      ? "bg-white/[0.14] text-white"
+                    className={`lg text-xs sm:text-sm px-2 py-2 rounded-full transition-colors ${settings[key] === value
+                      ? "lg text-white"
                       : "text-neutral-400 hover:text-neutral-200"}`}>
                     {label}
                   </button>
@@ -257,14 +257,14 @@ export default function SmartApply({
             <button
               onClick={generateCoverLetter}
               disabled={isGenerating}
-              className="w-full inline-flex items-center justify-center gap-2 bg-teal-300 hover:bg-teal-200 text-neutral-950 h-12 rounded-full text-sm font-semibold transition-colors disabled:opacity-50"
+              className="lg lg-accent w-full inline-flex items-center justify-center gap-2 h-12 rounded-full text-sm font-semibold transition-colors disabled:opacity-50"
             >
               {isGenerating ? <><Loader2 className="w-4 h-4 animate-spin" /> Пишем письмо…</> : <><Sparkles className="w-4 h-4" /> Написать письмо</>}
             </button>
           ) : (
             <Link
               href={`/login?next=${encodeURIComponent(`/vacancy/${vacancy.id}`)}`}
-              className="w-full inline-flex items-center justify-center gap-2 bg-teal-300 hover:bg-teal-200 text-neutral-950 h-12 rounded-full text-sm font-semibold transition-colors"
+              className="lg lg-accent w-full inline-flex items-center justify-center gap-2 h-12 rounded-full text-sm font-semibold transition-colors"
             >
               Войдите, чтобы откликнуться
             </Link>
@@ -279,7 +279,7 @@ export default function SmartApply({
           {typed !== null ? (
             // Письмо «печатается»; по клику — сразу целиком
             <div onClick={() => { stopTimers(); setTyped(null); }} aria-hidden="true"
-              className="w-full h-64 overflow-hidden bg-[#0B0F19] border border-teal-300/40 rounded-2xl p-4 text-sm text-neutral-200 leading-relaxed whitespace-pre-wrap cursor-text">
+              className="neu-in w-full h-64 overflow-hidden rounded-2xl p-4 text-sm text-neutral-200 leading-relaxed whitespace-pre-wrap cursor-text">
               {coverLetter.slice(0, typed)}<span className="inline-block w-[2px] h-4 align-[-2px] bg-teal-300 animate-pulse" />
             </div>
           ) : (
@@ -287,7 +287,7 @@ export default function SmartApply({
               id={`letter-${vacancy.id}`}
               value={coverLetter}
               onChange={(e) => setCoverLetter(e.target.value)}
-              className="w-full h-64 bg-[#0B0F19] border border-white/10 rounded-2xl p-4 text-sm text-neutral-200 focus:outline-none focus:border-teal-300 leading-relaxed resize-none"
+              className="neu-in w-full h-64 rounded-2xl p-4 text-sm text-neutral-200 leading-relaxed resize-none"
             />
           )}
           {letterSource?.vacancyId === vacancy.id && letterSource.source === "template" ? (
@@ -307,7 +307,7 @@ export default function SmartApply({
                   <label htmlFor={`blitz-${vacancy.id}-${i}`} className="block text-sm text-neutral-200">{q}</label>
                   <textarea id={`blitz-${vacancy.id}-${i}`} rows={2} maxLength={1000} value={answers[i] ?? ""}
                     onChange={e => setAnswer(i, e.target.value)}
-                    className="w-full bg-[#0B0F19] border border-white/10 rounded-2xl px-4 py-3 text-sm text-neutral-200 focus:outline-none focus:border-teal-300 resize-y" />
+                    className="neu-in w-full rounded-2xl px-4 py-3 text-sm text-neutral-200 resize-y" />
                 </div>
               ))}
             </fieldset>
@@ -316,7 +316,7 @@ export default function SmartApply({
             <button
               onClick={sendApplication}
               disabled={isSending || typed !== null}
-              className="flex-1 inline-flex items-center justify-center gap-2 bg-teal-300 hover:bg-teal-200 text-neutral-950 h-12 rounded-full text-sm font-semibold transition-colors disabled:opacity-50"
+              className="lg lg-accent flex-1 inline-flex items-center justify-center gap-2 h-12 rounded-full text-sm font-semibold transition-colors disabled:opacity-50"
             >
               {isSending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />} Откликнуться с письмом
             </button>
@@ -324,7 +324,7 @@ export default function SmartApply({
               onClick={() => setCoverLetter("")}
               aria-label="Переписать письмо"
               title="Переписать"
-              className="w-12 h-12 shrink-0 inline-flex items-center justify-center rounded-full border border-white/15 text-neutral-300 hover:text-white hover:border-white/30 transition-colors"
+              className="lg w-12 h-12 shrink-0 inline-flex items-center justify-center rounded-full text-neutral-300 hover:text-white transition-colors"
             >
               <RotateCcw className="w-4 h-4" />
             </button>
@@ -354,7 +354,7 @@ export default function SmartApply({
       {!inline && vacancy && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in">
           <div role="dialog" aria-modal="true" aria-label={`Smart Apply: ${vacancy.title}`}
-            className="bg-[#0B0F19]/95 border border-white/12 rounded-3xl w-full max-w-xl overflow-hidden shadow-2xl flex flex-col max-h-[90vh]">
+            className="glass rounded-3xl w-full max-w-xl overflow-hidden flex flex-col max-h-[90vh]">
             <div className="flex items-start justify-between gap-4 p-5 border-b border-white/10">
               <div className="space-y-1.5 min-w-0">
                 {title}
@@ -372,7 +372,7 @@ export default function SmartApply({
       {/* --- МОДАЛЬНОЕ ОКНО ДЛЯ EMAIL-ВАКАНСИЙ (БЕЗ ПРИНУДИТЕЛЬНОГО OUTLOOK) --- */}
       {successContactModal.open && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-in fade-in">
-          <div className="bg-[#0B0F19]/95 border border-white/12 rounded-3xl w-full max-w-lg p-6 space-y-6 shadow-2xl relative">
+          <div className="glass rounded-3xl w-full max-w-lg p-6 space-y-6 relative">
             <div className="flex items-center justify-between border-b border-white/10 pb-4">
               <div className="flex items-center gap-2.5 text-emerald-400">
                 <div className="w-8 h-8 rounded-full bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center">
@@ -391,14 +391,14 @@ export default function SmartApply({
               </p>
 
               {/* Поле с адресом почты и кнопкой копирования */}
-              <div className="flex items-center justify-between bg-white/[0.04] border border-white/12 rounded-2xl p-3.5">
+              <div className="neu-sub flex items-center justify-between rounded-2xl p-3.5">
                 <div className="flex items-center gap-3 overflow-hidden">
                   <Mail className="w-4 h-4 text-teal-300 shrink-0" />
                   <span className="text-sm font-mono text-neutral-200 truncate">{successContactModal.value}</span>
                 </div>
                 <button
                   onClick={() => handleCopy(successContactModal.value)}
-                  className="flex items-center gap-1.5 px-3 py-1.5 bg-white/[0.08] hover:bg-white/[0.14] text-neutral-200 rounded-full text-xs font-medium transition-colors shrink-0 ml-2"
+                  className="lg flex items-center gap-1.5 px-3 py-1.5 text-neutral-200 rounded-full text-xs font-medium transition-colors shrink-0 ml-2"
                 >
                   {copiedEmail ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
                   {copiedEmail ? "Скопировано" : "Скопировать"}
@@ -411,14 +411,14 @@ export default function SmartApply({
                   href={`https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(successContactModal.value)}&su=${encodeURIComponent("Отклик на вакансию: " + successContactModal.vacancyTitle)}`}
                   target="_blank"
                   rel="noreferrer"
-                  className="flex items-center justify-center gap-2 py-2.5 px-4 bg-white/[0.08] hover:bg-white/[0.14] border border-white/15 rounded-full text-xs font-semibold text-neutral-200 transition-colors"
+                  className="lg flex items-center justify-center gap-2 py-2.5 px-4 rounded-full text-xs font-semibold text-neutral-200 transition-colors"
                 >
                   <ExternalLink className="w-3.5 h-3.5 text-red-400" /> Открыть в Gmail
                 </a>
 
                 <a
                   href={`mailto:${encodeURIComponent(successContactModal.value)}?subject=${encodeURIComponent("Отклик на вакансию: " + successContactModal.vacancyTitle)}`}
-                  className="flex items-center justify-center gap-2 py-2.5 px-4 bg-teal-300 hover:bg-teal-200 rounded-full text-xs font-semibold text-neutral-950 transition-colors"
+                  className="lg lg-accent flex items-center justify-center gap-2 py-2.5 px-4 rounded-full text-xs font-semibold transition-colors"
                 >
                   <Mail className="w-3.5 h-3.5" /> Написать на почту
                 </a>
@@ -427,7 +427,7 @@ export default function SmartApply({
 
             <button
               onClick={() => setSuccessContactModal({ ...successContactModal, open: false })}
-              className="w-full py-2.5 bg-transparent hover:bg-white/[0.06] border border-white/12 text-neutral-400 text-xs font-medium rounded-full transition-colors"
+              className="lg w-full py-2.5 text-neutral-400 text-xs font-medium rounded-full transition-colors"
             >
               Закрыть
             </button>

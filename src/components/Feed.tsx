@@ -323,9 +323,9 @@ export default function Feed({ initialRows, initialTotal, hero }: { initialRows:
   const direction = DIRECTIONS.find(d => d.id === selectedDirection);
   const showLevels = selectedLevels.length > 0 || (area !== "work" && direction?.group !== "work");
   const chip = (active: boolean) =>
-    `text-xs px-3 py-1.5 rounded-full border transition-colors ${active
-      ? "bg-teal-300/15 border-teal-300 text-teal-200"
-      : "bg-transparent border-white/15 text-neutral-300 hover:border-white/30 hover:text-neutral-100"}`;
+    `text-xs px-3 py-1.5 rounded-full transition-colors ${active
+      ? "lg lg-accent"
+      : "lg text-neutral-300 hover:text-neutral-100"}`;
 
   const forYou = mode === "for-you";
   const savedMode = mode === "saved";
@@ -337,11 +337,11 @@ export default function Feed({ initialRows, initialTotal, hero }: { initialRows:
     // Без заполненного профиля оценка у всех одинаковая — не показываем её
     const match = hasPrefs ? matches[item.id] : undefined;
     return (
-      <div key={item.id} className="bg-white/[0.04] border border-white/10 hover:border-white/20 rounded-3xl p-5 sm:p-6 flex flex-col gap-4 relative overflow-hidden group transition-colors">
+      <div key={item.id} className="neu-sub rounded-3xl p-5 sm:p-6 flex flex-col gap-4 relative overflow-hidden group transition-colors">
 
         {/* Бейджи источников */}
         {item.source_type === 'external' ? (
-           <div className="absolute top-4 right-4 bg-white/[0.06] text-neutral-300 text-[11px] font-medium px-2.5 py-1 rounded-full z-10">
+           <div className="absolute top-4 right-4 neu-chip text-neutral-300 text-[11px] font-medium px-2.5 py-1 rounded-full z-10">
              {sourceOf(item).badge}
            </div>
         ) : (
@@ -353,7 +353,7 @@ export default function Feed({ initialRows, initialTotal, hero }: { initialRows:
 
         <div className="flex flex-col sm:flex-row justify-between gap-4">
           <div className="flex gap-4 sm:gap-5 items-start pr-24 sm:pr-28">
-          {match && <MatchRing value={match.score} size={64} stroke={match.score >= 70 ? "#5EEAD4" : "#818CF8"} />}
+          {match && <MatchRing value={match.score} size={64} stroke={match.score >= 70 ? "#f4f4f5" : "#8a8a90"} />}
           <div className="min-w-0">
             <h2 className="text-lg sm:text-xl font-semibold text-neutral-100 leading-snug">
               <Link href={`/vacancy/${item.id}`} className="hover:text-teal-300 transition-colors">{item.title}</Link>
@@ -395,7 +395,7 @@ export default function Feed({ initialRows, initialTotal, hero }: { initialRows:
 
           <button
             onClick={() => setApplyVacancy(item)}
-            className="inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-teal-300 hover:bg-teal-200 text-neutral-950 rounded-full text-sm font-semibold transition-colors shrink-0 relative z-10 sm:self-end"
+            className="lg inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-full text-sm font-semibold transition-colors shrink-0 relative z-10 sm:self-end"
           >
             <Sparkles className="w-4 h-4" /> Smart Apply
           </button>
@@ -450,7 +450,7 @@ export default function Feed({ initialRows, initialTotal, hero }: { initialRows:
         {(item.stack?.length || item.source_url || isCandidate) ? (
           <div className="flex flex-wrap items-center gap-2">
             {item.stack?.slice(0, 8).map(tech => (
-              <span key={tech} className="text-[11px] px-2.5 py-0.5 rounded-full bg-white/[0.06] text-neutral-300">
+              <span key={tech} className="text-[11px] px-2.5 py-0.5 rounded-full neu-chip text-neutral-300">
                 {tech}
               </span>
             ))}
@@ -496,8 +496,8 @@ export default function Feed({ initialRows, initialTotal, hero }: { initialRows:
 
   return (
     <div className="min-h-screen text-neutral-100 antialiased font-sans relative">
-      <header className="border-b border-white/10 bg-neutral-950/70 backdrop-blur-md sticky top-0 z-20">
-        <div className="max-w-6xl mx-auto px-4 py-3 sm:py-4 flex items-center justify-between gap-3">
+      <header className="sticky top-0 z-20 px-3 sm:px-4 pt-3">
+        <div className="glass rounded-[26px] max-w-6xl mx-auto pl-4 pr-2.5 py-2.5 flex items-center justify-between gap-3">
           <div className="flex items-center gap-1 sm:gap-3">
             <Logo />
             <Link href="/about" className="hidden sm:inline-block px-3 py-2 rounded-full text-sm text-neutral-400 hover:text-white transition-colors">
@@ -520,31 +520,31 @@ export default function Feed({ initialRows, initialTotal, hero }: { initialRows:
                   <>
                     <Link 
                       href="/employer"
-                      className="px-4 py-2 rounded-full text-sm text-neutral-300 hover:text-white hover:bg-white/[0.06] transition-colors"
+                      className="lg px-4 py-2 rounded-full text-sm text-neutral-300 hover:text-white transition-colors"
                     >
                       Кабинет HR
                     </Link>
                     <Link href="/resumes"
-                      className="hidden sm:inline-block px-3 py-2 rounded-full text-sm text-neutral-300 hover:text-white hover:bg-white/[0.06] transition-colors">
+                      className="lg hidden sm:inline-block px-3 py-2 rounded-full text-sm text-neutral-300 hover:text-white transition-colors">
                       Резюме
                     </Link>
                   </>
                 ) : (
                   <Link 
                     href="/applications"
-                    className="px-4 py-2 rounded-full text-sm text-neutral-300 hover:text-white hover:bg-white/[0.06] transition-colors"
+                    className="lg px-4 py-2 rounded-full text-sm text-neutral-300 hover:text-white transition-colors"
                   >
                     Мои отклики
                   </Link>
                 )}
 
                 <Link href="/messages" aria-label="Сообщения"
-                  className="relative px-3 py-2 rounded-full text-sm text-neutral-300 hover:text-white hover:bg-white/[0.06] transition-colors hidden sm:inline-flex items-center gap-1.5">
+                  className="lg relative px-3 py-2 rounded-full text-sm text-neutral-300 hover:text-white transition-colors hidden sm:inline-flex items-center gap-1.5">
                   Сообщения <UnreadDot count={unread} label="чатов с новыми сообщениями" />
                 </Link>
                 <Link
                   href="/profile"
-                  className="w-10 h-10 flex items-center justify-center rounded-full bg-white/10 text-neutral-100 font-semibold cursor-pointer hover:bg-white/15 transition-colors relative z-50"
+                  className="lg w-10 h-10 flex items-center justify-center rounded-full text-neutral-100 font-semibold cursor-pointer transition-colors relative z-50"
                   title="Перейти в личный кабинет"
                 >
                   {user.email?.charAt(0).toUpperCase()}
@@ -553,7 +553,7 @@ export default function Feed({ initialRows, initialTotal, hero }: { initialRows:
             ) : (
               <Link 
                 href="/register"
-                className="px-4 py-2 bg-white/[0.08] hover:bg-white/[0.14] text-neutral-100 rounded-full text-sm font-medium transition-colors border border-white/15 relative z-50 whitespace-nowrap"
+                className="lg px-4 py-2 text-neutral-100 rounded-full text-sm font-medium transition-colors relative z-50 whitespace-nowrap"
               >
                 Войти<span className="hidden sm:inline"> / Регистрация</span>
               </Link>
@@ -570,7 +570,7 @@ export default function Feed({ initialRows, initialTotal, hero }: { initialRows:
             <button
               onClick={() => setFiltersOpen(open => !open)}
               aria-expanded={filtersOpen}
-              className="lg:hidden flex items-center justify-between w-full px-5 py-3 bg-white/[0.04] border border-white/10 rounded-full text-sm font-medium text-neutral-200"
+              className="lg lg:hidden flex items-center justify-between w-full px-5 py-3 rounded-full text-sm font-medium text-neutral-200"
             >
               <span className="inline-flex items-center gap-2">
                 <SlidersHorizontal className="w-4 h-4 text-neutral-400" /> Фильтры
@@ -582,7 +582,7 @@ export default function Feed({ initialRows, initialTotal, hero }: { initialRows:
         })()}
         {/* Sidebar Filters */}
         <aside className={`lg:col-span-1 space-y-6 ${filtersOpen ? "" : "hidden"} lg:block`}>
-          <div className="bg-white/[0.04] border border-white/10 rounded-3xl p-5 space-y-6">
+          <div className="neu-sub rounded-3xl p-5 space-y-6">
             {/* Направление и уточнение по технологиям — главное для кандидата */}
             <div className="space-y-3">
               <label className="text-xs font-bold text-neutral-500 uppercase tracking-wider">Направление</label>
@@ -613,7 +613,7 @@ export default function Feed({ initialRows, initialTotal, hero }: { initialRows:
               <label className="text-xs font-bold text-neutral-500 uppercase tracking-wider">Ключевые слова</label>
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400" />
-                <input type="text" placeholder="Java, Backend..." value={search} onChange={(e) => setSearch(e.target.value)} className="w-full pl-9 pr-4 py-2.5 bg-white/[0.04] border border-white/10 rounded-full text-sm text-neutral-100 focus:outline-none focus:border-teal-300 transition-colors" />
+                <input type="text" placeholder="Java, Backend..." value={search} onChange={(e) => setSearch(e.target.value)} className="neu-in w-full pl-9 pr-4 py-2.5 rounded-full text-sm text-neutral-100 transition-colors" />
               </div>
             </div>
 
@@ -722,8 +722,8 @@ export default function Feed({ initialRows, initialTotal, hero }: { initialRows:
                 key={id || "all"}
                 onClick={() => chooseArea(id)}
                 aria-pressed={area === id}
-                className={`px-4 py-2 rounded-full text-sm border transition-colors ${
-                  area === id ? "bg-teal-300 border-teal-300 text-neutral-950 font-medium" : "bg-white/[0.04] border-white/10 text-neutral-300 hover:bg-white/[0.08]"
+                className={`lg px-4 py-2 rounded-full text-sm transition-colors ${
+                  area === id ? "lg lg-accent font-medium" : "lg text-neutral-300"
                 }`}
               >
                 <span className="sm:hidden">{short}</span><span className="hidden sm:inline">{label}</span>
@@ -738,8 +738,8 @@ export default function Feed({ initialRows, initialTotal, hero }: { initialRows:
                   role="tab"
                   aria-selected={mode === id}
                   onClick={() => (id === "for-you" ? showForYou() : id === "saved" ? showSaved() : setMode("all"))}
-                  className={`inline-flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-medium border transition-colors ${
-                    mode === id ? "bg-white/[0.14] border-white/20 text-neutral-100" : "bg-transparent border-white/10 text-neutral-400 hover:text-neutral-100"
+                  className={`lg inline-flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-medium transition-colors ${
+                    mode === id ? "lg text-neutral-100" : "lg text-neutral-400 hover:text-neutral-100"
                   }`}
                 >
                   {id === "for-you" && <Target className="w-4 h-4" />}
@@ -751,7 +751,7 @@ export default function Feed({ initialRows, initialTotal, hero }: { initialRows:
           )}
 
           {isCandidate && !hasPrefs && !forYou && (
-            <div className="rounded-3xl border border-white/10 bg-white/[0.04] px-5 py-4 text-sm text-neutral-300">
+            <div className="neu-sub rounded-3xl px-5 py-4 text-sm text-neutral-300">
               Расскажите, что ищете — направления, уровень и навыки, — и у каждой вакансии появится процент совпадения.{" "}
               <Link href="/profile#prefs" className="text-teal-300 hover:underline">Заполнить профиль</Link>
             </div>
@@ -774,7 +774,7 @@ export default function Feed({ initialRows, initialTotal, hero }: { initialRows:
           ) : loadError ? (
             <div className="text-center py-20 text-sm text-red-400">{loadError}</div>
           ) : list.length === 0 ? (
-            <div className="text-center py-20 bg-white/[0.02] border border-dashed border-white/15 rounded-3xl">
+            <div className="neu-sub text-center py-20 rounded-3xl">
               <p className="text-neutral-300 text-sm font-medium">Ничего не нашлось</p>
               <p className="text-neutral-500 text-xs mt-1">
                 {savedMode ? "Нажмите «В избранное» на карточке, чтобы вернуться к вакансии позже"
@@ -790,7 +790,7 @@ export default function Feed({ initialRows, initialTotal, hero }: { initialRows:
                   <button
                     onClick={() => loadRecommended(recPage + 1)}
                     disabled={recLoading}
-                    className="mx-auto mt-2 inline-flex items-center gap-2 px-6 py-3 bg-white/[0.06] hover:bg-white/[0.1] border border-white/15 rounded-full text-sm text-neutral-100 transition-colors disabled:opacity-50"
+                    className="lg mx-auto mt-2 inline-flex items-center gap-2 px-6 py-3 rounded-full text-sm text-neutral-100 transition-colors disabled:opacity-50"
                   >
                     {recLoading ? <><Loader2 className="w-4 h-4 animate-spin" /> Загружаем…</> : "Показать ещё"}
                   </button>
@@ -799,7 +799,7 @@ export default function Feed({ initialRows, initialTotal, hero }: { initialRows:
                 <button
                   onClick={loadMore}
                   disabled={loadingMore}
-                  className="mx-auto mt-2 inline-flex items-center gap-2 px-6 py-3 bg-white/[0.06] hover:bg-white/[0.1] border border-white/15 rounded-full text-sm text-neutral-100 transition-colors disabled:opacity-50"
+                  className="lg mx-auto mt-2 inline-flex items-center gap-2 px-6 py-3 rounded-full text-sm text-neutral-100 transition-colors disabled:opacity-50"
                 >
                   {loadingMore
                     ? <><Loader2 className="w-4 h-4 animate-spin" /> Загружаем…</>
@@ -810,7 +810,7 @@ export default function Feed({ initialRows, initialTotal, hero }: { initialRows:
           )}
 
           {savedMode && hiddenList.length > 0 && (
-            <details className="rounded-3xl border border-white/10 bg-white/[0.03] px-5 py-4">
+            <details className="neu-sub rounded-3xl px-5 py-4">
               <summary className="cursor-pointer text-sm text-neutral-300">Скрытые вакансии ({hiddenList.length})</summary>
               <ul className="mt-3 space-y-2">
                 {hiddenList.map(v => (

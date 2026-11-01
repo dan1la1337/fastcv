@@ -38,7 +38,7 @@ export default function ScreeningVerdict({ applicationId, screening, onChange }:
     return (
       <div className="flex flex-wrap items-center gap-3">
         <button onClick={() => run(false)} disabled={busy}
-          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-indigo-400/30 text-xs text-indigo-200 hover:border-indigo-300/60 disabled:opacity-50">
+          className="lg inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs text-indigo-200 disabled:opacity-50">
           {busy ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Sparkles className="w-3.5 h-3.5" />} ИИ-вердикт по отклику
         </button>
         {error && <span role="alert" className="text-xs text-amber-300">{error}</span>}
@@ -51,7 +51,7 @@ export default function ScreeningVerdict({ applicationId, screening, onChange }:
         <span className={`px-2.5 py-0.5 rounded-full border text-xs font-medium ${FIT_STYLE[screening.fit]}`}>{FIT_LABEL[screening.fit]}</span>
         <p className="flex-1 min-w-[12rem] text-sm text-neutral-200">{screening.headline}</p>
         <button onClick={() => run(true)} disabled={busy} title="Разобрать заново (например, после обновления профиля кандидата)"
-          aria-label="Разобрать отклик заново" className="p-1.5 rounded-lg text-neutral-500 hover:text-white hover:bg-white/[0.08] disabled:opacity-50">
+          aria-label="Разобрать отклик заново" className="lg p-1.5 rounded-lg text-neutral-500 hover:text-white disabled:opacity-50">
           {busy ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <RefreshCw className="w-3.5 h-3.5" />}
         </button>
       </div>

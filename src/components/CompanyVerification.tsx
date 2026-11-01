@@ -6,7 +6,7 @@ import { supabase } from "@/lib/supabase";
 import { isNetworkError } from "@/lib/auth-errors";
 
 const inputClass =
-  "flex-1 min-w-0 bg-[#0B0F19] border border-white/12 rounded-2xl px-4 py-3 text-sm text-neutral-200 focus:outline-none focus:border-teal-300 transition-colors";
+  "flex-1 min-w-0 neu-in rounded-2xl px-4 py-3 text-sm text-neutral-200 transition-colors";
 
 /** Текст ошибки из базы («company_domain: …») — без служебного префикса. */
 function errorText(message: string): string {
@@ -89,7 +89,7 @@ export default function CompanyVerification({ userId }: { userId: string }) {
             <input id="company-domain" value={domain} onChange={e => setDomain(e.target.value)} placeholder="acme.ru"
               className={inputClass} />
             <button type="submit" disabled={busy || !domain.trim()}
-              className="px-5 py-3 rounded-full border border-white/15 text-sm text-neutral-200 hover:border-white/30 disabled:opacity-50 transition-colors">
+              className="lg px-5 py-3 rounded-full text-sm text-neutral-200 disabled:opacity-50 transition-colors">
               {record ? "Сменить домен" : "Получить код"}
             </button>
           </form>
@@ -100,15 +100,15 @@ export default function CompanyVerification({ userId }: { userId: string }) {
                 <li>Откройте настройки DNS домена <span className="text-neutral-200">{state.domain}</span> у регистратора или хостинга.</li>
                 <li>Добавьте запись типа <span className="text-neutral-200">TXT</span> для самого домена (имя «@») с таким значением:</li>
               </ol>
-              <div className="flex items-center gap-2 bg-[#0B0F19] border border-white/12 rounded-2xl p-3">
+              <div className="neu-in flex items-center gap-2 rounded-2xl p-3">
                 <code className="flex-1 min-w-0 truncate font-mono text-xs text-teal-200">{record}</code>
                 <button type="button" onClick={() => copy(record)} aria-label="Скопировать запись"
-                  className="shrink-0 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/[0.08] hover:bg-white/[0.14] text-xs text-neutral-200">
+                  className="lg shrink-0 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs text-neutral-200">
                   {copied ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />} {copied ? "Скопировано" : "Копировать"}
                 </button>
               </div>
               <button type="button" onClick={check} disabled={busy}
-                className="w-full inline-flex items-center justify-center gap-2 bg-teal-300 hover:bg-teal-200 text-neutral-950 h-12 rounded-full text-sm font-semibold transition-colors disabled:opacity-50">
+                className="lg lg-accent w-full inline-flex items-center justify-center gap-2 h-12 rounded-full text-sm font-semibold transition-colors disabled:opacity-50">
                 {busy ? <Loader2 className="w-4 h-4 animate-spin" /> : <ShieldCheck className="w-4 h-4" />} Проверить запись
               </button>
             </div>

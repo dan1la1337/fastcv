@@ -46,7 +46,7 @@ export default function CompanyRatingCard({ company, rating }: { company: string
     <section aria-labelledby="rating-title" className="glass rounded-3xl p-6 sm:p-8 space-y-6">
       <div className="flex flex-wrap items-center gap-5">
         {rating.score !== undefined ? (
-          <MatchRing value={rating.score} size={96} stroke={rating.score >= 70 ? "#5EEAD4" : "#818CF8"} />
+          <MatchRing value={rating.score} size={96} stroke={rating.score >= 70 ? "#f4f4f5" : "#8a8a90"} />
         ) : (
           <div className="w-24 h-24 rounded-full border-[6px] border-white/10 flex items-center justify-center text-xs text-neutral-500 text-center px-2">мало данных</div>
         )}
@@ -65,7 +65,7 @@ export default function CompanyRatingCard({ company, rating }: { company: string
       {signals.length > 0 && (
         <dl className="grid sm:grid-cols-2 gap-3">
           {signals.map(s => (
-            <div key={s.label} className="rounded-2xl bg-white/[0.04] border border-white/[0.08] px-4 py-3" title={s.hint}>
+            <div key={s.label} className="neu-sub rounded-2xl px-4 py-3" title={s.hint}>
               <dt className="text-xs text-neutral-500 inline-flex items-center gap-1.5"><s.icon className="w-3.5 h-3.5" aria-hidden="true" />{s.label}</dt>
               <dd className="mt-1 font-semibold text-white flex items-center gap-2">
                 {s.value}
@@ -105,7 +105,7 @@ export default function CompanyRatingCard({ company, rating }: { company: string
                   {[5, 4, 3, 2, 1].map(n => (
                     <div key={n} className="grid grid-cols-[1.5rem_1fr_2rem] items-center gap-2 text-xs text-neutral-400">
                       <span>{n}★</span>
-                      <span className="h-2 rounded-full bg-white/[0.06] overflow-hidden">
+                      <span className="h-2 rounded-full neu-chip overflow-hidden">
                         <span className="block h-full bg-amber-300/80 rounded-full" style={{ width: `${(dist[n - 1] / maxDist) * 100}%` }} />
                       </span>
                       <span className="text-right tabular-nums">{dist[n - 1]}</span>
@@ -124,7 +124,7 @@ export default function CompanyRatingCard({ company, rating }: { company: string
 
             <ul className="space-y-3">
               {reviews.map(r => (
-                <li key={r.id} className="rounded-2xl border border-white/10 p-4 space-y-2">
+                <li key={r.id} className="neu-sub rounded-2xl p-4 space-y-2">
                   <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
                     <Stars value={r.rating} size="w-3.5 h-3.5" />
                     <span className="text-xs text-neutral-400 inline-flex items-center gap-1">

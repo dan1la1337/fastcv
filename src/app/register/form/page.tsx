@@ -9,13 +9,13 @@ import { authErrorText } from '@/lib/auth-errors';
 import { LEGAL_VERSION } from '@/lib/legal';
 
 const card = 'max-w-md w-full glass rounded-3xl p-8 shadow-2xl';
-const input = 'w-full px-4 py-3 bg-[#0B0F19] border border-white/12 rounded-2xl text-sm text-neutral-100 focus:outline-none focus:border-teal-300 transition-colors';
+const input = 'w-full px-4 py-3 neu-in rounded-2xl text-sm text-neutral-100 transition-colors';
 const label = 'block text-xs font-bold text-neutral-500 uppercase tracking-wider mb-2';
 
 function Logo() {
   return (
     <Link href="/" className="inline-flex items-center gap-2 mb-6 hover:opacity-80 transition-opacity">
-      <span className="font-display font-bold text-lg tracking-tight text-neutral-100">fastcv</span>
+      <span className="font-display text-xl text-neutral-100">FastCV</span>
     </Link>
   );
 }
@@ -109,7 +109,7 @@ function RegisterFormContent() {
 
           <label className="flex items-start gap-3 text-xs text-neutral-400 leading-relaxed cursor-pointer">
             <input type="checkbox" required checked={agreed} onChange={(e) => setAgreed(e.target.checked)}
-              className="mt-0.5 w-4 h-4 shrink-0 rounded bg-neutral-950 border-white/15" />
+              className="neu-in mt-0.5 w-4 h-4 shrink-0 rounded" />
             <span>
               Принимаю <Link href="/terms" target="_blank" className="text-teal-300 hover:underline">пользовательское соглашение</Link> и
               даю согласие на обработку персональных данных, в том числе их передачу за рубеж, на условиях{' '}
@@ -124,7 +124,7 @@ function RegisterFormContent() {
           <button
             type="submit"
             disabled={loading || !agreed}
-            className="w-full flex items-center justify-center gap-2 bg-teal-300 hover:bg-teal-200 text-neutral-950 py-3 rounded-full text-sm font-semibold transition-colors disabled:opacity-50 mt-6"
+            className="lg lg-accent w-full flex items-center justify-center gap-2 py-3 rounded-full text-sm font-semibold transition-colors disabled:opacity-50 mt-6"
           >
             {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Зарегистрироваться'}
           </button>

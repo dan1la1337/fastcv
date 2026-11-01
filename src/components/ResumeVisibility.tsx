@@ -56,7 +56,7 @@ export default function ResumeVisibility({ userId }: { userId: string }) {
         </label>
         <input id="resume-headline" maxLength={120} value={headline} onChange={e => setHeadline(e.target.value)}
           placeholder="Например: Python-разработчик (Middle)"
-          className="w-full px-4 py-3 bg-[#0B0F19] border border-white/12 rounded-2xl text-sm text-neutral-100 focus:outline-none focus:border-teal-300 transition-colors" />
+          className="neu-in w-full px-4 py-3 rounded-2xl text-sm text-neutral-100 transition-colors" />
       </div>
 
       <p className="text-xs text-neutral-500">
@@ -69,17 +69,17 @@ export default function ResumeVisibility({ userId }: { userId: string }) {
         {state.open ? (
           <>
             <button type="button" onClick={() => save(true)} disabled={busy || headline.trim() === state.headline}
-              className="px-5 h-11 rounded-full bg-teal-300 hover:bg-teal-200 text-neutral-950 text-sm font-semibold disabled:opacity-50 transition-colors">
+              className="lg lg-accent px-5 h-11 rounded-full text-sm font-semibold disabled:opacity-50 transition-colors">
               Сохранить должность
             </button>
             <button type="button" onClick={() => save(false)} disabled={busy}
-              className="px-5 h-11 rounded-full border border-white/15 text-sm text-neutral-300 hover:text-white hover:border-white/30 disabled:opacity-50 transition-colors inline-flex items-center gap-2">
+              className="lg px-5 h-11 rounded-full text-sm text-neutral-300 hover:text-white disabled:opacity-50 transition-colors inline-flex items-center gap-2">
               {busy && <Loader2 className="w-4 h-4 animate-spin" />} Скрыть резюме
             </button>
           </>
         ) : (
           <button type="button" onClick={() => save(true)} disabled={busy}
-            className="px-5 h-11 rounded-full bg-teal-300 hover:bg-teal-200 text-neutral-950 text-sm font-semibold disabled:opacity-50 transition-colors inline-flex items-center gap-2">
+            className="lg lg-accent px-5 h-11 rounded-full text-sm font-semibold disabled:opacity-50 transition-colors inline-flex items-center gap-2">
             {busy ? <Loader2 className="w-4 h-4 animate-spin" /> : <Eye className="w-4 h-4" />} Открыть резюме работодателям
           </button>
         )}

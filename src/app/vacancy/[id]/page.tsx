@@ -153,7 +153,7 @@ export default async function VacancyPage({ params }: Props) {
               {tiles.length > 0 && (
                 <div className="grid grid-cols-[repeat(auto-fit,minmax(10rem,1fr))] gap-3">
                   {tiles.map(t => (
-                    <div key={t.label} className="rounded-2xl px-4 py-3 bg-white/[0.04] border border-white/[0.08]">
+                    <div key={t.label} className="neu-sub rounded-2xl px-4 py-3">
                       <p className="text-xs text-neutral-500">{t.label}</p>
                       <p className="mt-1 font-semibold text-white">{t.value}</p>
                       {t.estimate && estimate && <SalaryEstimate estimate={estimate} className="text-xs mt-1" />}
@@ -182,7 +182,7 @@ export default async function VacancyPage({ params }: Props) {
               {vacancy.stack && vacancy.stack.length > 0 && (
                 <div className="flex flex-wrap gap-2">
                   {vacancy.stack.map(tech => (
-                    <span key={tech} className="text-xs px-3 py-1 rounded-full bg-white/[0.06] border border-white/10 text-neutral-300">{tech}</span>
+                    <span key={tech} className="text-xs px-3 py-1 rounded-full neu-chip text-neutral-300">{tech}</span>
                   ))}
                 </div>
               )}
@@ -207,7 +207,7 @@ export default async function VacancyPage({ params }: Props) {
 
             {!vacancy.archived_at && (
               <Link href={`/practice/${vacancy.id}`}
-                className="glass rounded-3xl p-5 flex items-center gap-4 group hover:border-teal-300/40 transition-colors">
+                className="lg lg-tint rounded-3xl p-5 flex items-center gap-4 group transition-colors">
                 <span className="shrink-0 w-11 h-11 rounded-2xl bg-teal-300/10 text-teal-300 inline-flex items-center justify-center">
                   <MessagesSquare className="w-5 h-5" aria-hidden="true" />
                 </span>

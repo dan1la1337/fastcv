@@ -80,7 +80,7 @@ const REJECT_REASONS: { label: string; text: string }[] = [
 ];
 
 const inputClass =
-  "w-full px-4 py-3 bg-[#0B0F19] border border-white/12 rounded-2xl text-sm text-neutral-100 focus:outline-none focus:border-teal-300";
+  "w-full px-4 py-3 neu-in rounded-2xl text-sm text-neutral-100";
 const labelClass = "block text-xs text-neutral-400 mb-2";
 
 export default function EmployerDashboard() {
@@ -374,7 +374,7 @@ export default function EmployerDashboard() {
   const openVacancies = vacancies.filter(v => !v.archived_at).length;
   const tabClass = (tab: Tab) =>
     `px-4 py-2 rounded-full text-sm transition-colors ${
-      activeTab === tab ? "bg-white/[0.14] text-white" : "text-neutral-400 hover:text-white"
+      activeTab === tab ? "lg lg-accent" : "lg text-neutral-400 hover:text-white"
     }`;
 
   return (
@@ -384,7 +384,7 @@ export default function EmployerDashboard() {
           <div className="space-y-1.5">
             <div className="flex flex-wrap items-center gap-3">
               <h1 className="font-display text-2xl font-bold">Кабинет работодателя</h1>
-              <span className="px-3 py-1 rounded-full bg-white/[0.08] text-xs text-neutral-300">для работодателей</span>
+              <span className="px-3 py-1 rounded-full neu-chip text-xs text-neutral-300">для работодателей</span>
             </div>
             <p className="text-sm text-neutral-400">
               Компания: {companyName || <Link href="/profile" className="text-teal-300 hover:underline">укажите в профиле</Link>}
@@ -392,16 +392,16 @@ export default function EmployerDashboard() {
           </div>
           <span className="flex-1" />
           <Link href="/resumes"
-            className="inline-flex items-center gap-2 h-11 px-5 rounded-full border border-white/15 text-sm text-neutral-200 hover:border-white/30 transition-colors">
+            className="lg inline-flex items-center gap-2 h-11 px-5 rounded-full text-sm text-neutral-200 transition-colors">
             <Users className="w-4 h-4" /> База резюме
           </Link>
           <Link href="/messages"
-            className="inline-flex items-center gap-2 h-11 px-5 rounded-full border border-white/15 text-sm text-neutral-200 hover:border-white/30 transition-colors">
+            className="lg inline-flex items-center gap-2 h-11 px-5 rounded-full text-sm text-neutral-200 transition-colors">
             <MessageCircle className="w-4 h-4" /> Сообщения
           </Link>
           <button
             onClick={() => openForm()}
-            className="inline-flex items-center gap-2 h-11 px-5 rounded-full bg-teal-300 hover:bg-teal-200 text-neutral-950 text-sm font-semibold transition-colors"
+            className="lg lg-accent inline-flex items-center gap-2 h-11 px-5 rounded-full text-sm font-semibold transition-colors"
           >
             <Plus className="w-4 h-4" /> Новая вакансия
           </button>
@@ -409,7 +409,7 @@ export default function EmployerDashboard() {
 
         <UpcomingInterviews />
 
-        <div role="tablist" aria-label="Разделы кабинета" className="inline-flex gap-1 p-1 rounded-full bg-white/[0.06]">
+        <div role="tablist" aria-label="Разделы кабинета" className="neu-in inline-flex gap-1 p-1 rounded-full">
           <button role="tab" aria-selected={activeTab === "applications"} onClick={() => setActiveTab("applications")} className={tabClass("applications")}>
             Отклики · {applications.length}
           </button>
@@ -445,7 +445,7 @@ export default function EmployerDashboard() {
                   placeholder="Ищем мидл-бэкендера на Python в финтех, Django + Postgres, удалёнка, 250–300к"
                   className={`${inputClass} resize-y`} />
                 <button type="button" onClick={draftWithAi} disabled={drafting || notes.trim().length < 15}
-                  className="inline-flex items-center gap-2 h-10 px-4 rounded-full bg-teal-300 hover:bg-teal-200 text-neutral-950 text-sm font-semibold disabled:opacity-50">
+                  className="lg lg-accent inline-flex items-center gap-2 h-10 px-4 rounded-full text-sm font-semibold disabled:opacity-50">
                   {drafting ? <><Loader2 className="w-4 h-4 animate-spin" /> Пишем…</> : "Написать черновик"}
                 </button>
               </div>
@@ -518,12 +518,12 @@ export default function EmployerDashboard() {
 
               <div className="flex flex-col sm:flex-row gap-3">
                 <button type="submit" disabled={saving}
-                  className="flex-1 h-12 bg-teal-300 hover:bg-teal-200 text-neutral-950 rounded-full text-sm font-semibold transition-colors disabled:opacity-50 flex items-center justify-center gap-2">
+                  className="lg lg-accent flex-1 h-12 rounded-full text-sm font-semibold transition-colors disabled:opacity-50 flex items-center justify-center gap-2">
                   {saving ? <Loader2 className="w-5 h-5 animate-spin" /> : editingId ? "Сохранить изменения" : "Опубликовать"}
                 </button>
                 {editingId && (
                   <button type="button" onClick={() => { setEditingId(null); setActiveTab("vacancies"); }}
-                    className="px-6 h-12 border border-white/15 rounded-full text-sm text-neutral-300 hover:text-white hover:border-white/30">
+                    className="lg px-6 h-12 rounded-full text-sm text-neutral-300 hover:text-white">
                     Отмена
                   </button>
                 )}
@@ -537,7 +537,7 @@ export default function EmployerDashboard() {
 
         {activeTab === "vacancies" && (
           vacancies.length === 0 ? (
-            <div className="text-center py-20 border border-dashed border-white/15 rounded-3xl">
+            <div className="neu-sub text-center py-20 rounded-3xl">
               <Briefcase className="w-10 h-10 mx-auto text-neutral-600 mb-3" />
               <p className="text-neutral-400 text-sm font-medium">У вас пока нет вакансий</p>
               <button onClick={() => openForm()} className="mt-3 text-sm text-teal-300 hover:underline">Опубликовать первую</button>
@@ -561,7 +561,7 @@ export default function EmployerDashboard() {
                       <div className="flex-1 min-w-[14rem]">
                         <div className="flex flex-wrap items-center gap-2">
                           <h3 className="font-display text-lg font-bold text-white">{v.title}</h3>
-                          {v.archived_at && <span className="text-xs px-2.5 py-0.5 rounded-full bg-white/[0.08] text-neutral-400">закрыта</span>}
+                          {v.archived_at && <span className="text-xs px-2.5 py-0.5 rounded-full neu-chip text-neutral-400">закрыта</span>}
                         </div>
                         <p className="text-sm text-neutral-400 mt-1">
                           {formatSalary(v.salary_min, v.salary_max, v.salary_currency)}
@@ -570,17 +570,17 @@ export default function EmployerDashboard() {
                       </div>
                       <div className="flex items-center gap-2 shrink-0">
                         <Link href={`/vacancy/${v.id}`} title="Открыть страницу вакансии" aria-label="Открыть страницу вакансии"
-                          className="w-10 h-10 inline-flex items-center justify-center rounded-full border border-white/12 text-neutral-400 hover:text-white hover:border-white/30"><Eye className="w-4 h-4" /></Link>
+                          className="lg w-10 h-10 inline-flex items-center justify-center rounded-full text-neutral-400 hover:text-white"><Eye className="w-4 h-4" /></Link>
                         <button onClick={() => openForm(v)} title="Редактировать" aria-label="Редактировать"
-                          className="w-10 h-10 inline-flex items-center justify-center rounded-full border border-white/12 text-neutral-400 hover:text-white hover:border-white/30"><Pencil className="w-4 h-4" /></button>
+                          className="lg w-10 h-10 inline-flex items-center justify-center rounded-full text-neutral-400 hover:text-white"><Pencil className="w-4 h-4" /></button>
                         {v.archived_at ? (
                           <button onClick={() => setArchived(v, false)}
-                            className="inline-flex items-center gap-1.5 h-10 px-4 rounded-full border border-white/12 text-sm text-neutral-300 hover:text-white hover:border-white/30">
+                            className="lg inline-flex items-center gap-1.5 h-10 px-4 rounded-full text-sm text-neutral-300 hover:text-white">
                             <RotateCcw className="w-3.5 h-3.5" /> Открыть снова
                           </button>
                         ) : (
                           <button onClick={() => setArchived(v, true)}
-                            className="inline-flex items-center gap-1.5 h-10 px-4 rounded-full border border-white/12 text-sm text-neutral-300 hover:text-red-300 hover:border-red-400/40">
+                            className="lg inline-flex items-center gap-1.5 h-10 px-4 rounded-full text-sm text-neutral-300 hover:text-red-300">
                             <Archive className="w-3.5 h-3.5" /> Закрыть
                           </button>
                         )}
@@ -590,7 +590,7 @@ export default function EmployerDashboard() {
                       {funnel.map((f, i) => (
                         <div key={f.label} className="grid grid-cols-[7.5rem_1fr_3rem] items-center gap-3">
                           <span className="text-neutral-400">{f.label}</span>
-                          <span className="h-2.5 rounded-r-md bg-white/[0.06] overflow-hidden">
+                          <span className="h-2.5 rounded-r-md neu-chip overflow-hidden">
                             <span className={`bar-grow block h-full rounded-r-md ${f.color}`}
                               style={{ width: `${Math.max(f.value ? 2 : 0, (f.value / top) * 100)}%`, animationDelay: `${i * 0.15}s` }} />
                           </span>
@@ -616,7 +616,7 @@ export default function EmployerDashboard() {
         {/* Отклики */}
         {activeTab === "applications" && (
           applications.length === 0 ? (
-            <div className="text-center py-20 border border-dashed border-white/15 rounded-3xl">
+            <div className="neu-sub text-center py-20 rounded-3xl">
               <Briefcase className="w-10 h-10 mx-auto text-neutral-600 mb-3" />
               <p className="text-neutral-400 text-sm font-medium">Пока нет откликов</p>
               <p className="text-neutral-500 text-xs mt-1">Опубликуйте вакансию, чтобы получать отклики через Smart Apply</p>
@@ -624,17 +624,17 @@ export default function EmployerDashboard() {
           ) : (
             <div className="grid gap-4">
               <div className="flex flex-wrap items-center justify-between gap-3">
-                <div role="group" aria-label="Сортировка откликов" className="inline-flex gap-1 p-1 rounded-full bg-white/[0.06] text-sm">
+                <div role="group" aria-label="Сортировка откликов" className="neu-in inline-flex gap-1 p-1 rounded-full text-sm">
                   {([["match", "По совпадению"], ["ai", "По вердикту ИИ"], ["new", "Сначала новые"]] as const).map(([id, label]) => (
                     <button key={id} onClick={() => setSortBy(id)} aria-pressed={sortBy === id}
-                      className={`px-4 py-1.5 rounded-full transition-colors ${sortBy === id ? "bg-white/[0.14] text-white" : "text-neutral-400 hover:text-white"}`}>
+                      className={`lg px-4 py-1.5 rounded-full transition-colors ${sortBy === id ? "lg text-white" : "text-neutral-400 hover:text-white"}`}>
                       {label}
                     </button>
                   ))}
                 </div>
                 {unscreened.length > 0 ? (
                   <button onClick={screenAll} disabled={!!batch}
-                    className="inline-flex items-center gap-1.5 px-4 h-9 rounded-full border border-indigo-400/30 text-sm text-indigo-200 hover:border-indigo-300/60 disabled:opacity-60">
+                    className="lg inline-flex items-center gap-1.5 px-4 h-9 rounded-full text-sm text-indigo-200 disabled:opacity-60">
                     {batch ? <><Loader2 className="w-4 h-4 animate-spin" /> Разбираю {batch.done} из {batch.total}…</>
                       : <><Sparkles className="w-4 h-4" /> ИИ-разбор новых откликов · {Math.min(unscreened.length, 15)}</>}
                   </button>
@@ -646,22 +646,22 @@ export default function EmployerDashboard() {
               {waitingIds.length > 1 && (
                 <div className="flex flex-wrap items-center gap-2 text-sm" role="group" aria-label="Выбор откликов">
                   <span className="text-neutral-500">Выбрать:</span>
-                  <button onClick={() => setSelected(new Set(waitingIds))} className="px-3 py-1 rounded-full border border-white/12 text-neutral-300 hover:border-white/30">все ждущие · {waitingIds.length}</button>
+                  <button onClick={() => setSelected(new Set(waitingIds))} className="lg px-3 py-1 rounded-full text-neutral-300">все ждущие · {waitingIds.length}</button>
                   {weakIds.length > 0 && (
-                    <button onClick={() => setSelected(new Set(weakIds))} className="px-3 py-1 rounded-full border border-white/12 text-neutral-300 hover:border-white/30">слабые по ИИ · {weakIds.length}</button>
+                    <button onClick={() => setSelected(new Set(weakIds))} className="lg px-3 py-1 rounded-full text-neutral-300">слабые по ИИ · {weakIds.length}</button>
                   )}
                   {selected.size > 0 && <button onClick={() => setSelected(new Set())} className="px-3 py-1 text-neutral-400 hover:text-white">снять выбор</button>}
                 </div>
               )}
 
               {selected.size > 0 && (
-                <div className="sticky bottom-20 md:bottom-4 z-20 rounded-2xl border border-teal-300/30 bg-[#0B0F19]/95 backdrop-blur p-4 space-y-3 shadow-2xl" aria-label="Действия с выбранными">
+                <div className="sticky bottom-20 md:bottom-4 z-20 glass rounded-2xl p-4 space-y-3" aria-label="Действия с выбранными">
                   <div className="flex flex-wrap items-center gap-3">
                     <p className="text-sm text-white font-semibold">Выбрано: {selected.size}</p>
                     <span className="flex-1" />
                     {!bulk && (
                       <button onClick={() => setBulk({ reason: null })}
-                        className="h-10 px-4 rounded-full border border-white/15 text-sm text-neutral-200 hover:border-red-400/50 hover:text-red-200 inline-flex items-center gap-1.5">
+                        className="lg h-10 px-4 rounded-full text-sm text-neutral-200 hover:text-red-200 inline-flex items-center gap-1.5">
                         <XCircle className="w-4 h-4" /> Отказать выбранным
                       </button>
                     )}
@@ -673,7 +673,7 @@ export default function EmployerDashboard() {
                         {REJECT_REASONS.map(r => (
                           <button key={r.label} type="button" aria-pressed={bulk.reason === r.label}
                             onClick={() => setBulk({ reason: bulk.reason === r.label ? null : r.label })}
-                            className={`px-3 py-1 rounded-full text-xs border transition-colors ${bulk.reason === r.label ? "bg-teal-300 border-teal-300 text-neutral-950" : "border-white/15 text-neutral-300 hover:border-white/30"}`}>
+                            className={`lg px-3 py-1 rounded-full text-xs transition-colors ${bulk.reason === r.label ? "lg lg-accent" : "lg text-neutral-300"}`}>
                             {r.label}
                           </button>
                         ))}
@@ -681,7 +681,7 @@ export default function EmployerDashboard() {
                       <div className="flex justify-end gap-2">
                         <button onClick={() => setBulk(null)} className="px-3 h-10 text-sm text-neutral-400 hover:text-white">Отмена</button>
                         <button onClick={sendBulkReject} disabled={bulkSending}
-                          className="h-10 px-5 rounded-full bg-teal-300 hover:bg-teal-200 text-neutral-950 text-sm font-semibold disabled:opacity-50 inline-flex items-center gap-2">
+                          className="lg lg-accent h-10 px-5 rounded-full text-sm font-semibold disabled:opacity-50 inline-flex items-center gap-2">
                           {bulkSending && <Loader2 className="w-4 h-4 animate-spin" />} Отправить отказы · {selected.size}
                         </button>
                       </div>
@@ -705,7 +705,7 @@ export default function EmployerDashboard() {
                         className="w-5 h-5 accent-teal-300 cursor-pointer" />
                     )}
                     {matches[app.id] && (
-                      <MatchRing value={matches[app.id].score} size={64} stroke={matches[app.id].score >= 70 ? "#5EEAD4" : "#818CF8"} />
+                      <MatchRing value={matches[app.id].score} size={64} stroke={matches[app.id].score >= 70 ? "#f4f4f5" : "#8a8a90"} />
                     )}
                     <div className="flex-1 min-w-[14rem]">
                       <p className="font-semibold text-white flex flex-wrap items-center gap-2">
@@ -740,13 +740,13 @@ export default function EmployerDashboard() {
 
                   <BlitzAnswers applicationId={app.id} answers={app.blitz_answers ?? []} summary={app.blitz_summary} />
 
-                  <div className="bg-[#0B0F19] border border-white/10 rounded-2xl p-4 text-sm text-neutral-300 leading-relaxed whitespace-pre-line">
+                  <div className="neu-in rounded-2xl p-4 text-sm text-neutral-300 leading-relaxed whitespace-pre-line">
                     <p className="text-xs text-neutral-500 mb-2">Сопроводительное письмо</p>
                     {app.cover_letter || "Письмо не сохранено"}
                   </div>
 
                   {app.hr_message && reply?.appId !== app.id && (
-                    <div className="rounded-2xl border border-white/10 px-4 py-3 text-sm text-neutral-400">
+                    <div className="neu-sub rounded-2xl px-4 py-3 text-sm text-neutral-400">
                       <p className="text-xs text-neutral-500 mb-1">Ваш ответ</p>
                       <p className="whitespace-pre-line">{app.hr_message}</p>
                     </div>
@@ -765,7 +765,7 @@ export default function EmployerDashboard() {
                             return (
                               <button key={reason.label} type="button" aria-pressed={active}
                                 onClick={() => setReply({ ...reply, text: active ? base : `${base}\n\n${reason.text}` })}
-                                className={`px-3 py-1 rounded-full text-xs border transition-colors ${active ? "bg-teal-300 border-teal-300 text-neutral-950" : "border-white/15 text-neutral-300 hover:border-white/30"}`}>
+                                className={`lg px-3 py-1 rounded-full text-xs transition-colors ${active ? "lg lg-accent" : "lg text-neutral-300"}`}>
                                 {reason.label}
                               </button>
                             );
@@ -778,7 +778,7 @@ export default function EmployerDashboard() {
                       <div className="flex justify-end gap-2">
                         <button onClick={() => setReply(null)} className="px-3 py-1.5 text-xs text-neutral-400 hover:text-white">Отмена</button>
                         <button onClick={sendReply} disabled={replying}
-                          className="h-10 px-4 bg-teal-300 hover:bg-teal-200 text-neutral-950 rounded-full text-sm font-semibold flex items-center gap-1.5 disabled:opacity-50">
+                          className="lg lg-accent h-10 px-4 rounded-full text-sm font-semibold flex items-center gap-1.5 disabled:opacity-50">
                           {replying ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Send className="w-3.5 h-3.5" />} Отправить
                         </button>
                       </div>
@@ -788,22 +788,22 @@ export default function EmployerDashboard() {
                   <div className="flex flex-wrap items-center justify-end gap-2.5 pt-3 border-t border-white/10">
                     {app.profiles?.resume_path && (
                       <button onClick={() => openResume(app.profiles!.resume_path!)}
-                        className="mr-auto h-11 px-4 rounded-full border border-white/12 text-neutral-200 hover:border-white/30 text-sm transition-colors flex items-center gap-1.5">
+                        className="lg mr-auto h-11 px-4 rounded-full text-neutral-200 text-sm transition-colors flex items-center gap-1.5">
                         <FileText className="w-3.5 h-3.5" /> Резюме (PDF)
                       </button>
                     )}
                     {app.conversations?.id && (
                       <Link href={`/messages?c=${app.conversations.id}`}
-                        className={`${app.profiles?.resume_path ? "" : "mr-auto "}h-11 px-4 rounded-full border border-white/12 text-neutral-200 hover:border-white/30 text-sm transition-colors flex items-center gap-1.5`}>
+                        className={`${app.profiles?.resume_path ? "" : "mr-auto "}lg h-11 px-4 rounded-full text-neutral-200 text-sm transition-colors flex items-center gap-1.5`}>
                         <MessageCircle className="w-3.5 h-3.5" /> Написать
                       </Link>
                     )}
                     <button onClick={() => setReply({ appId: app.id, status: "rejected", text: REPLY_TEMPLATES.rejected(app.vacancies.title) })}
-                      className="h-11 px-4 rounded-full border border-white/15 text-neutral-300 hover:text-red-300 hover:border-red-400/40 text-sm transition-colors flex items-center gap-1.5">
+                      className="lg h-11 px-4 rounded-full text-neutral-300 hover:text-red-300 text-sm transition-colors flex items-center gap-1.5">
                       <XCircle className="w-3.5 h-3.5" /> Отказать
                     </button>
                     <button onClick={() => setReply({ appId: app.id, status: "interview_scheduled", text: REPLY_TEMPLATES.interview_scheduled(app.vacancies.title) })}
-                      className="h-11 px-5 rounded-full bg-teal-300 hover:bg-teal-200 text-neutral-950 text-sm font-semibold transition-colors flex items-center gap-1.5">
+                      className="lg lg-accent h-11 px-5 rounded-full text-sm font-semibold transition-colors flex items-center gap-1.5">
                       <CheckCircle2 className="w-4 h-4" /> Пригласить
                     </button>
                   </div>

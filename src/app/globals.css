@@ -1,47 +1,264 @@
 @import "tailwindcss";
 
-/* Тема «Аврора» (редизайн, фаза 3): глубокий тёмно-синий фон, мятный акцент (teal-300),
-   индиго — второй цвет сияния. Сайт в одной тёмной теме: от темы системы не зависит. */
+/* Дизайн-система Obsidian Glass: тёмный glassmorphism. Матовые стеклянные панели парят
+   над почти чёрным void, за ними — глянцевые шары (орбы). Палитра монохромная: свет даёт
+   стекло и орбы, а не цвет. Единственная заливка-акцент — ink (главная кнопка, выбранное).
+   Сайт в одной тёмной теме. */
 :root {
-  --background: #05070d;
-  --foreground: #eef2f7;
+  --void: #050506;
+  --obsidian: #0c0c0e;
+  --graphite: #18181b;
+  --steel: #2b2c31;
+  --glass: rgba(255, 255, 255, 0.04);
+  --glass-strong: rgba(255, 255, 255, 0.08);
+  --glass-edge: rgba(255, 255, 255, 0.12);
+  --glass-rim: rgba(255, 255, 255, 0.24);
+  --ink: #f4f4f5;
+  --ink-soft: #b9b7b4;
+  --muted: #8a8a90;
+  --chrome: #c9ccd3;
+  --mist: #9aa3b5;
+  --on-ink: #0a0a0b;
+  --focus: #ffffff;
+
+  --glass-lift: inset 0 1px 0 rgba(255, 255, 255, 0.14), 0 30px 80px rgba(0, 0, 0, 0.55);
+  --ink-glow: 0 8px 28px rgba(255, 255, 255, 0.14);
+  --blur-glass: 24px;
+  --blur-orb: 40px;
+
+  --radius-xs: 4px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 24px;
+
+  --font-og: var(--font-poppins), var(--font-montserrat), "Avenir Next", "Segoe UI", system-ui, sans-serif;
+
+  --background: var(--void);
+  --foreground: var(--ink);
   color-scheme: dark;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-inter);
-  --font-display: var(--font-unbounded);
-  --font-mono: var(--font-jetbrains);
+  --font-sans: var(--font-og);
+  --font-display: var(--font-og);
+  --font-mono: var(--font-og);
 }
 
-/* Нейтральная шкала — холодная, под сине-чёрный фон; остальные цвета Tailwind как есть */
+/* Палитра через шкалы Tailwind. Нейтральная — от void до ink. Бывшие акценты (мятный, индиго,
+   изумрудный, голубой, янтарный) сведены к той же серой шкале: бренд-цвета в системе нет. */
 @theme {
-  --color-neutral-50: #f8fafc;
-  --color-neutral-100: #eef2f7;
-  --color-neutral-200: #d5dbe5;
-  --color-neutral-300: #c7ceda;
-  --color-neutral-400: #a7b0c0;
-  --color-neutral-500: #8892a3;
-  --color-neutral-600: #5b6577;
-  --color-neutral-700: #2a3242;
-  --color-neutral-800: #1a2130;
-  --color-neutral-900: #0b0f19;
-  --color-neutral-950: #05070d;
+  --color-neutral-50: #fafafa;
+  --color-neutral-100: #f4f4f5;
+  --color-neutral-200: #dcdcde;
+  --color-neutral-300: #b9b7b4;
+  --color-neutral-400: #9d9da3;
+  --color-neutral-500: #8a8a90;
+  --color-neutral-600: #5a5a60;
+  --color-neutral-700: #2b2c31;
+  --color-neutral-800: #18181b;
+  --color-neutral-900: #0c0c0e;
+  --color-neutral-950: #050506;
+  --color-white: #f4f4f5;
+
+  --color-teal-50: #fafafa;  --color-teal-100: #f4f4f5; --color-teal-200: #f4f4f5; --color-teal-300: #f4f4f5;
+  --color-teal-400: #c9ccd3; --color-teal-500: #9d9da3; --color-teal-600: #8a8a90; --color-teal-700: #5a5a60;
+  --color-teal-800: #2b2c31; --color-teal-900: #18181b; --color-teal-950: #0c0c0e;
+  --color-indigo-50: #fafafa;  --color-indigo-100: #f4f4f5; --color-indigo-200: #dcdcde; --color-indigo-300: #c9ccd3;
+  --color-indigo-400: #9d9da3; --color-indigo-500: #8a8a90; --color-indigo-600: #5a5a60; --color-indigo-700: #2b2c31;
+  --color-indigo-800: #18181b; --color-indigo-900: #0c0c0e; --color-indigo-950: #050506;
+  --color-emerald-50: #fafafa;  --color-emerald-100: #f4f4f5; --color-emerald-200: #f4f4f5; --color-emerald-300: #f4f4f5;
+  --color-emerald-400: #c9ccd3; --color-emerald-500: #9d9da3; --color-emerald-600: #8a8a90; --color-emerald-700: #5a5a60;
+  --color-emerald-800: #2b2c31; --color-emerald-900: #18181b; --color-emerald-950: #0c0c0e;
+  --color-sky-50: #fafafa;  --color-sky-100: #f4f4f5; --color-sky-200: #dcdcde; --color-sky-300: #c9ccd3;
+  --color-sky-400: #9d9da3; --color-sky-500: #8a8a90; --color-sky-600: #5a5a60; --color-sky-700: #2b2c31;
+  --color-sky-800: #18181b; --color-sky-900: #0c0c0e; --color-sky-950: #050506;
+  --color-amber-50: #fafafa;  --color-amber-100: #f4f4f5; --color-amber-200: #dcdcde; --color-amber-300: #c9ccd3;
+  --color-amber-400: #c9ccd3; --color-amber-500: #9d9da3; --color-amber-600: #8a8a90; --color-amber-700: #5a5a60;
+  --color-amber-800: #2b2c31; --color-amber-900: #18181b; --color-amber-950: #0c0c0e;
+  --color-violet-300: #c9ccd3; --color-violet-400: #9d9da3;
+  --color-cyan-300: #c9ccd3; --color-cyan-400: #9d9da3;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: var(--font-inter), system-ui, sans-serif;
+  background: var(--void);
+  color: var(--ink);
+  font-family: var(--font-og);
 }
 
-/* Сияние на фоне: два размытых пятна медленно плывут. Без анимации, если пользователь просил */
-@keyframes aurora-a { 0%, 100% { transform: translate(0, 0) scale(1); } 50% { transform: translate(120px, 40px) scale(1.15); } }
-@keyframes aurora-b { 0%, 100% { transform: translate(0, 0) scale(1.1); } 50% { transform: translate(-140px, -30px) scale(0.95); } }
-.aurora-a { animation: aurora-a 14s ease-in-out infinite; }
-.aurora-b { animation: aurora-b 18s ease-in-out infinite; }
+::placeholder { color: var(--muted); }
+
+/* Фокус: 2px белое кольцо с отступом 2px на всём интерактивном */
+:where(a, button, input, select, textarea, summary, [tabindex]):focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+
+@layer components {
+  /* ---------- GlassPanel: карточки ---------- */
+
+  /* Крупная карточка (имя .glass осталось с прежней разметки) */
+  .glass, .neu {
+    background: var(--glass);
+    border: 1px solid var(--glass-edge);
+    box-shadow: var(--glass-lift);
+    -webkit-backdrop-filter: blur(var(--blur-glass)) saturate(120%);
+    backdrop-filter: blur(var(--blur-glass)) saturate(120%);
+    color: var(--ink);
+  }
+
+  /* Вложенная панель внутри карточки — второй и последний слой стекла */
+  .neu-sub {
+    background: var(--glass);
+    border: 1px solid var(--glass-edge);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.10);
+    -webkit-backdrop-filter: blur(var(--blur-glass)) saturate(120%);
+    backdrop-filter: blur(var(--blur-glass)) saturate(120%);
+  }
+
+  /* Сплошные поверхности под ввод: поля, поиск, треки переключателей — graphite */
+  .neu-in {
+    background: var(--graphite);
+    border: 1px solid var(--steel);
+    color: var(--ink);
+    transition: border-color 160ms ease;
+  }
+  .neu-in:hover { border-color: var(--glass-rim); }
+  .neu-in:focus, .neu-in:focus-within {
+    outline: 2px solid var(--focus);
+    outline-offset: 2px;
+  }
+
+  /* Tag: контурная метка — навыки, источник, статус */
+  .neu-chip {
+    background: transparent;
+    border: 1px solid var(--glass-rim);
+    color: var(--ink);
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  /* ---------- Button ---------- */
+
+  /* Стеклянная кнопка: glass-strong + обводка glass-rim */
+  .lg {
+    position: relative;
+    color: var(--ink);
+    font-weight: 500;
+    background: var(--glass-strong);
+    border: 1px solid var(--glass-rim);
+    -webkit-backdrop-filter: blur(var(--blur-glass));
+    backdrop-filter: blur(var(--blur-glass));
+    transition: background 160ms ease, border-color 160ms ease, transform 160ms ease;
+  }
+  .lg:hover:not(:disabled) { background: rgba(255, 255, 255, 0.14); }
+  .lg:disabled, .lg[aria-disabled="true"] { opacity: 0.45; cursor: not-allowed; }
+
+  /* Главное действие и выбранное состояние: заливка ink, текст on-ink, ink-glow */
+  .lg-accent {
+    color: var(--on-ink);
+    background: var(--ink);
+    border-color: transparent;
+    box-shadow: var(--ink-glow);
+  }
+  .lg-accent:hover:not(:disabled) { background: var(--ink); transform: translateY(-1px); }
+
+  /* Цветов статуса в системе нет: второстепенные варианты отличаются только подписью и иконкой */
+  .lg-tint, .lg-warn, .lg-danger { color: var(--ink); }
+
+  /* ---------- Флажки: диск graphite, отмеченный — chrome ---------- */
+  input[type="checkbox"]:not(.sr-only):not(.peer), input[type="radio"]:not(.sr-only):not(.peer) {
+    appearance: none;
+    -webkit-appearance: none;
+    flex-shrink: 0;
+    width: 1.25rem;
+    height: 1.25rem;
+    border-radius: 6px;
+    cursor: pointer;
+    background: var(--graphite);
+    border: 1px solid var(--glass-edge);
+    display: inline-grid;
+    place-content: center;
+    transition: background 160ms ease;
+  }
+  input[type="radio"]:not(.sr-only):not(.peer) { border-radius: 9999px; }
+  input[type="checkbox"]:not(.sr-only):not(.peer):checked, input[type="radio"]:not(.sr-only):not(.peer):checked {
+    background: var(--chrome);
+    border-color: var(--chrome);
+  }
+  input[type="checkbox"]:not(.sr-only):not(.peer):checked::before {
+    content: "";
+    width: .55rem;
+    height: .3rem;
+    border-left: 2px solid var(--on-ink);
+    border-bottom: 2px solid var(--on-ink);
+    transform: translateY(-1px) rotate(-45deg);
+  }
+  input[type="radio"]:not(.sr-only):not(.peer):checked::before {
+    content: "";
+    width: .4rem;
+    height: .4rem;
+    border-radius: 9999px;
+    background: var(--on-ink);
+  }
+
+  input[type="range"] { accent-color: var(--chrome); }
+
+  /* Выпадающие списки — поля graphite со своей стрелкой */
+  select.neu-in {
+    appearance: none;
+    -webkit-appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%238a8a90' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 0.9rem center;
+    padding-right: 2.25rem;
+  }
+  select.neu-in option { background: var(--graphite); color: var(--ink); }
+
+  /* ---------- Orb: единственная «картинка» бренда ---------- */
+  .og-orb {
+    position: absolute;
+    border-radius: 50%;
+    pointer-events: none;
+    background: radial-gradient(circle at 50% 115%, rgba(154, 163, 181, 0.30), rgba(5, 5, 6, 0) 62%), rgba(255, 255, 255, 0.02);
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.30), inset 0 -10px 28px rgba(201, 204, 211, 0.20), inset 0 6px 14px rgba(255, 255, 255, 0.16);
+  }
+  .og-orb::after {
+    content: "";
+    position: absolute;
+    left: 20%; top: 13%; width: 28%; height: 16%;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.6);
+    filter: blur(2px);
+    transform: rotate(-32deg);
+  }
+  .og-orb--blur { background: var(--mist); opacity: 0.32; filter: blur(var(--blur-orb)); box-shadow: none; }
+  .og-orb--blur::after { display: none; }
+}
+
+/* Без backdrop-filter стекло — сплошной obsidian */
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .glass, .neu, .neu-sub, .lg:not(.lg-accent) { background: var(--obsidian); }
+}
+
+/* Tag: прямоугольник radius-xs, а не пилюля из прежней разметки */
+.neu-chip { border-radius: var(--radius-xs); }
+
+/* Типографика: заголовки — title (600), заголовок героя — headline (500, ink-soft) */
+.font-display { font-weight: 600; letter-spacing: -0.01em; }
+h1.font-display { font-weight: 500; }
+.font-mono { font-weight: 500; }
+
+/* Разделители — steel */
+.border-white\/10, .border-white\/12, .border-white\/15 { border-color: var(--steel); }
+
+/* Орбы медленно дрейфуют на 8–16px за 8–12 с */
+@keyframes orb-drift-a { 0%, 100% { transform: translate(0, 0); } 50% { transform: translate(12px, -10px); } }
+@keyframes orb-drift-b { 0%, 100% { transform: translate(0, 0); } 50% { transform: translate(-14px, 8px); } }
+.orb-drift-a { animation: orb-drift-a 10s ease-in-out infinite; }
+.orb-drift-b { animation: orb-drift-b 12s ease-in-out infinite; }
 
 /* Кольцо совпадения заполняется до своего значения (--ring-to задаёт компонент) */
 @keyframes ring-fill { from { stroke-dashoffset: var(--ring-from); } to { stroke-dashoffset: var(--ring-to); } }
@@ -50,12 +267,9 @@ body {
 @keyframes live-ping { 0% { transform: scale(1); opacity: .8; } 100% { transform: scale(2.6); opacity: 0; } }
 .live-ping { animation: live-ping 1.6s cubic-bezier(0, 0, .2, 1) infinite; }
 
-/* Стеклянная панель «Авроры» */
-.glass { background: rgba(255, 255, 255, 0.04); border: 1px solid rgba(255, 255, 255, 0.10); }
-
-/* Значок ИИ: переливается мятным и индиго */
+/* Значок ИИ: перелив chrome → ink, без цвета */
 @keyframes ai-shimmer { 0% { background-position: -200% 0; } 100% { background-position: 200% 0; } }
-.ai-shimmer { background: linear-gradient(90deg, #5EEAD4, #A5B4FC, #5EEAD4); background-size: 200% 100%; animation: ai-shimmer 3s linear infinite; }
+.ai-shimmer { background: linear-gradient(90deg, #8a8a90, #f4f4f5, #8a8a90); background-size: 200% 100%; animation: ai-shimmer 3s linear infinite; }
 
 /* Готовое письмо проявляется сверху вниз */
 @keyframes letter-write { from { clip-path: inset(0 0 100% 0); } to { clip-path: inset(0 0 0 0); } }
@@ -69,5 +283,6 @@ body {
 html[data-auth] .guest-only { display: none; }
 
 @media (prefers-reduced-motion: reduce) {
-  .aurora-a, .aurora-b, .ring-fill, .live-ping, .ai-shimmer, .letter-write, .bar-grow { animation: none; }
+  .orb-drift-a, .orb-drift-b, .ring-fill, .live-ping, .ai-shimmer, .letter-write, .bar-grow { animation: none; }
+  .lg { transition: none; }
 }

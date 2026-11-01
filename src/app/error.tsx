@@ -19,13 +19,13 @@ export default function Error({ error, retry }: { error: Error & { digest?: stri
         <div className="flex justify-center gap-3">
           <button
             onClick={() => retry()}
-            className="px-5 py-2.5 bg-teal-300 hover:bg-teal-200 text-neutral-950 rounded-full text-sm font-semibold transition-colors"
+            className="lg lg-accent px-5 py-2.5 rounded-full text-sm font-semibold transition-colors"
           >
             Повторить
           </button>
           <Link
             href="/"
-            className="px-5 py-2.5 bg-neutral-900 hover:bg-white/[0.08] border border-white/10 rounded-xl text-sm text-neutral-200 transition-colors"
+            className="lg px-5 py-2.5 rounded-xl text-sm text-neutral-200 transition-colors"
           >
             На главную
           </Link>

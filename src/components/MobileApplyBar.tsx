@@ -18,9 +18,9 @@ export default function MobileApplyBar({ target }: { target: string }) {
   if (!visible) return null;
   return (
     <div className="lg:hidden fixed inset-x-0 bottom-0 z-30 px-3 pb-3 pt-2">
-      <div className="bg-[#0B0F19]/90 border border-white/12 backdrop-blur-md rounded-3xl p-3 flex items-center gap-3">
+      <div className="neu-sub rounded-3xl p-3 flex items-center gap-3">
         <p className="flex-1 text-xs text-neutral-400 leading-snug">Smart Apply напишет письмо под эту вакансию</p>
-        <a href={`#${target}`} className="shrink-0 inline-flex items-center h-12 px-5 rounded-full bg-teal-300 text-neutral-950 text-sm font-semibold">
+        <a href={`#${target}`} className="lg lg-accent shrink-0 inline-flex items-center h-12 px-5 rounded-full text-sm font-semibold">
           Откликнуться
         </a>
       </div>

@@ -48,14 +48,14 @@ export default function LandingSections({ className = "" }: { className?: string
         </div>
       </section>
 
-      <section aria-labelledby="employers" className="rounded-[28px] p-8 sm:p-10 border border-white/12 bg-[linear-gradient(135deg,rgba(94,234,212,0.12),rgba(99,102,241,0.12))] flex flex-wrap items-center gap-8">
+      <section aria-labelledby="employers" className="neu-sub rounded-[28px] p-8 sm:p-10 flex flex-wrap items-center gap-8">
         <div className="flex-[1_1_420px] min-w-0 space-y-4">
           <h2 id="employers" className="font-display text-2xl sm:text-3xl font-bold leading-tight">Работодателям: ни один отклик не потеряется</h2>
           <p className="text-neutral-300 leading-relaxed">
             Отклики отсортированы по совпадению с вакансией, воронка и ответ кандидату в один клик. Место кандидата зависит только от совпадения — не от оплаты.
           </p>
         </div>
-        <Link href="/register/form?role=employer" className="rounded-full bg-neutral-100 hover:bg-white px-6 py-3.5 font-semibold text-neutral-950 transition-colors">
+        <Link href="/register/form?role=employer" className="lg rounded-full px-6 py-3.5 font-semibold text-neutral-100 transition-colors">
           Разместить вакансию
         </Link>
       </section>

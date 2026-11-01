@@ -95,7 +95,7 @@ export default function TelegramSubscription({ userId }: { userId: string }) {
       {linked ? (
         <div className="flex flex-wrap items-center gap-3">
           <label className="flex items-center gap-3 cursor-pointer">
-            <input type="checkbox" checked={notify} onChange={toggle} className="w-5 h-5 rounded bg-neutral-950 border-white/10 text-teal-400 focus:ring-0" />
+            <input type="checkbox" checked={notify} onChange={toggle} className="neu-in w-5 h-5 rounded text-teal-400" />
             <span className="text-sm text-neutral-200">Присылать подборку</span>
           </label>
           <button onClick={unlink} disabled={busy} className="ml-auto text-xs text-neutral-400 hover:text-red-300">Отвязать Telegram</button>
@@ -105,7 +105,7 @@ export default function TelegramSubscription({ userId }: { userId: string }) {
       ) : link ? (
         <div className="space-y-2">
           <a href={link} target="_blank" rel="noreferrer"
-            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-full bg-teal-300 hover:bg-teal-200 text-neutral-950 text-sm font-semibold">
+            className="lg lg-accent inline-flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-semibold">
             <Send className="w-4 h-4" /> Открыть @{bot} и нажать «Start»
           </a>
           <p className="text-xs text-neutral-500">
@@ -114,7 +114,7 @@ export default function TelegramSubscription({ userId }: { userId: string }) {
         </div>
       ) : (
         <button onClick={connect} disabled={busy}
-          className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border border-teal-300/40 text-teal-200 hover:bg-teal-300/10 text-sm font-medium disabled:opacity-50">
+          className="lg lg-tint inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-teal-200 text-sm font-medium disabled:opacity-50">
           {busy ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />} Подключить Telegram
         </button>
       )}

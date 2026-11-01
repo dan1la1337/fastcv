@@ -13,7 +13,7 @@ export default function NotFound() {
         </p>
         <Link
           href="/"
-          className="inline-flex items-center justify-center px-5 py-2.5 bg-teal-300 hover:bg-teal-200 text-neutral-950 rounded-full text-sm font-semibold transition-colors"
+          className="lg lg-accent inline-flex items-center justify-center px-5 py-2.5 rounded-full text-sm font-semibold transition-colors"
         >
           К вакансиям
         </Link>
