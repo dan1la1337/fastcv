@@ -1,7 +1,7 @@
 @import "tailwindcss";
 
 /* Дизайн-система Obsidian Glass: тёмный glassmorphism. Матовые стеклянные панели парят
-   над почти чёрным void, за ними — глянцевые шары (орбы). Палитра монохромная: свет даёт
+   над почти чёрным void, за ними — затемнённая фотография светового шлейфа. Палитра монохромная: свет даёт
    стекло и орбы, а не цвет. Единственная заливка-акцент — ink (главная кнопка, выбранное).
    Сайт в одной тёмной теме. */
 :root {
@@ -100,7 +100,8 @@ body {
 
   /* Крупная карточка (имя .glass осталось с прежней разметки) */
   .glass, .neu {
-    background: var(--glass);
+    /* Стекло с тёмной подложкой: светлая дуга фона просвечивает, но не съедает контраст текста */
+    background: linear-gradient(var(--glass), var(--glass)), rgba(5, 5, 6, 0.5);
     border: 1px solid var(--glass-edge);
     box-shadow: var(--glass-lift);
     -webkit-backdrop-filter: blur(var(--blur-glass)) saturate(120%);
@@ -110,7 +111,7 @@ body {
 
   /* Вложенная панель внутри карточки — второй и последний слой стекла */
   .neu-sub {
-    background: var(--glass);
+    background: linear-gradient(var(--glass), var(--glass)), rgba(5, 5, 6, 0.4);
     border: 1px solid var(--glass-edge);
     box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.10);
     -webkit-backdrop-filter: blur(var(--blur-glass)) saturate(120%);
@@ -130,15 +131,36 @@ body {
     outline-offset: 2px;
   }
 
-  /* Tag: контурная метка — навыки, источник, статус */
+  /* Метка: навыки, статус — мягкая стеклянная пилюля, обычный регистр */
   .neu-chip {
-    background: transparent;
-    border: 1px solid var(--glass-rim);
-    color: var(--ink);
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.075), rgba(255, 255, 255, 0.035));
+    border: 1px solid rgba(255, 255, 255, 0.09);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.10);
+    color: var(--ink-soft);
     font-weight: 500;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
+    letter-spacing: 0.005em;
   }
+
+  /* Источник вакансии: стеклянная пилюля с иконкой, текст мельче и спокойнее заголовка */
+  .source-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    height: 24px;
+    padding: 0 10px 0 8px;
+    border-radius: 9999px;
+    font-size: 11px;
+    line-height: 1;
+    font-weight: 500;
+    letter-spacing: 0.01em;
+    color: var(--ink-soft);
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.10), rgba(255, 255, 255, 0.04));
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.16), 0 6px 16px rgba(0, 0, 0, 0.35);
+    -webkit-backdrop-filter: blur(12px);
+    backdrop-filter: blur(12px);
+  }
+  .source-badge svg { color: var(--ink); opacity: 0.8; }
 
   /* ---------- Button ---------- */
 
@@ -216,35 +238,12 @@ body {
     padding-right: 2.25rem;
   }
   select.neu-in option { background: var(--graphite); color: var(--ink); }
-
-  /* ---------- Orb: единственная «картинка» бренда ---------- */
-  .og-orb {
-    position: absolute;
-    border-radius: 50%;
-    pointer-events: none;
-    background: radial-gradient(circle at 50% 115%, rgba(154, 163, 181, 0.30), rgba(5, 5, 6, 0) 62%), rgba(255, 255, 255, 0.02);
-    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.30), inset 0 -10px 28px rgba(201, 204, 211, 0.20), inset 0 6px 14px rgba(255, 255, 255, 0.16);
-  }
-  .og-orb::after {
-    content: "";
-    position: absolute;
-    left: 20%; top: 13%; width: 28%; height: 16%;
-    border-radius: 50%;
-    background: rgba(255, 255, 255, 0.6);
-    filter: blur(2px);
-    transform: rotate(-32deg);
-  }
-  .og-orb--blur { background: var(--mist); opacity: 0.32; filter: blur(var(--blur-orb)); box-shadow: none; }
-  .og-orb--blur::after { display: none; }
 }
 
 /* Без backdrop-filter стекло — сплошной obsidian */
 @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
   .glass, .neu, .neu-sub, .lg:not(.lg-accent) { background: var(--obsidian); }
 }
-
-/* Tag: прямоугольник radius-xs, а не пилюля из прежней разметки */
-.neu-chip { border-radius: var(--radius-xs); }
 
 /* Типографика: заголовки — title (600), заголовок героя — headline (500, ink-soft) */
 .font-display { font-weight: 600; letter-spacing: -0.01em; }
@@ -254,11 +253,15 @@ h1.font-display { font-weight: 500; }
 /* Разделители — steel */
 .border-white\/10, .border-white\/12, .border-white\/15 { border-color: var(--steel); }
 
-/* Орбы медленно дрейфуют на 8–16px за 8–12 с */
-@keyframes orb-drift-a { 0%, 100% { transform: translate(0, 0); } 50% { transform: translate(12px, -10px); } }
-@keyframes orb-drift-b { 0%, 100% { transform: translate(0, 0); } 50% { transform: translate(-14px, 8px); } }
-.orb-drift-a { animation: orb-drift-a 10s ease-in-out infinite; }
-.orb-drift-b { animation: orb-drift-b 12s ease-in-out infinite; }
+/* Фон: фотография светового шлейфа владельца, затемнённая, чтобы не спорить с текстом.
+   Слой фиксирован (не прокручивается), сверху — тёмная вуаль и виньетка к краям */
+.page-backdrop {
+  background:
+    radial-gradient(130% 100% at 55% 40%, rgba(5, 5, 6, 0.10), rgba(5, 5, 6, 0.65) 100%),
+    linear-gradient(rgba(5, 5, 6, 0.32), rgba(5, 5, 6, 0.32)),
+    url("/bg-light.webp") center / cover no-repeat,
+    var(--void);
+}
 
 /* Кольцо совпадения заполняется до своего значения (--ring-to задаёт компонент) */
 @keyframes ring-fill { from { stroke-dashoffset: var(--ring-from); } to { stroke-dashoffset: var(--ring-to); } }
@@ -283,6 +286,6 @@ h1.font-display { font-weight: 500; }
 html[data-auth] .guest-only { display: none; }
 
 @media (prefers-reduced-motion: reduce) {
-  .orb-drift-a, .orb-drift-b, .ring-fill, .live-ping, .ai-shimmer, .letter-write, .bar-grow { animation: none; }
+  .ring-fill, .live-ping, .ai-shimmer, .letter-write, .bar-grow { animation: none; }
   .lg { transition: none; }
 }
