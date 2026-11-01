@@ -321,6 +321,7 @@ export default function Feed({ initialRows, initialTotal, hero }: { initialRows:
     setSelectedLevels(prev => prev.includes(level) ? prev.filter(l => l !== level) : [...prev, level]);
   };
   const direction = DIRECTIONS.find(d => d.id === selectedDirection);
+  const showLevels = selectedLevels.length > 0 || (area !== "work" && direction?.group !== "work");
   const chip = (active: boolean) =>
     `text-xs px-3 py-1.5 rounded-full border transition-colors ${active
       ? "bg-teal-300/15 border-teal-300 text-teal-200"
@@ -573,8 +574,33 @@ export default function Feed({ initialRows, initialTotal, hero }: { initialRows:
         {/* Sidebar Filters */}
         <aside className={`lg:col-span-1 space-y-6 ${filtersOpen ? "" : "hidden"} lg:block`}>
           <div className="bg-white/[0.04] border border-white/10 rounded-3xl p-5 space-y-6">
-            {/* Поиск */}
+            {/* Направление и уточнение по технологиям — главное для кандидата */}
             <div className="space-y-3">
+              <label className="text-xs font-bold text-neutral-500 uppercase tracking-wider">Направление</label>
+
+              <SearchSelect label="Направление" placeholder="Например: frontend, маркетинг, React…" emptyLabel="Все направления"
+                options={AREAS.filter(a => !area || a.id === area).flatMap(a => DIRECTIONS.filter(d => d.group === a.id).map(d => ({
+                  value: d.id, label: d.label, group: a.label, keywords: d.tech,
+                })))}
+                value={selectedDirection ?? ""}
+                onChange={v => { setSelectedDirection(v || null); setSelectedStack([]); }} />
+
+              {direction?.tech && (
+                <div className="pt-1">
+                  <p className="text-xs text-neutral-500 mb-2">Уточнить по технологиям (можно несколько):</p>
+                  <div className="flex flex-wrap gap-2">
+                    {direction.tech.map(tech => (
+                      <button key={tech} onClick={() => toggleStack(tech)} className={chip(selectedStack.includes(tech))} aria-pressed={selectedStack.includes(tech)}>
+                        {tech}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Поиск */}
+            <div className="space-y-3 pt-2 border-t border-white/[0.08]">
               <label className="text-xs font-bold text-neutral-500 uppercase tracking-wider">Ключевые слова</label>
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400" />
@@ -582,8 +608,41 @@ export default function Feed({ initialRows, initialTotal, hero }: { initialRows:
               </div>
             </div>
 
+            {/* Уровень — грейды есть в IT и digital; для «других профессий» не показываем */}
+            {showLevels && (<div className="space-y-3 pt-2 border-t border-white/[0.08]">
+              <label className="text-xs font-bold text-neutral-500 uppercase tracking-wider">Уровень</label>
+              <div className="flex flex-wrap gap-2">
+                {LEVELS.map(l => (
+                  <button key={l.id} onClick={() => toggleLevel(l.id)} className={chip(selectedLevels.includes(l.id))} aria-pressed={selectedLevels.includes(l.id)}>
+                    {l.label}
+                  </button>
+                ))}
+              </div>
+            </div>)}
+
+            {/* Формат работы */}
+            <div className="space-y-3 pt-2 border-t border-white/[0.08]">
+              <label className="text-xs font-bold text-neutral-500 uppercase tracking-wider">Формат</label>
+              <div className="flex flex-wrap gap-2">
+                <button onClick={() => setFormats([])} className={chip(formats.length === 0)} aria-pressed={formats.length === 0}>Любой</button>
+                {WORK_FORMATS.map(f => (
+                  <button key={f.id}
+                    onClick={() => setFormats(prev => prev.includes(f.id) ? prev.filter(x => x !== f.id) : [...prev, f.id])}
+                    className={chip(formats.includes(f.id))} aria-pressed={formats.includes(f.id)}>
+                    {f.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Город */}
+            <div className="space-y-3 pt-2 border-t border-white/[0.08]">
+              <label className="text-xs font-bold text-neutral-500 uppercase tracking-wider">Город</label>
+              <SearchSelect label="Город" placeholder="Начните вводить город…" emptyLabel="Любой город"
+                options={cityOptions} value={city} onChange={setCity} />
+            </div>
             {/* Ползунок зарплаты и чекбокс */}
-            <div className="space-y-4">
+            <div className="space-y-4 pt-2 border-t border-white/[0.08]">
               <div className="flex items-center justify-between">
                 <label className="text-xs font-bold text-neutral-500 uppercase tracking-wider">Зарплата от</label>
                 <span className="text-xs font-semibold text-teal-200 transition-all duration-200">
@@ -621,19 +680,11 @@ export default function Feed({ initialRows, initialTotal, hero }: { initialRows:
               </label>
             </div>
 
-            {/* Формат работы */}
+            {/* Страна */}
             <div className="space-y-3 pt-2 border-t border-white/[0.08]">
-              <label className="text-xs font-bold text-neutral-500 uppercase tracking-wider">Формат</label>
-              <div className="flex flex-wrap gap-2">
-                <button onClick={() => setFormats([])} className={chip(formats.length === 0)} aria-pressed={formats.length === 0}>Любой</button>
-                {WORK_FORMATS.map(f => (
-                  <button key={f.id}
-                    onClick={() => setFormats(prev => prev.includes(f.id) ? prev.filter(x => x !== f.id) : [...prev, f.id])}
-                    className={chip(formats.includes(f.id))} aria-pressed={formats.includes(f.id)}>
-                    {f.label}
-                  </button>
-                ))}
-              </div>
+              <label className="text-xs font-bold text-neutral-500 uppercase tracking-wider">Страна</label>
+              <SearchSelect label="Страна" placeholder="Начните вводить страну…" emptyLabel="Все страны"
+                options={countryOptions} value={country} onChange={chooseCountry} />
             </div>
 
             {/* Источник */}
@@ -651,56 +702,6 @@ export default function Feed({ initialRows, initialTotal, hero }: { initialRows:
               </div>
             </div>
 
-            {/* Уровень */}
-            <div className="space-y-3 pt-2 border-t border-white/[0.08]">
-              <label className="text-xs font-bold text-neutral-500 uppercase tracking-wider">Уровень</label>
-              <div className="flex flex-wrap gap-2">
-                {LEVELS.map(l => (
-                  <button key={l.id} onClick={() => toggleLevel(l.id)} className={chip(selectedLevels.includes(l.id))} aria-pressed={selectedLevels.includes(l.id)}>
-                    {l.label}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* Страна */}
-            <div className="space-y-3 pt-2 border-t border-white/[0.08]">
-              <label className="text-xs font-bold text-neutral-500 uppercase tracking-wider">Страна</label>
-              <SearchSelect label="Страна" placeholder="Начните вводить страну…" emptyLabel="Все страны"
-                options={countryOptions} value={country} onChange={chooseCountry} />
-            </div>
-
-            {/* Город */}
-            <div className="space-y-3 pt-2 border-t border-white/[0.08]">
-              <label className="text-xs font-bold text-neutral-500 uppercase tracking-wider">Город</label>
-              <SearchSelect label="Город" placeholder="Начните вводить город…" emptyLabel="Любой город"
-                options={cityOptions} value={city} onChange={setCity} />
-            </div>
-          </div>
-
-          {/* Направление и уточнение по технологиям */}
-          <div className="bg-white/[0.04] border border-white/10 rounded-3xl p-5 space-y-4">
-            <label className="text-xs font-bold text-neutral-500 uppercase tracking-wider">Направление</label>
-
-            <SearchSelect label="Направление" placeholder="Например: frontend, маркетинг, React…" emptyLabel="Все направления"
-              options={AREAS.filter(a => !area || a.id === area).flatMap(a => DIRECTIONS.filter(d => d.group === a.id).map(d => ({
-                value: d.id, label: d.label, group: a.label, keywords: d.tech,
-              })))}
-              value={selectedDirection ?? ""}
-              onChange={v => { setSelectedDirection(v || null); setSelectedStack([]); }} />
-
-            {direction?.tech && (
-              <div className="pt-4 border-t border-neutral-800">
-                <p className="text-xs text-neutral-500 mb-3">Уточнить по технологиям (можно несколько):</p>
-                <div className="flex flex-wrap gap-2">
-                  {direction.tech.map(tech => (
-                    <button key={tech} onClick={() => toggleStack(tech)} className={chip(selectedStack.includes(tech))} aria-pressed={selectedStack.includes(tech)}>
-                      {tech}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
           </div>
         </aside>
 
