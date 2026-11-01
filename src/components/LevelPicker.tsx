@@ -15,9 +15,9 @@ export default function LevelPicker({ level, source, reason, onChange, labelClas
   labelClass: string;
 }) {
   const chip = (active: boolean) =>
-    `text-sm px-3.5 py-1.5 rounded-full border transition-colors ${active
-      ? "bg-teal-300 border-teal-300 text-neutral-950"
-      : "bg-white/[0.04] border-white/15 text-neutral-300 hover:border-white/30"}`;
+    `text-sm px-3.5 py-1.5 rounded-full transition-colors ${active
+      ? "lg lg-accent"
+      : "lg text-neutral-300 hover:text-neutral-100"}`;
   return (
     <div>
       <span className={labelClass}>Уровень</span>

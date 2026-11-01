@@ -145,7 +145,7 @@ export default function ChatThread({ conversation, userId, onBack, onChanged }: 
   return (
     <>
       <header className="flex items-center gap-3 px-4 py-3 border-b border-white/10">
-        <button onClick={onBack} aria-label="К списку диалогов" className="md:hidden p-1.5 -ml-1.5 rounded-lg hover:bg-white/[0.08]">
+        <button onClick={onBack} aria-label="К списку диалогов" className="lg md:hidden p-1.5 -ml-1.5 rounded-lg">
           <ArrowLeft className="w-5 h-5" />
         </button>
         <div className="min-w-0">
@@ -212,7 +212,7 @@ export default function ChatThread({ conversation, userId, onBack, onChanged }: 
               ) : m.kind === "booking" ? (
                 <BookingMessage message={m} mine={mine} />
               ) : m.kind === "status" ? (
-                <div className="mx-auto max-w-[92%] sm:max-w-[80%] rounded-2xl border border-white/12 bg-white/[0.04] p-4 space-y-2">
+                <div className="neu-sub mx-auto max-w-[92%] sm:max-w-[80%] rounded-2xl p-4 space-y-2">
                   <p className={`text-xs inline-flex items-center gap-1.5 ${m.meta?.status === "interview_scheduled" ? "text-emerald-300" : "text-neutral-400"}`}>
                     {m.meta?.status === "interview_scheduled"
                       ? <><CheckCircle2 className="w-3.5 h-3.5" /> Приглашение на собеседование</>
@@ -224,7 +224,7 @@ export default function ChatThread({ conversation, userId, onBack, onChanged }: 
               ) : (
                 <div className={`flex ${mine ? "justify-end" : "justify-start"}`}>
                   <div className={`max-w-[85%] sm:max-w-[70%] rounded-2xl px-3.5 py-2 text-sm leading-relaxed ${
-                    mine ? "bg-teal-300 text-neutral-950 rounded-br-md" : "bg-white/[0.08] text-neutral-100 rounded-bl-md"}`}>
+                    mine ? "bg-teal-300 text-neutral-950 rounded-br-md" : "neu-sub text-neutral-100 rounded-bl-md"}`}>
                     <p className="whitespace-pre-wrap break-words"><Linked text={m.body} /></p>
                     <p className={`mt-0.5 text-[10px] text-right flex items-center justify-end gap-1 ${mine ? "text-neutral-800" : "text-neutral-500"}`}>
                       {time(m.created_at)}
@@ -249,7 +249,7 @@ export default function ChatThread({ conversation, userId, onBack, onChanged }: 
         <div className="flex items-end gap-2">
           {conversation.i_am === "employer" && !proposing && (
             <button type="button" onClick={() => setProposing(true)} aria-label="Предложить время собеседования" title="Предложить время собеседования"
-              className="shrink-0 w-11 h-11 inline-flex items-center justify-center rounded-full border border-white/15 text-emerald-300 hover:border-emerald-300/60 transition-colors">
+              className="lg shrink-0 w-11 h-11 inline-flex items-center justify-center rounded-full text-emerald-300 transition-colors">
               <CalendarClock className="w-5 h-5" />
             </button>
           )}
@@ -257,9 +257,9 @@ export default function ChatThread({ conversation, userId, onBack, onChanged }: 
           <textarea id={`chat-input-${id}`} ref={input} value={text} rows={1} maxLength={MESSAGE_MAX}
             onChange={e => { setText(e.target.value); e.target.style.height = "auto"; e.target.style.height = `${Math.min(e.target.scrollHeight, 160)}px`; }}
             onKeyDown={onKey} placeholder="Сообщение…"
-            className="flex-1 resize-none bg-[#0B0F19] border border-white/12 rounded-2xl px-4 py-2.5 text-sm text-neutral-100 focus:outline-none focus:border-teal-300 max-h-40" />
+            className="neu-in flex-1 resize-none rounded-2xl px-4 py-2.5 text-sm text-neutral-100 max-h-40" />
           <button type="submit" disabled={sending || !text.trim()} aria-label="Отправить"
-            className="shrink-0 w-11 h-11 inline-flex items-center justify-center rounded-full bg-teal-300 hover:bg-teal-200 text-neutral-950 disabled:opacity-40 transition-colors">
+            className="lg lg-accent shrink-0 w-11 h-11 inline-flex items-center justify-center rounded-full disabled:opacity-40 transition-colors">
             {sending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
           </button>
         </div>

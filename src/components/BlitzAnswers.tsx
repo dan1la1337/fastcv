@@ -36,12 +36,12 @@ export default function BlitzAnswers({ applicationId, answers, summary }: {
   }
 
   return (
-    <div className="rounded-2xl border border-white/10 p-4 space-y-3 text-sm">
+    <div className="neu-sub rounded-2xl p-4 space-y-3 text-sm">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <p className="text-xs text-neutral-500">Ответы на ваши вопросы</p>
         {!text && (
           <button type="button" onClick={summarize} disabled={busy}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-white/15 text-xs text-neutral-200 hover:border-white/30 disabled:opacity-50">
+            className="lg inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs text-neutral-200 disabled:opacity-50">
             {busy ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Sparkles className="w-3.5 h-3.5 text-teal-300" />} ИИ-выжимка
           </button>
         )}

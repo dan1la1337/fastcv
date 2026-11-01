@@ -24,16 +24,16 @@ export default function Hero({ stats, always = false }: { stats: LiveStats | nul
           </p>
           <div className="flex flex-wrap gap-3">
             <Link href="/register/form?role=candidate"
-              className="rounded-full bg-teal-300 px-6 py-3.5 font-semibold text-neutral-950 hover:bg-teal-200 transition-colors">
+              className="lg lg-accent rounded-full px-6 py-3.5 font-semibold transition-colors">
               Загрузить резюме
             </Link>
-            <a href={feedHref} className="rounded-full border border-white/20 px-6 py-3.5 text-neutral-100 hover:border-white/40 transition-colors">
+            <a href={feedHref} className="lg rounded-full px-6 py-3.5 text-neutral-100 transition-colors">
               Смотреть вакансии
             </a>
           </div>
         </div>
 
-        <figure className="flex-[0_1_460px] min-w-0 m-0 rounded-3xl border border-white/10 bg-white/5 p-6 sm:p-7 space-y-5 backdrop-blur">
+        <figure className="neu-sub flex-[0_1_460px] min-w-0 m-0 rounded-3xl p-6 sm:p-7 space-y-5">
           <figcaption className="text-xs uppercase tracking-wider text-neutral-500">Пример подборки</figcaption>
           <div className="flex items-center gap-6">
             <MatchRing value={92} size={140} />

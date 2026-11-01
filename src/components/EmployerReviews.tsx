@@ -81,12 +81,12 @@ function ReviewItem({ review, onReply }: { review: Review; onReply: (reply: stri
           <label className="block text-xs text-neutral-400 space-y-1.5">
             <span>Публичный ответ компании</span>
             <textarea rows={3} maxLength={1500} value={text} onChange={e => setText(e.target.value)}
-              className="w-full bg-[#0B0F19] border border-white/12 rounded-2xl px-4 py-2.5 text-sm text-neutral-100 focus:outline-none focus:border-teal-300 resize-y" />
+              className="neu-in w-full rounded-2xl px-4 py-2.5 text-sm text-neutral-100 resize-y" />
           </label>
           <div className="flex justify-end gap-2">
             <button onClick={() => setEditing(false)} className="px-3 h-9 text-sm text-neutral-400 hover:text-white">Отмена</button>
             <button onClick={save} disabled={busy}
-              className="px-4 h-9 rounded-full bg-teal-300 hover:bg-teal-200 text-neutral-950 text-sm font-semibold disabled:opacity-50 inline-flex items-center gap-2">
+              className="lg lg-accent px-4 h-9 rounded-full text-sm font-semibold disabled:opacity-50 inline-flex items-center gap-2">
               {busy && <Loader2 className="w-4 h-4 animate-spin" />} Опубликовать ответ
             </button>
           </div>

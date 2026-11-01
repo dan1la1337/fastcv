@@ -45,7 +45,7 @@ export default function DeleteAccount({ userId }: { userId: string }) {
       </div>
       {!open ? (
         <button onClick={() => setOpen(true)}
-          className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border border-red-500/30 text-sm text-red-300 hover:bg-red-950/30 transition-colors">
+          className="lg lg-danger inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm text-red-300 transition-colors">
           <Trash2 className="w-4 h-4" /> Удалить аккаунт
         </button>
       ) : (
@@ -54,15 +54,15 @@ export default function DeleteAccount({ userId }: { userId: string }) {
             Чтобы подтвердить, введите слово «{CONFIRM_WORD}»
           </label>
           <input id="confirm-delete" value={word} onChange={e => setWord(e.target.value)} autoComplete="off"
-            className="w-full bg-[#0B0F19] border border-white/12 rounded-2xl px-4 py-3 text-sm text-neutral-200 focus:outline-none focus:border-red-500" />
+            className="neu-in w-full rounded-2xl px-4 py-3 text-sm text-neutral-200" />
           {error && <p role="alert" className="text-sm text-red-400">{error}</p>}
           <div className="flex flex-wrap gap-2">
             <button onClick={remove} disabled={busy || word.trim().toLowerCase() !== CONFIRM_WORD}
-              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-red-600 hover:bg-red-500 text-sm font-semibold text-white disabled:opacity-40 transition-colors">
+              className="lg lg-danger inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold text-white disabled:opacity-40 transition-colors">
               {busy ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />} Удалить навсегда
             </button>
             <button onClick={() => { setOpen(false); setWord(""); }} disabled={busy}
-              className="px-4 py-2.5 rounded-xl border border-white/10 text-sm text-neutral-300 hover:bg-white/[0.08]">
+              className="lg px-4 py-2.5 rounded-xl text-sm text-neutral-300">
               Отмена
             </button>
           </div>

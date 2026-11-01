@@ -17,10 +17,10 @@ export default async function AboutPage() {
   const stats = await fetchLiveStats().catch(() => null);
   return (
     <div className="min-h-screen text-neutral-100">
-      <header className="border-b border-white/10 bg-neutral-950/70 backdrop-blur-md sticky top-0 z-20">
-        <div className="max-w-6xl mx-auto px-4 py-3 sm:py-4 flex items-center justify-between gap-3">
+      <header className="sticky top-0 z-20 px-3 sm:px-4 pt-3">
+        <div className="glass rounded-[26px] max-w-6xl mx-auto pl-4 pr-2.5 py-2.5 flex items-center justify-between gap-3">
           <Logo />
-          <Link href="/" className="px-4 py-2 rounded-full text-sm bg-teal-300 text-neutral-950 font-semibold hover:bg-teal-200 transition-colors">
+          <Link href="/" className="lg lg-accent px-4 py-2 rounded-full text-sm font-semibold transition-colors">
             К вакансиям
           </Link>
         </div>

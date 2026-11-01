@@ -55,11 +55,11 @@ export default function ResetPasswordPage() {
                 <label htmlFor="email" className="block text-xs font-bold text-neutral-500 uppercase tracking-wider mb-2">Email</label>
                 <input id="email" type="email" required autoComplete="email" value={email} onChange={e => setEmail(e.target.value)}
                   placeholder="name@example.com"
-                  className="w-full px-4 py-3 bg-[#0B0F19] border border-white/12 rounded-2xl text-sm text-neutral-100 focus:outline-none focus:border-teal-300 transition-colors" />
+                  className="neu-in w-full px-4 py-3 rounded-2xl text-sm text-neutral-100 transition-colors" />
               </div>
               {error && <p role="alert" className="text-sm text-red-400 bg-red-950/30 border border-red-500/20 rounded-xl px-4 py-3">{error}</p>}
               <button type="submit" disabled={loading}
-                className="w-full flex items-center justify-center gap-2 bg-teal-300 hover:bg-teal-200 text-neutral-950 py-3 rounded-full text-sm font-semibold transition-colors disabled:opacity-50">
+                className="lg lg-accent w-full flex items-center justify-center gap-2 py-3 rounded-full text-sm font-semibold transition-colors disabled:opacity-50">
                 {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : "Отправить ссылку"}
               </button>
             </form>

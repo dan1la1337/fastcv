@@ -35,7 +35,7 @@ function Section({ title, items, counts }: { title: string; items: Direction[]; 
           return (
             <li key={d.id}>
               <Link href={`/jobs/${d.id.replace("_", "-")}`}
-                className="flex items-center justify-between gap-3 px-4 py-3 rounded-xl border border-white/10 bg-neutral-900/40 hover:bg-neutral-900">
+                className="lg flex items-center justify-between gap-3 px-4 py-3 rounded-xl">
                 <span className="font-medium">{d.label}</span>
                 <span className="text-xs text-neutral-400 whitespace-nowrap">
                   {n} {plural(n, VACANCY_FORMS)}

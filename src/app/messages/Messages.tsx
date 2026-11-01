@@ -47,7 +47,7 @@ export default function Messages({ initial }: { initial: string | null }) {
       <div className="max-w-6xl mx-auto space-y-4">
         <div className="flex items-center gap-3">
           <Link href={back.href} aria-label={back.label}
-            className="p-2 bg-neutral-900 border border-white/10 rounded-xl hover:bg-white/[0.08] transition-colors">
+            className="lg p-2 rounded-xl transition-colors">
             <ArrowLeft className="w-4 h-4" />
           </Link>
           <h1 className="font-display text-xl font-bold">Сообщения</h1>
@@ -56,7 +56,7 @@ export default function Messages({ initial }: { initial: string | null }) {
         {list === null ? (
           <div className="flex justify-center py-24"><Loader2 className="w-8 h-8 animate-spin text-teal-300" /></div>
         ) : list.length === 0 ? (
-          <div className="text-center py-20 border border-dashed border-white/15 rounded-3xl space-y-3 px-6">
+          <div className="neu-sub text-center py-20 rounded-3xl space-y-3 px-6">
             <MessagesSquare className="w-10 h-10 mx-auto text-neutral-600" aria-hidden="true" />
             <p className="text-neutral-300 text-sm font-medium">Пока нет переписки</p>
             <p className="text-neutral-500 text-sm max-w-md mx-auto">

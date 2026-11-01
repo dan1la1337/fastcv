@@ -32,8 +32,8 @@ const PAGE = 20;
 const EXPERIENCE = [["", "Любой"], ["1", "от 1 года"], ["3", "от 3 лет"], ["5", "от 5 лет"]] as const;
 const SORTS = [["fresh", "Сначала свежие"], ["match", "По совпадению с вакансией"], ["experience", "По опыту"], ["salary", "По зарплате ↑"]] as const;
 const chip = (on: boolean) =>
-  `px-3 py-1.5 rounded-full text-xs border transition-colors ${on ? "bg-teal-300 border-teal-300 text-neutral-950" : "border-white/15 text-neutral-300 hover:border-white/30"}`;
-const field = "w-full px-4 py-2.5 bg-[#0B0F19] border border-white/12 rounded-2xl text-sm text-neutral-100 focus:outline-none focus:border-teal-300";
+  `px-3 py-1.5 rounded-full text-xs transition-colors ${on ? "lg lg-accent" : "lg text-neutral-300 hover:text-neutral-100"}`;
+const field = "w-full px-4 py-2.5 neu-in rounded-2xl text-sm text-neutral-100";
 const label = "block text-xs font-bold text-neutral-500 uppercase tracking-wider mb-2";
 
 const toggle = (list: string[], id: string) => list.includes(id) ? list.filter(x => x !== id) : [...list, id];
@@ -144,17 +144,17 @@ export default function ResumeBoard() {
     <div className="min-h-screen text-neutral-100 p-4 sm:p-8">
       <div className="max-w-6xl mx-auto space-y-6">
         <div className="flex flex-wrap items-center gap-3">
-          <Link href="/employer" aria-label="В кабинет" className="p-2 bg-neutral-900 border border-white/10 rounded-xl hover:bg-white/[0.08] transition-colors">
+          <Link href="/employer" aria-label="В кабинет" className="lg p-2 rounded-xl transition-colors">
             <ArrowLeft className="w-4 h-4" />
           </Link>
           <h1 className="font-display text-2xl font-bold">База резюме</h1>
-          <span className="text-xs text-neutral-400 bg-neutral-900 px-3 py-1.5 rounded-full border border-white/10">
+          <span className="text-xs text-neutral-400 neu-chip px-3 py-1.5 rounded-full">
             {items === null ? "…" : `${total} ${plural(total, ["кандидат", "кандидата", "кандидатов"])}`}
           </span>
-          <div role="tablist" aria-label="Какие резюме" className="ml-auto inline-flex gap-1 p-1 rounded-full bg-white/[0.06]">
+          <div role="tablist" aria-label="Какие резюме" className="neu-in ml-auto inline-flex gap-1 p-1 rounded-full">
             {([[false, "Все"], [true, "Сохранённые"]] as const).map(([saved, text]) => (
               <button key={text} role="tab" aria-selected={filters.onlySaved === saved} onClick={() => set({ onlySaved: saved })}
-                className={`px-4 py-1.5 rounded-full text-sm ${filters.onlySaved === saved ? "bg-white/[0.14] text-white" : "text-neutral-400 hover:text-white"}`}>
+                className={`lg px-4 py-1.5 rounded-full text-sm ${filters.onlySaved === saved ? "lg text-white" : "text-neutral-400 hover:text-white"}`}>
                 {text}
               </button>
             ))}
@@ -166,7 +166,7 @@ export default function ResumeBoard() {
 
         <div className="grid lg:grid-cols-[300px_1fr] gap-6 items-start">
           <button onClick={() => setFiltersOpen(o => !o)} aria-expanded={filtersOpen}
-            className="lg:hidden flex items-center justify-between w-full px-5 py-3 bg-white/[0.04] border border-white/10 rounded-full text-sm font-medium">
+            className="lg lg:hidden flex items-center justify-between w-full px-5 py-3 rounded-full text-sm font-medium">
             <span className="inline-flex items-center gap-2"><SlidersHorizontal className="w-4 h-4 text-neutral-400" /> Фильтры
               {activeCount > 0 && <span className="text-xs px-2 py-0.5 rounded-full bg-teal-300 text-neutral-950">{activeCount}</span>}
             </span>
@@ -268,7 +268,7 @@ export default function ResumeBoard() {
               <label className="text-sm text-neutral-400 inline-flex items-center gap-2">
                 <span className="sr-only">Сортировка</span>
                 <select value={filters.sort} onChange={e => set({ sort: e.target.value })}
-                  className="bg-[#0B0F19] border border-white/12 rounded-full px-3 py-1.5 text-sm text-neutral-200">
+                  className="neu-in rounded-full px-3 py-1.5 text-sm text-neutral-200">
                   {SORTS.filter(([v]) => v !== "match" || filters.vacancy).map(([v, t]) => <option key={v} value={v}>{t}</option>)}
                 </select>
               </label>
@@ -279,7 +279,7 @@ export default function ResumeBoard() {
             ) : items === null ? (
               <div className="flex justify-center py-20"><Loader2 className="w-8 h-8 animate-spin text-teal-300" /></div>
             ) : items.length === 0 ? (
-              <div className="text-center py-20 border border-dashed border-white/15 rounded-3xl space-y-2 px-6">
+              <div className="neu-sub text-center py-20 rounded-3xl space-y-2 px-6">
                 <Users className="w-10 h-10 mx-auto text-neutral-600" aria-hidden="true" />
                 <p className="text-neutral-300 text-sm font-medium">
                   {filters.onlySaved ? "Вы ещё никого не сохранили" : "Под эти фильтры резюме нет"}
@@ -316,7 +316,7 @@ export default function ResumeBoard() {
                             </p>
                           </div>
                           <button onClick={() => toggleSaved(r)} aria-pressed={r.saved}
-                            className="shrink-0 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-white/12 text-xs text-neutral-300 hover:border-white/30">
+                            className="lg shrink-0 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs text-neutral-300">
                             {r.saved ? <><BookmarkCheck className="w-3.5 h-3.5 text-teal-300" /> Сохранён</> : <><Bookmark className="w-3.5 h-3.5" /> Сохранить</>}
                           </button>
                         </div>
@@ -349,18 +349,18 @@ export default function ResumeBoard() {
                         <div className="flex flex-wrap items-center gap-2.5 pt-3 border-t border-white/10">
                           {r.has_pdf && (
                             <button onClick={() => openPdf(r)}
-                              className="mr-auto h-10 px-4 rounded-full border border-white/12 text-neutral-200 hover:border-white/30 text-sm inline-flex items-center gap-1.5">
+                              className="lg mr-auto h-10 px-4 rounded-full text-neutral-200 text-sm inline-flex items-center gap-1.5">
                               <FileText className="w-3.5 h-3.5" /> Резюме (PDF)
                             </button>
                           )}
                           {r.conversation_id && (
                             <Link href={`/messages?c=${r.conversation_id}`}
-                              className={`${r.has_pdf ? "" : "mr-auto "}h-10 px-4 rounded-full border border-white/12 text-neutral-200 hover:border-white/30 text-sm inline-flex items-center gap-1.5`}>
+                              className={`${r.has_pdf ? "" : "mr-auto "}lg h-10 px-4 rounded-full text-neutral-200 text-sm inline-flex items-center gap-1.5`}>
                               <MessageCircle className="w-3.5 h-3.5" /> Открыть чат
                             </Link>
                           )}
                           <button onClick={() => setContact(r)}
-                            className="h-10 px-5 rounded-full bg-teal-300 hover:bg-teal-200 text-neutral-950 text-sm font-semibold inline-flex items-center gap-1.5">
+                            className="lg lg-accent h-10 px-5 rounded-full text-sm font-semibold inline-flex items-center gap-1.5">
                             <MessageCircle className="w-4 h-4" /> {r.conversation_id ? "Предложить вакансию" : "Написать кандидату"}
                           </button>
                         </div>
@@ -370,7 +370,7 @@ export default function ResumeBoard() {
                 </ul>
                 {items.length < total && (
                   <button onClick={more} disabled={loadingMore}
-                    className="w-full h-12 rounded-full border border-white/15 text-sm text-neutral-200 hover:border-white/30 disabled:opacity-50 inline-flex items-center justify-center gap-2">
+                    className="lg w-full h-12 rounded-full text-sm text-neutral-200 disabled:opacity-50 inline-flex items-center justify-center gap-2">
                     {loadingMore && <Loader2 className="w-4 h-4 animate-spin" />} Показать ещё
                   </button>
                 )}
@@ -424,7 +424,7 @@ function ContactDialog({ resume, vacancies, defaultVacancy, onClose, onSent }: {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm" onClick={onClose}>
       <div role="dialog" aria-modal="true" aria-labelledby="contact-title" onClick={e => e.stopPropagation()}
-        className="bg-[#0B0F19]/95 border border-white/12 rounded-3xl w-full max-w-lg p-6 space-y-4 shadow-2xl">
+        className="glass rounded-3xl w-full max-w-lg p-6 space-y-4">
         <div className="flex items-start justify-between gap-4">
           <div>
             <h2 id="contact-title" className="font-display text-lg font-bold text-white">Написать кандидату</h2>
@@ -450,7 +450,7 @@ function ContactDialog({ resume, vacancies, defaultVacancy, onClose, onSent }: {
         <div className="flex justify-end gap-2">
           <button onClick={onClose} className="px-4 h-11 text-sm text-neutral-400 hover:text-white">Отмена</button>
           <button onClick={send} disabled={busy || !text.trim()}
-            className="px-5 h-11 rounded-full bg-teal-300 hover:bg-teal-200 text-neutral-950 text-sm font-semibold disabled:opacity-50 inline-flex items-center gap-2">
+            className="lg lg-accent px-5 h-11 rounded-full text-sm font-semibold disabled:opacity-50 inline-flex items-center gap-2">
             {busy ? <Loader2 className="w-4 h-4 animate-spin" /> : <MessageCircle className="w-4 h-4" />} Отправить
           </button>
         </div>

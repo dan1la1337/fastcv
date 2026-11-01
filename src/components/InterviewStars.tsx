@@ -14,7 +14,7 @@ export default function InterviewStars({ value, onRate, disabled, label = "Оц�
       {[1, 2, 3, 4, 5].map(n => (
         <button key={n} type="button" role="radio" aria-checked={value === n} aria-label={`${n} из 5`}
           disabled={disabled} onClick={() => onRate(n)}
-          className="p-1 rounded-full hover:bg-white/[0.08] disabled:opacity-50 transition-colors">
+          className="lg p-1 rounded-full disabled:opacity-50 transition-colors">
           <Star className={`w-6 h-6 ${value !== null && n <= value ? "fill-amber-300 text-amber-300" : "text-neutral-500"}`} aria-hidden="true" />
         </button>
       ))}

@@ -8,7 +8,7 @@ import { toast } from "@/components/Toaster";
 
 export type MyReview = { application_id: string; rating: number; pros: string | null; cons: string | null; reply: string | null };
 
-const field = "w-full bg-[#0B0F19] border border-white/12 rounded-2xl px-4 py-2.5 text-sm text-neutral-100 focus:outline-none focus:border-teal-300 resize-y";
+const field = "w-full neu-in rounded-2xl px-4 py-2.5 text-sm text-neutral-100 resize-y";
 
 /** Отзыв кандидата о процессе найма (рейтинг работодателя). Публикуется анонимно. */
 export default function HiringReviewForm({ applicationId, company, review, onSaved }: {
@@ -39,12 +39,12 @@ export default function HiringReviewForm({ applicationId, company, review, onSav
 
   if (!open) {
     return (
-      <div className="flex flex-wrap items-center justify-between gap-2 rounded-2xl border border-white/10 px-4 py-3">
+      <div className="neu-sub flex flex-wrap items-center justify-between gap-2 rounded-2xl px-4 py-3">
         <p className="text-sm text-neutral-300">
           {review ? <>Ваш отзыв о найме: <span className="text-amber-300">{"★".repeat(review.rating)}</span></> : "Как вам процесс найма?"}
           <span className="block text-xs text-neutral-500">Анонимно, на странице {company ? `компании «${company}»` : "компании"}</span>
         </p>
-        <button onClick={() => setOpen(true)} className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-white/15 text-xs text-neutral-200 hover:border-white/30">
+        <button onClick={() => setOpen(true)} className="lg inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs text-neutral-200">
           <MessageSquareQuote className="w-3.5 h-3.5" /> {review ? "Изменить отзыв" : "Оставить отзыв"}
         </button>
         {review?.reply && (
@@ -71,7 +71,7 @@ export default function HiringReviewForm({ applicationId, company, review, onSav
       <div className="flex justify-end gap-2">
         <button onClick={() => setOpen(false)} className="px-3 h-10 text-sm text-neutral-400 hover:text-white">Отмена</button>
         <button onClick={save} disabled={busy || !rating}
-          className="px-5 h-10 rounded-full bg-teal-300 hover:bg-teal-200 text-neutral-950 text-sm font-semibold disabled:opacity-50 inline-flex items-center gap-2">
+          className="lg lg-accent px-5 h-10 rounded-full text-sm font-semibold disabled:opacity-50 inline-flex items-center gap-2">
           {busy && <Loader2 className="w-4 h-4 animate-spin" />} Опубликовать
         </button>
       </div>

@@ -36,7 +36,7 @@ export default function InterviewFeedback({ token, initial }: { token: string; i
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4">
-      <div className="max-w-md w-full glass rounded-3xl p-8 text-center space-y-5">
+      <div className="glass max-w-md w-full rounded-3xl p-8 text-center space-y-5">
         <Logo />
         <h1 className="font-display text-2xl font-bold text-white">Как прошло собеседование?</h1>
         {state === "invalid" ? (

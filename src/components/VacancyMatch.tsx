@@ -79,7 +79,7 @@ export default function VacancyMatch({ vacancyId }: { vacancyId: string }) {
           {match.missing.map(s => (
             <button key={s} onClick={() => addSkill(s)} disabled={adding !== null}
               aria-label={`У меня есть опыт с ${s} — добавить в профиль`}
-              className="px-3 py-1.5 rounded-full border border-dashed border-amber-300/70 bg-amber-300/10 text-amber-200 hover:bg-amber-300/20 disabled:opacity-60 transition-colors">
+              className="lg lg-warn px-3 py-1.5 rounded-full text-amber-200 disabled:opacity-60 transition-colors">
               {adding === s ? "добавляем…" : `+ ${s} в профиль`}
             </button>
           ))}

@@ -22,12 +22,12 @@ const MAX_DIRECTIONS = 5; // как в ограничении profiles_pref_dire
 const RESUME_MAX_BYTES = 5 * 1024 * 1024; // совпадает с лимитом бакета resumes
 
 const inputClass =
-  "w-full bg-[#0B0F19] border border-white/12 rounded-2xl px-4 py-3 text-sm text-neutral-200 focus:outline-none focus:border-teal-300 transition-colors";
+  "w-full neu-in rounded-2xl px-4 py-3 text-sm text-neutral-200 transition-colors";
 const labelClass = "block text-xs font-bold text-neutral-500 uppercase tracking-wider mb-2";
 const chip = (active: boolean) =>
-  `text-xs px-3 py-1.5 rounded-full border transition-colors ${active
-    ? "bg-teal-300 border-teal-300 text-neutral-950"
-    : "bg-white/[0.04] border-white/15 text-neutral-400 hover:border-white/30 hover:text-neutral-200"}`;
+  `text-xs px-3 py-1.5 rounded-full transition-colors ${active
+    ? "lg lg-accent"
+    : "lg text-neutral-400 hover:text-neutral-100"}`;
 
 const splitList = (text: string) => [...new Map(text.split(",").map(s => s.trim()).filter(Boolean).map(s => [s.toLowerCase(), s])).values()];
 
@@ -297,7 +297,7 @@ export default function ProfilePage() {
 
             {resumePath && (
               <button onClick={autofillFromResume} disabled={autofilling}
-                className="w-full flex items-center justify-center gap-2 bg-teal-300/10 hover:bg-teal-300/20 border border-teal-300/30 text-teal-200 rounded-xl py-3 text-sm font-medium transition-colors disabled:opacity-50">
+                className="lg lg-tint w-full flex items-center justify-center gap-2 text-teal-200 rounded-xl py-3 text-sm font-medium transition-colors disabled:opacity-50">
                 {autofilling
                   ? <><Loader2 className="w-4 h-4 animate-spin" /> ИИ читает резюме…</>
                   : <><Sparkles className="w-4 h-4" /> Заполнить профиль по резюме заново</>}
@@ -305,25 +305,25 @@ export default function ProfilePage() {
             )}
 
             {resumePath ? (
-              <div className="flex flex-wrap items-center gap-3 bg-[#0B0F19] border border-white/12 rounded-2xl p-4">
+              <div className="neu-in flex flex-wrap items-center gap-3 rounded-2xl p-4">
                 <FileText className="w-5 h-5 text-teal-300 shrink-0" />
                 <button onClick={openResume} className="text-sm text-neutral-200 hover:text-teal-300 underline-offset-2 hover:underline">
                   resume.pdf
                 </button>
                 <div className="ml-auto flex items-center gap-2">
                   <button onClick={() => fileInput.current?.click()} disabled={resumeBusy}
-                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-white/10 text-xs text-neutral-300 hover:bg-white/[0.08] disabled:opacity-50">
+                    className="lg inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs text-neutral-300 disabled:opacity-50">
                     <Upload className="w-3.5 h-3.5" /> Заменить
                   </button>
                   <button onClick={removeResume} disabled={resumeBusy}
-                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-white/10 text-xs text-neutral-300 hover:text-red-300 hover:bg-red-950/30 disabled:opacity-50">
+                    className="lg inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs text-neutral-300 hover:text-red-300 disabled:opacity-50">
                     <Trash2 className="w-3.5 h-3.5" /> Удалить
                   </button>
                 </div>
               </div>
             ) : (
               <button onClick={() => fileInput.current?.click()} disabled={resumeBusy}
-                className="w-full flex items-center justify-center gap-2 border border-dashed border-teal-300/40 hover:border-teal-300 bg-teal-300/[0.04] rounded-xl py-6 text-sm text-neutral-300 transition-colors disabled:opacity-50">
+                className="lg lg-tint w-full flex items-center justify-center gap-2 rounded-xl py-6 text-sm text-neutral-300 transition-colors disabled:opacity-50">
                 {resumeBusy || autofilling
                   ? <><Loader2 className="w-5 h-5 animate-spin" /> {autofilling ? "ИИ читает резюме…" : "Загружаем…"}</>
                   : <><Upload className="w-4 h-4" /> Загрузить резюме (PDF) и заполнить профиль</>}
@@ -335,13 +335,13 @@ export default function ProfilePage() {
           </div>
         )}
 
-        <div className="glass rounded-3xl p-6 sm:p-8 shadow-xl">
+        <div className="glass rounded-3xl p-6 sm:p-8">
           <h1 id="top" className="font-display text-2xl font-bold mb-6 text-white scroll-mt-6">Личный кабинет</h1>
 
           <form id="profile-form" onSubmit={saveProfile} className="space-y-6 scroll-mt-6">
             <div>
               <label className={labelClass}>Тип аккаунта</label>
-              <div className="inline-flex items-center gap-2 px-4 py-2 bg-[#0B0F19] border border-white/12 rounded-2xl text-sm font-medium text-neutral-300">
+              <div className="neu-in inline-flex items-center gap-2 px-4 py-2 rounded-2xl text-sm font-medium text-neutral-300">
                 {isCandidate
                   ? <><UserCircle className="w-4 h-4 text-emerald-400" /> Соискатель</>
                   : <><Briefcase className="w-4 h-4 text-teal-300" /> Работодатель</>}
@@ -451,7 +451,7 @@ export default function ProfilePage() {
                 className={`${inputClass} h-32 resize-y leading-relaxed`} />
             </div>
 
-            <button type="submit" disabled={saving} className="w-full flex items-center justify-center gap-2 bg-teal-300 hover:bg-teal-200 text-neutral-950 py-3.5 rounded-full text-sm font-semibold transition-colors disabled:opacity-50">
+            <button type="submit" disabled={saving} className="lg lg-accent w-full flex items-center justify-center gap-2 py-3.5 rounded-full text-sm font-semibold transition-colors disabled:opacity-50">
               {saving ? <Loader2 className="w-5 h-5 animate-spin" /> : <><Save className="w-4 h-4" /> Сохранить профиль</>}
             </button>
           </form>

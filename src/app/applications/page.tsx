@@ -36,7 +36,7 @@ const STATUS: Record<string, { text: string; style: string }> = {
   new: { text: "Ждёт ответа работодателя", style: "bg-amber-500/10 text-amber-400 border-amber-500/20" },
   viewed: { text: "Просмотрен", style: "bg-teal-300/10 text-teal-300 border-teal-300/20" },
   interview_scheduled: { text: "Приглашение на собеседование", style: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20" },
-  rejected: { text: "Отказ", style: "bg-white/[0.08] text-neutral-400 border-white/15" },
+  rejected: { text: "Отказ", style: "neu-chip text-neutral-400 border-white/15" },
 };
 
 export default function CandidateApplications() {
@@ -122,18 +122,18 @@ export default function CandidateApplications() {
       <div className="max-w-3xl mx-auto space-y-6">
         <div className="flex items-center justify-between gap-3 border-b border-white/10 pb-4">
           <div className="flex items-center gap-3">
-            <Link href="/" aria-label="К вакансиям" className="p-2 bg-neutral-900 border border-white/10 rounded-xl hover:bg-white/[0.08] transition-colors">
+            <Link href="/" aria-label="К вакансиям" className="lg p-2 rounded-xl transition-colors">
               <ArrowLeft className="w-4 h-4" />
             </Link>
             <h1 className="font-display text-xl font-bold">Мои отклики</h1>
           </div>
-          <span className="text-xs text-neutral-400 bg-neutral-900 px-3 py-1.5 rounded-full border border-white/10 whitespace-nowrap">
+          <span className="text-xs text-neutral-400 neu-chip px-3 py-1.5 rounded-full whitespace-nowrap">
             {applications.length} {plural(applications.length, ["отклик", "отклика", "откликов"])}
           </span>
         </div>
 
         {applications.length === 0 ? (
-          <div className="text-center py-20 border border-dashed border-white/15 rounded-3xl space-y-3">
+          <div className="neu-sub text-center py-20 rounded-3xl space-y-3">
             <MessageSquare className="w-10 h-10 mx-auto text-neutral-700" />
             <p className="text-neutral-400 text-sm font-medium">Вы ещё не откликались на вакансии</p>
             <Link href="/" className="inline-block text-sm text-teal-300 hover:text-teal-200">Перейти к вакансиям</Link>
@@ -178,7 +178,7 @@ export default function CandidateApplications() {
 
                   {app.hr_message && (
                     <div className={`rounded-xl border p-4 text-sm leading-relaxed ${
-                      app.status === "interview_scheduled" ? "border-emerald-500/30 bg-emerald-500/5 text-emerald-100" : "border-white/10 bg-neutral-950 text-neutral-300"
+                      app.status === "interview_scheduled" ? "border-emerald-500/30 bg-emerald-500/5 text-emerald-100" : "neu-in text-neutral-300"
                     }`}>
                       <p className="text-xs font-bold text-neutral-500 uppercase tracking-wider mb-2">Ответ работодателя</p>
                       <p className="whitespace-pre-line">{app.hr_message}</p>
@@ -186,7 +186,7 @@ export default function CandidateApplications() {
                   )}
 
                   {app.funnel && (
-                    <div className="rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3 space-y-1.5 text-sm" aria-label="Где ваш отклик">
+                    <div className="neu-sub rounded-2xl px-4 py-3 space-y-1.5 text-sm" aria-label="Где ваш отклик">
                       <p className="text-xs font-bold text-neutral-500 uppercase tracking-wider inline-flex items-center gap-1.5">
                         <BarChart3 className="w-3.5 h-3.5" aria-hidden="true" /> Где ваш отклик
                       </p>
@@ -205,7 +205,7 @@ export default function CandidateApplications() {
 
                   {interviews[app.id] && (
                     <Link href={`/messages?c=${interviews[app.id].conversation_id}`}
-                      className="flex flex-wrap items-center gap-x-2 gap-y-1 rounded-2xl border border-emerald-400/30 bg-emerald-400/[0.07] px-4 py-3 text-sm text-white hover:border-emerald-300/60">
+                      className="lg lg-tint flex flex-wrap items-center gap-x-2 gap-y-1 rounded-2xl px-4 py-3 text-sm text-white">
                       <CalendarCheck className="w-4 h-4 text-emerald-300" aria-hidden="true" />
                       Собеседование: <b>{slotLabel(interviews[app.id].starts_at)}</b>
                       <span className="text-neutral-400">({slotRange(interviews[app.id].starts_at, interviews[app.id].duration_min)})</span>
@@ -220,7 +220,7 @@ export default function CandidateApplications() {
                   )}
 
                   {!external && app.status === "interview_scheduled" && (
-                    <div className="flex flex-wrap items-center justify-between gap-2 rounded-2xl border border-white/10 px-4 py-3">
+                    <div className="neu-sub flex flex-wrap items-center justify-between gap-2 rounded-2xl px-4 py-3">
                       <p className="text-sm text-neutral-300">
                         {ratings[app.id] ? "Ваша оценка собеседования" : "Как прошло собеседование?"}
                         <span className="block text-xs text-neutral-500">Анонимно: работодатель видит только среднюю оценку</span>
@@ -239,7 +239,7 @@ export default function CandidateApplications() {
                   )}
 
                   {app.cover_letter && (
-                    <details className="bg-[#0B0F19] border border-white/12 rounded-2xl p-4 text-sm text-neutral-300 group">
+                    <details className="neu-in rounded-2xl p-4 text-sm text-neutral-300 group">
                       <summary className="cursor-pointer text-xs font-bold text-neutral-500 uppercase tracking-wider select-none">
                         Сопроводительное письмо
                       </summary>
