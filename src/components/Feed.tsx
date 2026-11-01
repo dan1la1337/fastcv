@@ -402,6 +402,15 @@ export default function Feed({ initialRows, initialTotal, hero }: { initialRows:
         </div>
         <p className="text-sm text-neutral-400 leading-relaxed line-clamp-3">{item.description}</p>
 
+        {match?.core && match.core.fit !== "match" && match.core.stack.length > 0 && (
+          <p className={`text-xs ${match.core.fit === "foreign" ? "text-amber-300" : "text-neutral-400"}`}>
+            Основной стек вакансии: <span className="font-medium">{match.core.stack.join(", ")}</span>
+            {match.core.fit === "foreign" && " — не ваш, поэтому совпадение не выше 40%"}
+            {match.core.fit === "related" && " — смежный с вашим"}
+            {match.core.fit === "unknown" && " — укажите в профиле свой основной стек, чтобы совпадение было точнее"}
+          </p>
+        )}
+
         {match && (match.matched.length > 0 || match.missing.length > 0 || match.related.length > 0) && (
           <p className="text-xs text-neutral-500">
             {match.matched.length > 0 && <>Есть у вас: <span className="text-teal-200">{match.matched.join(", ")}</span></>}

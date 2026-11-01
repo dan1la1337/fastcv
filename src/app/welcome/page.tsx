@@ -39,6 +39,7 @@ export default function WelcomePage() {
   const [formats, setFormats] = useState<WorkFormat[]>([]);
   const [city, setCity] = useState("");
   const [skills, setSkills] = useState("");
+  const [primarySkills, setPrimarySkills] = useState("");
   // Раздел ленты: в онбординге показываем направления только выбранного раздела
   const [area, setArea] = useState<Area>("it");
   // Сколько вакансий сейчас в каждом направлении — для живого счётчика под выбором
@@ -56,7 +57,7 @@ export default function WelcomePage() {
       setUserId(user.id);
       const { data: profile } = await supabase
         .from("profiles")
-        .select("name, skills, pref_directions, pref_level, pref_format, pref_formats, experience_years, pref_city, leads_people")
+        .select("name, skills, primary_skills, pref_directions, pref_level, pref_format, pref_formats, experience_years, pref_city, leads_people")
         .eq("id", user.id)
         .maybeSingle();
       if (profile) {
@@ -69,7 +70,10 @@ export default function WelcomePage() {
         setExperience(profile.experience_years != null ? String(profile.experience_years) : "");
         setLeadsPeople(profile.leads_people ?? false);
         setCity(profile.pref_city ?? "");
-        setSkills(Array.isArray(profile.skills) ? profile.skills.join(", ") : "");
+        const primary = Array.isArray(profile.primary_skills) ? (profile.primary_skills as string[]) : [];
+        const primaryLower = new Set(primary.map(x => x.toLowerCase()));
+        setPrimarySkills(primary.join(", "));
+        setSkills(Array.isArray(profile.skills) ? (profile.skills as string[]).filter(x => !primaryLower.has(x.toLowerCase())).join(", ") : "");
       }
     })();
   }, [router]);
@@ -80,7 +84,8 @@ export default function WelcomePage() {
     setSaving(true);
     const { error } = await supabase.from("profiles").update({
       name: name.trim(),
-      skills: [...new Set(skills.split(",").map(s => s.trim()).filter(Boolean))].slice(0, 50),
+      primary_skills: [...new Set(primarySkills.split(",").map(s => s.trim()).filter(Boolean))].slice(0, 5),
+      skills: [...new Set([...primarySkills.split(","), ...skills.split(",")].map(s => s.trim()).filter(Boolean))].slice(0, 50),
       pref_directions: directions,
       experience_years: parseExperience(experience),
       leads_people: leadsPeople,
@@ -198,8 +203,12 @@ export default function WelcomePage() {
             <input id="city" maxLength={100} value={city} onChange={e => setCity(e.target.value)} placeholder="Москва" className={inputClass} />
           </div>
           <div>
-            <label htmlFor="skills" className={labelClass}>Ключевые навыки</label>
-            <input id="skills" value={skills} onChange={e => setSkills(e.target.value)} placeholder="Python, SQL, Figma…" className={inputClass} />
+            <label htmlFor="primary-skills" className={labelClass}>Основной стек</label>
+            <input id="primary-skills" value={primarySkills} onChange={e => setPrimarySkills(e.target.value)} placeholder="Java, Spring или Figma" className={inputClass} />
+          </div>
+          <div className="sm:col-span-2">
+            <label htmlFor="skills" className={labelClass}>Другие навыки</label>
+            <input id="skills" value={skills} onChange={e => setSkills(e.target.value)} placeholder="PostgreSQL, Kafka, Docker…" className={inputClass} />
           </div>
         </div>
 

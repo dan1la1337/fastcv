@@ -10,9 +10,23 @@ export interface Match {
   missing: string[];
   /** Засчитаны наполовину по смежному опыту: навык вакансии и навык кандидата (PostgreSQL ← MySQL). */
   related: { skill: string; via: string }[];
+  /**
+   * Основной стек вакансии (язык и платформа) и ваш ли он: match — ваш, related — смежный
+   * (Kotlin при Java), foreign — чужой (совпадение тогда не выше 40%), unknown — в профиле нет языков.
+   * null — в вакансии язык не указан.
+   */
+  core: { fit: "match" | "related" | "foreign" | "unknown"; stack: string[] } | null;
 }
 
-type MatchRow = { id: string; score: number; matched: unknown; missing: unknown };
+type MatchRow = { id: string; score: number; matched: unknown; missing: unknown; core?: unknown };
+
+const FITS = new Set(["match", "related", "foreign", "unknown"]);
+const coreOf = (value: unknown): Match["core"] => {
+  const c = value as { fit?: unknown; stack?: unknown } | null;
+  return c && typeof c === "object" && typeof c.fit === "string" && FITS.has(c.fit)
+    ? { fit: c.fit as NonNullable<Match["core"]>["fit"], stack: strings(c.stack) }
+    : null;
+};
 
 const strings = (value: unknown): string[] =>
   Array.isArray(value) ? value.filter((s): s is string => typeof s === "string") : [];
@@ -30,6 +44,7 @@ export const toMatch = (row: Omit<MatchRow, "id">): Match => ({
   matched: strings(row.matched),
   missing: strings(row.missing),
   related: related(row.missing),
+  core: coreOf(row.core),
 });
 
 /** Совпадение для вакансий на экране. Не кандидату или без входа — пусто. */
