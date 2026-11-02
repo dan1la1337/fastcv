@@ -13,6 +13,46 @@ const SOURCES = [
   { title: "«Работа России»", text: "Открытые данные портала" },
 ];
 
+/** Откуда вакансии: общий блок главной и /about. */
+export function SourcesSection() {
+  return (
+    <section id="sources" aria-labelledby="sources-title" className="flex flex-wrap gap-8 scroll-mt-20">
+      <div className="flex-[1_1_320px] min-w-0 space-y-4">
+        <h2 id="sources-title" className="font-display text-2xl sm:text-4xl font-bold leading-tight">Откуда вакансии</h2>
+        <p className="text-neutral-400 leading-relaxed">
+          Только открытые источники и официальные API. У каждой вакансии — ссылка на оригинал. Владелец канала может исключить его в любой момент.
+        </p>
+        <Link href="/sources" className="inline-block font-semibold text-teal-200 hover:text-white">Как мы работаем с источниками →</Link>
+      </div>
+      <div className="flex-[1_1_520px] min-w-0 grid gap-3 sm:grid-cols-2">
+        {SOURCES.map(s => (
+          <div key={s.title} className="glass rounded-3xl p-5">
+            <h3 className="font-semibold mb-1.5">{s.title}</h3>
+            <p className="text-sm text-neutral-400 leading-relaxed">{s.text}</p>
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+/** Призыв для работодателей: общий блок главной и /about. */
+export function EmployersSection() {
+  return (
+    <section aria-labelledby="employers" className="neu-sub rounded-[28px] p-8 sm:p-10 flex flex-wrap items-center gap-8">
+      <div className="flex-[1_1_420px] min-w-0 space-y-4">
+        <h2 id="employers" className="font-display text-2xl sm:text-3xl font-bold leading-tight">Работодателям: ни один отклик не потеряется</h2>
+        <p className="text-neutral-300 leading-relaxed">
+          Отклики отсортированы по совпадению с вакансией, воронка и ответ кандидату в один клик. Место кандидата зависит только от совпадения — не от оплаты.
+        </p>
+      </div>
+      <Link href="/register/form?role=employer" className="lg rounded-full px-6 py-3.5 font-semibold text-neutral-100 transition-colors">
+        Разместить вакансию
+      </Link>
+    </section>
+  );
+}
+
 /** Лендинг под первым экраном (макет «Аврора»): как это работает, источники, работодателям. */
 export default function LandingSections({ className = "" }: { className?: string }) {
   return (
@@ -30,35 +70,9 @@ export default function LandingSections({ className = "" }: { className?: string
         </ol>
       </section>
 
-      <section id="sources" aria-labelledby="sources-title" className="flex flex-wrap gap-8 scroll-mt-20">
-        <div className="flex-[1_1_320px] min-w-0 space-y-4">
-          <h2 id="sources-title" className="font-display text-2xl sm:text-4xl font-bold leading-tight">Откуда вакансии</h2>
-          <p className="text-neutral-400 leading-relaxed">
-            Только открытые источники и официальные API. У каждой вакансии — ссылка на оригинал. Владелец канала может исключить его в любой момент.
-          </p>
-          <Link href="/sources" className="inline-block font-semibold text-teal-200 hover:text-white">Как мы работаем с источниками →</Link>
-        </div>
-        <div className="flex-[1_1_520px] min-w-0 grid gap-3 sm:grid-cols-2">
-          {SOURCES.map(s => (
-            <div key={s.title} className="glass rounded-3xl p-5">
-              <h3 className="font-semibold mb-1.5">{s.title}</h3>
-              <p className="text-sm text-neutral-400 leading-relaxed">{s.text}</p>
-            </div>
-          ))}
-        </div>
-      </section>
+      <SourcesSection />
 
-      <section aria-labelledby="employers" className="neu-sub rounded-[28px] p-8 sm:p-10 flex flex-wrap items-center gap-8">
-        <div className="flex-[1_1_420px] min-w-0 space-y-4">
-          <h2 id="employers" className="font-display text-2xl sm:text-3xl font-bold leading-tight">Работодателям: ни один отклик не потеряется</h2>
-          <p className="text-neutral-300 leading-relaxed">
-            Отклики отсортированы по совпадению с вакансией, воронка и ответ кандидату в один клик. Место кандидата зависит только от совпадения — не от оплаты.
-          </p>
-        </div>
-        <Link href="/register/form?role=employer" className="lg rounded-full px-6 py-3.5 font-semibold text-neutral-100 transition-colors">
-          Разместить вакансию
-        </Link>
-      </section>
+      <EmployersSection />
     </div>
   );
 }

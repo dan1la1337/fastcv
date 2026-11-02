@@ -6,12 +6,11 @@ import LandingSections from "@/components/LandingSections";
 
 /**
  * Главная страница (макет «Аврора»): обещание, пример совпадения, живой счётчик и лендинг.
- * На «/» вошедшим скрыта (.guest-only): им сразу лента. На /about видна всем.
+ * Вошедшим скрыта (.guest-only): им сразу лента.
  */
-export default function Hero({ stats, always = false }: { stats: LiveStats | null; always?: boolean }) {
-  const feedHref = always ? "/#feed" : "#feed";
+export default function Hero({ stats }: { stats: LiveStats | null }) {
   return (
-    <div className={always ? "" : "guest-only"}>
+    <div className="guest-only">
     <section className="max-w-6xl mx-auto px-4 pt-10 sm:pt-16 pb-4 space-y-12">
       <div className="flex flex-wrap items-center gap-x-16 gap-y-10">
         <div className="flex-[1_1_480px] min-w-0 space-y-6">
@@ -27,7 +26,7 @@ export default function Hero({ stats, always = false }: { stats: LiveStats | nul
               className="lg lg-accent rounded-full px-6 py-3.5 font-semibold transition-colors">
               Загрузить резюме
             </Link>
-            <a href={feedHref} className="lg rounded-full px-6 py-3.5 text-neutral-100 transition-colors">
+            <a href="#feed" className="lg rounded-full px-6 py-3.5 text-neutral-100 transition-colors">
               Смотреть вакансии
             </a>
           </div>
