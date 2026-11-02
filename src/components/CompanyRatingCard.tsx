@@ -46,7 +46,7 @@ export default function CompanyRatingCard({ company, rating }: { company: string
     <section aria-labelledby="rating-title" className="glass rounded-3xl p-6 sm:p-8 space-y-6">
       <div className="flex flex-wrap items-center gap-5">
         {rating.score !== undefined ? (
-          <MatchRing value={rating.score} size={96} stroke={rating.score >= 70 ? "#FFD43B" : "#8a8a90"} />
+          <MatchRing value={rating.score} size={96} stroke={rating.score >= 70 ? "#f4f4f5" : "#8a8a90"} />
         ) : (
           <div className="w-24 h-24 rounded-full border-[6px] border-white/10 flex items-center justify-center text-xs text-neutral-500 text-center px-2">мало данных</div>
         )}

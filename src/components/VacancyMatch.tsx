@@ -52,7 +52,7 @@ export default function VacancyMatch({ vacancyId }: { vacancyId: string }) {
   const total = match.matched.length + match.related.length + match.missing.length;
   return (
     <section aria-label="Совпадение с профилем" className="glass rounded-3xl p-6 flex flex-wrap items-center gap-6">
-      <MatchRing value={match.score} size={140} stroke={match.score >= 70 ? "#FFD43B" : "#8a8a90"} />
+      <MatchRing value={match.score} size={140} stroke={match.score >= 70 ? "#f4f4f5" : "#8a8a90"} />
       <div className="flex-1 min-w-[16rem] space-y-3">
         <p className="text-neutral-300">
           {total > 0
@@ -69,7 +69,7 @@ export default function VacancyMatch({ vacancyId }: { vacancyId: string }) {
         )}
         <div className="flex flex-wrap gap-2 text-sm">
           {match.matched.map(s => (
-            <span key={s} className="px-3 py-1.5 rounded-full bg-teal-300/15 text-teal-200">{s} ✓</span>
+            <span key={s} className="neu-chip px-2 py-1 text-[11px]">{s} ✓</span>
           ))}
           {match.related.map(r => (
             <span key={r.skill} title="Засчитано наполовину: у вас есть смежный опыт" className="px-3 py-1.5 rounded-full bg-sky-400/10 text-sky-200">
