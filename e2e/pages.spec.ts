@@ -129,11 +129,12 @@ test("сброс пароля: ссылка со входа, форма запр
   await expect(page.getByText("Ссылка устарела или уже использована")).toBeVisible();
 });
 
-test("главная страница сервиса доступна по /about: обещание, как это работает, источники, работодателям", async ({ page }) => {
+test("главная страница сервиса доступна по /about: обещание, источники, помощь с откликом, работодателям", async ({ page }) => {
   await page.goto("/about");
-  await expect(page.getByRole("heading", { level: 1, name: /Работа, которая подходит вам/ })).toBeVisible();
-  await expect(page.getByRole("heading", { name: "От резюме до отклика — без лишних шагов" })).toBeVisible();
+  await expect(page.getByRole("heading", { level: 1, name: /Вакансии со всего интернета/ })).toBeVisible();
+  await expect(page.getByRole("link", { name: "Смотреть вакансии" })).toHaveAttribute("href", "/#feed");
   await expect(page.getByRole("heading", { name: "Откуда вакансии" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Нашли вакансию? Дальше тоже поможем" })).toBeVisible();
   await expect(page.getByRole("link", { name: "Разместить вакансию" })).toHaveAttribute("href", "/register/form?role=employer");
 });
 
