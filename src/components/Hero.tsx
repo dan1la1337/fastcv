@@ -44,9 +44,9 @@ export default function Hero({ stats, always = false }: { stats: LiveStats | nul
           </div>
           <div className="flex flex-wrap gap-2 text-sm">
             {["Python", "FastAPI", "3+ года"].map(s => (
-              <span key={s} className="rounded-full bg-teal-300/15 px-3 py-1 text-teal-200">{s} ✓</span>
+              <span key={s} className="neu-chip px-2 py-1 text-[11px]">{s} ✓</span>
             ))}
-            <span className="rounded-full bg-amber-400/15 px-3 py-1 text-amber-300">SQLAlchemy — добавить?</span>
+            <span className="neu-chip px-2 py-1 text-[11px] !text-neutral-400">SQLAlchemy — добавить?</span>
           </div>
         </figure>
       </div>
