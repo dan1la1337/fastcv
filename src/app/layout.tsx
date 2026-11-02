@@ -37,12 +37,10 @@ export default function RootLayout({
         <script dangerouslySetInnerHTML={{ __html: AUTH_HINT }} />
       </head>
       <body className="min-h-full flex flex-col relative">
-        {/* Фон за всеми страницами: студийный рендер стеклянных шаров и отдельные шары на трёх глубинах —
-            резкий спереди, мягкий в средней плоскости, размытый далеко позади стекла */}
+        {/* Фон за всеми страницами: сильно приглушённый студийный рендер и один небольшой шар у края —
+            стеклу есть что размывать, но шары не спорят с текстом */}
         <div aria-hidden="true" className="page-backdrop pointer-events-none fixed inset-0 -z-10 overflow-hidden">
-          <div className="og-orb og-orb--blur orb-drift-a" style={{ width: 420, height: 420, left: "34%", top: "52%" }} />
-          <div className="og-orb og-orb--soft orb-drift-b hidden sm:block" style={{ width: 72, height: 72, left: "58%", top: 110 }} />
-          <div className="og-orb orb-drift-a hidden sm:block" style={{ width: 110, height: 110, right: "4%", bottom: "10%" }} />
+          <div className="og-orb orb-drift-a hidden lg:block" style={{ width: 84, height: 84, right: "2.5%", top: "26%", opacity: 0.75 }} />
         </div>
         {children}
         <footer className="mt-auto border-t border-white/10 px-4 py-6 text-xs text-neutral-400">

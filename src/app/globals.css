@@ -286,11 +286,11 @@ h1.font-display { font-weight: 500; }
 /* Разделители — steel */
 .border-white\/10, .border-white\/12, .border-white\/15 { border-color: var(--steel); }
 
-/* Фон: студийная плита со стеклянными шарами (screen на void). Сверху — спад света студии:
-   там, где идёт текст (слева и по центру), шары уходят в тень и не спорят с буквами */
+/* Фон: студийная плита со стеклянными шарами, сильно приглушённая — от шаров остаются только
+   мягкие блики по краям, под текстом почти ровный void */
 .page-backdrop {
   background:
-    linear-gradient(90deg, rgba(5, 5, 6, 0.72), rgba(5, 5, 6, 0.45) 45%, rgba(5, 5, 6, 0.25) 75%, rgba(5, 5, 6, 0.4)),
+    radial-gradient(120% 90% at 50% 45%, rgba(5, 5, 6, 0.94), rgba(5, 5, 6, 0.8) 70%, rgba(5, 5, 6, 0.7)),
     var(--og-stage) center / cover no-repeat,
     var(--void);
 }
