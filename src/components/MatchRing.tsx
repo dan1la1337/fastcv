@@ -1,8 +1,8 @@
 const R = 70;
 const C = 2 * Math.PI * R;
 
-/** Кольцо совпадения (Obsidian Glass: ink на треке steel): заполняется до процента при появлении. */
-export default function MatchRing({ value, size = 160, label = true, stroke = "#f4f4f5" }: { value: number; size?: number; label?: boolean; stroke?: string }) {
+/** Кольцо совпадения (жёлтый акцент на треке steel): заполняется до процента при появлении. */
+export default function MatchRing({ value, size = 160, label = true, stroke = "#FFD43B" }: { value: number; size?: number; label?: boolean; stroke?: string }) {
   const to = C * (1 - value / 100);
   return (
     <div className="relative shrink-0" style={{ width: size, height: size }}>
