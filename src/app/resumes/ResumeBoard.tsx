@@ -154,7 +154,7 @@ export default function ResumeBoard() {
           <div role="tablist" aria-label="Какие резюме" className="neu-in ml-auto inline-flex gap-1 p-1 rounded-full">
             {([[false, "Все"], [true, "Сохранённые"]] as const).map(([saved, text]) => (
               <button key={text} role="tab" aria-selected={filters.onlySaved === saved} onClick={() => set({ onlySaved: saved })}
-                className={`lg px-4 py-1.5 rounded-full text-sm ${filters.onlySaved === saved ? "lg text-white" : "text-neutral-400 hover:text-white"}`}>
+                className={`lg px-4 py-1.5 rounded-full text-sm ${filters.onlySaved === saved ? "lg lg-accent" : "text-neutral-400 hover:text-white"}`}>
                 {text}
               </button>
             ))}
@@ -300,7 +300,7 @@ export default function ResumeBoard() {
                     return (
                       <li key={r.id} className="glass rounded-3xl p-5 sm:p-6 space-y-4">
                         <div className="flex flex-wrap items-start gap-4">
-                          {r.score !== null && <MatchRing value={r.score} size={64} stroke={r.score >= 70 ? "#f4f4f5" : "#8a8a90"} />}
+                          {r.score !== null && <MatchRing value={r.score} size={64} stroke={r.score >= 70 ? "#5eead4" : "#fcd34d"} />}
                           <div className="flex-1 min-w-[14rem]">
                             <h2 className="text-lg font-bold text-white">{r.headline || (r.directions?.length ? directionLabel(r.directions[0]) : "Кандидат")}</h2>
                             <p className="text-sm text-neutral-300 mt-0.5">{r.name || "Имя не указано"}</p>
@@ -325,7 +325,7 @@ export default function ResumeBoard() {
                           <div className="flex flex-wrap gap-1.5">
                             {skills.slice(0, 16).map(s => {
                               const hit = searchWords.some(w => s.toLowerCase().includes(w));
-                              return <span key={s} className={`neu-chip text-[11px] px-2 py-1 ${hit ? "" : "!text-neutral-400"}`}>{s}</span>;
+                              return <span key={s} className={`neu-chip text-[11px] px-2 py-1 ${hit ? "!text-teal-200 !border-teal-300/40" : "!text-neutral-400"}`}>{s}</span>;
                             })}
                             {skills.length > 16 && <span className="text-xs text-neutral-500 px-1 py-1">+{skills.length - 16}</span>}
                           </div>

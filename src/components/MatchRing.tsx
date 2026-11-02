@@ -2,7 +2,7 @@ const R = 70;
 const C = 2 * Math.PI * R;
 
 /** Кольцо совпадения (ink на треке steel): заполняется до процента при появлении. */
-export default function MatchRing({ value, size = 160, label = true, stroke = "#f4f4f5" }: { value: number; size?: number; label?: boolean; stroke?: string }) {
+export default function MatchRing({ value, size = 160, label = true, stroke = "#5eead4" }: { value: number; size?: number; label?: boolean; stroke?: string }) {
   const to = C * (1 - value / 100);
   return (
     <div className="relative shrink-0" style={{ width: size, height: size }}>
