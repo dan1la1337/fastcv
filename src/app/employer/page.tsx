@@ -627,7 +627,7 @@ export default function EmployerDashboard() {
                 <div role="group" aria-label="Сортировка откликов" className="neu-in inline-flex gap-1 p-1 rounded-full text-sm">
                   {([["match", "По совпадению"], ["ai", "По вердикту ИИ"], ["new", "Сначала новые"]] as const).map(([id, label]) => (
                     <button key={id} onClick={() => setSortBy(id)} aria-pressed={sortBy === id}
-                      className={`lg px-4 py-1.5 rounded-full transition-colors ${sortBy === id ? "lg text-white" : "text-neutral-400 hover:text-white"}`}>
+                      className={`lg px-4 py-1.5 rounded-full transition-colors ${sortBy === id ? "lg lg-accent" : "text-neutral-400 hover:text-white"}`}>
                       {label}
                     </button>
                   ))}
@@ -705,7 +705,7 @@ export default function EmployerDashboard() {
                         className="w-5 h-5 accent-teal-300 cursor-pointer" />
                     )}
                     {matches[app.id] && (
-                      <MatchRing value={matches[app.id].score} size={64} stroke={matches[app.id].score >= 70 ? "#f4f4f5" : "#8a8a90"} />
+                      <MatchRing value={matches[app.id].score} size={64} stroke={matches[app.id].score >= 70 ? "#5eead4" : "#fcd34d"} />
                     )}
                     <div className="flex-1 min-w-[14rem]">
                       <p className="font-semibold text-white flex flex-wrap items-center gap-2">
@@ -727,11 +727,11 @@ export default function EmployerDashboard() {
 
                   {matches[app.id] && (matches[app.id].matched.length + matches[app.id].related.length + matches[app.id].missing.length > 0) && (
                     <div className="flex flex-wrap gap-2 text-xs">
-                      {matches[app.id].matched.map(s => <span key={s} className="neu-chip px-2 py-1 text-[11px]">{s} ✓</span>)}
+                      {matches[app.id].matched.map(s => <span key={s} className="neu-chip px-2 py-1 text-[11px] !text-teal-200 !border-teal-300/40">{s} ✓</span>)}
                       {matches[app.id].related.map(r => (
                         <span key={r.skill} title="Засчитано наполовину: у кандидата смежный опыт" className="px-2.5 py-1 rounded-full bg-sky-400/10 text-sky-200">{r.skill} ≈ {r.via}</span>
                       ))}
-                      {matches[app.id].missing.map(s => <span key={s} className="neu-chip px-2 py-1 text-[11px] !text-neutral-400">нет {s}</span>)}
+                      {matches[app.id].missing.map(s => <span key={s} className="neu-chip px-2 py-1 text-[11px] !text-amber-300 !border-amber-300/40">нет {s}</span>)}
                     </div>
                   )}
 

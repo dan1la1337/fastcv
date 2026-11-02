@@ -3,7 +3,7 @@
 /* Дизайн-система Obsidian Glass: тёмный glassmorphism с фотореальным стеклом. Плотные стеклянные
    панели с зерном плёнки и светящимся краем лежат на почти чёрном void; у правого края —
    студийный рендер стеклянных шаров, гаснущий к тексту. Палитра монохромная:
-   свет даёт стекло, а не цвет; единственная заливка-акцент — ink. Сайт в одной тёмной теме. */
+   цвет несёт только смысл: мятный — есть и главное действие, янтарный — не хватает. Сайт в одной тёмной теме. */
 :root {
   --void: #050506;
   --obsidian: #0c0c0e;
@@ -19,6 +19,10 @@
   --chrome: #c9ccd3;
   --mist: #9aa3b5;
   --on-ink: #0a0a0b;
+  /* Мятный — главное действие и выбранное состояние */
+  --accent: #5eead4;
+  --accent-hover: #99f6e4;
+  --accent-glow: 0 8px 28px rgba(94, 234, 212, 0.27);
   --focus: #ffffff;
 
   --glass-lift: inset 0 1px 0 rgba(255, 255, 255, 0.14), 0 30px 80px rgba(0, 0, 0, 0.55);
@@ -50,8 +54,7 @@
   --font-mono: var(--font-og);
 }
 
-/* Палитра через шкалы Tailwind. Нейтральная — от void до ink. Бывшие акценты (мятный, индиго,
-   изумрудный, голубой, янтарный) сведены к той же серой шкале: бренд-цвета в системе нет. */
+/* Палитра через шкалы Tailwind: нейтральная — от void до ink; смысловые цвета — ниже. */
 @theme {
   /* Poppins подключён в толщинах 300–600: более жирные ступени Tailwind сводим к 600 */
   --font-weight-thin: 300;
@@ -75,23 +78,10 @@
   --color-neutral-950: #050506;
   --color-white: #f4f4f5;
 
-  --color-teal-50: #fafafa;  --color-teal-100: #f4f4f5; --color-teal-200: #f4f4f5; --color-teal-300: #f4f4f5;
-  --color-teal-400: #c9ccd3; --color-teal-500: #9d9da3; --color-teal-600: #8a8a90; --color-teal-700: #5a5a60;
-  --color-teal-800: #2b2c31; --color-teal-900: #18181b; --color-teal-950: #0c0c0e;
-  --color-indigo-50: #fafafa;  --color-indigo-100: #f4f4f5; --color-indigo-200: #dcdcde; --color-indigo-300: #c9ccd3;
-  --color-indigo-400: #9d9da3; --color-indigo-500: #8a8a90; --color-indigo-600: #5a5a60; --color-indigo-700: #2b2c31;
-  --color-indigo-800: #18181b; --color-indigo-900: #0c0c0e; --color-indigo-950: #050506;
-  --color-emerald-50: #fafafa;  --color-emerald-100: #f4f4f5; --color-emerald-200: #f4f4f5; --color-emerald-300: #f4f4f5;
-  --color-emerald-400: #c9ccd3; --color-emerald-500: #9d9da3; --color-emerald-600: #8a8a90; --color-emerald-700: #5a5a60;
-  --color-emerald-800: #2b2c31; --color-emerald-900: #18181b; --color-emerald-950: #0c0c0e;
-  --color-sky-50: #fafafa;  --color-sky-100: #f4f4f5; --color-sky-200: #dcdcde; --color-sky-300: #c9ccd3;
-  --color-sky-400: #9d9da3; --color-sky-500: #8a8a90; --color-sky-600: #5a5a60; --color-sky-700: #2b2c31;
-  --color-sky-800: #18181b; --color-sky-900: #0c0c0e; --color-sky-950: #050506;
-  --color-amber-50: #fafafa;  --color-amber-100: #f4f4f5; --color-amber-200: #dcdcde; --color-amber-300: #c9ccd3;
-  --color-amber-400: #c9ccd3; --color-amber-500: #9d9da3; --color-amber-600: #8a8a90; --color-amber-700: #5a5a60;
-  --color-amber-800: #2b2c31; --color-amber-900: #18181b; --color-amber-950: #0c0c0e;
-  --color-violet-300: #c9ccd3; --color-violet-400: #9d9da3;
-  --color-cyan-300: #c9ccd3; --color-cyan-400: #9d9da3;
+  /* Цвета по смыслу (стандартные шкалы Tailwind): мятный (teal, emerald) — «есть у вас», высокое
+     совпадение и главное действие; голубой (sky) — «близко», смежный опыт; янтарный (amber) —
+     «не хватает», низкое совпадение и предупреждения; лавандовый (indigo) — подсказки ИИ.
+     Красный — только для ошибок: недостающий навык ошибкой не считается. */
 }
 
 /* Секции на ступень компактнее: всё в rem (отступы, текст, скругления) — уменьшаем базу 16 → 15px */
@@ -190,8 +180,8 @@ body {
   }
   .nav-dock-item { color: var(--ink-soft); font-weight: 500; transition: color 160ms ease, background 160ms ease; }
   .nav-dock-item:active { background: var(--glass-strong); }
-  /* Текущий раздел — заливка ink, как активный пункт NavPill */
-  .nav-dock-item.is-active { color: var(--on-ink); background: linear-gradient(180deg, #ffffff, var(--ink) 55%, #dcdce0); box-shadow: var(--ink-glow); }
+  /* Текущий раздел — мятная заливка, как главное действие */
+  .nav-dock-item.is-active { color: var(--on-ink); background: var(--accent); box-shadow: var(--accent-glow); }
 
   /* ---------- Button ---------- */
 
@@ -210,19 +200,21 @@ body {
   .lg:hover:not(:disabled) { background: rgba(255, 255, 255, 0.14); }
   .lg:disabled, .lg[aria-disabled="true"] { opacity: 0.45; cursor: not-allowed; }
 
-  /* Главное действие и выбранное состояние: глянцевая заливка ink, текст on-ink, ink-glow */
+  /* Главное действие и выбранное состояние: мятная заливка, тёмный текст, мятное свечение */
   .lg-accent {
     color: var(--on-ink);
-    background: linear-gradient(180deg, #ffffff, var(--ink) 55%, #dcdce0);
+    background: var(--accent);
     border-color: transparent;
-    box-shadow: var(--ink-glow), inset 0 -1px 0 rgba(0, 0, 0, 0.18), inset 0 1px 0 #ffffff;
+    box-shadow: var(--accent-glow), inset 0 1px 0 rgba(255, 255, 255, 0.45);
   }
-  .lg-accent:hover:not(:disabled) { background: linear-gradient(180deg, #ffffff, var(--ink) 55%, #dcdce0); transform: translateY(-1px); }
+  .lg-accent:hover:not(:disabled) { background: var(--accent-hover); transform: translateY(-1px); }
 
-  /* Цветов статуса в системе нет: второстепенные варианты отличаются только подписью и иконкой */
-  .lg-tint, .lg-warn, .lg-danger { color: var(--ink); }
+  /* Второстепенные кнопки со смыслом: мятный оттенок — ИИ-действия, янтарный — внимание, красный — удаление */
+  .lg-tint { color: #99f6e4; }
+  .lg-warn { color: #fcd34d; }
+  .lg-danger { color: #fca5a5; }
 
-  /* ---------- Флажки: диск graphite, отмеченный — chrome ---------- */
+  /* ---------- Флажки: диск graphite, отмеченный — мятный ---------- */
   input[type="checkbox"]:not(.sr-only):not(.peer), input[type="radio"]:not(.sr-only):not(.peer) {
     appearance: none;
     -webkit-appearance: none;
@@ -239,8 +231,8 @@ body {
   }
   input[type="radio"]:not(.sr-only):not(.peer) { border-radius: 9999px; }
   input[type="checkbox"]:not(.sr-only):not(.peer):checked, input[type="radio"]:not(.sr-only):not(.peer):checked {
-    background: var(--chrome);
-    border-color: var(--chrome);
+    background: var(--accent);
+    border-color: var(--accent);
   }
   input[type="checkbox"]:not(.sr-only):not(.peer):checked::before {
     content: "";
@@ -258,7 +250,7 @@ body {
     background: var(--on-ink);
   }
 
-  input[type="range"] { accent-color: var(--chrome); }
+  input[type="range"] { accent-color: var(--accent); }
 
   /* Выпадающие списки — поля graphite со своей стрелкой */
   select.neu-in {

@@ -144,7 +144,7 @@ export default function WelcomePage() {
             {AREAS.map(a => (
               <button key={a.id} type="button" aria-pressed={area === a.id} onClick={() => setArea(a.id)}
                 className={`lg text-sm px-3.5 py-1.5 rounded-full transition-colors ${area === a.id
-                  ? "lg text-white" : "text-neutral-400 hover:text-neutral-200"}`}>
+                  ? "lg lg-accent" : "text-neutral-400 hover:text-neutral-200"}`}>
                 {a.label}
               </button>
             ))}

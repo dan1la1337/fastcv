@@ -226,7 +226,7 @@ export default function SmartApply({
                   <button key={value} type="button" aria-pressed={settings[key] === value}
                     onClick={() => setSettings(prev => ({ ...prev, [key]: value }))}
                     className={`lg text-xs sm:text-sm px-2 py-2 rounded-full transition-colors ${settings[key] === value
-                      ? "lg text-white"
+                      ? "lg lg-accent"
                       : "text-neutral-400 hover:text-neutral-200"}`}>
                     {label}
                   </button>
