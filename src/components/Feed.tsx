@@ -6,7 +6,7 @@ import {
   AREAS, DEFAULT_FILTERS, DIRECTIONS, experienceLabel, sourceOf, freshnessLabel, ghostSignal, LEVELS, WORK_FORMATS, fetchVacancyPage, formatLabel, formatSalary, levelLabel, plural, PAGE_SIZE,
   VACANCY_FORMS, SOURCES, type SourceKind, type Area, type Level, type Vacancy, type VacancyFilters, type WorkFormat,
 } from "@/lib/vacancies";
-import { BadgeCheck, Send, Clock, Search, MapPin, ChevronDown, Sparkles, Loader2, ExternalLink, Globe, SlidersHorizontal, Briefcase, Building2, Target, Bookmark, BookmarkCheck, EyeOff, Ghost, Undo2 } from "lucide-react";
+import { Clock, Search, MapPin, ChevronDown, Sparkles, Loader2, ExternalLink, Globe, SlidersHorizontal, Briefcase, Building2, Target, Bookmark, BookmarkCheck, EyeOff, Ghost, Undo2 } from "lucide-react";
 import { fetchMarked, fetchMarks, setMark, type MarkKind } from "@/lib/marks";
 import { toast } from "@/components/Toaster";
 import { fetchMatches, fetchRecommended, type Match } from "@/lib/matching";
@@ -339,24 +339,21 @@ export default function Feed({ initialRows, initialTotal, hero }: { initialRows:
     return (
       <div key={item.id} className="neu-sub rounded-3xl p-5 sm:p-6 flex flex-col gap-4 relative overflow-hidden group transition-colors">
 
-        {/* Бейдж источника: стеклянная пилюля с иконкой источника */}
-        {(() => {
-          const badge = sourceOf(item).badge;
-          const Icon = item.source_type !== "external" ? BadgeCheck
-            : badge === "Telegram" ? Send
-            : badge === "Сайт компании" ? Building2
-            : Briefcase;
-          return (
-            <div className="source-badge absolute top-4 right-4 z-10">
-              <Icon className="w-3 h-3" aria-hidden="true" />
-              {badge}
-            </div>
-          );
-        })()}
+        {/* Бейджи источников — как в первой версии: полупрозрачная пилюля, у прямого работодателя жёлтая с пульсом */}
+        {item.source_type === 'external' ? (
+           <div className="absolute top-4 right-4 bg-white/[0.06] text-neutral-300 text-[11px] font-medium px-2.5 py-1 rounded-full z-10">
+             {sourceOf(item).badge}
+           </div>
+        ) : (
+           <div className="absolute top-4 right-4 bg-teal-300/15 text-teal-200 text-[11px] font-medium px-2.5 py-1 rounded-full z-10 flex items-center gap-1.5">
+             <span className="w-1.5 h-1.5 rounded-full bg-teal-300 animate-pulse"></span>
+             Прямой работодатель
+           </div>
+        )}
 
         <div className="flex flex-col sm:flex-row justify-between gap-4">
           <div className="flex gap-4 sm:gap-5 items-start pr-24 sm:pr-28">
-          {match && <MatchRing value={match.score} size={64} stroke={match.score >= 70 ? "#f4f4f5" : "#8a8a90"} />}
+          {match && <MatchRing value={match.score} size={64} stroke={match.score >= 70 ? "#FFD43B" : "#8a8a90"} />}
           <div className="min-w-0">
             <h2 className="text-lg sm:text-xl font-semibold text-neutral-100 leading-snug">
               <Link href={`/vacancy/${item.id}`} className="hover:text-teal-300 transition-colors">{item.title}</Link>
@@ -453,7 +450,7 @@ export default function Feed({ initialRows, initialTotal, hero }: { initialRows:
         {(item.stack?.length || item.source_url || isCandidate) ? (
           <div className="flex flex-wrap items-center gap-2">
             {item.stack?.slice(0, 8).map(tech => (
-              <span key={tech} className="text-[11px] px-2.5 py-0.5 rounded-full neu-chip text-neutral-300">
+              <span key={tech} className="text-[11px] px-2.5 py-0.5 rounded-full bg-white/[0.06] text-neutral-300">
                 {tech}
               </span>
             ))}
