@@ -1,12 +1,16 @@
 import Link from "next/link";
 import Logo from "@/components/Logo";
+import UserMenu from "@/components/UserMenu";
 
 const SECTIONS = {
-  candidate: [["/", "Лента"], ["/applications", "Мои отклики"], ["/messages", "Сообщения"], ["/profile", "Профиль"]],
-  employer: [["/", "Лента"], ["/employer", "Кабинет"], ["/resumes", "Резюме"], ["/messages", "Сообщения"], ["/profile", "Профиль"]],
+  candidate: [["/applications", "Мои отклики"], ["/messages", "Сообщения"]],
+  employer: [["/employer", "Кабинет"], ["/resumes", "Резюме"], ["/messages", "Сообщения"]],
 } as const;
 
-/** Верхняя панель разделов для вошедших на десктопе. На телефоне её место занимает нижняя панель. */
+/**
+ * Верхняя панель разделов для вошедших на десктопе. На телефоне её место занимает нижняя панель.
+ * В ленту ведёт логотип, в профиль и к выходу — меню аккаунта.
+ */
 export default function AppBar({ role, current }: { role: "candidate" | "employer"; current: string }) {
   return (
     <header className="top-strip hidden sm:block sticky top-0 z-20 px-4 pt-3 pb-3">
@@ -19,6 +23,7 @@ export default function AppBar({ role, current }: { role: "candidate" | "employe
               {label}
             </Link>
           ))}
+          <UserMenu role={role} />
         </nav>
       </div>
     </header>

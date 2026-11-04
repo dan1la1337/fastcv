@@ -28,6 +28,44 @@ test.describe("кандидат", () => {
     await expect(page.getByRole("heading", { name: "Мои отклики" })).toBeVisible();
   });
 
+  test("меню аккаунта в ленте: разделы, клавиатура, выход", async ({ page }) => {
+    await logIn(page, candidate, "/");
+    const open = page.getByRole("button", { name: "Меню профиля" });
+    await open.click();
+    const menu = page.getByRole("menu", { name: "Меню профиля" });
+    for (const name of ["Мои отклики", "Сообщения", "Профиль", "Выйти"]) {
+      await expect(menu.getByRole("menuitem", { name })).toBeVisible();
+    }
+    // Esc закрывает меню и возвращает фокус на кнопку
+    await page.keyboard.press("Escape");
+    await expect(menu).toBeHidden();
+    await expect(open).toBeFocused();
+
+    await open.click();
+    await menu.getByRole("menuitem", { name: "Профиль" }).click();
+    await expect(page).toHaveURL(/\/profile$/);
+    await expect(menu).toBeHidden();
+
+    // Выход завершает все сессии аккаунта, а параллельные тесты входят им же: сервер не трогаем
+    await page.route("**/auth/v1/logout*", route => route.fulfill({ status: 204 }));
+    await page.goto("/");
+    await open.click();
+    await menu.getByRole("menuitem", { name: "Выйти" }).click();
+    await expect(page.getByRole("banner").getByRole("link", { name: /^Войти/ })).toBeVisible();
+    await page.goto("/profile");
+    await expect(page).toHaveURL(/\/login/);
+  });
+
+  test("шапка кабинета: в ленту ведёт логотип, отдельной кнопки нет", async ({ page }, info) => {
+    test.skip(info.project.name !== "desktop", "верхняя панель только на десктопе");
+    await logIn(page, candidate, "/profile");
+    const bar = page.getByRole("banner");
+    await expect(bar.getByRole("link", { name: "Мои отклики" })).toBeVisible();
+    await expect(bar.getByRole("link", { name: "Лента" })).toHaveCount(0);
+    await bar.getByRole("link", { name: "FastCV — на главную" }).click();
+    await expect(page).toHaveURL(/\/$/);
+  });
+
   test("добавляет вакансию в избранное и убирает обратно", async ({ page }, info) => {
     // Меняет данные аккаунта — только в одном проекте, чтобы прогоны не мешали друг другу
     test.skip(info.project.name !== "desktop", "изменяет данные: только desktop");
