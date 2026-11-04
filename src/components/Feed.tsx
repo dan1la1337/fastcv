@@ -324,7 +324,7 @@ export default function Feed({ initialRows, initialTotal, hero }: { initialRows:
   const showLevels = selectedLevels.length > 0 || (area !== "work" && direction?.group !== "work");
   const chip = (active: boolean) =>
     `text-xs px-3 py-1.5 rounded-full transition-colors ${active
-      ? "lg lg-accent"
+      ? "lg lg-on"
       : "lg text-neutral-300 hover:text-neutral-100"}`;
 
   const forYou = mode === "for-you";
@@ -341,11 +341,11 @@ export default function Feed({ initialRows, initialTotal, hero }: { initialRows:
 
         {/* Бейджи источников — Tag: контурная метка капсом; у прямого работодателя — с пульсом */}
         {item.source_type === 'external' ? (
-           <div className="absolute top-4 right-4 neu-chip text-[10px] px-2 py-0.5 z-10">
+           <div className="absolute top-4 right-4 neu-chip text-xs px-2 py-0.5 z-10">
              {sourceOf(item).badge}
            </div>
         ) : (
-           <div className="absolute top-4 right-4 neu-chip text-[10px] px-2 py-0.5 z-10 flex items-center gap-1.5">
+           <div className="absolute top-4 right-4 neu-chip text-xs px-2 py-0.5 z-10 flex items-center gap-1.5">
              <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse"></span>
              Прямой работодатель
            </div>
@@ -434,7 +434,7 @@ export default function Feed({ initialRows, initialTotal, hero }: { initialRows:
                       onClick={() => addSkill(skill)}
                       disabled={addingSkill !== null}
                       title="У меня есть этот опыт — добавить в профиль"
-                      aria-label={`У меня есть опыт с ${skill} — добавить в профиль`}
+                      aria-label={`+ ${skill} в профиль: у меня есть этот опыт`}
                       className="text-amber-300 underline decoration-dotted underline-offset-2 hover:text-amber-200 disabled:opacity-60"
                     >
                       {addingSkill === skill ? "добавляем…" : `+ ${skill}`}
@@ -450,7 +450,7 @@ export default function Feed({ initialRows, initialTotal, hero }: { initialRows:
         {(item.stack?.length || item.source_url || isCandidate) ? (
           <div className="flex flex-wrap items-center gap-2">
             {item.stack?.slice(0, 8).map(tech => (
-              <span key={tech} className="text-[10px] px-2 py-0.5 neu-chip">
+              <span key={tech} className="text-xs px-2 py-0.5 neu-chip">
                 {tech}
               </span>
             ))}
@@ -497,7 +497,7 @@ export default function Feed({ initialRows, initialTotal, hero }: { initialRows:
   return (
     <div className="min-h-screen text-neutral-100 antialiased font-sans relative">
       <header className="sticky top-0 z-20 px-3 sm:px-4 pt-3">
-        <div className="glass rounded-[26px] max-w-6xl mx-auto pl-4 pr-2.5 py-2.5 flex items-center justify-between gap-3">
+        <div className="glass rounded-3xl max-w-6xl mx-auto pl-4 pr-2.5 py-2.5 flex items-center justify-between gap-3">
           <div className="flex items-center gap-1 sm:gap-3">
             <Logo />
             <Link href="/about" className="hidden sm:inline-block px-3 py-2 rounded-full text-sm text-neutral-400 hover:text-white transition-colors">
@@ -505,7 +505,7 @@ export default function Feed({ initialRows, initialTotal, hero }: { initialRows:
             </Link>
           </div>
           <div className="flex items-center gap-2 sm:gap-4">
-            <span className="inline-flex items-center gap-2 font-mono text-[11px] sm:text-xs text-teal-300 whitespace-nowrap">
+            <span className="inline-flex items-center gap-2 tabular-nums text-xs text-teal-300 whitespace-nowrap">
               <span className="relative h-2 w-2" aria-hidden="true">
                 <span className="live-ping absolute inset-0 rounded-full bg-teal-300" />
                 <span className="absolute inset-0 rounded-full bg-teal-300" />
@@ -610,10 +610,10 @@ export default function Feed({ initialRows, initialTotal, hero }: { initialRows:
 
             {/* Поиск */}
             <div className="space-y-3 pt-2 border-t border-white/[0.08]">
-              <label className="text-xs font-bold text-neutral-500 uppercase tracking-wider">Ключевые слова</label>
+              <label htmlFor="feed-search" className="text-xs font-bold text-neutral-500 uppercase tracking-wider">Ключевые слова</label>
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400" />
-                <input type="text" placeholder="Java, Backend..." value={search} onChange={(e) => setSearch(e.target.value)} className="neu-in w-full pl-9 pr-4 py-2.5 rounded-full text-sm text-neutral-100 transition-colors" />
+                <input id="feed-search" type="text" placeholder="Java, Backend..." value={search} onChange={(e) => setSearch(e.target.value)} className="neu-in w-full pl-9 pr-4 py-2.5 rounded-full text-sm text-neutral-100 transition-colors" />
               </div>
             </div>
 
@@ -653,7 +653,7 @@ export default function Feed({ initialRows, initialTotal, hero }: { initialRows:
             {/* Ползунок зарплаты и чекбокс */}
             <div className="space-y-4 pt-2 border-t border-white/[0.08]">
               <div className="flex items-center justify-between">
-                <label className="text-xs font-bold text-neutral-500 uppercase tracking-wider">Зарплата от</label>
+                <label htmlFor="feed-salary" className="text-xs font-bold text-neutral-500 uppercase tracking-wider">Зарплата от</label>
                 <span className="text-xs font-semibold text-teal-200 transition-all duration-200">
                   {minSalary === 0 ? "Любая" : `${minSalary.toLocaleString("ru-RU")} ₽`}
                 </span>
@@ -661,6 +661,7 @@ export default function Feed({ initialRows, initialTotal, hero }: { initialRows:
 
               <div className="space-y-2">
                 <input
+                  id="feed-salary"
                   type="range"
                   min={0}
                   max={500000}
@@ -669,7 +670,7 @@ export default function Feed({ initialRows, initialTotal, hero }: { initialRows:
                   onChange={(e) => setMinSalary(Number(e.target.value))}
                   className="w-full h-1.5 bg-neutral-800 rounded-lg appearance-none cursor-pointer accent-teal-300 transition-all hover:bg-neutral-700"
                 />
-                <div className="flex justify-between text-[10px] text-neutral-500 font-mono">
+                <div className="flex justify-between text-xs text-neutral-500 tabular-nums">
                   <span>0 ₽</span>
                   <span>250k</span>
                   <span>500k+</span>
@@ -681,7 +682,7 @@ export default function Feed({ initialRows, initialTotal, hero }: { initialRows:
                 className="flex items-center gap-3 cursor-pointer group pt-1 select-none"
               >
                 <div className={`w-4 h-4 rounded border flex items-center justify-center transition-all duration-150 ${onlyWithSalary ? 'bg-teal-300 border-teal-300' : 'border-neutral-700 group-hover:border-neutral-500'}`}>
-                  {onlyWithSalary && <span className="text-neutral-950 text-[10px] font-bold">✓</span>}
+                  {onlyWithSalary && <span className="text-neutral-950 text-xs font-bold">✓</span>}
                 </div>
                 <span className="text-xs text-neutral-300 group-hover:text-neutral-100 transition-colors">
                   Только с указанной ЗП
@@ -723,7 +724,7 @@ export default function Feed({ initialRows, initialTotal, hero }: { initialRows:
                 onClick={() => chooseArea(id)}
                 aria-pressed={area === id}
                 className={`lg px-4 py-2 rounded-full text-sm transition-colors ${
-                  area === id ? "lg lg-accent font-medium" : "lg text-neutral-300"
+                  area === id ? "lg lg-on" : "lg text-neutral-300"
                 }`}
               >
                 <span className="sm:hidden">{short}</span><span className="hidden sm:inline">{label}</span>
@@ -739,7 +740,7 @@ export default function Feed({ initialRows, initialTotal, hero }: { initialRows:
                   aria-selected={mode === id}
                   onClick={() => (id === "for-you" ? showForYou() : id === "saved" ? showSaved() : setMode("all"))}
                   className={`lg inline-flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-medium transition-colors ${
-                    mode === id ? "lg lg-accent" : "lg text-neutral-400 hover:text-neutral-100"
+                    mode === id ? "lg lg-on" : "lg text-neutral-400 hover:text-neutral-100"
                   }`}
                 >
                   {id === "for-you" && <Target className="w-4 h-4" />}

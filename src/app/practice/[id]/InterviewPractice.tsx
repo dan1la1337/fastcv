@@ -191,7 +191,7 @@ export default function InterviewPractice({ vacancyId, title }: { vacancyId: str
       </div>
 
       <div className="space-y-2">
-        <span className="inline-block px-2.5 py-0.5 rounded-full neu-chip text-[11px] text-neutral-300">{KIND_LABEL[question!.kind]}</span>
+        <span className="inline-block px-2.5 py-0.5 rounded-full neu-chip text-xs text-neutral-300">{KIND_LABEL[question!.kind]}</span>
         <h2 className="text-lg sm:text-xl font-semibold text-white leading-snug">{question!.q}</h2>
         {question!.hint && (showHint
           ? <p className="text-sm text-amber-100/90 inline-flex gap-1.5"><Lightbulb className="w-4 h-4 shrink-0 mt-0.5 text-amber-300" />{question!.hint}</p>

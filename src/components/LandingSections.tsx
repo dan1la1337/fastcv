@@ -39,7 +39,7 @@ export function SourcesSection() {
 /** Призыв для работодателей: общий блок главной и /about. */
 export function EmployersSection() {
   return (
-    <section aria-labelledby="employers" className="neu-sub rounded-[28px] p-8 sm:p-10 flex flex-wrap items-center gap-8">
+    <section aria-labelledby="employers" className="neu-sub rounded-3xl p-8 sm:p-10 flex flex-wrap items-center gap-8">
       <div className="flex-[1_1_420px] min-w-0 space-y-4">
         <h2 id="employers" className="font-display text-2xl sm:text-3xl font-bold leading-tight">Работодателям: ни один отклик не потеряется</h2>
         <p className="text-neutral-300 leading-relaxed">
@@ -62,7 +62,7 @@ export default function LandingSections({ className = "" }: { className?: string
         <ol className="grid gap-4 sm:grid-cols-3 list-none p-0 m-0">
           {STEPS.map(s => (
             <li key={s.n} className="glass rounded-3xl p-6 space-y-2.5">
-              <p className="font-mono text-sm text-teal-300">{s.n}</p>
+              <p className="tabular-nums text-sm font-medium text-teal-300">{s.n}</p>
               <h3 className="text-xl font-semibold">{s.title}</h3>
               <p className="text-neutral-400 leading-relaxed">{s.text}</p>
             </li>

@@ -26,7 +26,7 @@ export default async function AboutPage() {
   return (
     <div className="min-h-screen text-neutral-100">
       <header className="sticky top-0 z-20 px-3 sm:px-4 pt-3">
-        <div className="glass rounded-[26px] max-w-6xl mx-auto pl-4 pr-2.5 py-2.5 flex items-center justify-between gap-3">
+        <div className="glass rounded-3xl max-w-6xl mx-auto pl-4 pr-2.5 py-2.5 flex items-center justify-between gap-3">
           <Logo />
           <Link href="/" className="lg lg-accent px-4 py-2 rounded-full text-sm font-semibold transition-colors">
             К вакансиям
@@ -37,7 +37,7 @@ export default async function AboutPage() {
       <section className="max-w-6xl mx-auto px-4 pt-10 sm:pt-16 pb-4 space-y-12">
         <div className="flex flex-wrap items-center gap-x-16 gap-y-10">
           <div className="flex-[1_1_480px] min-w-0 space-y-6">
-            <h1 className="font-display text-4xl sm:text-5xl lg:text-[56px] font-bold leading-[1.1] tracking-tight text-neutral-300">
+            <h1 className="font-display text-4xl sm:text-5xl font-bold leading-[1.1] tracking-tight text-neutral-300">
               Вакансии со всего интернета — <span className="text-teal-300">в одном месте</span>
             </h1>
             <p className="text-lg leading-relaxed text-neutral-400 max-w-xl">
@@ -60,7 +60,7 @@ export default async function AboutPage() {
               {EXAMPLE_FEED.map(v => (
                 <li key={v.source} className="flex items-center justify-between gap-3">
                   <span className="font-semibold leading-snug min-w-0">{v.title}</span>
-                  <span className="neu-chip px-2 py-1 text-[11px] shrink-0">{v.source}</span>
+                  <span className="neu-chip px-2 py-1 text-xs shrink-0">{v.source}</span>
                 </li>
               ))}
             </ul>
@@ -73,7 +73,7 @@ export default async function AboutPage() {
       <div className="max-w-6xl mx-auto px-4 space-y-20 sm:space-y-24 pt-16 pb-8">
         <SourcesSection />
 
-        <section aria-labelledby="extras" className="neu-sub rounded-[28px] p-8 sm:p-10 space-y-4">
+        <section aria-labelledby="extras" className="neu-sub rounded-3xl p-8 sm:p-10 space-y-4">
           <h2 id="extras" className="font-display text-2xl sm:text-3xl font-bold leading-tight">Нашли вакансию? Дальше тоже поможем</h2>
           <p className="text-neutral-300 leading-relaxed">
             Покажем, насколько она подходит вашему резюме, напишем сопроводительное письмо и потренируем перед собеседованием.

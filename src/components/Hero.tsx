@@ -14,7 +14,7 @@ export default function Hero({ stats }: { stats: LiveStats | null }) {
     <section className="max-w-6xl mx-auto px-4 pt-10 sm:pt-16 pb-4 space-y-12">
       <div className="flex flex-wrap items-center gap-x-16 gap-y-10">
         <div className="flex-[1_1_480px] min-w-0 space-y-6">
-          <h1 className="font-display text-4xl sm:text-5xl lg:text-[56px] font-bold leading-[1.1] tracking-tight text-neutral-300">
+          <h1 className="font-display text-4xl sm:text-5xl font-bold leading-[1.1] tracking-tight text-neutral-300">
             Работа, которая подходит вам на <span className="text-teal-300">92%</span>
           </h1>
           <p className="text-lg leading-relaxed text-neutral-400 max-w-xl">
@@ -43,9 +43,9 @@ export default function Hero({ stats }: { stats: LiveStats | null }) {
           </div>
           <div className="flex flex-wrap gap-2 text-sm">
             {["Python", "FastAPI", "3+ года"].map(s => (
-              <span key={s} className="neu-chip px-2 py-1 text-[11px] !text-teal-200 !border-teal-300/40">{s} ✓</span>
+              <span key={s} className="neu-chip px-2 py-1 text-xs !text-teal-200 !border-teal-300/40">{s} ✓</span>
             ))}
-            <span className="neu-chip px-2 py-1 text-[11px] !text-amber-300 !border-amber-300/40">SQLAlchemy — добавить?</span>
+            <span className="neu-chip px-2 py-1 text-xs !text-amber-300 !border-amber-300/40">SQLAlchemy — добавить?</span>
           </div>
         </figure>
       </div>

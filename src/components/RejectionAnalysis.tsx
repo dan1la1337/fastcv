@@ -87,14 +87,14 @@ export default function RejectionAnalysis({ applicationId, vacancyId, initial }:
           <Block title="Чего не хватило" tone="text-red-300" items={analysis.gaps} />
           {analysis.letter && <p className="text-sm text-neutral-300"><span className="text-indigo-200">Письмо и ответы: </span>{analysis.letter}</p>}
           <Block title="Что сделать дальше" tone="text-teal-300" items={analysis.next} />
-          <p className="text-[11px] text-neutral-500">Настоящую причину знает только работодатель — это вероятные причины по вашему профилю, отклику и вакансии.</p>
+          <p className="text-xs text-neutral-500">Настоящую причину знает только работодатель — это вероятные причины по вашему профилю, отклику и вакансии.</p>
           {better && better.length > 0 && (
             <div className="border-t border-white/10 pt-3 space-y-2">
               <p className="text-xs font-bold text-neutral-400 uppercase tracking-wider">Где ваше совпадение выше</p>
               <ul className="space-y-1.5">
                 {better.map(({ v, m }) => (
                   <li key={v.id} className="flex items-center gap-2 text-sm">
-                    <span className={`shrink-0 px-2 py-0.5 rounded-full border text-[11px] ${matchTone(m.score)}`}>{m.score}%</span>
+                    <span className={`shrink-0 px-2 py-0.5 rounded-full border text-xs ${matchTone(m.score)}`}>{m.score}%</span>
                     <Link href={`/vacancy/${v.id}`} className="text-neutral-200 hover:text-teal-300 truncate">
                       {v.title}{v.company_name ? ` · ${v.company_name}` : ""}
                     </Link>

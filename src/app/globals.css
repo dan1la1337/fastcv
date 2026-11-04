@@ -15,10 +15,12 @@
   --glass-rim: rgba(255, 255, 255, 0.24);
   --ink: #f4f4f5;
   --ink-soft: #e4e4e7;
-  --muted: #a9a9b0;
+  --muted: #b8b9c0;
   --chrome: #c9ccd3;
   --mist: #9aa3b5;
   --on-ink: #0a0a0b;
+  /* Рамка полей и флажков: 3:1 к поверхности карточки, иначе контрол теряется */
+  --field-edge: #72737c;
   /* Мятный — главное действие и выбранное состояние */
   --accent: #5eead4;
   --accent-hover: #99f6e4;
@@ -30,16 +32,11 @@
   --blur-glass: 24px;
   --blur-orb: 40px;
 
-  --radius-xs: 4px;
-  --radius-md: 12px;
-  --radius-lg: 16px;
-  --radius-xl: 24px;
-
   /* Рендеры из дизайн-системы: студийная плита с шарами и зерно плёнки */
   --og-stage: url("/og/stage.webp");
   --og-grain: url("/og/grain.webp");
 
-  --font-og: var(--font-poppins), var(--font-montserrat), "Avenir Next", "Segoe UI", system-ui, sans-serif;
+  --font-og: var(--font-onest), "Segoe UI", system-ui, sans-serif;
 
   --background: var(--void);
   --foreground: var(--ink);
@@ -51,17 +48,51 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-og);
   --font-display: var(--font-og);
-  --font-mono: var(--font-og);
+  /* Настоящий моноширинный только для кода и DNS-записей; числа выравнивает tabular-nums */
+  --font-mono: ui-monospace, "SF Mono", "Cascadia Mono", "Roboto Mono", "Liberation Mono", monospace;
 }
 
 /* Палитра через шкалы Tailwind: нейтральная — от void до ink; смысловые цвета — ниже. */
 @theme {
-  /* Poppins подключён в толщинах 300–600: более жирные ступени Tailwind сводим к 600 */
-  --font-weight-thin: 300;
-  --font-weight-extralight: 300;
+  /* Толщины системы: 400, 500, 600. Остальные ступени Tailwind сводим к ним */
+  --font-weight-thin: 400;
+  --font-weight-extralight: 400;
+  --font-weight-light: 400;
   --font-weight-bold: 600;
   --font-weight-extrabold: 600;
   --font-weight-black: 600;
+
+  /* Шкала радиусов: метка 4, поле и кнопка-строка 12, вложенная панель 16, карточка 24, пилюля full */
+  --radius-xs: 4px;
+  --radius-sm: 4px;
+  --radius-md: 12px;
+  --radius-lg: 12px;
+  --radius-xl: 12px;
+  --radius-2xl: 16px;
+  --radius-3xl: 24px;
+
+  /* Четыре уровня текста. Имена Tailwind сводятся к ним:
+     метаданные — xs; основной текст — sm и base; заголовок карточки — lg и xl; заголовок страницы — 2xl и крупнее */
+  --text-xs: 0.8667rem;
+  --text-xs--line-height: 1.4;
+  --text-sm: 1rem;
+  --text-sm--line-height: 1.5;
+  --text-base: 1rem;
+  --text-base--line-height: 1.55;
+  --text-lg: 1.2rem;
+  --text-lg--line-height: 1.3;
+  --text-xl: 1.2rem;
+  --text-xl--line-height: 1.3;
+  --text-2xl: clamp(1.75rem, 1.25rem + 1.5vw, 2.6rem);
+  --text-2xl--line-height: 1.15;
+  --text-3xl: clamp(1.75rem, 1.25rem + 1.5vw, 2.6rem);
+  --text-3xl--line-height: 1.15;
+  --text-4xl: clamp(1.75rem, 1.25rem + 1.5vw, 2.6rem);
+  --text-4xl--line-height: 1.15;
+  --text-5xl: clamp(1.75rem, 1.25rem + 1.5vw, 2.6rem);
+  --text-5xl--line-height: 1.15;
+  --text-6xl: clamp(1.75rem, 1.25rem + 1.5vw, 2.6rem);
+  --text-6xl--line-height: 1.15;
 
   --color-neutral-50: #fafafa;
   --color-neutral-100: #f4f4f5;
@@ -70,8 +101,8 @@
      серый #8a8a90 сливался. Шкала сдвинута к ink ради читаемости */
   --color-neutral-300: #e4e4e7;
   --color-neutral-400: #c4c4ca;
-  --color-neutral-500: #a9a9b0;
-  --color-neutral-600: #85858c;
+  --color-neutral-500: #b8b9c0;
+  --color-neutral-600: #9b9ca4;
   --color-neutral-700: #2b2c31;
   --color-neutral-800: #18181b;
   --color-neutral-900: #0c0c0e;
@@ -111,7 +142,7 @@ body {
     position: relative;
     isolation: isolate;
     /* Плотное стекло: под текстом карточек фон не просвечивает */
-    background: linear-gradient(rgba(255, 255, 255, 0.035), rgba(255, 255, 255, 0.035)), rgba(10, 10, 12, 0.88);
+    background: linear-gradient(rgba(255, 255, 255, 0.035), rgba(255, 255, 255, 0.035)), rgba(10, 10, 12, 0.94);
     border: 1px solid var(--glass-edge);
     box-shadow: var(--glass-lift);
     -webkit-backdrop-filter: blur(var(--blur-glass)) saturate(125%) brightness(1.08);
@@ -130,7 +161,7 @@ body {
       var(--og-grain) 0 0 / 256px 256px repeat,
       linear-gradient(180deg, rgba(255, 255, 255, 0.07), rgba(255, 255, 255, 0) 38%),
       radial-gradient(120% 80% at 0% 0%, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0) 60%);
-    opacity: 0.18;
+    opacity: 0.12;
     mix-blend-mode: screen;
   }
   .glass::after, .neu::after, .neu-sub::after {
@@ -149,11 +180,11 @@ body {
   /* Сплошные поверхности под ввод: поля, поиск, треки переключателей — graphite */
   .neu-in {
     background: var(--graphite);
-    border: 1px solid var(--steel);
+    border: 1px solid var(--field-edge);
     color: var(--ink);
     transition: border-color 160ms ease;
   }
-  .neu-in:hover { border-color: var(--glass-rim); }
+  .neu-in:hover { border-color: var(--chrome); }
   .neu-in:focus, .neu-in:focus-within {
     outline: 2px solid var(--focus);
     outline-offset: 2px;
@@ -180,8 +211,8 @@ body {
   }
   .nav-dock-item { color: var(--ink-soft); font-weight: 500; transition: color 160ms ease, background 160ms ease; }
   .nav-dock-item:active { background: var(--glass-strong); }
-  /* Текущий раздел — мятная заливка, как главное действие */
-  .nav-dock-item.is-active { color: var(--on-ink); background: var(--accent); box-shadow: var(--accent-glow); }
+  /* Текущий раздел — мятный тон, как выбранное состояние: заливка остаётся главному действию */
+  .nav-dock-item.is-active { color: var(--accent); background: rgba(94, 234, 212, 0.14); }
 
   /* ---------- Button ---------- */
 
@@ -198,9 +229,10 @@ body {
     transition: background 160ms ease, border-color 160ms ease, transform 160ms ease;
   }
   .lg:hover:not(:disabled) { background: rgba(255, 255, 255, 0.14); }
+  .lg:active:not(:disabled) { background: rgba(255, 255, 255, 0.08); }
   .lg:disabled, .lg[aria-disabled="true"] { opacity: 0.45; cursor: not-allowed; }
 
-  /* Главное действие и выбранное состояние: мятная заливка, тёмный текст, мятное свечение */
+  /* Главное действие: мятная заливка, тёмный текст, мятное свечение. Одно на экран */
   .lg-accent {
     color: var(--on-ink);
     background: var(--accent);
@@ -208,6 +240,16 @@ body {
     box-shadow: var(--accent-glow), inset 0 1px 0 rgba(255, 255, 255, 0.45);
   }
   .lg-accent:hover:not(:disabled) { background: var(--accent-hover); transform: translateY(-1px); }
+  .lg-accent:active:not(:disabled) { background: var(--accent); transform: none; }
+
+  /* Выбранное состояние (вкладка, сегмент, фильтр): мятный тон, не заливка */
+  .lg-on {
+    color: var(--accent-hover);
+    background: rgba(94, 234, 212, 0.14);
+    border-color: rgba(94, 234, 212, 0.6);
+    box-shadow: none;
+  }
+  .lg-on:hover:not(:disabled) { background: rgba(94, 234, 212, 0.2); }
 
   /* Второстепенные кнопки со смыслом: мятный оттенок — ИИ-действия, янтарный — внимание, красный — удаление */
   .lg-tint { color: #99f6e4; }
@@ -219,12 +261,12 @@ body {
     appearance: none;
     -webkit-appearance: none;
     flex-shrink: 0;
-    width: 1.25rem;
-    height: 1.25rem;
-    border-radius: 6px;
+    width: 1.4rem;
+    height: 1.4rem;
+    border-radius: var(--radius-xs);
     cursor: pointer;
     background: var(--graphite);
-    border: 1px solid var(--glass-edge);
+    border: 1px solid var(--field-edge);
     display: inline-grid;
     place-content: center;
     transition: background 160ms ease;
@@ -256,7 +298,7 @@ body {
   select.neu-in {
     appearance: none;
     -webkit-appearance: none;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%238a8a90' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23c9ccd3' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
     background-repeat: no-repeat;
     background-position: right 0.9rem center;
     padding-right: 2.25rem;
@@ -269,13 +311,15 @@ body {
   .glass, .neu, .neu-sub, .lg:not(.lg-accent) { background: var(--obsidian); }
 }
 
-/* Tag: прямоугольник radius-xs, а не пилюля из разметки */
+/* Вне слоёв, чтобы перебить разметку: метка — radius-xs, поле — radius-md */
 .neu-chip { border-radius: var(--radius-xs); }
+.neu-in { border-radius: var(--radius-md); }
 
-/* Типографика: заголовки — title (600), заголовок героя — headline (500) */
-.font-display { font-weight: 600; letter-spacing: -0.01em; }
-h1.font-display { font-weight: 500; }
-.font-mono { font-weight: 500; }
+/* Типографика: заголовки — 600 */
+.font-display { font-weight: 600; letter-spacing: -0.015em; }
+
+/* Иконки lucide: одна толщина линии на всём сайте */
+.lucide { stroke-width: 1.75; }
 
 /* Разделители — steel */
 .border-white\/10, .border-white\/12, .border-white\/15 { border-color: var(--steel); }

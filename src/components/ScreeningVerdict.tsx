@@ -60,7 +60,7 @@ export default function ScreeningVerdict({ applicationId, screening, onChange }:
         {screening.cons.map((x, i) => <p key={`c${i}`} className="text-neutral-300"><span className="text-amber-300">− </span>{x}</p>)}
       </div>
       {screening.ask && <p className="text-sm text-neutral-300"><span className="text-indigo-200">Спросить на собеседовании: </span>{screening.ask}</p>}
-      <p className="text-[11px] text-neutral-500">Подсказка ИИ по профилю и отклику, не решение. Кандидат её не видит.</p>
+      <p className="text-xs text-neutral-500">Подсказка ИИ по профилю и отклику, не решение. Кандидат её не видит.</p>
       {error && <p role="alert" className="text-xs text-amber-300">{error}</p>}
     </div>
   );

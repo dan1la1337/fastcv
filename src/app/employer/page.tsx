@@ -374,7 +374,7 @@ export default function EmployerDashboard() {
   const openVacancies = vacancies.filter(v => !v.archived_at).length;
   const tabClass = (tab: Tab) =>
     `px-4 py-2 rounded-full text-sm transition-colors ${
-      activeTab === tab ? "lg lg-accent" : "lg text-neutral-400 hover:text-white"
+      activeTab === tab ? "lg lg-on" : "lg text-neutral-400 hover:text-white"
     }`;
 
   return (
@@ -627,7 +627,7 @@ export default function EmployerDashboard() {
                 <div role="group" aria-label="Сортировка откликов" className="neu-in inline-flex gap-1 p-1 rounded-full text-sm">
                   {([["match", "По совпадению"], ["ai", "По вердикту ИИ"], ["new", "Сначала новые"]] as const).map(([id, label]) => (
                     <button key={id} onClick={() => setSortBy(id)} aria-pressed={sortBy === id}
-                      className={`lg px-4 py-1.5 rounded-full transition-colors ${sortBy === id ? "lg lg-accent" : "text-neutral-400 hover:text-white"}`}>
+                      className={`lg px-4 py-1.5 rounded-full transition-colors ${sortBy === id ? "lg lg-on" : "text-neutral-400 hover:text-white"}`}>
                       {label}
                     </button>
                   ))}
@@ -673,7 +673,7 @@ export default function EmployerDashboard() {
                         {REJECT_REASONS.map(r => (
                           <button key={r.label} type="button" aria-pressed={bulk.reason === r.label}
                             onClick={() => setBulk({ reason: bulk.reason === r.label ? null : r.label })}
-                            className={`lg px-3 py-1 rounded-full text-xs transition-colors ${bulk.reason === r.label ? "lg lg-accent" : "lg text-neutral-300"}`}>
+                            className={`lg px-3 py-1 rounded-full text-xs transition-colors ${bulk.reason === r.label ? "lg lg-on" : "lg text-neutral-300"}`}>
                             {r.label}
                           </button>
                         ))}
@@ -727,11 +727,11 @@ export default function EmployerDashboard() {
 
                   {matches[app.id] && (matches[app.id].matched.length + matches[app.id].related.length + matches[app.id].missing.length > 0) && (
                     <div className="flex flex-wrap gap-2 text-xs">
-                      {matches[app.id].matched.map(s => <span key={s} className="neu-chip px-2 py-1 text-[11px] !text-teal-200 !border-teal-300/40">{s} ✓</span>)}
+                      {matches[app.id].matched.map(s => <span key={s} className="neu-chip px-2 py-1 text-xs !text-teal-200 !border-teal-300/40">{s} ✓</span>)}
                       {matches[app.id].related.map(r => (
                         <span key={r.skill} title="Засчитано наполовину: у кандидата смежный опыт" className="px-2.5 py-1 rounded-full bg-sky-400/10 text-sky-200">{r.skill} ≈ {r.via}</span>
                       ))}
-                      {matches[app.id].missing.map(s => <span key={s} className="neu-chip px-2 py-1 text-[11px] !text-amber-300 !border-amber-300/40">нет {s}</span>)}
+                      {matches[app.id].missing.map(s => <span key={s} className="neu-chip px-2 py-1 text-xs !text-amber-300 !border-amber-300/40">нет {s}</span>)}
                     </div>
                   )}
 
@@ -765,14 +765,14 @@ export default function EmployerDashboard() {
                             return (
                               <button key={reason.label} type="button" aria-pressed={active}
                                 onClick={() => setReply({ ...reply, text: active ? base : `${base}\n\n${reason.text}` })}
-                                className={`lg px-3 py-1 rounded-full text-xs transition-colors ${active ? "lg lg-accent" : "lg text-neutral-300"}`}>
+                                className={`lg px-3 py-1 rounded-full text-xs transition-colors ${active ? "lg lg-on" : "lg text-neutral-300"}`}>
                                 {reason.label}
                               </button>
                             );
                           })}
                         </div>
                       )}
-                      <textarea value={reply.text} maxLength={2000} rows={4}
+                      <textarea value={reply.text} maxLength={2000} rows={4} aria-label="Текст ответа кандидату"
                         onChange={e => setReply({ ...reply, text: e.target.value })}
                         className={`${inputClass} leading-relaxed resize-y`} />
                       <div className="flex justify-end gap-2">

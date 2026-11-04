@@ -26,7 +26,7 @@ const inputClass =
 const labelClass = "block text-xs font-bold text-neutral-500 uppercase tracking-wider mb-2";
 const chip = (active: boolean) =>
   `text-xs px-3 py-1.5 rounded-full transition-colors ${active
-    ? "lg lg-accent"
+    ? "lg lg-on"
     : "lg text-neutral-400 hover:text-neutral-100"}`;
 
 const splitList = (text: string) => [...new Map(text.split(",").map(s => s.trim()).filter(Boolean).map(s => [s.toLowerCase(), s])).values()];
@@ -382,7 +382,7 @@ export default function ProfilePage() {
                   <div className="space-y-3">
                     {AREAS.map(a => (
                       <div key={a.id}>
-                        <p className="text-[11px] text-neutral-500 mb-1.5">{a.label}</p>
+                        <p className="text-xs text-neutral-500 mb-1.5">{a.label}</p>
                         <div className="flex flex-wrap gap-2">
                           {DIRECTIONS.filter(d => d.group === a.id).map(d => {
                             const on = prefDirections.includes(d.id);

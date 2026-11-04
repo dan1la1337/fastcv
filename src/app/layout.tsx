@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Montserrat, Poppins } from "next/font/google";
+import { Onest } from "next/font/google";
 import "./globals.css";
 import Link from "next/link";
 import { Suspense } from "react";
@@ -7,11 +7,9 @@ import Toaster from "@/components/Toaster";
 import MobileNav from "@/components/MobileNav";
 import { OPERATOR } from "@/lib/legal";
 
-// Дизайн-система Obsidian Glass: одно семейство — Poppins (300–600).
-// У Poppins нет кириллицы, поэтому русские буквы берёт Montserrat — такой же геометрический гротеск:
-// браузер сам выбирает начертание по символу (Poppins в стеке первым)
-const poppins = Poppins({ variable: "--font-poppins", subsets: ["latin"], weight: ["300", "400", "500", "600"] });
-const montserrat = Montserrat({ variable: "--font-montserrat", subsets: ["cyrillic"], weight: ["300", "400", "500", "600"] });
+// Дизайн-система Obsidian Glass: одно семейство на оба алфавита. В вакансиях латиница идёт вперемешку
+// с кириллицей («Python-разработчик»), и пара разных шрифтов давала скачки размера и толщины внутри слова
+const onest = Onest({ variable: "--font-onest", subsets: ["latin", "cyrillic"], weight: ["400", "500", "600"] });
 
 // Признак входа до первой отрисовки: вошедшим не показываем экран-приветствие (.guest-only).
 // Куки сессии Supabase читаются из браузера; сама сессия здесь не проверяется — только скрытие блока
@@ -31,7 +29,7 @@ export default function RootLayout({
   return (
     <html
       lang="ru"
-      className={`${poppins.variable} ${montserrat.variable} h-full antialiased`}
+      className={`${onest.variable} h-full antialiased`}
     >
       <head>
         <script dangerouslySetInnerHTML={{ __html: AUTH_HINT }} />

@@ -19,7 +19,7 @@ const inputClass =
 const labelClass = "block text-xs font-bold text-neutral-500 uppercase tracking-wider mb-2";
 const chip = (active: boolean) =>
   `text-sm px-3.5 py-1.5 rounded-full transition-colors ${active
-    ? "lg lg-accent"
+    ? "lg lg-on"
     : "lg text-neutral-300 hover:text-neutral-100"}`;
 
 /**
@@ -117,7 +117,7 @@ export default function WelcomePage() {
       <div className="max-w-2xl mx-auto mb-6"><Logo /></div>
       <form onSubmit={save} className="glass max-w-2xl mx-auto rounded-3xl p-6 sm:p-8 space-y-7">
         <header className="space-y-2">
-          <p className="text-xs font-mono text-teal-300 uppercase tracking-wider">Займёт минуту</p>
+          <p className="text-xs font-medium text-teal-300 uppercase tracking-wider">Займёт минуту</p>
           <h1 className="font-display text-2xl sm:text-3xl font-bold">Что вы ищете?</h1>
           <p className="text-sm text-neutral-400">
             Ответьте на пару вопросов — лента выстроится под вас, а у каждой вакансии появится процент совпадения.
@@ -144,7 +144,7 @@ export default function WelcomePage() {
             {AREAS.map(a => (
               <button key={a.id} type="button" aria-pressed={area === a.id} onClick={() => setArea(a.id)}
                 className={`lg text-sm px-3.5 py-1.5 rounded-full transition-colors ${area === a.id
-                  ? "lg lg-accent" : "text-neutral-400 hover:text-neutral-200"}`}>
+                  ? "lg lg-on" : "text-neutral-400 hover:text-neutral-200"}`}>
                 {a.label}
               </button>
             ))}

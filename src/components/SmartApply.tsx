@@ -11,7 +11,7 @@ import { toast } from "@/components/Toaster";
 
 // Настройки письма (значения совпадают с /api/cover-letter)
 const LETTER_OPTIONS = {
-  tone: [["neutral", "Деловой"], ["formal", "Официальный"], ["friendly", "Неформальный"]],
+  tone: [["neutral", "Деловой"], ["formal", "Официальный"], ["friendly", "Свободный"]],
   length: [["short", "Коротко"], ["medium", "Обычно"], ["long", "Подробно"]],
   language: [["auto", "Как в вакансии"], ["ru", "Русский"], ["en", "English"]],
 } as const;
@@ -221,12 +221,12 @@ export default function SmartApply({
           {user && (Object.keys(LETTER_OPTIONS) as (keyof typeof LETTER_OPTIONS)[]).map(key => (
             <div key={key} className="space-y-1.5">
               <p className="text-xs text-neutral-500">{LETTER_LABELS[key]}</p>
-              <div role="group" aria-label={LETTER_LABELS[key]} className="neu-in grid grid-cols-3 gap-1 p-1 rounded-full">
+              <div role="group" aria-label={LETTER_LABELS[key]} className="neu-in grid grid-cols-3 gap-1 p-1">
                 {LETTER_OPTIONS[key].map(([value, label]) => (
                   <button key={value} type="button" aria-pressed={settings[key] === value}
                     onClick={() => setSettings(prev => ({ ...prev, [key]: value }))}
-                    className={`lg text-xs sm:text-sm px-2 py-2 rounded-full transition-colors ${settings[key] === value
-                      ? "lg lg-accent"
+                    className={`lg min-w-0 text-xs px-1 py-2 rounded-lg transition-colors ${settings[key] === value
+                      ? "lg lg-on"
                       : "text-neutral-400 hover:text-neutral-200"}`}>
                     {label}
                   </button>
@@ -336,7 +336,7 @@ export default function SmartApply({
 
   const title = (
     <div className="flex items-center gap-2.5">
-      <span aria-hidden="true" className="ai-shimmer w-7 h-7 rounded-[9px] shrink-0" />
+      <span aria-hidden="true" className="ai-shimmer w-7 h-7 rounded-xl shrink-0" />
       <h2 className="font-display text-lg font-bold text-white">Smart Apply</h2>
     </div>
   );
@@ -394,7 +394,7 @@ export default function SmartApply({
               <div className="neu-sub flex items-center justify-between rounded-2xl p-3.5">
                 <div className="flex items-center gap-3 overflow-hidden">
                   <Mail className="w-4 h-4 text-teal-300 shrink-0" />
-                  <span className="text-sm font-mono text-neutral-200 truncate">{successContactModal.value}</span>
+                  <span className="text-sm font-medium text-neutral-200 truncate">{successContactModal.value}</span>
                 </div>
                 <button
                   onClick={() => handleCopy(successContactModal.value)}

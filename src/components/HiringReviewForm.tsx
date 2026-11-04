@@ -67,7 +67,7 @@ export default function HiringReviewForm({ applicationId, company, review, onSav
           <textarea rows={3} maxLength={1000} value={cons} onChange={e => setCons(e.target.value)} placeholder="Долго молчали после собеседования…" className={field} />
         </label>
       </div>
-      <p className="text-[11px] text-neutral-500">Отзыв публикуется без имени — видны только ваш уровень и вакансия. Пишите о процессе найма, без личных данных.</p>
+      <p className="text-xs text-neutral-500">Отзыв публикуется без имени — видны только ваш уровень и вакансия. Пишите о процессе найма, без личных данных.</p>
       <div className="flex justify-end gap-2">
         <button onClick={() => setOpen(false)} className="px-3 h-10 text-sm text-neutral-400 hover:text-white">Отмена</button>
         <button onClick={save} disabled={busy || !rating}

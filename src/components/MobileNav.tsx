@@ -58,7 +58,7 @@ export default function MobileNav() {
               <li key={item.href}>
                 {/* Обычная ссылка, а не Link: лента читает ?tab только при загрузке */}
                 <a href={item.href} aria-current={active ? "page" : undefined}
-                  className={`nav-dock-item flex flex-col items-center gap-0.5 py-1.5 rounded-full text-[11px] leading-tight ${active ? "is-active" : ""}`}>
+                  className={`nav-dock-item flex flex-col items-center gap-0.5 py-1.5 rounded-full text-xs leading-tight ${active ? "is-active" : ""}`}>
                   <span className="relative">
                     <Icon className="w-5 h-5" aria-hidden="true" />
                     {item === MESSAGES && <UnreadDot count={unread} label="чатов с новыми сообщениями" className="absolute -top-1.5 -right-3" />}
