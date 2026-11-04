@@ -1,5 +1,6 @@
 'use client';
 
+import FormError from "@/components/FormError";
 import { useState, Suspense } from 'react';
 import Link from 'next/link';
 import { useSearchParams, useRouter } from 'next/navigation';
@@ -104,12 +105,13 @@ function RegisterFormContent() {
           <div>
             <label htmlFor="password" className={label}>Пароль</label>
             <input id="password" type="password" autoComplete="new-password" value={password} onChange={(e) => setPassword(e.target.value)}
-              required minLength={6} className={input} placeholder="Минимум 6 символов" />
+              required minLength={6} aria-describedby="password-hint" className={input} placeholder="Введите пароль" />
+            <p id="password-hint" className="mt-1.5 text-xs text-neutral-500">Минимум 6 символов</p>
           </div>
 
           <label className="flex items-start gap-3 text-xs text-neutral-400 leading-relaxed cursor-pointer">
             <input type="checkbox" required checked={agreed} onChange={(e) => setAgreed(e.target.checked)}
-              className="neu-in mt-0.5 w-4 h-4 shrink-0 rounded" />
+              className="mt-0.5" />
             <span>
               Принимаю <Link href="/terms" target="_blank" className="text-teal-300 hover:underline">пользовательское соглашение</Link> и
               даю согласие на обработку персональных данных, в том числе их передачу за рубеж, на условиях{' '}
@@ -118,8 +120,10 @@ function RegisterFormContent() {
           </label>
 
           {error && (
-            <p role="alert" className="text-sm text-red-400 bg-red-950/30 border border-red-500/20 rounded-xl px-4 py-3">{error}</p>
+            <FormError>{error}</FormError>
           )}
+
+          {!agreed && <p className="text-xs text-neutral-500 text-center">Чтобы продолжить, отметьте согласие выше</p>}
 
           <button
             type="submit"

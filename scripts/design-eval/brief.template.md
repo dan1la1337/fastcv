@@ -8,7 +8,7 @@ FastCV is a Russian job board. Candidates find vacancies and apply with an AI co
 
 Image paths are relative to the folder that holds this brief. Each image carries its own path in a strip at the top. Each image is a sheet of labelled tiles. A desktop tile is a 1440×900 viewport. A mobile tile is a 412×915 viewport. Sheets are scaled to fit, so judge small text with care and do not treat scaling softness as a defect.
 
-The data is test data. Do not score its wording. Score how the UI lays it out, for example how it truncates a long title. The screens of the other job boards show public pages of a logged-out visitor. A grey bar on a screenshot hides a personal name. Ignore it.
+The data is test data. Do not score its wording. Score how the UI lays it out, for example how it truncates a long title. Live counters are hidden on every FastCV screenshot, so the home page shows an empty area where the counter block sits. Do not score that area. A candidate who opens `/resumes` is sent to the feed, so the tile `candidate-resumes` repeats the feed. The screens of the other job boards show public pages of a logged-out visitor. A grey bar on a screenshot hides a personal name. Ignore it.
 
 Products:
 

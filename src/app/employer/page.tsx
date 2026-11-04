@@ -4,8 +4,10 @@ import { useCallback, useEffect, useState } from "react";
 import type { User } from "@supabase/supabase-js";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import AppBar from "@/components/AppBar";
 import {
-  Archive, Briefcase, CheckCircle2, Eye, FileText, Loader2, MessageCircle, Pencil, Plus, RotateCcw, Send, Sparkles, Users, XCircle,
+  Archive, Briefcase, CheckCircle2, Eye, FileText, Loader2, MessageCircle, Pencil, Plus, RotateCcw, Send, Sparkles, XCircle,
+  ChevronDown,
 } from "lucide-react";
 import { toMatch, type Match } from "@/lib/matching";
 import MatchRing from "@/components/MatchRing";
@@ -378,27 +380,20 @@ export default function EmployerDashboard() {
     }`;
 
   return (
+    <>
+    <AppBar role="employer" current="/employer" />
     <div className="min-h-screen text-neutral-100 font-sans p-4 sm:p-8">
-      <div className="max-w-5xl mx-auto space-y-6">
+      <div className="max-w-6xl mx-auto space-y-6">
         <div className="flex flex-wrap items-center gap-x-6 gap-y-4">
           <div className="space-y-1.5">
             <div className="flex flex-wrap items-center gap-3">
               <h1 className="font-display text-2xl font-bold">Кабинет работодателя</h1>
-              <span className="px-3 py-1 rounded-full neu-chip text-xs text-neutral-300">для работодателей</span>
             </div>
             <p className="text-sm text-neutral-400">
               Компания: {companyName || <Link href="/profile" className="text-teal-300 hover:underline">укажите в профиле</Link>}
             </p>
           </div>
           <span className="flex-1" />
-          <Link href="/resumes"
-            className="lg inline-flex items-center gap-2 h-11 px-5 rounded-full text-sm text-neutral-200 transition-colors">
-            <Users className="w-4 h-4" /> База резюме
-          </Link>
-          <Link href="/messages"
-            className="lg inline-flex items-center gap-2 h-11 px-5 rounded-full text-sm text-neutral-200 transition-colors">
-            <MessageCircle className="w-4 h-4" /> Сообщения
-          </Link>
           <button
             onClick={() => openForm()}
             className="lg lg-accent inline-flex items-center gap-2 h-11 px-5 rounded-full text-sm font-semibold transition-colors"
@@ -513,7 +508,7 @@ export default function EmployerDashboard() {
                 <label className={labelClass}>Обязанности и требования</label>
                 <textarea required rows={6} placeholder="Опишите стек, проект и задачи кандидата..."
                   value={form.description} onChange={e => setForm({ ...form, description: e.target.value })}
-                  className={`${inputClass} leading-relaxed resize-y`} />
+                  className={`${inputClass} leading-relaxed resize-y max-h-52`} />
               </div>
 
               <div className="flex flex-col sm:flex-row gap-3">
@@ -624,10 +619,10 @@ export default function EmployerDashboard() {
           ) : (
             <div className="grid gap-4">
               <div className="flex flex-wrap items-center justify-between gap-3">
-                <div role="group" aria-label="Сортировка откликов" className="neu-in inline-flex gap-1 p-1 rounded-full text-sm">
+                <div role="group" aria-label="Сортировка откликов" className="neu-in grid grid-cols-3 w-full sm:w-auto sm:inline-flex gap-1 p-1 text-xs sm:text-sm">
                   {([["match", "По совпадению"], ["ai", "По вердикту ИИ"], ["new", "Сначала новые"]] as const).map(([id, label]) => (
                     <button key={id} onClick={() => setSortBy(id)} aria-pressed={sortBy === id}
-                      className={`lg px-4 py-1.5 rounded-full transition-colors ${sortBy === id ? "lg lg-on" : "text-neutral-400 hover:text-white"}`}>
+                      className={`lg min-w-0 px-1 sm:px-4 py-1.5 rounded-lg leading-tight transition-colors ${sortBy === id ? "lg lg-on" : "text-neutral-400 hover:text-white"}`}>
                       {label}
                     </button>
                   ))}
@@ -708,20 +703,18 @@ export default function EmployerDashboard() {
                       <MatchRing value={matches[app.id].score} size={64} stroke={matches[app.id].score >= 70 ? "#5eead4" : "#fcd34d"} />
                     )}
                     <div className="flex-1 min-w-[14rem]">
-                      <p className="font-semibold text-white flex flex-wrap items-center gap-2">
+                      <p className="text-lg font-semibold text-white flex flex-wrap items-center gap-2">
                         {app.profiles?.name || "Без имени"}
                         <span className={`text-xs px-2.5 py-0.5 rounded-full font-medium ${
                           app.status === "interview_scheduled" ? "bg-teal-300/15 text-teal-200"
                             : app.status === "rejected" ? "bg-white/[0.08] text-neutral-400"
-                            : "bg-amber-300/15 text-amber-200"
+                            : "bg-white/[0.08] text-neutral-200"
                         }`}>
                           {STATUS_LABELS[app.status] ?? app.status}
                         </span>
                       </p>
-                      <p className="text-sm text-neutral-400 mt-1">
-                        {app.vacancies.title}
-                        {app.profiles?.skills?.length ? ` · ${app.profiles.skills.slice(0, 6).join(", ")}` : ""}
-                      </p>
+                      <p className="text-sm text-neutral-200 mt-1">{app.vacancies.title}</p>
+                      {app.profiles?.skills?.length ? <p className="text-xs text-neutral-500 mt-0.5">{app.profiles.skills.slice(0, 6).join(", ")}</p> : null}
                     </div>
                   </div>
 
@@ -734,16 +727,6 @@ export default function EmployerDashboard() {
                       {matches[app.id].missing.map(s => <span key={s} className="neu-chip px-2 py-1 text-xs !text-amber-300 !border-amber-300/40">нет {s}</span>)}
                     </div>
                   )}
-
-                  <ScreeningVerdict applicationId={app.id} screening={screenings[app.id]}
-                    onChange={sc => setScreenings(all => ({ ...all, [app.id]: sc }))} />
-
-                  <BlitzAnswers applicationId={app.id} answers={app.blitz_answers ?? []} summary={app.blitz_summary} />
-
-                  <div className="neu-in rounded-2xl p-4 text-sm text-neutral-300 leading-relaxed whitespace-pre-line">
-                    <p className="text-xs text-neutral-500 mb-2">Сопроводительное письмо</p>
-                    {app.cover_letter || "Письмо не сохранено"}
-                  </div>
 
                   {app.hr_message && reply?.appId !== app.id && (
                     <div className="neu-sub rounded-2xl px-4 py-3 text-sm text-neutral-400">
@@ -772,41 +755,62 @@ export default function EmployerDashboard() {
                           })}
                         </div>
                       )}
-                      <textarea value={reply.text} maxLength={2000} rows={4} aria-label="Текст ответа кандидату"
+                      <textarea value={reply.text} maxLength={2000} rows={6} aria-label="Текст ответа кандидату"
                         onChange={e => setReply({ ...reply, text: e.target.value })}
-                        className={`${inputClass} leading-relaxed resize-y`} />
+                        className={`${inputClass} leading-relaxed resize-y max-h-52`} />
                       <div className="flex justify-end gap-2">
-                        <button onClick={() => setReply(null)} className="px-3 py-1.5 text-xs text-neutral-400 hover:text-white">Отмена</button>
+                        <button onClick={() => setReply(null)} className="lg h-11 px-4 rounded-full text-sm text-neutral-200 transition-colors">Отмена</button>
                         <button onClick={sendReply} disabled={replying}
-                          className="lg lg-accent h-10 px-4 rounded-full text-sm font-semibold flex items-center gap-1.5 disabled:opacity-50">
+                          className="lg lg-accent h-11 px-5 rounded-full text-sm font-semibold flex items-center gap-1.5 disabled:opacity-50">
                           {replying ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Send className="w-3.5 h-3.5" />} Отправить
                         </button>
                       </div>
                     </div>
                   )}
 
-                  <div className="flex flex-wrap items-center justify-end gap-2.5 pt-3 border-t border-white/10">
+                  {/* Пока пишем ответ, кнопки решения убраны: иначе рядом два разных «отправить» */}
+                  {reply?.appId !== app.id && (
+                  <div className="grid grid-cols-2 sm:flex sm:flex-wrap sm:items-center sm:justify-end gap-2.5">
                     {app.profiles?.resume_path && (
                       <button onClick={() => openResume(app.profiles!.resume_path!)}
-                        className="lg mr-auto h-11 px-4 rounded-full text-neutral-200 text-sm transition-colors flex items-center gap-1.5">
+                        className="lg col-span-2 sm:mr-auto h-11 px-4 rounded-full text-neutral-200 text-sm transition-colors flex items-center justify-center gap-1.5">
                         <FileText className="w-3.5 h-3.5" /> Резюме (PDF)
                       </button>
                     )}
                     {app.conversations?.id && (
                       <Link href={`/messages?c=${app.conversations.id}`}
-                        className={`${app.profiles?.resume_path ? "" : "mr-auto "}lg h-11 px-4 rounded-full text-neutral-200 text-sm transition-colors flex items-center gap-1.5`}>
+                        className={`${app.profiles?.resume_path ? "" : "sm:mr-auto "}lg h-11 px-4 rounded-full text-neutral-200 text-sm transition-colors flex items-center justify-center gap-1.5`}>
                         <MessageCircle className="w-3.5 h-3.5" /> Написать
                       </Link>
                     )}
                     <button onClick={() => setReply({ appId: app.id, status: "rejected", text: REPLY_TEMPLATES.rejected(app.vacancies.title) })}
-                      className="lg h-11 px-4 rounded-full text-neutral-300 hover:text-red-300 text-sm transition-colors flex items-center gap-1.5">
+                      className="lg h-11 px-4 rounded-full text-neutral-300 hover:text-red-300 text-sm transition-colors flex items-center justify-center gap-1.5">
                       <XCircle className="w-3.5 h-3.5" /> Отказать
                     </button>
                     <button onClick={() => setReply({ appId: app.id, status: "interview_scheduled", text: REPLY_TEMPLATES.interview_scheduled(app.vacancies.title) })}
-                      className="lg lg-accent h-11 px-5 rounded-full text-sm font-semibold transition-colors flex items-center gap-1.5">
+                      className="lg lg-accent col-span-2 order-first sm:order-none h-12 sm:h-11 px-5 rounded-full text-sm font-semibold transition-colors flex items-center justify-center gap-1.5">
                       <CheckCircle2 className="w-4 h-4" /> Пригласить
                     </button>
                   </div>
+                  )}
+
+                  {/* Решение выше подробностей: кнопки видно, не пролистывая ответы и письмо */}
+                  <ScreeningVerdict applicationId={app.id} screening={screenings[app.id]}
+                    onChange={sc => setScreenings(all => ({ ...all, [app.id]: sc }))} />
+
+                  <BlitzAnswers applicationId={app.id} answers={app.blitz_answers ?? []} summary={app.blitz_summary} />
+
+                  {/* Письмо свёрнуто до двух строк: иначе на экран помещается одна карточка, а кнопки решения уходят вниз */}
+                  <details className="group border-t border-white/10 pt-3 text-sm text-neutral-300 leading-relaxed">
+                    <summary className="cursor-pointer list-none">
+                      <span className="flex items-center justify-between gap-2 text-xs text-neutral-500">
+                        Сопроводительное письмо
+                        <ChevronDown className="w-4 h-4 transition-transform group-open:rotate-180" aria-hidden="true" />
+                      </span>
+                      <span className="mt-1.5 line-clamp-2 group-open:hidden">{app.cover_letter || "Письмо не сохранено"}</span>
+                    </summary>
+                    <p className="mt-1.5 whitespace-pre-line">{app.cover_letter || "Письмо не сохранено"}</p>
+                  </details>
                 </div>
               ))}
             </div>
@@ -814,5 +818,6 @@ export default function EmployerDashboard() {
         )}
       </div>
     </div>
+    </>
   );
 }

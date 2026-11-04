@@ -44,15 +44,10 @@ async function centre(locator) {
   await locator.evaluate(el => el.scrollIntoView({ block: "center", behavior: "instant" }));
 }
 
-async function openFilters(page) {
-  const toggle = page.locator('button[aria-expanded]').filter({ hasText: /Фильтры/ }).first();
-  if (await toggle.isVisible().catch(() => false) && await toggle.getAttribute("aria-expanded") === "false") await toggle.click();
-}
-
 async function search(page, text) {
-  await page.goto(`${BASE_URL}/`);
+  // Поиск живёт в общей ленте: кандидата главная открывает на «Для вас»
+  await page.goto(`${BASE_URL}/?tab=all`);
   await page.waitForLoadState("networkidle", { timeout: 8000 }).catch(() => {});
-  await openFilters(page);
   const box = page.getByPlaceholder("Java, Backend...");
   await box.fill(text);
   await page.waitForTimeout(1200);
@@ -61,7 +56,7 @@ async function search(page, text) {
 
 async function openSmartApply(page) {
   await search(page, "Senior Python-разработчик");
-  await page.getByRole("button", { name: /Smart Apply/ }).first().click();
+  await page.getByRole("button", { name: /Откликнуться с ИИ/ }).first().click();
   await page.getByRole("button", { name: "Написать письмо" }).waitFor({ timeout: 10_000 });
 }
 
@@ -82,7 +77,7 @@ export function scenes() {
     { id: "register-form", as: "guest", run: go("/register/form?role=candidate") },
     { id: "not-found", as: "guest", run: go("/no-such-page") },
     // Состояния и шаги сценария гостя
-    { id: "feed-filtered", as: "guest", run: async p => { await search(p, data.filterQuery); await centre(p.getByRole("button", { name: /Smart Apply/ }).first()); } },
+    { id: "feed-filtered", as: "guest", run: async p => { await search(p, data.filterQuery); await centre(p.getByRole("button", { name: /Откликнуться с ИИ/ }).first()); } },
     { id: "feed-empty", as: "guest", run: async p => { await search(p, data.emptyQuery); const empty = p.getByText("Ничего не нашлось"); await empty.waitFor({ timeout: 10_000 }); await centre(empty); } },
     { id: "form-error", as: "guest", run: async p => {
       await p.route("**/auth/v1/token*", route => route.fulfill({ status: 400, json: { error_code: "invalid_credentials", msg: "Invalid login credentials" } }));
@@ -106,7 +101,7 @@ export function scenes() {
     // Работодатель
     { id: "employer", as: "employer", run: go("/employer") },
     { id: "employer-review", as: "employer", run: async p => { await go("/employer")(p); await p.getByRole("button", { name: "Сначала новые" }).click(); await p.locator("div.glass").filter({ hasText: "Backend-разработчик (Python, FastAPI)" }).getByRole("button", { name: "Пригласить" }).first().scrollIntoViewIfNeeded(); } },
-    { id: "employer-decision", as: "employer", run: async p => { await go("/employer")(p); await p.getByRole("button", { name: "Сначала новые" }).click(); const card = p.locator("div.glass").filter({ hasText: "Backend-разработчик (Python, FastAPI)" }).filter({ has: p.getByRole("button", { name: "Пригласить" }) }).first(); await card.getByRole("button", { name: "Пригласить" }).click(); await card.getByRole("button", { name: "Отправить", exact: true }).waitFor({ timeout: 5000 }); await card.getByRole("button", { name: "Отправить", exact: true }).scrollIntoViewIfNeeded(); } },
+    { id: "employer-decision", as: "employer", run: async p => { await go("/employer")(p); await p.getByRole("button", { name: "Сначала новые" }).click(); const card = p.locator("div.glass").filter({ hasText: "Backend-разработчик (Python, FastAPI)" }).filter({ has: p.getByRole("button", { name: "Пригласить" }) }).first(); await card.getByRole("button", { name: "Пригласить" }).click(); const send = p.getByRole("button", { name: "Отправить", exact: true }).first(); await send.waitFor({ timeout: 5000 }); await send.scrollIntoViewIfNeeded(); } },
     { id: "employer-resumes", as: "employer", run: go("/resumes") },
   ];
 }

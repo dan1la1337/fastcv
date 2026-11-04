@@ -97,7 +97,7 @@ export default function SearchSelect({
             className="neu-in w-full pl-8 pr-2 py-2 rounded-xl text-sm text-neutral-100" />
         </div>
         <ul id={listId} role="listbox" aria-label={label} className="max-h-72 overflow-y-auto p-1">
-          {filtered.length === 0 && <li className="px-3 py-2 text-sm text-neutral-500">Ничего не нашлось</li>}
+          {open && filtered.length === 0 && <li className="px-3 py-2 text-sm text-neutral-500">Ничего не нашлось</li>}
           {filtered.map((o, i) => {
             const header = o.group && o.group !== filtered[i - 1]?.group ? o.group : null;
             return (

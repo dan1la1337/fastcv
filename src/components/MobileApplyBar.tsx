@@ -11,7 +11,7 @@ export default function MobileApplyBar({ target }: { target: string }) {
   useEffect(() => {
     const el = document.getElementById(target);
     if (!el || !("IntersectionObserver" in window)) return;
-    const observer = new IntersectionObserver(([entry]) => setVisible(!entry.isIntersecting), { threshold: 0.15 });
+    const observer = new IntersectionObserver(([entry]) => setVisible(!entry.isIntersecting), { threshold: 0.7 });
     observer.observe(el);
     return () => observer.disconnect();
   }, [target]);

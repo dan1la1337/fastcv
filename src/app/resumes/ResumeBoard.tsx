@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
+import AppBar from "@/components/AppBar";
 import { useRouter } from "next/navigation";
 import {
   ArrowLeft, Bookmark, BookmarkCheck, Briefcase, FileText, Loader2, MapPin, MessageCircle, Search,
@@ -141,10 +142,12 @@ export default function ResumeBoard() {
   const searchWords = query.search.toLowerCase().split(/\s+/).filter(w => w.length > 1);
 
   return (
+    <>
+    <AppBar role="employer" current="/resumes" />
     <div className="min-h-screen text-neutral-100 p-4 sm:p-8">
       <div className="max-w-6xl mx-auto space-y-6">
         <div className="flex flex-wrap items-center gap-3">
-          <Link href="/employer" aria-label="В кабинет" className="lg p-2 rounded-xl transition-colors">
+          <Link href="/employer" aria-label="В кабинет" className="lg sm:hidden inline-flex items-center justify-center w-10 h-10 rounded-full transition-colors">
             <ArrowLeft className="w-4 h-4" />
           </Link>
           <h1 className="font-display text-2xl font-bold">База резюме</h1>
@@ -315,9 +318,9 @@ export default function ResumeBoard() {
                               {freshness(r.published_at) && <span>{freshness(r.published_at)}</span>}
                             </p>
                           </div>
-                          <button onClick={() => toggleSaved(r)} aria-pressed={r.saved}
-                            className="lg shrink-0 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs text-neutral-300">
-                            {r.saved ? <><BookmarkCheck className="w-3.5 h-3.5 text-teal-300" /> Сохранён</> : <><Bookmark className="w-3.5 h-3.5" /> Сохранить</>}
+                          <button onClick={() => toggleSaved(r)} aria-pressed={r.saved} aria-label={r.saved ? "Сохранён" : "Сохранить"} title={r.saved ? "Сохранён" : "Сохранить"}
+                            className="lg shrink-0 inline-flex items-center justify-center w-10 h-10 rounded-full text-neutral-300 order-first sm:order-none ml-auto sm:ml-0">
+                            {r.saved ? <BookmarkCheck className="w-4 h-4 text-teal-300" /> : <Bookmark className="w-4 h-4" />}
                           </button>
                         </div>
 
@@ -346,21 +349,21 @@ export default function ResumeBoard() {
                           <p className="text-xs text-neutral-500">Ищет: {r.directions.map(directionLabel).join(", ")}</p>
                         )}
 
-                        <div className="flex flex-wrap items-center gap-2.5 pt-3 border-t border-white/10">
+                        <div className="grid grid-cols-1 sm:flex sm:flex-wrap sm:items-center gap-2.5 pt-3 border-t border-white/10">
                           {r.has_pdf && (
                             <button onClick={() => openPdf(r)}
-                              className="lg mr-auto h-10 px-4 rounded-full text-neutral-200 text-sm inline-flex items-center gap-1.5">
+                              className="lg sm:mr-auto h-10 px-4 rounded-full text-neutral-200 text-sm inline-flex items-center justify-center gap-1.5">
                               <FileText className="w-3.5 h-3.5" /> Резюме (PDF)
                             </button>
                           )}
                           {r.conversation_id && (
                             <Link href={`/messages?c=${r.conversation_id}`}
-                              className={`${r.has_pdf ? "" : "mr-auto "}lg h-10 px-4 rounded-full text-neutral-200 text-sm inline-flex items-center gap-1.5`}>
+                              className={`${r.has_pdf ? "" : "sm:mr-auto "}lg h-10 px-4 rounded-full text-neutral-200 text-sm inline-flex items-center justify-center gap-1.5`}>
                               <MessageCircle className="w-3.5 h-3.5" /> Открыть чат
                             </Link>
                           )}
                           <button onClick={() => setContact(r)}
-                            className="lg lg-accent h-10 px-5 rounded-full text-sm font-semibold inline-flex items-center gap-1.5">
+                            className="lg lg-accent order-first sm:order-none h-11 px-5 rounded-full text-sm font-semibold inline-flex items-center justify-center gap-1.5">
                             <MessageCircle className="w-4 h-4" /> {r.conversation_id ? "Предложить вакансию" : "Написать кандидату"}
                           </button>
                         </div>
@@ -386,6 +389,7 @@ export default function ResumeBoard() {
           onSent={id => { setContact(null); router.push(`/messages?c=${id}`); }} />
       )}
     </div>
+    </>
   );
 }
 

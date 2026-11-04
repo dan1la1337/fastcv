@@ -28,7 +28,12 @@ const collect = () => {
     range.selectNodeContents(node);
     for (const r of [...range.getClientRects()].slice(0, 1)) {
       if (r.width < 4 || r.height < 4 || r.top < 0 || r.left < 0 || r.bottom > innerHeight || r.right > innerWidth) continue;
-      if (document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2) && !el.contains(document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2)) && !document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2).contains(el)) continue;
+      // Строка хотя бы частично под фиксированной панелью не считается: её там не прочитать
+      const covered = [[.5, .5], [.1, .2], [.9, .2], [.1, .8], [.9, .8]].some(([fx, fy]) => {
+        const hit = document.elementFromPoint(r.left + r.width * fx, r.top + r.height * fy);
+        return hit && !el.contains(hit) && !hit.contains(el);
+      });
+      if (covered) continue;
       let opacity = 1;
       for (let e = el; e; e = e.parentElement) opacity *= Number(getComputedStyle(e).opacity);
       items.push({ text: text.slice(0, 40), color: toRgba(css.color), opacity, size: parseFloat(css.fontSize), weight: Number(css.fontWeight), x: r.left, y: r.top, w: r.width, h: r.height, cls: String(el.className).slice(0, 80) });

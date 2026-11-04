@@ -6,7 +6,7 @@ import {
   AREAS, DEFAULT_FILTERS, DIRECTIONS, experienceLabel, sourceOf, freshnessLabel, ghostSignal, LEVELS, WORK_FORMATS, fetchVacancyPage, formatLabel, formatSalary, levelLabel, plural, PAGE_SIZE,
   VACANCY_FORMS, SOURCES, type SourceKind, type Area, type Level, type Vacancy, type VacancyFilters, type WorkFormat,
 } from "@/lib/vacancies";
-import { Clock, Search, MapPin, ChevronDown, Sparkles, Loader2, ExternalLink, Globe, SlidersHorizontal, Briefcase, Building2, Target, Bookmark, BookmarkCheck, EyeOff, Ghost, Undo2 } from "lucide-react";
+import { Clock, Search, MapPin, Sparkles, Loader2, ExternalLink, Globe, SlidersHorizontal, Briefcase, Building2, Target, Bookmark, BookmarkCheck, EyeOff, Ghost, Undo2, X } from "lucide-react";
 import { fetchMarked, fetchMarks, setMark, type MarkKind } from "@/lib/marks";
 import { toast } from "@/components/Toaster";
 import { fetchMatches, fetchRecommended, type Match } from "@/lib/matching";
@@ -30,7 +30,7 @@ const SmartApply = dynamic(() => import("@/components/SmartApply"), { ssr: false
  * в HTML (initialRows): лента видна до загрузки скриптов и индексируется поисковиками.
  * Дальше — запросы из браузера при смене фильтров и «Показать ещё».
  */
-export default function Feed({ initialRows, initialTotal, hero }: { initialRows: Vacancy[] | null; initialTotal: number; hero?: React.ReactNode }) {
+export default function Feed({ initialRows, initialTotal, hero, after }: { initialRows: Vacancy[] | null; initialTotal: number; hero?: React.ReactNode; after?: React.ReactNode }) {
   const [vacancies, setVacancies] = useState<Vacancy[]>(initialRows ?? []);
   const [total, setTotal] = useState(initialTotal);
   const [page, setPage] = useState(0);
@@ -333,27 +333,47 @@ export default function Feed({ initialRows, initialTotal, hero }: { initialRows:
   const list = savedMode ? savedList : (forYou ? recommended : vacancies).filter(notHidden);
   const listLoading = savedMode ? savedLoading : forYou ? recLoading && recommended.length === 0 : loading;
 
+  // Что сейчас сужает ленту: показываем над результатами, каждое условие снимается по клику
+  const activeFilters: { key: string; label: string; clear: () => void }[] = [
+    search.trim() && { key: "search", label: `«${search.trim()}»`, clear: () => setSearch("") },
+    area && { key: "area", label: AREAS.find(a => a.id === area)?.label ?? area, clear: () => setArea("") },
+    selectedDirection && { key: "direction", label: DIRECTIONS.find(d => d.id === selectedDirection)?.label ?? selectedDirection, clear: () => { setSelectedDirection(null); setSelectedStack([]); } },
+    ...selectedLevels.map(l => ({ key: `level-${l}`, label: levelLabel(l) ?? l, clear: () => setSelectedLevels(prev => prev.filter(x => x !== l)) })),
+    ...formats.map(f => ({ key: `format-${f}`, label: formatLabel(f) ?? f, clear: () => setFormats(prev => prev.filter(x => x !== f)) })),
+    city.trim() && { key: "city", label: city, clear: () => setCity("") },
+    country && { key: "country", label: country, clear: () => setCountry("") },
+    minSalary > 0 && { key: "salary", label: `от ${minSalary.toLocaleString("ru-RU")} ₽`, clear: () => setMinSalary(0) },
+    onlyWithSalary && { key: "with-salary", label: "С зарплатой", clear: () => setOnlyWithSalary(false) },
+    ...sources.map(id => ({ key: `source-${id}`, label: SOURCES.find(x => x.id === id)?.label ?? id, clear: () => setSources(prev => prev.filter(x => x !== id)) })),
+  ].filter(f => !!f);
+
   const card = (item: Vacancy) => {
     // Без заполненного профиля оценка у всех одинаковая — не показываем её
     const match = hasPrefs ? matches[item.id] : undefined;
     return (
-      <div key={item.id} className="neu-sub rounded-3xl p-5 sm:p-6 flex flex-col gap-4 relative overflow-hidden group transition-colors">
+      <div key={item.id} className="neu-sub rounded-3xl p-4 sm:p-6 flex flex-col gap-4 relative overflow-hidden group transition-colors">
 
-        {/* Бейджи источников — Tag: контурная метка капсом; у прямого работодателя — с пульсом */}
-        {item.source_type === 'external' ? (
-           <div className="absolute top-4 right-4 neu-chip text-xs px-2 py-0.5 z-10">
-             {sourceOf(item).badge}
-           </div>
-        ) : (
-           <div className="absolute top-4 right-4 neu-chip text-xs px-2 py-0.5 z-10 flex items-center gap-1.5">
-             <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse"></span>
-             Прямой работодатель
-           </div>
-        )}
+        {/* Метки над заголовком отдельной строкой: поверх длинного названия они его перекрывали.
+            На телефоне совпадение тоже здесь: кольцо сжало бы заголовок */}
+        <div className="flex flex-wrap items-center gap-2">
+          {match && (
+            <span className={`sm:hidden neu-chip text-xs px-2 py-0.5 tabular-nums ${match.score >= 70 ? "!text-teal-200 !border-teal-300/40" : "!text-amber-300 !border-amber-300/40"}`}>
+              {match.score}%
+            </span>
+          )}
+          {item.source_type === 'external' ? (
+            <span className="neu-chip text-xs px-2 py-0.5">{sourceOf(item).badge}</span>
+          ) : (
+            <span className="neu-chip text-xs px-2 py-0.5 inline-flex items-center gap-1.5">
+              <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse"></span>
+              Прямой работодатель
+            </span>
+          )}
+        </div>
 
         <div className="flex flex-col sm:flex-row justify-between gap-4">
-          <div className="flex gap-4 sm:gap-5 items-start pr-24 sm:pr-28">
-          {match && <MatchRing value={match.score} size={64} stroke={match.score >= 70 ? "#5eead4" : "#fcd34d"} />}
+          <div className="flex gap-4 sm:gap-5 items-start min-w-0">
+          {match && <span className="hidden sm:block shrink-0"><MatchRing value={match.score} size={64} stroke={match.score >= 70 ? "#5eead4" : "#fcd34d"} /></span>}
           <div className="min-w-0">
             <h2 className="text-lg sm:text-xl font-semibold text-neutral-100 leading-snug">
               <Link href={`/vacancy/${item.id}`} className="hover:text-teal-300 transition-colors">{item.title}</Link>
@@ -395,12 +415,12 @@ export default function Feed({ initialRows, initialTotal, hero }: { initialRows:
 
           <button
             onClick={() => setApplyVacancy(item)}
-            className="lg inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-full text-sm font-semibold transition-colors shrink-0 relative z-10 sm:self-end"
+            className="lg lg-tint inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-full text-sm font-semibold transition-colors shrink-0 relative z-10 sm:self-end"
           >
-            <Sparkles className="w-4 h-4" /> Smart Apply
+            <Sparkles className="w-4 h-4" /> Откликнуться с ИИ
           </button>
         </div>
-        <p className="text-sm text-neutral-400 leading-relaxed line-clamp-3">{item.description}</p>
+        <p className="text-sm text-neutral-400 leading-relaxed line-clamp-2 sm:line-clamp-3">{item.description}</p>
 
         {match?.core && match.core.fit !== "match" && match.core.stack.length > 0 && (
           <p className={`text-xs ${match.core.fit === "foreign" ? "text-amber-300" : "text-neutral-400"}`}>
@@ -437,11 +457,11 @@ export default function Feed({ initialRows, initialTotal, hero }: { initialRows:
                       aria-label={`+ ${skill} в профиль: у меня есть этот опыт`}
                       className="text-amber-300 underline decoration-dotted underline-offset-2 hover:text-amber-200 disabled:opacity-60"
                     >
-                      {addingSkill === skill ? "добавляем…" : `+ ${skill}`}
+                      {addingSkill === skill ? "добавляем…" : `+ ${skill} в профиль`}
                     </button>
                   </span>
                 ))}
-                <span className="text-neutral-600"> — нажмите на навык, если он у вас есть</span>
+                <span className="hidden sm:inline text-neutral-600"> — нажмите на навык, если он у вас есть</span>
               </>
             )}
           </p>
@@ -449,7 +469,8 @@ export default function Feed({ initialRows, initialTotal, hero }: { initialRows:
 
         {(item.stack?.length || item.source_url || isCandidate) ? (
           <div className="flex flex-wrap items-center gap-2">
-            {item.stack?.slice(0, 8).map(tech => (
+            {/* С совпадением навыки уже названы строкой «Есть у вас / Не хватает»: второй раз не повторяем */}
+            {!match && item.stack?.slice(0, 8).map(tech => (
               <span key={tech} className="text-xs px-2 py-0.5 neu-chip">
                 {tech}
               </span>
@@ -496,7 +517,7 @@ export default function Feed({ initialRows, initialTotal, hero }: { initialRows:
 
   return (
     <div className="min-h-screen text-neutral-100 antialiased font-sans relative">
-      <header className="sticky top-0 z-20 px-3 sm:px-4 pt-3">
+      <header className="top-strip sticky top-0 z-20 px-3 sm:px-4 pt-3 pb-3">
         <div className="glass rounded-3xl max-w-6xl mx-auto pl-4 pr-2.5 py-2.5 flex items-center justify-between gap-3">
           <div className="flex items-center gap-1 sm:gap-3">
             <Logo />
@@ -520,7 +541,7 @@ export default function Feed({ initialRows, initialTotal, hero }: { initialRows:
                   <>
                     <Link 
                       href="/employer"
-                      className="lg px-4 py-2 rounded-full text-sm text-neutral-300 hover:text-white transition-colors"
+                      className="lg hidden sm:inline-block px-4 py-2 rounded-full text-sm text-neutral-300 hover:text-white transition-colors"
                     >
                       Кабинет HR
                     </Link>
@@ -532,7 +553,7 @@ export default function Feed({ initialRows, initialTotal, hero }: { initialRows:
                 ) : (
                   <Link 
                     href="/applications"
-                    className="lg px-4 py-2 rounded-full text-sm text-neutral-300 hover:text-white transition-colors"
+                    className="lg hidden sm:inline-block px-4 py-2 rounded-full text-sm text-neutral-300 hover:text-white transition-colors"
                   >
                     Мои отклики
                   </Link>
@@ -562,24 +583,27 @@ export default function Feed({ initialRows, initialTotal, hero }: { initialRows:
         </div>
       </header>
 
-      {hero}
-      <main id="feed" className="max-w-6xl mx-auto px-4 py-6 lg:py-8 grid grid-cols-1 lg:grid-cols-4 gap-4 lg:gap-8 relative z-0 scroll-mt-20">
-        {(() => {
-          const active = [search.trim(), formats.length > 0, minSalary > 0, onlyWithSalary, country, city.trim(), selectedDirection, area, selectedLevels.length > 0, sources.length > 0].filter(Boolean).length;
-          return (
-            <button
-              onClick={() => setFiltersOpen(open => !open)}
-              aria-expanded={filtersOpen}
-              className="lg lg:hidden flex items-center justify-between w-full px-5 py-3 rounded-full text-sm font-medium text-neutral-200"
-            >
-              <span className="inline-flex items-center gap-2">
-                <SlidersHorizontal className="w-4 h-4 text-neutral-400" /> Фильтры
-                {active > 0 && <span className="text-xs px-2 py-0.5 rounded-full bg-teal-300 text-neutral-950">{active}</span>}
-              </span>
-              <ChevronDown className={`w-4 h-4 text-neutral-400 transition-transform ${filtersOpen ? "rotate-180" : ""}`} />
-            </button>
-          );
-        })()}
+      {/* Поиск первым на странице, рядом кнопка фильтров: на телефоне они свёрнуты.
+          С запросом лендинг убирается, и результаты сразу под полем */}
+      <div className="max-w-page mx-auto px-4 pt-4 flex items-center gap-2">
+        <div className="relative flex-1 min-w-0">
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400" aria-hidden="true" />
+          <input id="feed-search" type="search" aria-label="Поиск по вакансиям" placeholder="Должность или навык: Java, Backend..." value={search}
+            onChange={(e) => { setSearch(e.target.value); if (mode !== "all") setMode("all"); }} className="neu-in w-full h-12 pl-10 pr-4 text-sm text-neutral-100" />
+        </div>
+        <button
+          onClick={() => setFiltersOpen(open => !open)}
+          aria-expanded={filtersOpen}
+          aria-label={`Фильтры${activeFilters.length ? `: выбрано ${activeFilters.length}` : ""}`}
+          className="lg lg:hidden shrink-0 inline-flex items-center justify-center gap-1.5 h-12 min-w-12 px-3 rounded-full text-sm text-neutral-200"
+        >
+          <SlidersHorizontal className="w-4 h-4" aria-hidden="true" />
+          {activeFilters.length > 0 && <span className="text-xs tabular-nums text-teal-200">{activeFilters.length}</span>}
+        </button>
+      </div>
+
+      {!search.trim() && hero}
+      <main id="feed" className="max-w-page mx-auto px-4 py-6 lg:py-8 grid grid-cols-1 lg:grid-cols-4 gap-4 lg:gap-8 relative z-0 scroll-mt-20">
         {/* Sidebar Filters */}
         <aside className={`lg:col-span-1 space-y-6 ${filtersOpen ? "" : "hidden"} lg:block`}>
           <div className="neu-sub rounded-3xl p-5 space-y-6">
@@ -606,15 +630,6 @@ export default function Feed({ initialRows, initialTotal, hero }: { initialRows:
                   </div>
                 </div>
               )}
-            </div>
-
-            {/* Поиск */}
-            <div className="space-y-3 pt-2 border-t border-white/[0.08]">
-              <label htmlFor="feed-search" className="text-xs font-bold text-neutral-500 uppercase tracking-wider">Ключевые слова</label>
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400" />
-                <input id="feed-search" type="text" placeholder="Java, Backend..." value={search} onChange={(e) => setSearch(e.target.value)} className="neu-in w-full pl-9 pr-4 py-2.5 rounded-full text-sm text-neutral-100 transition-colors" />
-              </div>
             </div>
 
             {/* Уровень — грейды есть в IT и digital; для «других профессий» не показываем */}
@@ -668,7 +683,7 @@ export default function Feed({ initialRows, initialTotal, hero }: { initialRows:
                   step={25000}
                   value={minSalary}
                   onChange={(e) => setMinSalary(Number(e.target.value))}
-                  className="w-full h-1.5 bg-neutral-800 rounded-lg appearance-none cursor-pointer accent-teal-300 transition-all hover:bg-neutral-700"
+                  className="w-full appearance-none cursor-pointer"
                 />
                 <div className="flex justify-between text-xs text-neutral-500 tabular-nums">
                   <span>0 ₽</span>
@@ -677,16 +692,9 @@ export default function Feed({ initialRows, initialTotal, hero }: { initialRows:
                 </div>
               </div>
 
-              <label 
-                onClick={() => setOnlyWithSalary(!onlyWithSalary)}
-                className="flex items-center gap-3 cursor-pointer group pt-1 select-none"
-              >
-                <div className={`w-4 h-4 rounded border flex items-center justify-center transition-all duration-150 ${onlyWithSalary ? 'bg-teal-300 border-teal-300' : 'border-neutral-700 group-hover:border-neutral-500'}`}>
-                  {onlyWithSalary && <span className="text-neutral-950 text-xs font-bold">✓</span>}
-                </div>
-                <span className="text-xs text-neutral-300 group-hover:text-neutral-100 transition-colors">
-                  Только с указанной ЗП
-                </span>
+              <label className="flex items-center gap-3 cursor-pointer pt-1 select-none text-xs text-neutral-300 hover:text-neutral-100 transition-colors">
+                <input type="checkbox" checked={onlyWithSalary} onChange={e => setOnlyWithSalary(e.target.checked)} />
+                Только с указанной зарплатой
               </label>
             </div>
 
@@ -717,13 +725,13 @@ export default function Feed({ initialRows, initialTotal, hero }: { initialRows:
 
         {/* Vacancies Feed */}
         <section className="lg:col-span-3 space-y-4">
-          <div className="flex flex-wrap items-center gap-2" role="group" aria-label="Раздел ленты">
+          <div className="flex items-center gap-2 overflow-x-auto sm:flex-wrap -mx-4 px-4 sm:mx-0 sm:px-0 [scrollbar-width:none]" role="group" aria-label="Раздел ленты">
             {([["", "Все разделы", "Все"], ...AREAS.map(a => [a.id, a.label, a.short])] as [Area | "", string, string][]).map(([id, label, short]) => (
               <button
                 key={id || "all"}
                 onClick={() => chooseArea(id)}
                 aria-pressed={area === id}
-                className={`lg px-4 py-2 rounded-full text-sm transition-colors ${
+                className={`lg shrink-0 whitespace-nowrap px-4 py-2 rounded-full text-sm transition-colors ${
                   area === id ? "lg lg-on" : "lg text-neutral-300"
                 }`}
               >
@@ -732,19 +740,19 @@ export default function Feed({ initialRows, initialTotal, hero }: { initialRows:
             ))}
           </div>
           {isCandidate && (
-            <div className="flex items-center gap-2" role="tablist" aria-label="Какие вакансии показать">
+            <div className="grid grid-cols-3 gap-2 sm:flex sm:items-center" role="tablist" aria-label="Какие вакансии показать">
               {([["all", "Все вакансии"], ["for-you", "Для вас"], ["saved", "Избранное"]] as const).map(([id, label]) => (
                 <button
                   key={id}
                   role="tab"
                   aria-selected={mode === id}
                   onClick={() => (id === "for-you" ? showForYou() : id === "saved" ? showSaved() : setMode("all"))}
-                  className={`lg inline-flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-medium transition-colors ${
+                  className={`lg inline-flex items-center justify-center gap-1.5 px-2 sm:px-4 h-10 rounded-full text-sm font-medium whitespace-nowrap transition-colors ${
                     mode === id ? "lg lg-on" : "lg text-neutral-400 hover:text-neutral-100"
                   }`}
                 >
-                  {id === "for-you" && <Target className="w-4 h-4" />}
-                  {id === "saved" && <Bookmark className="w-4 h-4" />}
+                  {id === "for-you" && <Target className="hidden sm:block w-4 h-4" />}
+                  {id === "saved" && <Bookmark className="hidden sm:block w-4 h-4" />}
                   {label}
                 </button>
               ))}
@@ -759,13 +767,27 @@ export default function Feed({ initialRows, initialTotal, hero }: { initialRows:
           )}
 
           {forYou && (
-            <div className="rounded-3xl border border-teal-300/25 bg-teal-300/[0.06] px-5 py-4 text-sm text-neutral-300">
+            <p className="text-xs text-neutral-400">
               {hasPrefs ? (
-                <>Вакансии отсортированы по совпадению с вашим профилем: направления, навыки, уровень, формат и город.{" "}
-                  <Link href="/profile#prefs" className="text-teal-300 hover:underline">Изменить, что ищу</Link></>
+                <>Сначала — самые подходящие вашему профилю. <Link href="/profile#prefs" className="text-teal-300 hover:underline">Изменить, что ищу</Link></>
               ) : (
                 <>Подборка пока общая: укажите в профиле направления, уровень и навыки — и вакансии выстроятся под вас.{" "}
                   <Link href="/profile#prefs" className="text-teal-300 hover:underline">Заполнить за минуту</Link></>
+              )}
+            </p>
+          )}
+
+          {mode === "all" && !listLoading && (
+            <div className="flex flex-wrap items-center gap-x-3 gap-y-2" aria-live="polite">
+              <p className="text-lg font-semibold text-neutral-100 tabular-nums">{total.toLocaleString("ru-RU")} {plural(total, VACANCY_FORMS)}</p>
+              {activeFilters.map(f => (
+                <button key={f.key} onClick={f.clear} aria-label={`${f.label}: снять условие`}
+                  className="lg inline-flex items-center gap-1.5 h-8 px-3 rounded-full text-xs text-neutral-200 transition-colors">
+                  {f.label} <X className="w-3.5 h-3.5" aria-hidden="true" />
+                </button>
+              ))}
+              {activeFilters.length > 1 && (
+                <button onClick={() => activeFilters.forEach(f => f.clear())} className="text-xs text-neutral-400 hover:text-white transition-colors">Сбросить всё</button>
               )}
             </div>
           )}
@@ -781,6 +803,11 @@ export default function Feed({ initialRows, initialTotal, hero }: { initialRows:
                 {savedMode ? "Нажмите «В избранное» на карточке, чтобы вернуться к вакансии позже"
                   : forYou ? "Свежих вакансий пока нет — загляните позже" : "Попробуйте ослабить фильтры"}
               </p>
+              {mode === "all" && activeFilters.length > 0 && (
+                <button onClick={() => activeFilters.forEach(f => f.clear())} className="lg mt-5 inline-flex items-center h-11 px-5 rounded-full text-sm text-neutral-100 transition-colors">
+                  Сбросить фильтры
+                </button>
+              )}
             </div>
           ) : (
             <div className="flex flex-col gap-4">
@@ -827,6 +854,8 @@ export default function Feed({ initialRows, initialTotal, hero }: { initialRows:
           )}
         </section>
       </main>
+
+      {!search.trim() && after}
 
       {applyVacancy && <SmartApply vacancy={applyVacancy} user={user} onClose={() => setApplyVacancy(null)} />}
     </div>

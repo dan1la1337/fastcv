@@ -24,7 +24,7 @@
   /* Мятный — главное действие и выбранное состояние */
   --accent: #5eead4;
   --accent-hover: #99f6e4;
-  --accent-glow: 0 8px 28px rgba(94, 234, 212, 0.27);
+  --accent-glow: 0 6px 20px rgba(94, 234, 212, 0.16);
   --focus: #ffffff;
 
   --glass-lift: inset 0 1px 0 rgba(255, 255, 255, 0.14), 0 30px 80px rgba(0, 0, 0, 0.55);
@@ -71,27 +71,30 @@
   --radius-2xl: 16px;
   --radius-3xl: 24px;
 
+  /* Ширина контента с отступами px-4: края совпадают с верхней панелью (max-w-6xl) */
+  --container-page: 74rem;
+
   /* Четыре уровня текста. Имена Tailwind сводятся к ним:
      метаданные — xs; основной текст — sm и base; заголовок карточки — lg и xl; заголовок страницы — 2xl и крупнее */
-  --text-xs: 0.8667rem;
+  --text-xs: 0.9333rem;
   --text-xs--line-height: 1.4;
-  --text-sm: 1rem;
+  --text-sm: 1.0667rem;
   --text-sm--line-height: 1.5;
-  --text-base: 1rem;
+  --text-base: 1.0667rem;
   --text-base--line-height: 1.55;
-  --text-lg: 1.2rem;
+  --text-lg: 1.3333rem;
   --text-lg--line-height: 1.3;
-  --text-xl: 1.2rem;
+  --text-xl: 1.3333rem;
   --text-xl--line-height: 1.3;
-  --text-2xl: clamp(1.75rem, 1.25rem + 1.5vw, 2.6rem);
+  --text-2xl: clamp(1.75rem, 1.25rem + 1.7vw, 2.8rem);
   --text-2xl--line-height: 1.15;
-  --text-3xl: clamp(1.75rem, 1.25rem + 1.5vw, 2.6rem);
+  --text-3xl: clamp(1.75rem, 1.25rem + 1.7vw, 2.8rem);
   --text-3xl--line-height: 1.15;
-  --text-4xl: clamp(1.75rem, 1.25rem + 1.5vw, 2.6rem);
+  --text-4xl: clamp(1.75rem, 1.25rem + 1.7vw, 2.8rem);
   --text-4xl--line-height: 1.15;
-  --text-5xl: clamp(1.75rem, 1.25rem + 1.5vw, 2.6rem);
+  --text-5xl: clamp(1.75rem, 1.25rem + 1.7vw, 2.8rem);
   --text-5xl--line-height: 1.15;
-  --text-6xl: clamp(1.75rem, 1.25rem + 1.5vw, 2.6rem);
+  --text-6xl: clamp(1.75rem, 1.25rem + 1.7vw, 2.8rem);
   --text-6xl--line-height: 1.15;
 
   --color-neutral-50: #fafafa;
@@ -116,7 +119,7 @@
 }
 
 /* Секции на ступень компактнее: всё в rem (отступы, текст, скругления) — уменьшаем базу 16 → 15px */
-html { font-size: 93.75%; }
+html { font-size: 93.75%; scroll-padding-top: 6rem; scroll-padding-bottom: 7rem; }
 
 body {
   background: var(--void);
@@ -161,7 +164,7 @@ body {
       var(--og-grain) 0 0 / 256px 256px repeat,
       linear-gradient(180deg, rgba(255, 255, 255, 0.07), rgba(255, 255, 255, 0) 38%),
       radial-gradient(120% 80% at 0% 0%, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0) 60%);
-    opacity: 0.12;
+    opacity: 0.07;
     mix-blend-mode: screen;
   }
   .glass::after, .neu::after, .neu-sub::after {
@@ -171,7 +174,7 @@ body {
     border-radius: inherit;
     pointer-events: none;
     padding: 1px;
-    background: linear-gradient(160deg, rgba(255, 255, 255, 0.42), rgba(255, 255, 255, 0.06) 30%, rgba(255, 255, 255, 0.02) 65%, rgba(255, 255, 255, 0.22));
+    background: linear-gradient(160deg, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.05) 30%, rgba(255, 255, 255, 0.02) 65%, rgba(255, 255, 255, 0.1));
     -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
     -webkit-mask-composite: xor;
     mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
@@ -221,14 +224,14 @@ body {
     position: relative;
     color: var(--ink);
     font-weight: 500;
-    background: linear-gradient(180deg, rgba(255, 255, 255, 0.14), rgba(255, 255, 255, 0.04));
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.09), rgba(255, 255, 255, 0.05));
     border: 1px solid var(--glass-rim);
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1);
     -webkit-backdrop-filter: blur(var(--blur-glass));
     backdrop-filter: blur(var(--blur-glass));
     transition: background 160ms ease, border-color 160ms ease, transform 160ms ease;
   }
-  .lg:hover:not(:disabled) { background: rgba(255, 255, 255, 0.14); }
+  .lg:hover:not(:disabled) { background: rgba(255, 255, 255, 0.13); }
   .lg:active:not(:disabled) { background: rgba(255, 255, 255, 0.08); }
   .lg:disabled, .lg[aria-disabled="true"] { opacity: 0.45; cursor: not-allowed; }
 
@@ -247,12 +250,13 @@ body {
     color: var(--accent-hover);
     background: rgba(94, 234, 212, 0.14);
     border-color: rgba(94, 234, 212, 0.6);
-    box-shadow: none;
+    box-shadow: inset 0 0 0 1px rgba(94, 234, 212, 0.6);
+    font-weight: 600;
   }
   .lg-on:hover:not(:disabled) { background: rgba(94, 234, 212, 0.2); }
 
   /* Второстепенные кнопки со смыслом: мятный оттенок — ИИ-действия, янтарный — внимание, красный — удаление */
-  .lg-tint { color: #99f6e4; }
+  .lg-tint { color: #99f6e4; border-color: rgba(94, 234, 212, 0.55); }
   .lg-warn { color: #fcd34d; }
   .lg-danger { color: #fca5a5; }
 
@@ -294,6 +298,13 @@ body {
 
   input[type="range"] { accent-color: var(--accent); }
 
+  /* Ползунок: видимая дорожка и мятный бегунок вместо тонкой тёмной полосы */
+  input[type="range"] { height: 1.5rem; background: transparent; }
+  input[type="range"]::-webkit-slider-runnable-track { height: 4px; border-radius: 9999px; background: var(--field-edge); }
+  input[type="range"]::-moz-range-track { height: 4px; border-radius: 9999px; background: var(--field-edge); }
+  input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; width: 1.25rem; height: 1.25rem; margin-top: calc(2px - 0.625rem); border-radius: 9999px; background: var(--accent); border: 2px solid var(--void); }
+  input[type="range"]::-moz-range-thumb { width: 1.25rem; height: 1.25rem; border-radius: 9999px; background: var(--accent); border: 2px solid var(--void); }
+
   /* Выпадающие списки — поля graphite со своей стрелкой */
   select.neu-in {
     appearance: none;
@@ -312,11 +323,22 @@ body {
 }
 
 /* Вне слоёв, чтобы перебить разметку: метка — radius-xs, поле — radius-md */
-.neu-chip { border-radius: var(--radius-xs); }
+.neu-chip { border-radius: var(--radius-xs); font-size: 0.8rem; }
 .neu-in { border-radius: var(--radius-md); }
 
 /* Типографика: заголовки — 600 */
 .font-display { font-weight: 600; letter-spacing: -0.015em; }
+
+/* Подписи капсом меньше метаданных: заглавные буквы и так крупнее строчных */
+.uppercase { font-size: 0.8rem; }
+
+/* Палец промахивается мимо мелких кнопок: на сенсорных экранах цель не меньше 44px */
+@media (pointer: coarse) {
+  .lg { min-height: 44px; min-width: 44px; }
+}
+
+/* Полоса под верхней панелью: контент уходит под неё, а не просвечивает вокруг стекла */
+.top-strip { background: linear-gradient(var(--void) 85%, transparent); }
 
 /* Иконки lucide: одна толщина линии на всём сайте */
 .lucide { stroke-width: 1.75; }

@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import AppBar from "@/components/AppBar";
 import { useRouter } from "next/navigation";
 import { ArrowLeft, BarChart3, Sparkles, CalendarCheck, ExternalLink, Loader2, MessageCircle, MessageSquare } from "lucide-react";
 import { supabase, getUserRole } from "@/lib/supabase";
@@ -33,8 +34,8 @@ interface Application {
 }
 
 const STATUS: Record<string, { text: string; style: string }> = {
-  new: { text: "Ждёт ответа работодателя", style: "bg-amber-500/10 text-amber-400 border-amber-500/20" },
-  viewed: { text: "Просмотрен", style: "bg-teal-300/10 text-teal-300 border-teal-300/20" },
+  new: { text: "Ждёт ответа работодателя", style: "bg-white/[0.08] text-neutral-200 border-white/15" },
+  viewed: { text: "Просмотрен", style: "bg-white/[0.08] text-neutral-200 border-white/15" },
   interview_scheduled: { text: "Приглашение на собеседование", style: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20" },
   rejected: { text: "Отказ", style: "neu-chip text-neutral-400 border-white/15" },
 };
@@ -118,14 +119,16 @@ export default function CandidateApplications() {
   }
 
   return (
+    <>
+    <AppBar role="candidate" current="/applications" />
     <div className="min-h-screen text-neutral-100 p-4 sm:p-8">
       <div className="max-w-3xl mx-auto space-y-6">
         <div className="flex items-center justify-between gap-3 border-b border-white/10 pb-4">
           <div className="flex items-center gap-3">
-            <Link href="/" aria-label="К вакансиям" className="lg p-2 rounded-xl transition-colors">
+            <Link href="/" aria-label="К вакансиям" className="lg sm:hidden inline-flex items-center justify-center w-10 h-10 rounded-full transition-colors">
               <ArrowLeft className="w-4 h-4" />
             </Link>
-            <h1 className="font-display text-xl font-bold">Мои отклики</h1>
+            <h1 className="font-display text-2xl font-bold">Мои отклики</h1>
           </div>
           <span className="text-xs text-neutral-400 neu-chip px-3 py-1.5 rounded-full whitespace-nowrap">
             {applications.length} {plural(applications.length, ["отклик", "отклика", "откликов"])}
@@ -267,5 +270,6 @@ export default function CandidateApplications() {
         )}
       </div>
     </div>
+    </>
   );
 }

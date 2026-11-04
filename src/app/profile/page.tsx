@@ -14,6 +14,7 @@ import { AREAS, DIRECTIONS, WORK_FORMATS, levelApplies, parseExperience, type Le
 import LevelPicker from "@/components/LevelPicker";
 import ExperienceInput from "@/components/ExperienceInput";
 import Logo from "@/components/Logo";
+import AppBar from "@/components/AppBar";
 import { toast } from "@/components/Toaster";
 import { saveErrorText } from "@/lib/auth-errors";
 
@@ -264,10 +265,12 @@ export default function ProfilePage() {
   const isCandidate = role === "candidate";
 
   return (
+    <>
+    <AppBar role={isCandidate ? "candidate" : "employer"} current="/profile" />
     <div className="min-h-screen text-neutral-100 font-sans p-4 sm:p-8">
-      <div className="max-w-2xl mx-auto space-y-8">
-        <div className="flex items-center justify-between">
-          <Logo />
+      <div className="max-w-3xl mx-auto space-y-8">
+        <div className="flex items-center justify-between sm:justify-end">
+          <Logo className="sm:hidden" />
           <button onClick={handleLogout} className="text-sm text-neutral-400 hover:text-white flex items-center gap-2 transition-colors">
             <LogOut className="w-4 h-4" /> Выйти
           </button>
@@ -323,10 +326,10 @@ export default function ProfilePage() {
               </div>
             ) : (
               <button onClick={() => fileInput.current?.click()} disabled={resumeBusy}
-                className="lg lg-tint w-full flex items-center justify-center gap-2 rounded-xl py-6 text-sm text-neutral-300 transition-colors disabled:opacity-50">
+                className="lg lg-accent w-full flex items-center justify-center gap-2 rounded-full py-3 text-sm font-semibold transition-colors disabled:opacity-50">
                 {resumeBusy || autofilling
                   ? <><Loader2 className="w-5 h-5 animate-spin" /> {autofilling ? "ИИ читает резюме…" : "Загружаем…"}</>
-                  : <><Upload className="w-4 h-4" /> Загрузить резюме (PDF) и заполнить профиль</>}
+                  : <><Upload className="w-4 h-4" /> Загрузить резюме (PDF)</>}
               </button>
             )}
 
@@ -464,5 +467,6 @@ export default function ProfilePage() {
         {user && <DeleteAccount userId={user.id} />}
       </div>
     </div>
+    </>
   );
 }

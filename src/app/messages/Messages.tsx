@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
+import AppBar from "@/components/AppBar";
 import { ArrowLeft, Loader2, MessagesSquare } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import type { Conversation } from "@/lib/chat";
@@ -43,14 +44,17 @@ export default function Messages({ initial }: { initial: string | null }) {
   const back = role === "employer" ? { href: "/employer", label: "Кабинет" } : { href: "/applications", label: "Мои отклики" };
 
   return (
+    <>
+    <AppBar role={role === "employer" ? "employer" : "candidate"} current="/messages" />
     <div className="min-h-screen text-neutral-100 p-3 sm:p-6">
       <div className="max-w-6xl mx-auto space-y-4">
-        <div className="flex items-center gap-3">
+        {/* На телефоне в открытом диалоге своя кнопка «назад»: вторая над ней не нужна */}
+        <div className={`${current ? "hidden md:flex" : "flex"} items-center gap-3`}>
           <Link href={back.href} aria-label={back.label}
-            className="lg p-2 rounded-xl transition-colors">
+            className="lg sm:hidden inline-flex items-center justify-center w-10 h-10 rounded-full transition-colors">
             <ArrowLeft className="w-4 h-4" />
           </Link>
-          <h1 className="font-display text-xl font-bold">Сообщения</h1>
+          <h1 className="font-display text-2xl font-bold">Сообщения</h1>
         </div>
 
         {list === null ? (
@@ -69,7 +73,7 @@ export default function Messages({ initial }: { initial: string | null }) {
             </Link>
           </div>
         ) : (
-          <div className="glass rounded-3xl overflow-hidden grid md:grid-cols-[340px_1fr] h-[calc(100dvh-7.5rem)] sm:h-[calc(100dvh-9rem)] min-h-[420px]">
+          <div className="glass rounded-3xl overflow-hidden grid md:grid-cols-[340px_1fr] h-[calc(100dvh-7.5rem)] sm:h-[calc(100dvh-14rem)] min-h-[420px]">
             <div className={`${selected ? "hidden md:block" : "block"} border-r border-white/10 overflow-y-auto`}>
               <ConversationList items={list} selected={selected} onSelect={open} />
             </div>
@@ -90,5 +94,6 @@ export default function Messages({ initial }: { initial: string | null }) {
         )}
       </div>
     </div>
+    </>
   );
 }

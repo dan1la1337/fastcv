@@ -49,7 +49,7 @@ export default function MobileNav() {
   return (
     <>
       <div className="h-24 sm:hidden" aria-hidden="true" />
-      <nav aria-label="Разделы" className="nav-dock sm:hidden fixed inset-x-3 bottom-3 z-40 rounded-full p-1.5">
+      <nav aria-label="Разделы" className="nav-dock sm:hidden fixed inset-x-3 bottom-3 z-40 rounded-3xl p-1.5">
         <ul className={`grid gap-1 ${items.length === 5 ? "grid-cols-5" : "grid-cols-4"}`}>
           {items.map(item => {
             const active = item.active(path, tab);
@@ -58,7 +58,7 @@ export default function MobileNav() {
               <li key={item.href}>
                 {/* Обычная ссылка, а не Link: лента читает ?tab только при загрузке */}
                 <a href={item.href} aria-current={active ? "page" : undefined}
-                  className={`nav-dock-item flex flex-col items-center gap-0.5 py-1.5 rounded-full text-xs leading-tight ${active ? "is-active" : ""}`}>
+                  className={`nav-dock-item flex flex-col items-center justify-center gap-0.5 min-h-12 py-1.5 rounded-2xl text-[0.8667rem] leading-4 whitespace-nowrap ${active ? "is-active" : ""}`}>
                   <span className="relative">
                     <Icon className="w-5 h-5" aria-hidden="true" />
                     {item === MESSAGES && <UnreadDot count={unread} label="чатов с новыми сообщениями" className="absolute -top-1.5 -right-3" />}

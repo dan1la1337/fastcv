@@ -78,7 +78,7 @@ test("карточка ведёт на страницу вакансии", async
 
 test("Smart Apply без входа предлагает войти", async ({ page }) => {
   await page.goto("/");
-  await page.getByRole("button", { name: /Smart Apply/ }).first().click();
+  await page.getByRole("button", { name: /Откликнуться с ИИ/ }).first().click();
   await expect(page.getByRole("link", { name: "Войдите, чтобы откликнуться" })).toBeVisible();
 });
 

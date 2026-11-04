@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ArrowLeft } from "lucide-react";
+import PageBar from "@/components/PageBar";
 import { supabase } from "@/lib/supabase";
 import InterviewPractice from "./InterviewPractice";
 
@@ -19,11 +18,10 @@ export default async function PracticePage({ params }: Props) {
   if (!vacancy) notFound();
 
   return (
-    <main className="min-h-screen text-neutral-100 px-4 py-8">
+    <>
+      <PageBar href={`/vacancy/${vacancy.id}`} label="К вакансии" />
+      <main className="min-h-screen text-neutral-100 px-4 py-8">
       <div className="max-w-3xl mx-auto space-y-6">
-        <Link href={`/vacancy/${vacancy.id}`} className="inline-flex items-center gap-2 text-sm text-neutral-400 hover:text-white">
-          <ArrowLeft className="w-4 h-4" /> К вакансии
-        </Link>
         <header className="space-y-1">
           <p className="text-xs uppercase tracking-wider text-teal-300 font-semibold">Тренажёр собеседования</p>
           <h1 className="font-display text-2xl sm:text-3xl font-bold">{vacancy.title}</h1>
@@ -32,5 +30,6 @@ export default async function PracticePage({ params }: Props) {
         <InterviewPractice vacancyId={vacancy.id} title={vacancy.title} />
       </div>
     </main>
+      </>
   );
 }

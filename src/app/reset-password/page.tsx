@@ -1,5 +1,6 @@
 "use client";
 
+import FormError from "@/components/FormError";
 import Logo from "@/components/Logo";
 import { useState } from "react";
 import Link from "next/link";
@@ -57,7 +58,7 @@ export default function ResetPasswordPage() {
                   placeholder="name@example.com"
                   className="neu-in w-full px-4 py-3 rounded-2xl text-sm text-neutral-100 transition-colors" />
               </div>
-              {error && <p role="alert" className="text-sm text-red-400 bg-red-950/30 border border-red-500/20 rounded-xl px-4 py-3">{error}</p>}
+              {error && <FormError>{error}</FormError>}
               <button type="submit" disabled={loading}
                 className="lg lg-accent w-full flex items-center justify-center gap-2 py-3 rounded-full text-sm font-semibold transition-colors disabled:opacity-50">
                 {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : "Отправить ссылку"}

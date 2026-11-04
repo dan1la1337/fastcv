@@ -36,7 +36,7 @@ export default function BlitzAnswers({ applicationId, answers, summary }: {
   }
 
   return (
-    <div className="neu-sub rounded-2xl p-4 space-y-3 text-sm">
+    <div className="border-t border-white/10 pt-3 space-y-3 text-sm">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <p className="text-xs text-neutral-500">Ответы на ваши вопросы</p>
         {!text && (

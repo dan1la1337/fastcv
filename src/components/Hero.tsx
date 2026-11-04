@@ -11,25 +11,25 @@ import LandingSections from "@/components/LandingSections";
 export default function Hero({ stats }: { stats: LiveStats | null }) {
   return (
     <div className="guest-only">
-    <section className="max-w-6xl mx-auto px-4 pt-10 sm:pt-16 pb-4 space-y-12">
+    <section className="max-w-page mx-auto px-4 pt-10 sm:pt-16 pb-4 space-y-12">
       <div className="flex flex-wrap items-center gap-x-16 gap-y-10">
         <div className="flex-[1_1_480px] min-w-0 space-y-6">
           <h1 className="font-display text-4xl sm:text-5xl font-bold leading-[1.1] tracking-tight text-neutral-300">
             Работа, которая подходит вам на <span className="text-teal-300">92%</span>
           </h1>
-          <p className="text-lg leading-relaxed text-neutral-400 max-w-xl">
-            Загрузите резюме — ИИ прочитает его, пройдёт по всем вакансиям из Telegram, сайтов компаний,
-            SuperJob и «Работы России» и объяснит, почему каждая вам подходит и чего не хватает.
+          <p className="text-base sm:text-lg leading-relaxed text-neutral-300 max-w-xl">
+            Загрузите резюме — ИИ сравнит его со всеми вакансиями и объяснит, почему каждая подходит и чего не хватает.
           </p>
           <div className="flex flex-wrap gap-3">
             <Link href="/register/form?role=candidate"
-              className="lg lg-accent rounded-full px-6 py-3.5 font-semibold transition-colors">
+              className="lg lg-accent w-full sm:w-auto text-center rounded-full px-6 py-3.5 font-semibold transition-colors">
               Загрузить резюме
             </Link>
-            <a href="#feed" className="lg rounded-full px-6 py-3.5 text-neutral-100 transition-colors">
+            <a href="#feed" className="lg w-full sm:w-auto text-center rounded-full px-6 py-3.5 text-neutral-100 transition-colors">
               Смотреть вакансии
             </a>
           </div>
+          <p className="text-xs text-neutral-500">Сначала короткая регистрация, затем загрузка PDF</p>
         </div>
 
         <figure className="neu-sub flex-[0_1_460px] min-w-0 m-0 rounded-3xl p-6 sm:p-7 space-y-5">

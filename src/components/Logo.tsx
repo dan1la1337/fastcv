@@ -1,6 +1,6 @@
 import Link from "next/link";
 
-/** Логотип Obsidian Glass: надпись FastCV стилем title (Poppins 600, ink), ведёт на главную. */
+/** Логотип Obsidian Glass: надпись FastCV стилем заголовка (600, ink), ведёт на главную. */
 export default function Logo({ className = "" }: { className?: string }) {
   return (
     <Link href="/" aria-label="FastCV — на главную"
