@@ -13,6 +13,7 @@ import { fetchMatches, fetchRecommended, type Match } from "@/lib/matching";
 import type { Tables } from "@/lib/database.types";
 import type { User } from "@supabase/supabase-js";
 import Link from "next/link";
+import UserMenu from "@/components/UserMenu";
 import Logo from "@/components/Logo";
 import MatchRing from "@/components/MatchRing";
 import dynamic from "next/dynamic";
@@ -563,17 +564,11 @@ export default function Feed({ initialRows, initialTotal, hero, after }: { initi
                   className="lg relative px-3 py-2 rounded-full text-sm text-neutral-300 hover:text-white transition-colors hidden sm:inline-flex items-center gap-1.5">
                   Сообщения <UnreadDot count={unread} label="чатов с новыми сообщениями" />
                 </Link>
-                <Link
-                  href="/profile"
-                  className="lg w-10 h-10 flex items-center justify-center rounded-full text-neutral-100 font-semibold cursor-pointer transition-colors relative z-50"
-                  title="Перейти в личный кабинет"
-                >
-                  {user.email?.charAt(0).toUpperCase()}
-                </Link>
+                <UserMenu role={isEmployer ? "employer" : "candidate"} email={user.email} />
               </div>
             ) : (
               <Link 
-                href="/register"
+                href="/login"
                 className="lg px-4 py-2 text-neutral-100 rounded-full text-sm font-medium transition-colors relative z-50 whitespace-nowrap"
               >
                 Войти<span className="hidden sm:inline"> / Регистрация</span>

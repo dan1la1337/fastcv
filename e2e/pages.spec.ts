@@ -21,6 +21,14 @@ for (const path of ["/profile", "/applications", "/employer", "/welcome", "/admi
   });
 }
 
+test("кнопка входа в шапке ведёт на вход, а оттуда можно перейти к регистрации", async ({ page }) => {
+  await page.goto("/");
+  await page.getByRole("banner").getByRole("link", { name: /^Войти/ }).click();
+  await expect(page).toHaveURL(/\/login$/);
+  await page.getByRole("link", { name: "Нет аккаунта? Создать" }).click();
+  await expect(page).toHaveURL(/\/register$/);
+});
+
 test("вход с неверным паролем показывает ошибку по-русски", async ({ page }) => {
   await page.goto("/login");
   await page.locator('input[type="email"]').fill("nobody@example.com");
