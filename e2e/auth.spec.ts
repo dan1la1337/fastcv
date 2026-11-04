@@ -54,13 +54,13 @@ test.describe("кандидат", () => {
     await expect(page).toHaveURL(/\/login/);
   });
 
-  test("шапка кабинета и ленты: логотип и меню, разделы только в меню", async ({ page }, info) => {
+  test("в шапке кабинета есть путь в ленту, в самой ленте его нет, разделы только в меню", async ({ page }, info) => {
     test.skip(info.project.name !== "desktop", "верхняя панель только на десктопе");
     await logIn(page, candidate, "/profile");
     const bar = page.getByRole("banner");
     await expect(bar.getByRole("button", { name: /^Меню профиля/ })).toBeVisible();
-    await expect(bar.getByRole("link")).toHaveCount(1);
-    await bar.getByRole("link", { name: "FastCV — на главную" }).click();
+    await expect(bar.getByRole("link")).toHaveCount(2);
+    await bar.getByRole("link", { name: "К ленте" }).click();
     await expect(page).toHaveURL(/\/$/);
     await expect(bar.getByRole("button", { name: /^Меню профиля/ })).toBeVisible();
     await expect(bar.getByRole("link")).toHaveCount(1);
