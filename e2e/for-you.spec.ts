@@ -14,7 +14,7 @@ test("подборка «Для вас» открывается по умолч�
 
   const tab = page.getByRole("tab", { name: "Для вас" });
   await expect(tab).toHaveAttribute("aria-selected", "true", { timeout: 15_000 });
-  await expect(page.getByText("Вакансии отсортированы по совпадению")).toBeVisible();
+  await expect(page.getByText("Сначала — самые подходящие вашему профилю")).toBeVisible();
   await expect(page.locator('a[href^="/vacancy/"]').first()).toBeVisible({ timeout: 20_000 });
   await expect(page.getByText("Не удалось собрать подборку")).toHaveCount(0);
 
