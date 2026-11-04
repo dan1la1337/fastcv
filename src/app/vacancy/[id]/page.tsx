@@ -139,15 +139,15 @@ export default async function VacancyPage({ params }: Props) {
           <div className="flex-[999_1_560px] min-w-0 space-y-4">
             <article className="glass rounded-3xl p-6 sm:p-8 space-y-5">
               <div className="flex flex-wrap gap-2 text-xs">
-                <span className={`px-2 py-1 text-[11px] ${vacancy.source_type === "internal" ? "neu-chip" : "neu-chip"}`}>
+                <span className={`px-2 py-1 text-xs ${vacancy.source_type === "internal" ? "neu-chip" : "neu-chip"}`}>
                   {sourceOf(vacancy).badge}
                 </span>
-                <span className="neu-chip px-2 py-1 text-[11px] inline-flex items-center gap-1.5">
+                <span className="neu-chip px-2 py-1 text-xs inline-flex items-center gap-1.5">
                   <Calendar className="w-3.5 h-3.5" /> Впервые — {posted}
                   {channels > 1 && <> · в {channels} {plural(channels, ["канале", "каналах", "каналах"])}</>}
                 </span>
               </div>
-              <h1 className="font-display text-2xl sm:text-[32px] leading-tight font-bold text-white">{vacancy.title}</h1>
+              <h1 className="font-display text-2xl sm:text-3xl leading-tight font-bold text-white">{vacancy.title}</h1>
               <CompanyLine vacancy={vacancy} className="text-base text-neutral-300" />
 
               {tiles.length > 0 && (

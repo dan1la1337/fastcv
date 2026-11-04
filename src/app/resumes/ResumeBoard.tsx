@@ -32,7 +32,7 @@ const PAGE = 20;
 const EXPERIENCE = [["", "Любой"], ["1", "от 1 года"], ["3", "от 3 лет"], ["5", "от 5 лет"]] as const;
 const SORTS = [["fresh", "Сначала свежие"], ["match", "По совпадению с вакансией"], ["experience", "По опыту"], ["salary", "По зарплате ↑"]] as const;
 const chip = (on: boolean) =>
-  `px-3 py-1.5 rounded-full text-xs transition-colors ${on ? "lg lg-accent" : "lg text-neutral-300 hover:text-neutral-100"}`;
+  `px-3 py-1.5 rounded-full text-xs transition-colors ${on ? "lg lg-on" : "lg text-neutral-300 hover:text-neutral-100"}`;
 const field = "w-full px-4 py-2.5 neu-in rounded-2xl text-sm text-neutral-100";
 const label = "block text-xs font-bold text-neutral-500 uppercase tracking-wider mb-2";
 
@@ -154,7 +154,7 @@ export default function ResumeBoard() {
           <div role="tablist" aria-label="Какие резюме" className="neu-in ml-auto inline-flex gap-1 p-1 rounded-full">
             {([[false, "Все"], [true, "Сохранённые"]] as const).map(([saved, text]) => (
               <button key={text} role="tab" aria-selected={filters.onlySaved === saved} onClick={() => set({ onlySaved: saved })}
-                className={`lg px-4 py-1.5 rounded-full text-sm ${filters.onlySaved === saved ? "lg lg-accent" : "text-neutral-400 hover:text-white"}`}>
+                className={`lg px-4 py-1.5 rounded-full text-sm ${filters.onlySaved === saved ? "lg lg-on" : "text-neutral-400 hover:text-white"}`}>
                 {text}
               </button>
             ))}
@@ -325,7 +325,7 @@ export default function ResumeBoard() {
                           <div className="flex flex-wrap gap-1.5">
                             {skills.slice(0, 16).map(s => {
                               const hit = searchWords.some(w => s.toLowerCase().includes(w));
-                              return <span key={s} className={`neu-chip text-[11px] px-2 py-1 ${hit ? "!text-teal-200 !border-teal-300/40" : "!text-neutral-400"}`}>{s}</span>;
+                              return <span key={s} className={`neu-chip text-xs px-2 py-1 ${hit ? "!text-teal-200 !border-teal-300/40" : "!text-neutral-400"}`}>{s}</span>;
                             })}
                             {skills.length > 16 && <span className="text-xs text-neutral-500 px-1 py-1">+{skills.length - 16}</span>}
                           </div>

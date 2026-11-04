@@ -36,7 +36,7 @@ export function UnreadDot({ count, label = "непрочитанных", classNa
   if (!count) return null;
   return (
     <span aria-label={`${count} ${label}`}
-      className={`inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full bg-teal-300 text-neutral-950 text-[11px] font-semibold leading-none ${className}`}>
+      className={`inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full bg-teal-300 text-neutral-950 text-xs font-semibold leading-none ${className}`}>
       {count > 99 ? "99+" : count}
     </span>
   );

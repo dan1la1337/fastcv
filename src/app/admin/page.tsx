@@ -101,10 +101,10 @@ export default async function AdminPage() {
               return (
                 <div key={d.day} className="group relative flex-1 h-full flex flex-col justify-end">
                   {i === peak && total > 0 && (
-                    <span className="absolute -top-0.5 left-1/2 -translate-x-1/2 text-[11px] text-neutral-300 tabular-nums">{total}</span>
+                    <span className="absolute -top-0.5 left-1/2 -translate-x-1/2 text-xs text-neutral-300 tabular-nums">{total}</span>
                   )}
                   <div
-                    className="w-full rounded-t-[4px] bg-teal-300 group-hover:bg-teal-200 transition-colors"
+                    className="w-full rounded-t-xs bg-teal-300 group-hover:bg-teal-200 transition-colors"
                     style={{ height: `${Math.max(total ? 2 : 0, (total / maxDay) * 85)}%` }}
                     title={`${date}: ${total} (из каналов ${d.external}, от работодателей ${d.internal})`}
                   />
@@ -112,7 +112,7 @@ export default async function AdminPage() {
               );
             })}
           </div>
-          <div className="flex justify-between text-[11px] text-neutral-500">
+          <div className="flex justify-between text-xs text-neutral-500">
             <span>{days[0] && new Date(days[0].day).toLocaleDateString("ru-RU", { day: "numeric", month: "short" })}</span>
             <span>сегодня</span>
           </div>
@@ -138,7 +138,7 @@ export default async function AdminPage() {
               {directions.map(d => (
                 <li key={d.direction} className="grid grid-cols-[9rem_1fr_3rem] items-center gap-3 text-xs">
                   <span className="text-neutral-300 truncate">{directionLabel(d.direction)}</span>
-                  <span className="h-2.5 rounded-r-[4px] bg-teal-300" style={{ width: `${(d.count / maxDirection) * 100}%` }} />
+                  <span className="h-2.5 rounded-r-xs bg-teal-300" style={{ width: `${(d.count / maxDirection) * 100}%` }} />
                   <span className="text-neutral-400 tabular-nums text-right">{d.count}</span>
                 </li>
               ))}

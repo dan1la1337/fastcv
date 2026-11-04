@@ -73,8 +73,8 @@ export default function SearchSelect({
 
   return (
     <div ref={root} className="relative">
-      <button type="button" onClick={toggle} aria-haspopup="listbox" aria-expanded={open} aria-label={label}
-        className="lg w-full flex items-center justify-between gap-2 pl-3 pr-14 py-2.5 rounded-xl text-sm text-left focus:outline-none transition-colors">
+      <button type="button" onClick={toggle} aria-haspopup="listbox" aria-expanded={open} aria-label={`${label}: ${selected?.label ?? emptyLabel}`}
+        className="neu-in w-full flex items-center justify-between gap-2 pl-3 pr-14 py-2.5 text-sm text-left">
         <span className={selected ? "text-neutral-100" : "text-neutral-500"}>{selected?.label ?? emptyLabel}</span>
       </button>
       <span className="absolute right-2 top-0 h-[42px] flex items-center gap-1 pointer-events-none">
@@ -102,7 +102,7 @@ export default function SearchSelect({
             const header = o.group && o.group !== filtered[i - 1]?.group ? o.group : null;
             return (
               <li key={o.value}>
-                {header && <p className="px-3 pt-2 pb-1 text-[11px] text-neutral-500">{header}</p>}
+                {header && <p className="px-3 pt-2 pb-1 text-xs text-neutral-500">{header}</p>}
                 <button type="button" role="option" aria-selected={o.value === value} tabIndex={-1}
                   onMouseEnter={() => setActive(i)} onClick={() => pick(o.value)}
                   className={`w-full flex items-center justify-between gap-2 px-3 py-1.5 rounded-lg text-sm text-left transition-colors ${

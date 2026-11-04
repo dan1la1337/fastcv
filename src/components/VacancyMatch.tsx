@@ -69,7 +69,7 @@ export default function VacancyMatch({ vacancyId }: { vacancyId: string }) {
         )}
         <div className="flex flex-wrap gap-2 text-sm">
           {match.matched.map(s => (
-            <span key={s} className="neu-chip px-2 py-1 text-[11px] !text-teal-200 !border-teal-300/40">{s} ✓</span>
+            <span key={s} className="neu-chip px-2 py-1 text-xs !text-teal-200 !border-teal-300/40">{s} ✓</span>
           ))}
           {match.related.map(r => (
             <span key={r.skill} title="Засчитано наполовину: у вас есть смежный опыт" className="px-3 py-1.5 rounded-full bg-sky-400/10 text-sky-200">
@@ -78,7 +78,7 @@ export default function VacancyMatch({ vacancyId }: { vacancyId: string }) {
           ))}
           {match.missing.map(s => (
             <button key={s} onClick={() => addSkill(s)} disabled={adding !== null}
-              aria-label={`У меня есть опыт с ${s} — добавить в профиль`}
+              aria-label={`+ ${s} в профиль: у меня есть этот опыт`}
               className="lg lg-warn px-3 py-1.5 rounded-full text-amber-200 disabled:opacity-60 transition-colors">
               {adding === s ? "добавляем…" : `+ ${s} в профиль`}
             </button>

@@ -169,7 +169,7 @@ export default function CandidateApplications() {
                         {status.text}
                       </span>
                       {app.viewed_at && (
-                        <span className="text-[11px] text-neutral-500">
+                        <span className="text-xs text-neutral-500">
                           Открыт работодателем {new Date(app.viewed_at).toLocaleString("ru-RU", { day: "numeric", month: "long", hour: "2-digit", minute: "2-digit" })}
                         </span>
                       )}

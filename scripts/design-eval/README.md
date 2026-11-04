@@ -5,6 +5,7 @@ Harness для совета `codex` и `claude`. Метод взят из pingdo
 ```bash
 npx next build
 node scripts/design-eval/check.mjs                # axe, горизонтальный скролл, ошибки консоли
+node scripts/design-eval/contrast.mjs             # контраст текста по пикселям настоящего фона
 node scripts/design-eval/capture.mjs ../fastcv-ui-climb/captures/round-N
 node scripts/design-eval/pack.mjs N ../fastcv-ui-climb/captures/round-N
 scripts/design-eval/review.sh N both              # или codex; повтор: review.sh N both -2

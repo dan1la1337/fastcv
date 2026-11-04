@@ -68,7 +68,7 @@ export default function LiveCounter({ initial }: { initial: LiveStats }) {
   return (
     <div data-live-stats className="neu-sub rounded-3xl px-6 py-6 sm:px-8 flex flex-wrap items-center gap-x-12 gap-y-6">
       <div className="space-y-1.5">
-        <p className="flex items-center gap-2.5 font-mono text-xs text-teal-300" suppressHydrationWarning>
+        <p className="flex items-center gap-2.5 tabular-nums text-xs text-teal-300" suppressHydrationWarning>
           <span className="relative h-2 w-2" aria-hidden="true">
             <span className="live-ping absolute inset-0 rounded-full bg-teal-300" />
             <span className="absolute inset-0 rounded-full bg-teal-300" />

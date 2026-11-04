@@ -176,7 +176,7 @@ export default function ChatThread({ conversation, userId, onBack, onChanged }: 
           return (
             <Fragment key={m.id}>
               {newDay && (
-                <p className="text-center text-[11px] text-neutral-500 py-2">{dayLabel(m.created_at)}</p>
+                <p className="text-center text-xs text-neutral-500 py-2">{dayLabel(m.created_at)}</p>
               )}
               {m.kind === "application" ? (
                 <div className={`max-w-[92%] sm:max-w-[80%] ${mine ? "ml-auto" : ""} rounded-2xl border border-teal-300/25 bg-teal-300/[0.06] p-4 space-y-3`}>
@@ -226,7 +226,7 @@ export default function ChatThread({ conversation, userId, onBack, onChanged }: 
                   <div className={`max-w-[85%] sm:max-w-[70%] rounded-2xl px-3.5 py-2 text-sm leading-relaxed ${
                     mine ? "bg-teal-300 text-neutral-950 rounded-br-md" : "neu-sub text-neutral-100 rounded-bl-md"}`}>
                     <p className="whitespace-pre-wrap break-words"><Linked text={m.body} /></p>
-                    <p className={`mt-0.5 text-[10px] text-right flex items-center justify-end gap-1 ${mine ? "text-neutral-800" : "text-neutral-500"}`}>
+                    <p className={`mt-0.5 text-xs text-right flex items-center justify-end gap-1 ${mine ? "text-neutral-800" : "text-neutral-500"}`}>
                       {time(m.created_at)}
                       {mine && m.id === lastMine?.id && (Date.parse(m.created_at) <= otherRead
                         ? <CheckCheck className="w-3.5 h-3.5" aria-label="Прочитано" />
@@ -264,7 +264,7 @@ export default function ChatThread({ conversation, userId, onBack, onChanged }: 
           </button>
         </div>
         {text.length > MESSAGE_MAX - 300 && (
-          <p className="text-[11px] text-neutral-500 text-right px-1">{text.length} / {MESSAGE_MAX}</p>
+          <p className="text-xs text-neutral-500 text-right px-1">{text.length} / {MESSAGE_MAX}</p>
         )}
       </form>
     </>

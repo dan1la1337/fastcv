@@ -16,7 +16,7 @@ export default function LevelPicker({ level, source, reason, onChange, labelClas
 }) {
   const chip = (active: boolean) =>
     `text-sm px-3.5 py-1.5 rounded-full transition-colors ${active
-      ? "lg lg-accent"
+      ? "lg lg-on"
       : "lg text-neutral-300 hover:text-neutral-100"}`;
   return (
     <div>

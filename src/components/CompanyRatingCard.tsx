@@ -76,7 +76,7 @@ export default function CompanyRatingCard({ company, rating }: { company: string
                   </span>
                 )}
               </dd>
-              <p className="text-[11px] text-neutral-500 mt-1 leading-snug">{s.hint}</p>
+              <dd className="text-xs text-neutral-500 mt-1 leading-snug">{s.hint}</dd>
             </div>
           ))}
         </dl>
@@ -148,7 +148,7 @@ export default function CompanyRatingCard({ company, rating }: { company: string
         )}
       </div>
 
-      <p className="text-[11px] text-neutral-500 leading-relaxed">
+      <p className="text-xs text-neutral-500 leading-relaxed">
         Как считаем: доля ответов на отклики (30%), скорость ответа (15%), оценки собеседований (20%), отзывы о найме (25%) и
         отсутствие вакансий-призраков (10%). Учитываются только части, по которым достаточно данных; балл не зависит от оплаты.
       </p>
