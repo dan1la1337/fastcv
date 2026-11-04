@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import AppBar from "@/components/AppBar";
 import { useRouter } from "next/navigation";
 import { ArrowLeft, BarChart3, Sparkles, CalendarCheck, ExternalLink, Loader2, MessageCircle, MessageSquare } from "lucide-react";
 import { supabase, getUserRole } from "@/lib/supabase";
@@ -118,11 +119,13 @@ export default function CandidateApplications() {
   }
 
   return (
+    <>
+    <AppBar role="candidate" current="/applications" />
     <div className="min-h-screen text-neutral-100 p-4 sm:p-8">
       <div className="max-w-3xl mx-auto space-y-6">
         <div className="flex items-center justify-between gap-3 border-b border-white/10 pb-4">
           <div className="flex items-center gap-3">
-            <Link href="/" aria-label="К вакансиям" className="lg inline-flex items-center justify-center w-10 h-10 rounded-full transition-colors">
+            <Link href="/" aria-label="К вакансиям" className="lg sm:hidden inline-flex items-center justify-center w-10 h-10 rounded-full transition-colors">
               <ArrowLeft className="w-4 h-4" />
             </Link>
             <h1 className="font-display text-2xl font-bold">Мои отклики</h1>
@@ -267,5 +270,6 @@ export default function CandidateApplications() {
         )}
       </div>
     </div>
+    </>
   );
 }

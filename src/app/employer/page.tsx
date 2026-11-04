@@ -4,8 +4,9 @@ import { useCallback, useEffect, useState } from "react";
 import type { User } from "@supabase/supabase-js";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import AppBar from "@/components/AppBar";
 import {
-  Archive, Briefcase, CheckCircle2, Eye, FileText, Loader2, MessageCircle, Pencil, Plus, RotateCcw, Send, Sparkles, Users, XCircle,
+  Archive, Briefcase, CheckCircle2, Eye, FileText, Loader2, MessageCircle, Pencil, Plus, RotateCcw, Send, Sparkles, XCircle,
   ChevronDown,
 } from "lucide-react";
 import { toMatch, type Match } from "@/lib/matching";
@@ -379,6 +380,8 @@ export default function EmployerDashboard() {
     }`;
 
   return (
+    <>
+    <AppBar role="employer" current="/employer" />
     <div className="min-h-screen text-neutral-100 font-sans p-4 sm:p-8">
       <div className="max-w-6xl mx-auto space-y-6">
         <div className="flex flex-wrap items-center gap-x-6 gap-y-4">
@@ -391,14 +394,6 @@ export default function EmployerDashboard() {
             </p>
           </div>
           <span className="flex-1" />
-          <Link href="/resumes"
-            className="lg hidden sm:inline-flex items-center gap-2 h-11 px-5 rounded-full text-sm text-neutral-200 transition-colors">
-            <Users className="w-4 h-4" /> База резюме
-          </Link>
-          <Link href="/messages"
-            className="lg hidden sm:inline-flex items-center gap-2 h-11 px-5 rounded-full text-sm text-neutral-200 transition-colors">
-            <MessageCircle className="w-4 h-4" /> Сообщения
-          </Link>
           <button
             onClick={() => openForm()}
             className="lg lg-accent inline-flex items-center gap-2 h-11 px-5 rounded-full text-sm font-semibold transition-colors"
@@ -513,7 +508,7 @@ export default function EmployerDashboard() {
                 <label className={labelClass}>Обязанности и требования</label>
                 <textarea required rows={6} placeholder="Опишите стек, проект и задачи кандидата..."
                   value={form.description} onChange={e => setForm({ ...form, description: e.target.value })}
-                  className={`${inputClass} leading-relaxed resize-y`} />
+                  className={`${inputClass} leading-relaxed resize-y max-h-52`} />
               </div>
 
               <div className="flex flex-col sm:flex-row gap-3">
@@ -760,11 +755,10 @@ export default function EmployerDashboard() {
                           })}
                         </div>
                       )}
-                      <textarea value={reply.text} maxLength={2000} rows={7} aria-label="Текст ответа кандидату"
+                      <textarea value={reply.text} maxLength={2000} rows={6} aria-label="Текст ответа кандидату"
                         onChange={e => setReply({ ...reply, text: e.target.value })}
-                        className={`${inputClass} leading-relaxed resize-y`} />
-                      {/* Кнопки у края экрана, над нижней панелью телефона: длинный текст их не прячет */}
-                      <div className="sticky bottom-24 sm:bottom-3 z-10 flex justify-end gap-2">
+                        className={`${inputClass} leading-relaxed resize-y max-h-52`} />
+                      <div className="flex justify-end gap-2">
                         <button onClick={() => setReply(null)} className="lg h-11 px-4 rounded-full text-sm text-neutral-200 transition-colors">Отмена</button>
                         <button onClick={sendReply} disabled={replying}
                           className="lg lg-accent h-11 px-5 rounded-full text-sm font-semibold flex items-center gap-1.5 disabled:opacity-50">
@@ -824,5 +818,6 @@ export default function EmployerDashboard() {
         )}
       </div>
     </div>
+    </>
   );
 }

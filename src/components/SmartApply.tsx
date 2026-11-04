@@ -221,11 +221,11 @@ export default function SmartApply({
           {user && (Object.keys(LETTER_OPTIONS) as (keyof typeof LETTER_OPTIONS)[]).map(key => (
             <div key={key} className="space-y-1.5">
               <p className="text-xs text-neutral-500">{LETTER_LABELS[key]}</p>
-              <div role="group" aria-label={LETTER_LABELS[key]} className="neu-in grid grid-cols-3 gap-1 p-1">
+              <div role="group" aria-label={LETTER_LABELS[key]} className="neu-in flex gap-1 p-1">
                 {LETTER_OPTIONS[key].map(([value, label]) => (
                   <button key={value} type="button" aria-pressed={settings[key] === value}
                     onClick={() => setSettings(prev => ({ ...prev, [key]: value }))}
-                    className={`lg min-w-0 text-xs px-1 py-2 rounded-lg transition-colors ${settings[key] === value
+                    className={`lg flex-auto text-xs whitespace-nowrap px-2 py-2 rounded-lg transition-colors ${settings[key] === value
                       ? "lg lg-on"
                       : "text-neutral-400 hover:text-neutral-200"}`}>
                     {label}
@@ -323,10 +323,9 @@ export default function SmartApply({
             <button
               onClick={() => setCoverLetter("")}
               aria-label="Переписать письмо"
-              title="Переписать"
-              className="lg w-12 h-12 shrink-0 inline-flex items-center justify-center rounded-full text-neutral-300 hover:text-white transition-colors"
+              className="lg h-12 px-4 shrink-0 inline-flex items-center justify-center gap-2 rounded-full text-sm text-neutral-200 hover:text-white transition-colors"
             >
-              <RotateCcw className="w-4 h-4" />
+              <RotateCcw className="w-4 h-4" aria-hidden="true" /> Переписать
             </button>
           </div>
         </div>

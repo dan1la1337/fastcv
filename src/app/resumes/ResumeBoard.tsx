@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
+import AppBar from "@/components/AppBar";
 import { useRouter } from "next/navigation";
 import {
   ArrowLeft, Bookmark, BookmarkCheck, Briefcase, FileText, Loader2, MapPin, MessageCircle, Search,
@@ -141,10 +142,12 @@ export default function ResumeBoard() {
   const searchWords = query.search.toLowerCase().split(/\s+/).filter(w => w.length > 1);
 
   return (
+    <>
+    <AppBar role="employer" current="/resumes" />
     <div className="min-h-screen text-neutral-100 p-4 sm:p-8">
       <div className="max-w-6xl mx-auto space-y-6">
         <div className="flex flex-wrap items-center gap-3">
-          <Link href="/employer" aria-label="В кабинет" className="lg inline-flex items-center justify-center w-10 h-10 rounded-full transition-colors">
+          <Link href="/employer" aria-label="В кабинет" className="lg sm:hidden inline-flex items-center justify-center w-10 h-10 rounded-full transition-colors">
             <ArrowLeft className="w-4 h-4" />
           </Link>
           <h1 className="font-display text-2xl font-bold">База резюме</h1>
@@ -386,6 +389,7 @@ export default function ResumeBoard() {
           onSent={id => { setContact(null); router.push(`/messages?c=${id}`); }} />
       )}
     </div>
+    </>
   );
 }
 

@@ -457,7 +457,7 @@ export default function Feed({ initialRows, initialTotal, hero, after }: { initi
                       aria-label={`+ ${skill} в профиль: у меня есть этот опыт`}
                       className="text-amber-300 underline decoration-dotted underline-offset-2 hover:text-amber-200 disabled:opacity-60"
                     >
-                      {addingSkill === skill ? "добавляем…" : `+ ${skill}`}
+                      {addingSkill === skill ? "добавляем…" : `+ ${skill} в профиль`}
                     </button>
                   </span>
                 ))}
@@ -517,7 +517,7 @@ export default function Feed({ initialRows, initialTotal, hero, after }: { initi
 
   return (
     <div className="min-h-screen text-neutral-100 antialiased font-sans relative">
-      <header className="sticky top-0 z-20 px-3 sm:px-4 pt-3">
+      <header className="top-strip sticky top-0 z-20 px-3 sm:px-4 pt-3 pb-3">
         <div className="glass rounded-3xl max-w-6xl mx-auto pl-4 pr-2.5 py-2.5 flex items-center justify-between gap-3">
           <div className="flex items-center gap-1 sm:gap-3">
             <Logo />
@@ -779,7 +779,7 @@ export default function Feed({ initialRows, initialTotal, hero, after }: { initi
 
           {mode === "all" && !listLoading && (
             <div className="flex flex-wrap items-center gap-x-3 gap-y-2" aria-live="polite">
-              <h2 className="text-lg font-semibold text-neutral-100 tabular-nums">{total.toLocaleString("ru-RU")} {plural(total, VACANCY_FORMS)}</h2>
+              <p className="text-lg font-semibold text-neutral-100 tabular-nums">{total.toLocaleString("ru-RU")} {plural(total, VACANCY_FORMS)}</p>
               {activeFilters.map(f => (
                 <button key={f.key} onClick={f.clear} aria-label={`${f.label}: снять условие`}
                   className="lg inline-flex items-center gap-1.5 h-8 px-3 rounded-full text-xs text-neutral-200 transition-colors">
