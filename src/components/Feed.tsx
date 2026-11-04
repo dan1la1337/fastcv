@@ -351,7 +351,7 @@ export default function Feed({ initialRows, initialTotal, hero, after }: { initi
     // Без заполненного профиля оценка у всех одинаковая — не показываем её
     const match = hasPrefs ? matches[item.id] : undefined;
     return (
-      <div key={item.id} className="neu-sub rounded-3xl p-5 sm:p-6 flex flex-col gap-4 relative overflow-hidden group transition-colors">
+      <div key={item.id} className="neu-sub rounded-3xl p-4 sm:p-6 flex flex-col gap-4 relative overflow-hidden group transition-colors">
 
         {/* Метки над заголовком отдельной строкой: поверх длинного названия они его перекрывали.
             На телефоне совпадение тоже здесь: кольцо сжало бы заголовок */}
@@ -420,7 +420,7 @@ export default function Feed({ initialRows, initialTotal, hero, after }: { initi
             <Sparkles className="w-4 h-4" /> Откликнуться с ИИ
           </button>
         </div>
-        <p className="text-sm text-neutral-400 leading-relaxed line-clamp-3">{item.description}</p>
+        <p className="text-sm text-neutral-400 leading-relaxed line-clamp-2 sm:line-clamp-3">{item.description}</p>
 
         {match?.core && match.core.fit !== "match" && match.core.stack.length > 0 && (
           <p className={`text-xs ${match.core.fit === "foreign" ? "text-amber-300" : "text-neutral-400"}`}>
@@ -461,7 +461,7 @@ export default function Feed({ initialRows, initialTotal, hero, after }: { initi
                     </button>
                   </span>
                 ))}
-                <span className="text-neutral-600"> — нажмите на навык, если он у вас есть</span>
+                <span className="hidden sm:inline text-neutral-600"> — нажмите на навык, если он у вас есть</span>
               </>
             )}
           </p>
@@ -469,7 +469,8 @@ export default function Feed({ initialRows, initialTotal, hero, after }: { initi
 
         {(item.stack?.length || item.source_url || isCandidate) ? (
           <div className="flex flex-wrap items-center gap-2">
-            {item.stack?.slice(0, 8).map(tech => (
+            {/* С совпадением навыки уже названы строкой «Есть у вас / Не хватает»: второй раз не повторяем */}
+            {!match && item.stack?.slice(0, 8).map(tech => (
               <span key={tech} className="text-xs px-2 py-0.5 neu-chip">
                 {tech}
               </span>
@@ -584,7 +585,7 @@ export default function Feed({ initialRows, initialTotal, hero, after }: { initi
 
       {/* Поиск первым на странице, рядом кнопка фильтров: на телефоне они свёрнуты.
           С запросом лендинг убирается, и результаты сразу под полем */}
-      <div className="max-w-6xl mx-auto px-4 pt-4 flex items-center gap-2">
+      <div className="max-w-page mx-auto px-4 pt-4 flex items-center gap-2">
         <div className="relative flex-1 min-w-0">
           <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400" aria-hidden="true" />
           <input id="feed-search" type="search" aria-label="Поиск по вакансиям" placeholder="Должность или навык: Java, Backend..." value={search}
@@ -602,7 +603,7 @@ export default function Feed({ initialRows, initialTotal, hero, after }: { initi
       </div>
 
       {!search.trim() && hero}
-      <main id="feed" className="max-w-6xl mx-auto px-4 py-6 lg:py-8 grid grid-cols-1 lg:grid-cols-4 gap-4 lg:gap-8 relative z-0 scroll-mt-20">
+      <main id="feed" className="max-w-page mx-auto px-4 py-6 lg:py-8 grid grid-cols-1 lg:grid-cols-4 gap-4 lg:gap-8 relative z-0 scroll-mt-20">
         {/* Sidebar Filters */}
         <aside className={`lg:col-span-1 space-y-6 ${filtersOpen ? "" : "hidden"} lg:block`}>
           <div className="neu-sub rounded-3xl p-5 space-y-6">

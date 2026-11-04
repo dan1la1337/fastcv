@@ -56,7 +56,7 @@ export function EmployersSection() {
 /** Лендинг под первым экраном (макет «Аврора»): как это работает, источники, работодателям. */
 export default function LandingSections({ className = "" }: { className?: string }) {
   return (
-    <div className={`max-w-6xl mx-auto px-4 space-y-20 sm:space-y-24 pt-16 ${className}`}>
+    <div className={`max-w-page mx-auto px-4 space-y-20 sm:space-y-24 pt-16 ${className}`}>
       <section aria-labelledby="how" className="space-y-8">
         <h2 id="how" className="font-display text-xl font-bold leading-tight">От резюме до отклика — без лишних шагов</h2>
         <ol className="grid gap-4 sm:grid-cols-3 list-none p-0 m-0">

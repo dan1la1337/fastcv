@@ -11,7 +11,7 @@ import LandingSections from "@/components/LandingSections";
 export default function Hero({ stats }: { stats: LiveStats | null }) {
   return (
     <div className="guest-only">
-    <section className="max-w-6xl mx-auto px-4 pt-10 sm:pt-16 pb-4 space-y-12">
+    <section className="max-w-page mx-auto px-4 pt-10 sm:pt-16 pb-4 space-y-12">
       <div className="flex flex-wrap items-center gap-x-16 gap-y-10">
         <div className="flex-[1_1_480px] min-w-0 space-y-6">
           <h1 className="font-display text-4xl sm:text-5xl font-bold leading-[1.1] tracking-tight text-neutral-300">

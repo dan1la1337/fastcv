@@ -763,7 +763,8 @@ export default function EmployerDashboard() {
                       <textarea value={reply.text} maxLength={2000} rows={7} aria-label="Текст ответа кандидату"
                         onChange={e => setReply({ ...reply, text: e.target.value })}
                         className={`${inputClass} leading-relaxed resize-y`} />
-                      <div className="flex justify-end gap-2">
+                      {/* Кнопки у края экрана, над нижней панелью телефона: длинный текст их не прячет */}
+                      <div className="sticky bottom-24 sm:bottom-3 z-10 flex justify-end gap-2">
                         <button onClick={() => setReply(null)} className="lg h-11 px-4 rounded-full text-sm text-neutral-200 transition-colors">Отмена</button>
                         <button onClick={sendReply} disabled={replying}
                           className="lg lg-accent h-11 px-5 rounded-full text-sm font-semibold flex items-center gap-1.5 disabled:opacity-50">

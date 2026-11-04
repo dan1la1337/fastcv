@@ -26,7 +26,7 @@ export default async function Home() {
   // В карточке ленты видно три строки описания: остальное не везём в HTML первой страницы
   const light = rows?.map(r => ({ ...r, description: r.description && r.description.length > 320 ? r.description.slice(0, 320) + "…" : r.description })) ?? null;
   return <Feed initialRows={light} initialTotal={total} hero={<Hero stats={stats} />} after={
-    <div className="guest-only max-w-6xl mx-auto px-4 space-y-20 sm:space-y-24 pt-16 pb-8">
+    <div className="guest-only max-w-page mx-auto px-4 space-y-20 sm:space-y-24 pt-16 pb-8">
       <SourcesSection />
       <EmployersSection />
     </div>

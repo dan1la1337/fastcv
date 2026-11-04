@@ -119,7 +119,7 @@ export default async function VacancyPage({ params }: Props) {
       )}
 
       <PageBar label="К ленте" />
-      <div className="max-w-6xl mx-auto px-4 py-8 space-y-6">
+      <div className="max-w-page mx-auto px-4 py-8 space-y-6">
         {vacancy.archived_at && (
           <div className="rounded-2xl border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-sm text-amber-300">
             Вакансия в архиве: скорее всего, она уже закрыта.
