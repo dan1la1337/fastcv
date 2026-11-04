@@ -73,7 +73,7 @@ export default function Messages({ initial }: { initial: string | null }) {
             </Link>
           </div>
         ) : (
-          <div className="glass rounded-3xl overflow-hidden grid md:grid-cols-[340px_1fr] h-[calc(100dvh-7.5rem)] sm:h-[calc(100dvh-9rem)] min-h-[420px]">
+          <div className="glass rounded-3xl overflow-hidden grid md:grid-cols-[340px_1fr] h-[calc(100dvh-7.5rem)] sm:h-[calc(100dvh-14rem)] min-h-[420px]">
             <div className={`${selected ? "hidden md:block" : "block"} border-r border-white/10 overflow-y-auto`}>
               <ConversationList items={list} selected={selected} onSelect={open} />
             </div>

@@ -312,18 +312,18 @@ export default function SmartApply({
               ))}
             </fieldset>
           )}
-          <div className="flex gap-2.5">
+          <div className="flex flex-col gap-2">
             <button
               onClick={sendApplication}
               disabled={isSending || typed !== null}
-              className="lg lg-accent flex-1 inline-flex items-center justify-center gap-2 h-12 rounded-full text-sm font-semibold transition-colors disabled:opacity-50"
+              className="lg lg-accent w-full inline-flex items-center justify-center gap-2 h-12 rounded-full text-sm font-semibold transition-colors disabled:opacity-50"
             >
               {isSending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />} Откликнуться с письмом
             </button>
             <button
               onClick={() => setCoverLetter("")}
               aria-label="Переписать письмо"
-              className="lg h-12 px-4 shrink-0 inline-flex items-center justify-center gap-2 rounded-full text-sm text-neutral-200 hover:text-white transition-colors"
+              className="lg w-full h-11 px-4 inline-flex items-center justify-center gap-2 rounded-full text-sm text-neutral-200 hover:text-white transition-colors"
             >
               <RotateCcw className="w-4 h-4" aria-hidden="true" /> Переписать
             </button>
