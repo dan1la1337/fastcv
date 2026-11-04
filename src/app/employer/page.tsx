@@ -708,7 +708,7 @@ export default function EmployerDashboard() {
                       <MatchRing value={matches[app.id].score} size={64} stroke={matches[app.id].score >= 70 ? "#5eead4" : "#fcd34d"} />
                     )}
                     <div className="flex-1 min-w-[14rem]">
-                      <p className="font-semibold text-white flex flex-wrap items-center gap-2">
+                      <p className="text-lg font-semibold text-white flex flex-wrap items-center gap-2">
                         {app.profiles?.name || "Без имени"}
                         <span className={`text-xs px-2.5 py-0.5 rounded-full font-medium ${
                           app.status === "interview_scheduled" ? "bg-teal-300/15 text-teal-200"
@@ -718,10 +718,8 @@ export default function EmployerDashboard() {
                           {STATUS_LABELS[app.status] ?? app.status}
                         </span>
                       </p>
-                      <p className="text-sm text-neutral-400 mt-1">
-                        {app.vacancies.title}
-                        {app.profiles?.skills?.length ? ` · ${app.profiles.skills.slice(0, 6).join(", ")}` : ""}
-                      </p>
+                      <p className="text-sm text-neutral-200 mt-1">{app.vacancies.title}</p>
+                      {app.profiles?.skills?.length ? <p className="text-xs text-neutral-500 mt-0.5">{app.profiles.skills.slice(0, 6).join(", ")}</p> : null}
                     </div>
                   </div>
 
@@ -741,7 +739,7 @@ export default function EmployerDashboard() {
                   <BlitzAnswers applicationId={app.id} answers={app.blitz_answers ?? []} summary={app.blitz_summary} />
 
                   {/* Письмо свёрнуто до двух строк: иначе на экран помещается одна карточка, а кнопки решения уходят вниз */}
-                  <details className="group neu-sub rounded-2xl px-4 py-3 text-sm text-neutral-300 leading-relaxed">
+                  <details className="group border-t border-white/10 pt-3 text-sm text-neutral-300 leading-relaxed">
                     <summary className="cursor-pointer list-none">
                       <span className="flex items-center justify-between gap-2 text-xs text-neutral-500">
                         Сопроводительное письмо
@@ -779,7 +777,7 @@ export default function EmployerDashboard() {
                           })}
                         </div>
                       )}
-                      <textarea value={reply.text} maxLength={2000} rows={4} aria-label="Текст ответа кандидату"
+                      <textarea value={reply.text} maxLength={2000} rows={7} aria-label="Текст ответа кандидату"
                         onChange={e => setReply({ ...reply, text: e.target.value })}
                         className={`${inputClass} leading-relaxed resize-y`} />
                       <div className="flex justify-end gap-2">
@@ -794,25 +792,25 @@ export default function EmployerDashboard() {
 
                   {/* Пока пишем ответ, кнопки решения убраны: иначе рядом два разных «отправить» */}
                   {reply?.appId !== app.id && (
-                  <div className="flex flex-wrap items-center justify-end gap-2.5 pt-3 border-t border-white/10">
+                  <div className="grid grid-cols-2 sm:flex sm:flex-wrap sm:items-center sm:justify-end gap-2.5 pt-3 border-t border-white/10">
                     {app.profiles?.resume_path && (
                       <button onClick={() => openResume(app.profiles!.resume_path!)}
-                        className="lg mr-auto h-11 px-4 rounded-full text-neutral-200 text-sm transition-colors flex items-center gap-1.5">
+                        className="lg col-span-2 sm:mr-auto h-11 px-4 rounded-full text-neutral-200 text-sm transition-colors flex items-center justify-center gap-1.5">
                         <FileText className="w-3.5 h-3.5" /> Резюме (PDF)
                       </button>
                     )}
                     {app.conversations?.id && (
                       <Link href={`/messages?c=${app.conversations.id}`}
-                        className={`${app.profiles?.resume_path ? "" : "mr-auto "}lg h-11 px-4 rounded-full text-neutral-200 text-sm transition-colors flex items-center gap-1.5`}>
+                        className={`${app.profiles?.resume_path ? "" : "sm:mr-auto "}lg h-11 px-4 rounded-full text-neutral-200 text-sm transition-colors flex items-center justify-center gap-1.5`}>
                         <MessageCircle className="w-3.5 h-3.5" /> Написать
                       </Link>
                     )}
                     <button onClick={() => setReply({ appId: app.id, status: "rejected", text: REPLY_TEMPLATES.rejected(app.vacancies.title) })}
-                      className="lg h-11 px-4 rounded-full text-neutral-300 hover:text-red-300 text-sm transition-colors flex items-center gap-1.5">
+                      className="lg h-11 px-4 rounded-full text-neutral-300 hover:text-red-300 text-sm transition-colors flex items-center justify-center gap-1.5">
                       <XCircle className="w-3.5 h-3.5" /> Отказать
                     </button>
                     <button onClick={() => setReply({ appId: app.id, status: "interview_scheduled", text: REPLY_TEMPLATES.interview_scheduled(app.vacancies.title) })}
-                      className="lg lg-accent h-11 px-5 rounded-full text-sm font-semibold transition-colors flex items-center gap-1.5">
+                      className="lg lg-accent col-span-2 order-first sm:order-none h-12 sm:h-11 px-5 rounded-full text-sm font-semibold transition-colors flex items-center justify-center gap-1.5">
                       <CheckCircle2 className="w-4 h-4" /> Пригласить
                     </button>
                   </div>

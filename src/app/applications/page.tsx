@@ -122,10 +122,10 @@ export default function CandidateApplications() {
       <div className="max-w-3xl mx-auto space-y-6">
         <div className="flex items-center justify-between gap-3 border-b border-white/10 pb-4">
           <div className="flex items-center gap-3">
-            <Link href="/" aria-label="К вакансиям" className="lg p-2 rounded-xl transition-colors">
+            <Link href="/" aria-label="К вакансиям" className="lg inline-flex items-center justify-center w-10 h-10 rounded-full transition-colors">
               <ArrowLeft className="w-4 h-4" />
             </Link>
-            <h1 className="font-display text-xl font-bold">Мои отклики</h1>
+            <h1 className="font-display text-2xl font-bold">Мои отклики</h1>
           </div>
           <span className="text-xs text-neutral-400 neu-chip px-3 py-1.5 rounded-full whitespace-nowrap">
             {applications.length} {plural(applications.length, ["отклик", "отклика", "откликов"])}

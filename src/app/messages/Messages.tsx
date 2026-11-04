@@ -48,10 +48,10 @@ export default function Messages({ initial }: { initial: string | null }) {
         {/* На телефоне в открытом диалоге своя кнопка «назад»: вторая над ней не нужна */}
         <div className={`${current ? "hidden md:flex" : "flex"} items-center gap-3`}>
           <Link href={back.href} aria-label={back.label}
-            className="lg p-2 rounded-xl transition-colors">
+            className="lg inline-flex items-center justify-center w-10 h-10 rounded-full transition-colors">
             <ArrowLeft className="w-4 h-4" />
           </Link>
-          <h1 className="font-display text-xl font-bold">Сообщения</h1>
+          <h1 className="font-display text-2xl font-bold">Сообщения</h1>
         </div>
 
         {list === null ? (

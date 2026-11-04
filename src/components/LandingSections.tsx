@@ -18,7 +18,7 @@ export function SourcesSection() {
   return (
     <section id="sources" aria-labelledby="sources-title" className="flex flex-wrap gap-8 scroll-mt-20">
       <div className="flex-[1_1_320px] min-w-0 space-y-4">
-        <h2 id="sources-title" className="font-display text-2xl sm:text-4xl font-bold leading-tight">Откуда вакансии</h2>
+        <h2 id="sources-title" className="font-display text-xl font-bold leading-tight">Откуда вакансии</h2>
         <p className="text-neutral-400 leading-relaxed">
           Только открытые источники и официальные API. У каждой вакансии — ссылка на оригинал. Владелец канала может исключить его в любой момент.
         </p>
@@ -41,7 +41,7 @@ export function EmployersSection() {
   return (
     <section aria-labelledby="employers" className="neu-sub rounded-3xl p-8 sm:p-10 flex flex-wrap items-center gap-8">
       <div className="flex-[1_1_420px] min-w-0 space-y-4">
-        <h2 id="employers" className="font-display text-2xl sm:text-3xl font-bold leading-tight">Работодателям: ни один отклик не потеряется</h2>
+        <h2 id="employers" className="font-display text-xl font-bold leading-tight">Работодателям: ни один отклик не потеряется</h2>
         <p className="text-neutral-300 leading-relaxed">
           Отклики отсортированы по совпадению с вакансией, воронка и ответ кандидату в один клик. Место кандидата зависит только от совпадения — не от оплаты.
         </p>
@@ -58,7 +58,7 @@ export default function LandingSections({ className = "" }: { className?: string
   return (
     <div className={`max-w-6xl mx-auto px-4 space-y-20 sm:space-y-24 pt-16 ${className}`}>
       <section aria-labelledby="how" className="space-y-8">
-        <h2 id="how" className="font-display text-2xl sm:text-4xl font-bold leading-tight">От резюме до отклика — без лишних шагов</h2>
+        <h2 id="how" className="font-display text-xl font-bold leading-tight">От резюме до отклика — без лишних шагов</h2>
         <ol className="grid gap-4 sm:grid-cols-3 list-none p-0 m-0">
           {STEPS.map(s => (
             <li key={s.n} className="glass rounded-3xl p-6 space-y-2.5">

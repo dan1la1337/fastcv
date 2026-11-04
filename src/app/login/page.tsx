@@ -81,7 +81,7 @@ function LoginForm() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               className="neu-in w-full px-4 py-3 rounded-2xl text-sm text-neutral-100 transition-colors"
-              placeholder="Минимум 6 символов"
+              placeholder="Ваш пароль"
             />
           </div>
 

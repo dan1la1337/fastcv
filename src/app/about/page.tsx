@@ -74,7 +74,7 @@ export default async function AboutPage() {
         <SourcesSection />
 
         <section aria-labelledby="extras" className="neu-sub rounded-3xl p-8 sm:p-10 space-y-4">
-          <h2 id="extras" className="font-display text-2xl sm:text-3xl font-bold leading-tight">Нашли вакансию? Дальше тоже поможем</h2>
+          <h2 id="extras" className="font-display text-xl font-bold leading-tight">Нашли вакансию? Дальше тоже поможем</h2>
           <p className="text-neutral-300 leading-relaxed">
             Покажем, насколько она подходит вашему резюме, напишем сопроводительное письмо и потренируем перед собеседованием.
           </p>

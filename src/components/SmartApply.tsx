@@ -336,7 +336,7 @@ export default function SmartApply({
 
   const title = (
     <div className="flex items-center gap-2.5">
-      <span aria-hidden="true" className="ai-shimmer w-7 h-7 rounded-xl shrink-0" />
+      <Sparkles className="w-5 h-5 text-teal-300 shrink-0" aria-hidden="true" />
       <h2 className="font-display text-lg font-bold text-white">Smart Apply</h2>
     </div>
   );

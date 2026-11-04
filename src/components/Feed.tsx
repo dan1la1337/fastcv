@@ -540,7 +540,7 @@ export default function Feed({ initialRows, initialTotal, hero, after }: { initi
                   <>
                     <Link 
                       href="/employer"
-                      className="lg px-4 py-2 rounded-full text-sm text-neutral-300 hover:text-white transition-colors"
+                      className="lg hidden sm:inline-block px-4 py-2 rounded-full text-sm text-neutral-300 hover:text-white transition-colors"
                     >
                       Кабинет HR
                     </Link>
@@ -552,7 +552,7 @@ export default function Feed({ initialRows, initialTotal, hero, after }: { initi
                 ) : (
                   <Link 
                     href="/applications"
-                    className="lg px-4 py-2 rounded-full text-sm text-neutral-300 hover:text-white transition-colors"
+                    className="lg hidden sm:inline-block px-4 py-2 rounded-full text-sm text-neutral-300 hover:text-white transition-colors"
                   >
                     Мои отклики
                   </Link>
@@ -722,20 +722,18 @@ export default function Feed({ initialRows, initialTotal, hero, after }: { initi
         {/* Vacancies Feed */}
         <section className="lg:col-span-3 space-y-4">
           {/* Поиск над результатами, а не в фильтрах: на телефоне они свёрнуты, и искать было негде */}
-          {!forYou && !savedMode && (
-            <div className="relative">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400" aria-hidden="true" />
-              <input id="feed-search" type="search" aria-label="Поиск по вакансиям" placeholder="Должность или навык: Java, Backend..." value={search}
-                onChange={(e) => setSearch(e.target.value)} className="neu-in w-full h-12 pl-10 pr-4 text-sm text-neutral-100" />
-            </div>
-          )}
-          <div className="flex flex-wrap items-center gap-2" role="group" aria-label="Раздел ленты">
+          <div className="relative">
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400" aria-hidden="true" />
+            <input id="feed-search" type="search" aria-label="Поиск по вакансиям" placeholder="Должность или навык: Java, Backend..." value={search}
+              onChange={(e) => { setSearch(e.target.value); if (mode !== "all") setMode("all"); }} className="neu-in w-full h-12 pl-10 pr-4 text-sm text-neutral-100" />
+          </div>
+          <div className="flex items-center gap-2 overflow-x-auto sm:flex-wrap -mx-4 px-4 sm:mx-0 sm:px-0 [scrollbar-width:none]" role="group" aria-label="Раздел ленты">
             {([["", "Все разделы", "Все"], ...AREAS.map(a => [a.id, a.label, a.short])] as [Area | "", string, string][]).map(([id, label, short]) => (
               <button
                 key={id || "all"}
                 onClick={() => chooseArea(id)}
                 aria-pressed={area === id}
-                className={`lg px-4 py-2 rounded-full text-sm transition-colors ${
+                className={`lg shrink-0 whitespace-nowrap px-4 py-2 rounded-full text-sm transition-colors ${
                   area === id ? "lg lg-on" : "lg text-neutral-300"
                 }`}
               >
@@ -773,8 +771,7 @@ export default function Feed({ initialRows, initialTotal, hero, after }: { initi
           {forYou && (
             <div className="rounded-3xl border border-teal-300/25 bg-teal-300/[0.06] px-5 py-4 text-sm text-neutral-300">
               {hasPrefs ? (
-                <>Вакансии отсортированы по совпадению с вашим профилем: направления, навыки, уровень, формат и город.{" "}
-                  <Link href="/profile#prefs" className="text-teal-300 hover:underline">Изменить, что ищу</Link></>
+                <>Сначала вакансии, которые больше всего подходят вашему профилю. <Link href="/profile#prefs" className="text-teal-300 hover:underline">Изменить, что ищу</Link></>
               ) : (
                 <>Подборка пока общая: укажите в профиле направления, уровень и навыки — и вакансии выстроятся под вас.{" "}
                   <Link href="/profile#prefs" className="text-teal-300 hover:underline">Заполнить за минуту</Link></>
