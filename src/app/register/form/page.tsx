@@ -1,5 +1,6 @@
 'use client';
 
+import FormError from "@/components/FormError";
 import { useState, Suspense } from 'react';
 import Link from 'next/link';
 import { useSearchParams, useRouter } from 'next/navigation';
@@ -119,7 +120,7 @@ function RegisterFormContent() {
           </label>
 
           {error && (
-            <p role="alert" className="text-sm text-red-400 bg-red-950/30 border border-red-500/20 rounded-xl px-4 py-3">{error}</p>
+            <FormError>{error}</FormError>
           )}
 
           {!agreed && <p className="text-xs text-neutral-500 text-center">Чтобы продолжить, отметьте согласие выше</p>}

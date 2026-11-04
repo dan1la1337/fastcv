@@ -417,7 +417,7 @@ export default function Feed({ initialRows, initialTotal, hero, after }: { initi
             onClick={() => setApplyVacancy(item)}
             className="lg lg-tint inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-full text-sm font-semibold transition-colors shrink-0 relative z-10 sm:self-end"
           >
-            <Sparkles className="w-4 h-4" /> Smart Apply
+            <Sparkles className="w-4 h-4" /> Откликнуться с ИИ
           </button>
         </div>
         <p className="text-sm text-neutral-400 leading-relaxed line-clamp-3">{item.description}</p>
@@ -688,7 +688,7 @@ export default function Feed({ initialRows, initialTotal, hero, after }: { initi
                   step={25000}
                   value={minSalary}
                   onChange={(e) => setMinSalary(Number(e.target.value))}
-                  className="w-full h-1.5 bg-neutral-800 rounded-lg appearance-none cursor-pointer accent-teal-300 transition-all hover:bg-neutral-700"
+                  className="w-full appearance-none cursor-pointer"
                 />
                 <div className="flex justify-between text-xs text-neutral-500 tabular-nums">
                   <span>0 ₽</span>
@@ -697,16 +697,9 @@ export default function Feed({ initialRows, initialTotal, hero, after }: { initi
                 </div>
               </div>
 
-              <label 
-                onClick={() => setOnlyWithSalary(!onlyWithSalary)}
-                className="flex items-center gap-3 cursor-pointer group pt-1 select-none"
-              >
-                <div className={`w-4 h-4 rounded border flex items-center justify-center transition-all duration-150 ${onlyWithSalary ? 'bg-teal-300 border-teal-300' : 'border-neutral-700 group-hover:border-neutral-500'}`}>
-                  {onlyWithSalary && <span className="text-neutral-950 text-xs font-bold">✓</span>}
-                </div>
-                <span className="text-xs text-neutral-300 group-hover:text-neutral-100 transition-colors">
-                  Только с указанной ЗП
-                </span>
+              <label className="flex items-center gap-3 cursor-pointer pt-1 select-none text-xs text-neutral-300 hover:text-neutral-100 transition-colors">
+                <input type="checkbox" checked={onlyWithSalary} onChange={e => setOnlyWithSalary(e.target.checked)} />
+                Только с указанной зарплатой
               </label>
             </div>
 
@@ -752,19 +745,19 @@ export default function Feed({ initialRows, initialTotal, hero, after }: { initi
             ))}
           </div>
           {isCandidate && (
-            <div className="flex items-center gap-2" role="tablist" aria-label="Какие вакансии показать">
+            <div className="grid grid-cols-3 gap-2 sm:flex sm:items-center" role="tablist" aria-label="Какие вакансии показать">
               {([["all", "Все вакансии"], ["for-you", "Для вас"], ["saved", "Избранное"]] as const).map(([id, label]) => (
                 <button
                   key={id}
                   role="tab"
                   aria-selected={mode === id}
                   onClick={() => (id === "for-you" ? showForYou() : id === "saved" ? showSaved() : setMode("all"))}
-                  className={`lg inline-flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-medium transition-colors ${
+                  className={`lg inline-flex items-center justify-center gap-1.5 px-2 sm:px-4 h-10 rounded-full text-sm font-medium whitespace-nowrap transition-colors ${
                     mode === id ? "lg lg-on" : "lg text-neutral-400 hover:text-neutral-100"
                   }`}
                 >
-                  {id === "for-you" && <Target className="w-4 h-4" />}
-                  {id === "saved" && <Bookmark className="w-4 h-4" />}
+                  {id === "for-you" && <Target className="hidden sm:block w-4 h-4" />}
+                  {id === "saved" && <Bookmark className="hidden sm:block w-4 h-4" />}
                   {label}
                 </button>
               ))}
@@ -816,6 +809,11 @@ export default function Feed({ initialRows, initialTotal, hero, after }: { initi
                 {savedMode ? "Нажмите «В избранное» на карточке, чтобы вернуться к вакансии позже"
                   : forYou ? "Свежих вакансий пока нет — загляните позже" : "Попробуйте ослабить фильтры"}
               </p>
+              {mode === "all" && activeFilters.length > 0 && (
+                <button onClick={() => activeFilters.forEach(f => f.clear())} className="lg mt-5 inline-flex items-center h-11 px-5 rounded-full text-sm text-neutral-100 transition-colors">
+                  Сбросить фильтры
+                </button>
+              )}
             </div>
           ) : (
             <div className="flex flex-col gap-4">

@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import {
   Archive, Briefcase, CheckCircle2, Eye, FileText, Loader2, MessageCircle, Pencil, Plus, RotateCcw, Send, Sparkles, Users, XCircle,
+  ChevronDown,
 } from "lucide-react";
 import { toMatch, type Match } from "@/lib/matching";
 import MatchRing from "@/components/MatchRing";
@@ -740,10 +741,17 @@ export default function EmployerDashboard() {
 
                   <BlitzAnswers applicationId={app.id} answers={app.blitz_answers ?? []} summary={app.blitz_summary} />
 
-                  <div className="neu-in rounded-2xl p-4 text-sm text-neutral-300 leading-relaxed whitespace-pre-line">
-                    <p className="text-xs text-neutral-500 mb-2">Сопроводительное письмо</p>
-                    {app.cover_letter || "Письмо не сохранено"}
-                  </div>
+                  {/* Письмо свёрнуто до двух строк: иначе на экран помещается одна карточка, а кнопки решения уходят вниз */}
+                  <details className="group neu-sub rounded-2xl px-4 py-3 text-sm text-neutral-300 leading-relaxed">
+                    <summary className="cursor-pointer list-none">
+                      <span className="flex items-center justify-between gap-2 text-xs text-neutral-500">
+                        Сопроводительное письмо
+                        <ChevronDown className="w-4 h-4 transition-transform group-open:rotate-180" aria-hidden="true" />
+                      </span>
+                      <span className="mt-1.5 line-clamp-2 group-open:hidden">{app.cover_letter || "Письмо не сохранено"}</span>
+                    </summary>
+                    <p className="mt-1.5 whitespace-pre-line">{app.cover_letter || "Письмо не сохранено"}</p>
+                  </details>
 
                   {app.hr_message && reply?.appId !== app.id && (
                     <div className="neu-sub rounded-2xl px-4 py-3 text-sm text-neutral-400">

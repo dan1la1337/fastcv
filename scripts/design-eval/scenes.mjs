@@ -61,7 +61,7 @@ async function search(page, text) {
 
 async function openSmartApply(page) {
   await search(page, "Senior Python-разработчик");
-  await page.getByRole("button", { name: /Smart Apply/ }).first().click();
+  await page.getByRole("button", { name: /Откликнуться с ИИ/ }).first().click();
   await page.getByRole("button", { name: "Написать письмо" }).waitFor({ timeout: 10_000 });
 }
 
@@ -82,7 +82,7 @@ export function scenes() {
     { id: "register-form", as: "guest", run: go("/register/form?role=candidate") },
     { id: "not-found", as: "guest", run: go("/no-such-page") },
     // Состояния и шаги сценария гостя
-    { id: "feed-filtered", as: "guest", run: async p => { await search(p, data.filterQuery); await centre(p.getByRole("button", { name: /Smart Apply/ }).first()); } },
+    { id: "feed-filtered", as: "guest", run: async p => { await search(p, data.filterQuery); await centre(p.getByRole("button", { name: /Откликнуться с ИИ/ }).first()); } },
     { id: "feed-empty", as: "guest", run: async p => { await search(p, data.emptyQuery); const empty = p.getByText("Ничего не нашлось"); await empty.waitFor({ timeout: 10_000 }); await centre(empty); } },
     { id: "form-error", as: "guest", run: async p => {
       await p.route("**/auth/v1/token*", route => route.fulfill({ status: 400, json: { error_code: "invalid_credentials", msg: "Invalid login credentials" } }));

@@ -1,5 +1,6 @@
 "use client";
 
+import FormError from "@/components/FormError";
 import { Suspense, useState } from "react";
 import { supabase, getUserRole, homeForRole } from "@/lib/supabase";
 import { authErrorText } from "@/lib/auth-errors";
@@ -85,7 +86,7 @@ function LoginForm() {
           </div>
 
           {error && (
-            <p role="alert" className="text-sm text-red-400 bg-red-950/30 border border-red-500/20 rounded-xl px-4 py-3">{error}</p>
+            <FormError>{error}</FormError>
           )}
 
           <button
