@@ -21,7 +21,7 @@ const ROLES = [
 
 export default function RoleSelectionPage() {
   return (
-    <div className="min-h-screen flex items-center justify-center p-4">
+    <div className="showcase min-h-screen flex items-center justify-center p-4">
       <div className="max-w-3xl w-full space-y-8">
         <div className="text-center space-y-3">
           <Link href="/" className="inline-flex items-center gap-2 hover:opacity-80 transition-opacity">

@@ -35,7 +35,7 @@ export default function RootLayout({
         <script dangerouslySetInnerHTML={{ __html: AUTH_HINT }} />
       </head>
       <body className="min-h-full flex flex-col relative">
-        {/* Фон за всеми страницами: студийный рендер стеклянных шаров у правого края, к тексту гаснет */}
+        {/* Фон за всеми страницами: мягкое свечение, на витринах (.showcase) — стеклянные шары у правого края */}
         <div aria-hidden="true" className="page-backdrop pointer-events-none fixed inset-0 -z-10" />
         {children}
         <footer className="mt-auto border-t border-white/10 px-4 py-6 text-xs text-neutral-400">

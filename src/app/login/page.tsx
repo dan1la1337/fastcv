@@ -46,7 +46,7 @@ function LoginForm() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 font-sans">
+    <div className="showcase min-h-screen flex items-center justify-center p-4 font-sans">
       <div className="glass max-w-md w-full rounded-3xl p-8">
         <div className="text-center mb-8">
           <Link href="/" className="inline-flex items-center gap-2 mb-6 hover:opacity-80 transition-opacity">
