@@ -133,9 +133,10 @@ export default async function VacancyPage({ params }: Props) {
           </div>
         )}
 
-        <div className="flex flex-wrap items-start gap-6">
-          <div className="flex-[999_1_560px] min-w-0 space-y-4">
-            <article className="glass rounded-3xl p-6 sm:p-8 space-y-5">
+        {/* Порядок разметки — порядок на телефоне: вакансия, отклик, совпадение, тренажёр.
+            На десктопе отклик занимает правую колонку */}
+        <div className="grid gap-4 lg:gap-x-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,26rem)] items-start">
+            <article className="glass rounded-3xl p-6 sm:p-8 space-y-5 min-w-0 lg:col-start-1 lg:row-start-1">
               <div className="flex flex-wrap gap-2 text-xs">
                 <span className={`px-2 py-1 text-xs ${vacancy.source_type === "internal" ? "neu-chip" : "neu-chip"}`}>
                   {sourceOf(vacancy).badge}
@@ -201,11 +202,17 @@ export default async function VacancyPage({ params }: Props) {
               </footer>
             </article>
 
-            {!vacancy.archived_at && <VacancyMatch vacancyId={vacancy.id} />}
+          {!vacancy.archived_at && (
+            <div id="smart-apply" className="min-w-0 lg:col-start-2 lg:row-start-1 lg:row-span-3 lg:sticky lg:top-24 scroll-mt-24">
+              <VacancyApply vacancy={vacancy} />
+            </div>
+          )}
+
+            {!vacancy.archived_at && <div className="min-w-0 lg:col-start-1"><VacancyMatch vacancyId={vacancy.id} /></div>}
 
             {!vacancy.archived_at && (
               <Link href={`/practice/${vacancy.id}`}
-                className="lg lg-tint rounded-3xl p-5 flex items-center gap-4 group transition-colors">
+                className="lg lg-tint rounded-3xl p-5 flex items-center gap-4 group transition-colors min-w-0 lg:col-start-1">
                 <span className="shrink-0 w-11 h-11 rounded-2xl bg-teal-300/10 text-teal-300 inline-flex items-center justify-center">
                   <MessagesSquare className="w-5 h-5" aria-hidden="true" />
                 </span>
@@ -216,13 +223,6 @@ export default async function VacancyPage({ params }: Props) {
                 <ChevronRight className="w-5 h-5 text-neutral-500 group-hover:text-teal-300" aria-hidden="true" />
               </Link>
             )}
-          </div>
-
-          {!vacancy.archived_at && (
-            <div id="smart-apply" className="flex-[1_1_360px] lg:max-w-md min-w-0 lg:sticky lg:top-24 scroll-mt-6">
-              <VacancyApply vacancy={vacancy} />
-            </div>
-          )}
         </div>
       </div>
 

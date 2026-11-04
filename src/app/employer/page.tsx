@@ -385,7 +385,6 @@ export default function EmployerDashboard() {
           <div className="space-y-1.5">
             <div className="flex flex-wrap items-center gap-3">
               <h1 className="font-display text-2xl font-bold">Кабинет работодателя</h1>
-              <span className="px-3 py-1 rounded-full neu-chip text-xs text-neutral-300">для работодателей</span>
             </div>
             <p className="text-sm text-neutral-400">
               Компания: {companyName || <Link href="/profile" className="text-teal-300 hover:underline">укажите в профиле</Link>}
@@ -393,11 +392,11 @@ export default function EmployerDashboard() {
           </div>
           <span className="flex-1" />
           <Link href="/resumes"
-            className="lg inline-flex items-center gap-2 h-11 px-5 rounded-full text-sm text-neutral-200 transition-colors">
+            className="lg hidden sm:inline-flex items-center gap-2 h-11 px-5 rounded-full text-sm text-neutral-200 transition-colors">
             <Users className="w-4 h-4" /> База резюме
           </Link>
           <Link href="/messages"
-            className="lg inline-flex items-center gap-2 h-11 px-5 rounded-full text-sm text-neutral-200 transition-colors">
+            className="lg hidden sm:inline-flex items-center gap-2 h-11 px-5 rounded-full text-sm text-neutral-200 transition-colors">
             <MessageCircle className="w-4 h-4" /> Сообщения
           </Link>
           <button
@@ -625,10 +624,10 @@ export default function EmployerDashboard() {
           ) : (
             <div className="grid gap-4">
               <div className="flex flex-wrap items-center justify-between gap-3">
-                <div role="group" aria-label="Сортировка откликов" className="neu-in inline-flex gap-1 p-1 rounded-full text-sm">
+                <div role="group" aria-label="Сортировка откликов" className="neu-in grid grid-cols-3 w-full sm:w-auto sm:inline-flex gap-1 p-1 text-xs sm:text-sm">
                   {([["match", "По совпадению"], ["ai", "По вердикту ИИ"], ["new", "Сначала новые"]] as const).map(([id, label]) => (
                     <button key={id} onClick={() => setSortBy(id)} aria-pressed={sortBy === id}
-                      className={`lg px-4 py-1.5 rounded-full transition-colors ${sortBy === id ? "lg lg-on" : "text-neutral-400 hover:text-white"}`}>
+                      className={`lg min-w-0 px-1 sm:px-4 py-1.5 rounded-lg leading-tight transition-colors ${sortBy === id ? "lg lg-on" : "text-neutral-400 hover:text-white"}`}>
                       {label}
                     </button>
                   ))}

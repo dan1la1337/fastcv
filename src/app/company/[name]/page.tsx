@@ -62,8 +62,8 @@ export default async function CompanyPage({ params }: Props) {
           <h1 className="font-display text-2xl sm:text-3xl font-bold">{company}</h1>
           <p className="text-sm text-neutral-400">{vacancies.length} {plural(vacancies.length, ["открытая вакансия", "открытые вакансии", "открытых вакансий"])}</p>
         </header>
-        {rating && <CompanyRatingCard company={company} rating={rating} />}
         {vacancies.length > 0 && <VacancyListStatic vacancies={vacancies} />}
+        {rating && <CompanyRatingCard company={company} rating={rating} />}
       </div>
     </main>
       </>

@@ -148,10 +148,13 @@ export default function CompanyRatingCard({ company, rating }: { company: string
         )}
       </div>
 
-      <p className="text-xs text-neutral-500 leading-relaxed">
-        Как считаем: доля ответов на отклики (30%), скорость ответа (15%), оценки собеседований (20%), отзывы о найме (25%) и
+      <details className="text-xs text-neutral-500 leading-relaxed">
+        <summary className="cursor-pointer text-neutral-400 hover:text-neutral-200">Как считаем рейтинг</summary>
+        <p className="mt-2">
+          Доля ответов на отклики (30%), скорость ответа (15%), оценки собеседований (20%), отзывы о найме (25%) и
         отсутствие вакансий-призраков (10%). Учитываются только части, по которым достаточно данных; балл не зависит от оплаты.
-      </p>
+        </p>
+      </details>
     </section>
   );
 }

@@ -44,15 +44,10 @@ async function centre(locator) {
   await locator.evaluate(el => el.scrollIntoView({ block: "center", behavior: "instant" }));
 }
 
-async function openFilters(page) {
-  const toggle = page.locator('button[aria-expanded]').filter({ hasText: /Фильтры/ }).first();
-  if (await toggle.isVisible().catch(() => false) && await toggle.getAttribute("aria-expanded") === "false") await toggle.click();
-}
-
 async function search(page, text) {
-  await page.goto(`${BASE_URL}/`);
+  // Поиск живёт в общей ленте: кандидата главная открывает на «Для вас»
+  await page.goto(`${BASE_URL}/?tab=all`);
   await page.waitForLoadState("networkidle", { timeout: 8000 }).catch(() => {});
-  await openFilters(page);
   const box = page.getByPlaceholder("Java, Backend...");
   await box.fill(text);
   await page.waitForTimeout(1200);

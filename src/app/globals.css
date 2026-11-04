@@ -73,15 +73,15 @@
 
   /* Четыре уровня текста. Имена Tailwind сводятся к ним:
      метаданные — xs; основной текст — sm и base; заголовок карточки — lg и xl; заголовок страницы — 2xl и крупнее */
-  --text-xs: 0.8667rem;
+  --text-xs: 0.9333rem;
   --text-xs--line-height: 1.4;
-  --text-sm: 1rem;
+  --text-sm: 1.0667rem;
   --text-sm--line-height: 1.5;
-  --text-base: 1rem;
+  --text-base: 1.0667rem;
   --text-base--line-height: 1.55;
-  --text-lg: 1.2rem;
+  --text-lg: 1.3333rem;
   --text-lg--line-height: 1.3;
-  --text-xl: 1.2rem;
+  --text-xl: 1.3333rem;
   --text-xl--line-height: 1.3;
   --text-2xl: clamp(1.75rem, 1.25rem + 1.5vw, 2.6rem);
   --text-2xl--line-height: 1.15;
@@ -171,7 +171,7 @@ body {
     border-radius: inherit;
     pointer-events: none;
     padding: 1px;
-    background: linear-gradient(160deg, rgba(255, 255, 255, 0.42), rgba(255, 255, 255, 0.06) 30%, rgba(255, 255, 255, 0.02) 65%, rgba(255, 255, 255, 0.22));
+    background: linear-gradient(160deg, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.05) 30%, rgba(255, 255, 255, 0.02) 65%, rgba(255, 255, 255, 0.1));
     -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
     -webkit-mask-composite: xor;
     mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
@@ -319,11 +319,19 @@ body {
 }
 
 /* Вне слоёв, чтобы перебить разметку: метка — radius-xs, поле — radius-md */
-.neu-chip { border-radius: var(--radius-xs); }
+.neu-chip { border-radius: var(--radius-xs); font-size: 0.8rem; }
 .neu-in { border-radius: var(--radius-md); }
 
 /* Типографика: заголовки — 600 */
 .font-display { font-weight: 600; letter-spacing: -0.015em; }
+
+/* Подписи капсом меньше метаданных: заглавные буквы и так крупнее строчных */
+.uppercase { font-size: 0.8rem; }
+
+/* Палец промахивается мимо мелких кнопок: на сенсорных экранах цель не меньше 44px */
+@media (pointer: coarse) {
+  .lg { min-height: 44px; min-width: 44px; }
+}
 
 /* Иконки lucide: одна толщина линии на всём сайте */
 .lucide { stroke-width: 1.75; }

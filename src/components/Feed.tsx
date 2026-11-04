@@ -628,15 +628,6 @@ export default function Feed({ initialRows, initialTotal, hero, after }: { initi
               )}
             </div>
 
-            {/* Поиск */}
-            <div className="space-y-3 pt-2 border-t border-white/[0.08]">
-              <label htmlFor="feed-search" className="text-xs font-bold text-neutral-500 uppercase tracking-wider">Ключевые слова</label>
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400" />
-                <input id="feed-search" type="text" placeholder="Java, Backend..." value={search} onChange={(e) => setSearch(e.target.value)} className="neu-in w-full pl-9 pr-4 py-2.5 rounded-full text-sm text-neutral-100 transition-colors" />
-              </div>
-            </div>
-
             {/* Уровень — грейды есть в IT и digital; для «других профессий» не показываем */}
             {showLevels && (<div className="space-y-3 pt-2 border-t border-white/[0.08]">
               <label className="text-xs font-bold text-neutral-500 uppercase tracking-wider">Уровень</label>
@@ -730,6 +721,14 @@ export default function Feed({ initialRows, initialTotal, hero, after }: { initi
 
         {/* Vacancies Feed */}
         <section className="lg:col-span-3 space-y-4">
+          {/* Поиск над результатами, а не в фильтрах: на телефоне они свёрнуты, и искать было негде */}
+          {!forYou && !savedMode && (
+            <div className="relative">
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400" aria-hidden="true" />
+              <input id="feed-search" type="search" aria-label="Поиск по вакансиям" placeholder="Должность или навык: Java, Backend..." value={search}
+                onChange={(e) => setSearch(e.target.value)} className="neu-in w-full h-12 pl-10 pr-4 text-sm text-neutral-100" />
+            </div>
+          )}
           <div className="flex flex-wrap items-center gap-2" role="group" aria-label="Раздел ленты">
             {([["", "Все разделы", "Все"], ...AREAS.map(a => [a.id, a.label, a.short])] as [Area | "", string, string][]).map(([id, label, short]) => (
               <button

@@ -163,7 +163,7 @@ export default function ChatThread({ conversation, userId, onBack, onChanged }: 
           onCancelled={b => { stick.current = true; append([b]); onChanged(); }} />
       )}
 
-      <div ref={scroller} role="log" aria-live="polite" aria-label={`Переписка с ${conversation.other_name}`}
+      <div ref={scroller} role="log" tabIndex={0} aria-live="polite" aria-label={`Переписка с ${conversation.other_name}`}
         onScroll={e => { const el = e.currentTarget; stick.current = el.scrollHeight - el.scrollTop - el.clientHeight < 80; }}
         className="flex-1 min-h-0 overflow-y-auto px-3 sm:px-5 py-4 space-y-2">
         {loadError ? (
