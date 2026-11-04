@@ -45,7 +45,8 @@ export default function Messages({ initial }: { initial: string | null }) {
   return (
     <div className="min-h-screen text-neutral-100 p-3 sm:p-6">
       <div className="max-w-6xl mx-auto space-y-4">
-        <div className="flex items-center gap-3">
+        {/* На телефоне в открытом диалоге своя кнопка «назад»: вторая над ней не нужна */}
+        <div className={`${current ? "hidden md:flex" : "flex"} items-center gap-3`}>
           <Link href={back.href} aria-label={back.label}
             className="lg p-2 rounded-xl transition-colors">
             <ArrowLeft className="w-4 h-4" />

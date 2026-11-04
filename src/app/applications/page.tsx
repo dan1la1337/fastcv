@@ -33,8 +33,8 @@ interface Application {
 }
 
 const STATUS: Record<string, { text: string; style: string }> = {
-  new: { text: "Ждёт ответа работодателя", style: "bg-amber-500/10 text-amber-400 border-amber-500/20" },
-  viewed: { text: "Просмотрен", style: "bg-teal-300/10 text-teal-300 border-teal-300/20" },
+  new: { text: "Ждёт ответа работодателя", style: "bg-white/[0.08] text-neutral-200 border-white/15" },
+  viewed: { text: "Просмотрен", style: "bg-white/[0.08] text-neutral-200 border-white/15" },
   interview_scheduled: { text: "Приглашение на собеседование", style: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20" },
   rejected: { text: "Отказ", style: "neu-chip text-neutral-400 border-white/15" },
 };

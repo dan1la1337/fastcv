@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { cache } from "react";
-import { ArrowLeft } from "lucide-react";
+import PageBar from "@/components/PageBar";
 import { supabase } from "@/lib/supabase";
 import { DIRECTIONS, VACANCY_COLUMNS, plural, VACANCY_FORMS, type Vacancy } from "@/lib/vacancies";
 import VacancyListStatic from "@/components/VacancyListStatic";
@@ -51,11 +51,10 @@ export default async function DirectionPage({ params }: Props) {
   ).sort((a, b) => b[1] - a[1]).slice(0, 5);
 
   return (
-    <main className="min-h-screen text-neutral-100 px-4 py-8">
+    <>
+      <PageBar href="/" label="Все вакансии" />
+      <main className="min-h-screen text-neutral-100 px-4 py-8">
       <div className="max-w-3xl mx-auto space-y-6">
-        <Link href="/" className="inline-flex items-center gap-2 text-sm text-neutral-400 hover:text-white">
-          <ArrowLeft className="w-4 h-4" /> Все вакансии
-        </Link>
         <header className="space-y-2">
           <h1 className="font-display text-2xl sm:text-3xl font-bold">Вакансии: {direction.label}</h1>
           <p className="text-sm text-neutral-400">
@@ -91,5 +90,6 @@ export default async function DirectionPage({ params }: Props) {
         </nav>
       </div>
     </main>
+      </>
   );
 }

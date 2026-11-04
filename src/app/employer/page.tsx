@@ -379,7 +379,7 @@ export default function EmployerDashboard() {
 
   return (
     <div className="min-h-screen text-neutral-100 font-sans p-4 sm:p-8">
-      <div className="max-w-5xl mx-auto space-y-6">
+      <div className="max-w-6xl mx-auto space-y-6">
         <div className="flex flex-wrap items-center gap-x-6 gap-y-4">
           <div className="space-y-1.5">
             <div className="flex flex-wrap items-center gap-3">
@@ -713,7 +713,7 @@ export default function EmployerDashboard() {
                         <span className={`text-xs px-2.5 py-0.5 rounded-full font-medium ${
                           app.status === "interview_scheduled" ? "bg-teal-300/15 text-teal-200"
                             : app.status === "rejected" ? "bg-white/[0.08] text-neutral-400"
-                            : "bg-amber-300/15 text-amber-200"
+                            : "bg-white/[0.08] text-neutral-200"
                         }`}>
                           {STATUS_LABELS[app.status] ?? app.status}
                         </span>
@@ -776,15 +776,17 @@ export default function EmployerDashboard() {
                         onChange={e => setReply({ ...reply, text: e.target.value })}
                         className={`${inputClass} leading-relaxed resize-y`} />
                       <div className="flex justify-end gap-2">
-                        <button onClick={() => setReply(null)} className="px-3 py-1.5 text-xs text-neutral-400 hover:text-white">Отмена</button>
+                        <button onClick={() => setReply(null)} className="lg h-11 px-4 rounded-full text-sm text-neutral-200 transition-colors">Отмена</button>
                         <button onClick={sendReply} disabled={replying}
-                          className="lg lg-accent h-10 px-4 rounded-full text-sm font-semibold flex items-center gap-1.5 disabled:opacity-50">
+                          className="lg lg-accent h-11 px-5 rounded-full text-sm font-semibold flex items-center gap-1.5 disabled:opacity-50">
                           {replying ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Send className="w-3.5 h-3.5" />} Отправить
                         </button>
                       </div>
                     </div>
                   )}
 
+                  {/* Пока пишем ответ, кнопки решения убраны: иначе рядом два разных «отправить» */}
+                  {reply?.appId !== app.id && (
                   <div className="flex flex-wrap items-center justify-end gap-2.5 pt-3 border-t border-white/10">
                     {app.profiles?.resume_path && (
                       <button onClick={() => openResume(app.profiles!.resume_path!)}
@@ -807,6 +809,7 @@ export default function EmployerDashboard() {
                       <CheckCircle2 className="w-4 h-4" /> Пригласить
                     </button>
                   </div>
+                  )}
                 </div>
               ))}
             </div>

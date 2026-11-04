@@ -252,7 +252,7 @@ body {
   .lg-on:hover:not(:disabled) { background: rgba(94, 234, 212, 0.2); }
 
   /* Второстепенные кнопки со смыслом: мятный оттенок — ИИ-действия, янтарный — внимание, красный — удаление */
-  .lg-tint { color: #99f6e4; }
+  .lg-tint { color: #99f6e4; border-color: rgba(94, 234, 212, 0.55); }
   .lg-warn { color: #fcd34d; }
   .lg-danger { color: #fca5a5; }
 

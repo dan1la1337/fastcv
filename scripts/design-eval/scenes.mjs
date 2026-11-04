@@ -106,7 +106,7 @@ export function scenes() {
     // Работодатель
     { id: "employer", as: "employer", run: go("/employer") },
     { id: "employer-review", as: "employer", run: async p => { await go("/employer")(p); await p.getByRole("button", { name: "Сначала новые" }).click(); await p.locator("div.glass").filter({ hasText: "Backend-разработчик (Python, FastAPI)" }).getByRole("button", { name: "Пригласить" }).first().scrollIntoViewIfNeeded(); } },
-    { id: "employer-decision", as: "employer", run: async p => { await go("/employer")(p); await p.getByRole("button", { name: "Сначала новые" }).click(); const card = p.locator("div.glass").filter({ hasText: "Backend-разработчик (Python, FastAPI)" }).filter({ has: p.getByRole("button", { name: "Пригласить" }) }).first(); await card.getByRole("button", { name: "Пригласить" }).click(); await card.getByRole("button", { name: "Отправить", exact: true }).waitFor({ timeout: 5000 }); await card.getByRole("button", { name: "Отправить", exact: true }).scrollIntoViewIfNeeded(); } },
+    { id: "employer-decision", as: "employer", run: async p => { await go("/employer")(p); await p.getByRole("button", { name: "Сначала новые" }).click(); const card = p.locator("div.glass").filter({ hasText: "Backend-разработчик (Python, FastAPI)" }).filter({ has: p.getByRole("button", { name: "Пригласить" }) }).first(); await card.getByRole("button", { name: "Пригласить" }).click(); const send = p.getByRole("button", { name: "Отправить", exact: true }).first(); await send.waitFor({ timeout: 5000 }); await send.scrollIntoViewIfNeeded(); } },
     { id: "employer-resumes", as: "employer", run: go("/resumes") },
   ];
 }

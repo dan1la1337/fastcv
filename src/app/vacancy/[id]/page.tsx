@@ -1,8 +1,9 @@
+import PageBar from "@/components/PageBar";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { cache } from "react";
-import { AlertTriangle, ArrowLeft, Calendar, ChevronRight, ExternalLink, Ghost, MessagesSquare } from "lucide-react";
+import { AlertTriangle, Calendar, ChevronRight, ExternalLink, Ghost, MessagesSquare } from "lucide-react";
 import ClosedReport from "@/components/ClosedReport";
 import { supabase } from "@/lib/supabase";
 import { VACANCY_COLUMNS, formatLabel, formatSalary, levelLabel, experienceLabel, plural, sourceOf, ghostSignal, type Vacancy } from "@/lib/vacancies";
@@ -117,11 +118,8 @@ export default async function VacancyPage({ params }: Props) {
         />
       )}
 
+      <PageBar label="К ленте" />
       <div className="max-w-6xl mx-auto px-4 py-8 space-y-6">
-        <Link href="/" className="inline-flex items-center gap-2 text-sm text-neutral-400 hover:text-white transition-colors">
-          <ArrowLeft className="w-4 h-4" /> К ленте
-        </Link>
-
         {vacancy.archived_at && (
           <div className="rounded-2xl border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-sm text-amber-300">
             Вакансия в архиве: скорее всего, она уже закрыта.
@@ -151,9 +149,9 @@ export default async function VacancyPage({ params }: Props) {
               <CompanyLine vacancy={vacancy} className="text-base text-neutral-300" />
 
               {tiles.length > 0 && (
-                <div className="grid grid-cols-[repeat(auto-fit,minmax(10rem,1fr))] gap-3">
+                <div className="flex flex-wrap gap-3">
                   {tiles.map(t => (
-                    <div key={t.label} className="neu-sub rounded-2xl px-4 py-3">
+                    <div key={t.label} className="neu-sub flex-[1_1_auto] min-w-0 rounded-2xl px-4 py-3">
                       <p className="text-xs text-neutral-500">{t.label}</p>
                       <p className="mt-1 font-semibold text-white">{t.value}</p>
                       {t.estimate && estimate && <SalaryEstimate estimate={estimate} className="text-xs mt-1" />}

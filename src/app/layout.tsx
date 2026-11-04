@@ -39,7 +39,7 @@ export default function RootLayout({
         <div aria-hidden="true" className="page-backdrop pointer-events-none fixed inset-0 -z-10" />
         {children}
         <footer className="mt-auto border-t border-white/10 px-4 py-6 text-xs text-neutral-400">
-          <div className="max-w-5xl mx-auto flex flex-wrap items-center gap-x-5 gap-y-2">
+          <div className="max-w-6xl mx-auto flex flex-wrap items-center gap-x-5 gap-y-2">
             <span>© FastCV</span>
             <Link href="/about" className="hover:text-neutral-200">О сервисе</Link>
             <Link href="/jobs" className="hover:text-neutral-200">Вакансии по направлениям</Link>

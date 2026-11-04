@@ -67,7 +67,7 @@ export default async function AdminPage() {
 
   return (
     <main className="min-h-screen text-neutral-100 px-4 py-8">
-      <div className="max-w-5xl mx-auto space-y-8">
+      <div className="max-w-6xl mx-auto space-y-8">
         <div className="flex items-center justify-between gap-4">
           <div>
             <Link href="/" className="inline-flex items-center gap-2 text-sm text-neutral-400 hover:text-white">

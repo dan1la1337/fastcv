@@ -6,7 +6,7 @@ import {
   AREAS, DEFAULT_FILTERS, DIRECTIONS, experienceLabel, sourceOf, freshnessLabel, ghostSignal, LEVELS, WORK_FORMATS, fetchVacancyPage, formatLabel, formatSalary, levelLabel, plural, PAGE_SIZE,
   VACANCY_FORMS, SOURCES, type SourceKind, type Area, type Level, type Vacancy, type VacancyFilters, type WorkFormat,
 } from "@/lib/vacancies";
-import { Clock, Search, MapPin, ChevronDown, Sparkles, Loader2, ExternalLink, Globe, SlidersHorizontal, Briefcase, Building2, Target, Bookmark, BookmarkCheck, EyeOff, Ghost, Undo2 } from "lucide-react";
+import { Clock, Search, MapPin, ChevronDown, Sparkles, Loader2, ExternalLink, Globe, SlidersHorizontal, Briefcase, Building2, Target, Bookmark, BookmarkCheck, EyeOff, Ghost, Undo2, X } from "lucide-react";
 import { fetchMarked, fetchMarks, setMark, type MarkKind } from "@/lib/marks";
 import { toast } from "@/components/Toaster";
 import { fetchMatches, fetchRecommended, type Match } from "@/lib/matching";
@@ -30,7 +30,7 @@ const SmartApply = dynamic(() => import("@/components/SmartApply"), { ssr: false
  * в HTML (initialRows): лента видна до загрузки скриптов и индексируется поисковиками.
  * Дальше — запросы из браузера при смене фильтров и «Показать ещё».
  */
-export default function Feed({ initialRows, initialTotal, hero }: { initialRows: Vacancy[] | null; initialTotal: number; hero?: React.ReactNode }) {
+export default function Feed({ initialRows, initialTotal, hero, after }: { initialRows: Vacancy[] | null; initialTotal: number; hero?: React.ReactNode; after?: React.ReactNode }) {
   const [vacancies, setVacancies] = useState<Vacancy[]>(initialRows ?? []);
   const [total, setTotal] = useState(initialTotal);
   const [page, setPage] = useState(0);
@@ -333,27 +333,47 @@ export default function Feed({ initialRows, initialTotal, hero }: { initialRows:
   const list = savedMode ? savedList : (forYou ? recommended : vacancies).filter(notHidden);
   const listLoading = savedMode ? savedLoading : forYou ? recLoading && recommended.length === 0 : loading;
 
+  // Что сейчас сужает ленту: показываем над результатами, каждое условие снимается по клику
+  const activeFilters: { key: string; label: string; clear: () => void }[] = [
+    search.trim() && { key: "search", label: `«${search.trim()}»`, clear: () => setSearch("") },
+    area && { key: "area", label: AREAS.find(a => a.id === area)?.label ?? area, clear: () => setArea("") },
+    selectedDirection && { key: "direction", label: DIRECTIONS.find(d => d.id === selectedDirection)?.label ?? selectedDirection, clear: () => { setSelectedDirection(null); setSelectedStack([]); } },
+    ...selectedLevels.map(l => ({ key: `level-${l}`, label: levelLabel(l) ?? l, clear: () => setSelectedLevels(prev => prev.filter(x => x !== l)) })),
+    ...formats.map(f => ({ key: `format-${f}`, label: formatLabel(f) ?? f, clear: () => setFormats(prev => prev.filter(x => x !== f)) })),
+    city.trim() && { key: "city", label: city, clear: () => setCity("") },
+    country && { key: "country", label: country, clear: () => setCountry("") },
+    minSalary > 0 && { key: "salary", label: `от ${minSalary.toLocaleString("ru-RU")} ₽`, clear: () => setMinSalary(0) },
+    onlyWithSalary && { key: "with-salary", label: "С зарплатой", clear: () => setOnlyWithSalary(false) },
+    ...sources.map(id => ({ key: `source-${id}`, label: SOURCES.find(x => x.id === id)?.label ?? id, clear: () => setSources(prev => prev.filter(x => x !== id)) })),
+  ].filter(f => !!f);
+
   const card = (item: Vacancy) => {
     // Без заполненного профиля оценка у всех одинаковая — не показываем её
     const match = hasPrefs ? matches[item.id] : undefined;
     return (
       <div key={item.id} className="neu-sub rounded-3xl p-5 sm:p-6 flex flex-col gap-4 relative overflow-hidden group transition-colors">
 
-        {/* Бейджи источников — Tag: контурная метка капсом; у прямого работодателя — с пульсом */}
-        {item.source_type === 'external' ? (
-           <div className="absolute top-4 right-4 neu-chip text-xs px-2 py-0.5 z-10">
-             {sourceOf(item).badge}
-           </div>
-        ) : (
-           <div className="absolute top-4 right-4 neu-chip text-xs px-2 py-0.5 z-10 flex items-center gap-1.5">
-             <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse"></span>
-             Прямой работодатель
-           </div>
-        )}
+        {/* Метки над заголовком отдельной строкой: поверх длинного названия они его перекрывали.
+            На телефоне совпадение тоже здесь: кольцо сжало бы заголовок */}
+        <div className="flex flex-wrap items-center gap-2">
+          {match && (
+            <span className={`sm:hidden neu-chip text-xs px-2 py-0.5 tabular-nums ${match.score >= 70 ? "!text-teal-200 !border-teal-300/40" : "!text-amber-300 !border-amber-300/40"}`}>
+              {match.score}%
+            </span>
+          )}
+          {item.source_type === 'external' ? (
+            <span className="neu-chip text-xs px-2 py-0.5">{sourceOf(item).badge}</span>
+          ) : (
+            <span className="neu-chip text-xs px-2 py-0.5 inline-flex items-center gap-1.5">
+              <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse"></span>
+              Прямой работодатель
+            </span>
+          )}
+        </div>
 
         <div className="flex flex-col sm:flex-row justify-between gap-4">
-          <div className="flex gap-4 sm:gap-5 items-start pr-24 sm:pr-28">
-          {match && <MatchRing value={match.score} size={64} stroke={match.score >= 70 ? "#5eead4" : "#fcd34d"} />}
+          <div className="flex gap-4 sm:gap-5 items-start min-w-0">
+          {match && <span className="hidden sm:block shrink-0"><MatchRing value={match.score} size={64} stroke={match.score >= 70 ? "#5eead4" : "#fcd34d"} /></span>}
           <div className="min-w-0">
             <h2 className="text-lg sm:text-xl font-semibold text-neutral-100 leading-snug">
               <Link href={`/vacancy/${item.id}`} className="hover:text-teal-300 transition-colors">{item.title}</Link>
@@ -395,7 +415,7 @@ export default function Feed({ initialRows, initialTotal, hero }: { initialRows:
 
           <button
             onClick={() => setApplyVacancy(item)}
-            className="lg inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-full text-sm font-semibold transition-colors shrink-0 relative z-10 sm:self-end"
+            className="lg lg-tint inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-full text-sm font-semibold transition-colors shrink-0 relative z-10 sm:self-end"
           >
             <Sparkles className="w-4 h-4" /> Smart Apply
           </button>
@@ -770,6 +790,21 @@ export default function Feed({ initialRows, initialTotal, hero }: { initialRows:
             </div>
           )}
 
+          {mode === "all" && !listLoading && (
+            <div className="flex flex-wrap items-center gap-x-3 gap-y-2" aria-live="polite">
+              <h2 className="text-lg font-semibold text-neutral-100 tabular-nums">{total.toLocaleString("ru-RU")} {plural(total, VACANCY_FORMS)}</h2>
+              {activeFilters.map(f => (
+                <button key={f.key} onClick={f.clear} aria-label={`${f.label}: снять условие`}
+                  className="lg inline-flex items-center gap-1.5 h-8 px-3 rounded-full text-xs text-neutral-200 transition-colors">
+                  {f.label} <X className="w-3.5 h-3.5" aria-hidden="true" />
+                </button>
+              ))}
+              {activeFilters.length > 1 && (
+                <button onClick={() => activeFilters.forEach(f => f.clear())} className="text-xs text-neutral-400 hover:text-white transition-colors">Сбросить всё</button>
+              )}
+            </div>
+          )}
+
           {listLoading ? (
             <div className="flex items-center justify-center h-64"><div className="w-6 h-6 border-2 border-teal-300 border-t-transparent rounded-full animate-spin"></div></div>
           ) : loadError ? (
@@ -827,6 +862,8 @@ export default function Feed({ initialRows, initialTotal, hero }: { initialRows:
           )}
         </section>
       </main>
+
+      {after}
 
       {applyVacancy && <SmartApply vacancy={applyVacancy} user={user} onClose={() => setApplyVacancy(null)} />}
     </div>

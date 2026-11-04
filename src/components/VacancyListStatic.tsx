@@ -16,7 +16,7 @@ export default function VacancyListStatic({ vacancies }: { vacancies: Vacancy[] 
             <Link href={`/vacancy/${v.id}`} className="hover:text-teal-300 transition-colors">{v.title}</Link>
           </h2>
           <CompanyLine vacancy={v} className="text-sm text-neutral-400 mt-0.5" />
-          <p className="text-sm font-semibold text-emerald-400 mt-1">{formatSalary(v.salary_min, v.salary_max, v.salary_currency)}</p>
+          <p className="text-sm font-semibold text-neutral-100 mt-1">{formatSalary(v.salary_min, v.salary_max, v.salary_currency)}</p>
           <p className="flex flex-wrap items-center gap-3 text-xs text-neutral-400 mt-2">
             {v.level && <span className="inline-flex items-center gap-1"><Briefcase className="w-3.5 h-3.5" />{levelLabel(v.level)}</span>}
             {v.city && <span className="inline-flex items-center gap-1"><MapPin className="w-3.5 h-3.5" />{v.city}</span>}
