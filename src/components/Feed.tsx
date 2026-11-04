@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { supabase } from "@/lib/supabase";
 import {
   AREAS, DEFAULT_FILTERS, DIRECTIONS, experienceLabel, sourceOf, freshnessLabel, ghostSignal, LEVELS, WORK_FORMATS, fetchVacancyPage, formatLabel, formatSalary, levelLabel, plural, PAGE_SIZE,
@@ -21,7 +21,6 @@ import CompanyLine from "@/components/CompanyLine";
 import { estimateSalary, fetchSalaryBenchmarks, type SalaryBenchmark } from "@/lib/salary";
 import SalaryEstimate from "@/components/SalaryEstimate";
 import SearchSelect, { type SelectOption } from "@/components/SearchSelect";
-import { useUnread, UnreadDot } from "@/components/chat/useUnread";
 
 // Окно Smart Apply нужно только по клику: его код не грузим вместе с лентой
 const SmartApply = dynamic(() => import("@/components/SmartApply"), { ssr: false });
@@ -31,6 +30,10 @@ const SmartApply = dynamic(() => import("@/components/SmartApply"), { ssr: false
  * в HTML (initialRows): лента видна до загрузки скриптов и индексируется поисковиками.
  * Дальше — запросы из браузера при смене фильтров и «Показать ещё».
  */
+const neverChanges = () => () => {};
+// То же условие, что у скрипта в layout.tsx
+const readSessionCookie = () => /(^|; )sb-[^=]+-auth-token/.test(document.cookie);
+
 export default function Feed({ initialRows, initialTotal, hero, after }: { initialRows: Vacancy[] | null; initialTotal: number; hero?: React.ReactNode; after?: React.ReactNode }) {
   const [vacancies, setVacancies] = useState<Vacancy[]>(initialRows ?? []);
   const [total, setTotal] = useState(initialTotal);
@@ -39,6 +42,10 @@ export default function Feed({ initialRows, initialTotal, hero, after }: { initi
   const [loadingMore, setLoadingMore] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [user, setUser] = useState<User | null>(null);
+  const [authChecked, setAuthChecked] = useState(false);
+  // Пока сессия проверяется, верим куке: иначе при переходе из кабинета вошедший на миг увидит экран гостя
+  const hasSessionCookie = useSyncExternalStore(neverChanges, readSessionCookie, () => false);
+  const signedIn = Boolean(user) || (hasSessionCookie && !authChecked);
   const [userProfile, setUserProfile] = useState<Tables<"profiles"> | null>(null);
 
   // «Для вас»: подборка по профилю кандидата и процент совпадения на карточках
@@ -105,6 +112,9 @@ export default function Feed({ initialRows, initialTotal, hero, after }: { initi
 
   useEffect(() => {
     supabase.auth.getUser().then(async ({ data }) => {
+      setAuthChecked(true);
+      // Кука могла пережить сессию: снимаем метку входа, чтобы гость увидел кнопку входа и приветствие
+      if (!data.user) delete document.documentElement.dataset.auth;
       if (data.user) {
         setUser(data.user);
         const { data: profile } = await supabase
@@ -204,7 +214,6 @@ export default function Feed({ initialRows, initialTotal, hero, after }: { initi
   // Надежное определение роли: проверяем и метаданные аутентификации, и таблицу profiles
   const userRole = userProfile?.role || user?.user_metadata?.role;
   const isEmployer = userRole === 'employer';
-  const unread = useUnread(Boolean(user));
   const isCandidate = Boolean(user) && userProfile?.role === "candidate";
   const profileSkills = Array.isArray(userProfile?.skills) ? userProfile.skills : [];
   const hasPrefs = Boolean(userProfile?.pref_directions?.length || profileSkills.length || userProfile?.pref_level);
@@ -520,12 +529,7 @@ export default function Feed({ initialRows, initialTotal, hero, after }: { initi
     <div className="min-h-screen text-neutral-100 antialiased font-sans relative">
       <header className="top-strip sticky top-0 z-20 px-3 sm:px-4 pt-3 pb-3">
         <div className="glass rounded-3xl max-w-6xl mx-auto pl-4 pr-2.5 py-2.5 flex items-center justify-between gap-3">
-          <div className="flex items-center gap-1 sm:gap-3">
-            <Logo />
-            <Link href="/about" className="hidden sm:inline-block px-3 py-2 rounded-full text-sm text-neutral-400 hover:text-white transition-colors">
-              О сервисе
-            </Link>
-          </div>
+          <Logo />
           <div className="flex items-center gap-2 sm:gap-4">
             <span className="inline-flex items-center gap-2 tabular-nums text-xs text-teal-300 whitespace-nowrap">
               <span className="relative h-2 w-2" aria-hidden="true">
@@ -535,41 +539,12 @@ export default function Feed({ initialRows, initialTotal, hero, after }: { initi
               {loading ? "…" : `${total.toLocaleString("ru-RU")} ${plural(total, VACANCY_FORMS)}`}
             </span>
             
-            {user ? (
-              <div className="flex items-center gap-3">
-                {/* Если работодатель — показываем Кабинет HR, если соискатель — Мои отклики */}
-                {isEmployer ? (
-                  <>
-                    <Link 
-                      href="/employer"
-                      className="lg hidden sm:inline-block px-4 py-2 rounded-full text-sm text-neutral-300 hover:text-white transition-colors"
-                    >
-                      Кабинет HR
-                    </Link>
-                    <Link href="/resumes"
-                      className="lg hidden sm:inline-block px-3 py-2 rounded-full text-sm text-neutral-300 hover:text-white transition-colors">
-                      Резюме
-                    </Link>
-                  </>
-                ) : (
-                  <Link 
-                    href="/applications"
-                    className="lg hidden sm:inline-block px-4 py-2 rounded-full text-sm text-neutral-300 hover:text-white transition-colors"
-                  >
-                    Мои отклики
-                  </Link>
-                )}
-
-                <Link href="/messages" aria-label="Сообщения"
-                  className="lg relative px-3 py-2 rounded-full text-sm text-neutral-300 hover:text-white transition-colors hidden sm:inline-flex items-center gap-1.5">
-                  Сообщения <UnreadDot count={unread} label="чатов с новыми сообщениями" />
-                </Link>
-                <UserMenu role={isEmployer ? "employer" : "candidate"} email={user.email} />
-              </div>
+            {signedIn ? (
+              <UserMenu role={isEmployer ? "employer" : "candidate"} email={user?.email} />
             ) : (
               <Link 
                 href="/login"
-                className="lg px-4 py-2 text-neutral-100 rounded-full text-sm font-medium transition-colors relative z-50 whitespace-nowrap"
+                className="guest-only lg px-4 py-2 text-neutral-100 rounded-full text-sm font-medium transition-colors relative z-50 whitespace-nowrap"
               >
                 Войти<span className="hidden sm:inline"> / Регистрация</span>
               </Link>
@@ -578,29 +553,29 @@ export default function Feed({ initialRows, initialTotal, hero, after }: { initi
         </div>
       </header>
 
-      {/* Поиск первым на странице, рядом кнопка фильтров: на телефоне они свёрнуты.
-          С запросом лендинг убирается, и результаты сразу под полем */}
-      <div className="max-w-page mx-auto px-4 pt-4 flex items-center gap-2">
-        <div className="relative flex-1 min-w-0">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400" aria-hidden="true" />
-          <input id="feed-search" type="search" aria-label="Поиск по вакансиям" placeholder="Должность или навык: Java, Backend..." value={search}
-            onChange={(e) => { setSearch(e.target.value); if (mode !== "all") setMode("all"); }} className="neu-in w-full h-12 pl-10 pr-4 text-sm text-neutral-100" />
+      {!signedIn && hero}
+      {/* Вторая строка сетки забирает лишнюю высоту: колонка фильтров занимает обе строки и не растягивает строку поиска */}
+      <main id="feed" className="max-w-page mx-auto px-4 py-6 lg:py-8 grid grid-cols-1 lg:grid-cols-4 lg:grid-rows-[auto_1fr] gap-y-4 lg:gap-x-8 relative z-0 scroll-mt-20">
+        {/* Поиск над результатами, рядом кнопка фильтров: на телефоне они свёрнуты и открываются под этой строкой */}
+        <div className="lg:col-start-2 lg:col-span-3 lg:row-start-1 flex items-center gap-2">
+          <div className="relative flex-1 min-w-0">
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400" aria-hidden="true" />
+            <input id="feed-search" type="search" aria-label="Поиск по вакансиям" placeholder="Должность или навык: Java, Backend..." value={search}
+              onChange={(e) => { setSearch(e.target.value); if (mode !== "all") setMode("all"); }} className="neu-in w-full h-12 pl-10 pr-4 text-sm text-neutral-100" />
+          </div>
+          <button
+            onClick={() => setFiltersOpen(open => !open)}
+            aria-expanded={filtersOpen}
+            aria-label={`Фильтры${activeFilters.length ? `: выбрано ${activeFilters.length}` : ""}`}
+            className="lg lg:hidden shrink-0 inline-flex items-center justify-center gap-1.5 h-12 min-w-12 px-3 rounded-full text-sm text-neutral-200"
+          >
+            <SlidersHorizontal className="w-4 h-4" aria-hidden="true" />
+            {activeFilters.length > 0 && <span className="text-xs tabular-nums text-teal-200">{activeFilters.length}</span>}
+          </button>
         </div>
-        <button
-          onClick={() => setFiltersOpen(open => !open)}
-          aria-expanded={filtersOpen}
-          aria-label={`Фильтры${activeFilters.length ? `: выбрано ${activeFilters.length}` : ""}`}
-          className="lg lg:hidden shrink-0 inline-flex items-center justify-center gap-1.5 h-12 min-w-12 px-3 rounded-full text-sm text-neutral-200"
-        >
-          <SlidersHorizontal className="w-4 h-4" aria-hidden="true" />
-          {activeFilters.length > 0 && <span className="text-xs tabular-nums text-teal-200">{activeFilters.length}</span>}
-        </button>
-      </div>
 
-      {!search.trim() && hero}
-      <main id="feed" className="max-w-page mx-auto px-4 py-6 lg:py-8 grid grid-cols-1 lg:grid-cols-4 gap-4 lg:gap-8 relative z-0 scroll-mt-20">
         {/* Sidebar Filters */}
-        <aside className={`lg:col-span-1 space-y-6 ${filtersOpen ? "" : "hidden"} lg:block`}>
+        <aside className={`lg:col-start-1 lg:row-start-1 lg:row-span-2 space-y-6 ${filtersOpen ? "" : "hidden"} lg:block`}>
           <div className="neu-sub rounded-3xl p-5 space-y-6">
             {/* Направление и уточнение по технологиям — главное для кандидата */}
             <div className="space-y-3">
@@ -719,7 +694,7 @@ export default function Feed({ initialRows, initialTotal, hero, after }: { initi
         </aside>
 
         {/* Vacancies Feed */}
-        <section className="lg:col-span-3 space-y-4">
+        <section className="lg:col-start-2 lg:col-span-3 lg:row-start-2 min-w-0 space-y-4">
           <div className="flex items-center gap-2 overflow-x-auto sm:flex-wrap -mx-4 px-4 sm:mx-0 sm:px-0 [scrollbar-width:none]" role="group" aria-label="Раздел ленты">
             {([["", "Все разделы", "Все"], ...AREAS.map(a => [a.id, a.label, a.short])] as [Area | "", string, string][]).map(([id, label, short]) => (
               <button
@@ -850,7 +825,7 @@ export default function Feed({ initialRows, initialTotal, hero, after }: { initi
         </section>
       </main>
 
-      {!search.trim() && after}
+      {!signedIn && after}
 
       {applyVacancy && <SmartApply vacancy={applyVacancy} user={user} onClose={() => setApplyVacancy(null)} />}
     </div>

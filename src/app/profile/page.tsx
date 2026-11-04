@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import type { User } from "@supabase/supabase-js";
 import { useRouter } from "next/navigation";
-import { Briefcase, FileText, Loader2, LogOut, Save, Sparkles, Trash2, Upload, UserCircle } from "lucide-react";
+import { Briefcase, FileText, Loader2, Save, Sparkles, Trash2, Upload, UserCircle } from "lucide-react";
 import type { ResumeDraft } from "@/lib/resume-draft";
 import TelegramSubscription from "@/components/TelegramSubscription";
 import DeleteAccount from "@/components/DeleteAccount";
@@ -15,6 +15,7 @@ import LevelPicker from "@/components/LevelPicker";
 import ExperienceInput from "@/components/ExperienceInput";
 import Logo from "@/components/Logo";
 import AppBar from "@/components/AppBar";
+import UserMenu from "@/components/UserMenu";
 import { toast } from "@/components/Toaster";
 import { saveErrorText } from "@/lib/auth-errors";
 
@@ -249,11 +250,6 @@ export default function ProfilePage() {
     }
   }
 
-  async function handleLogout() {
-    await supabase.auth.signOut();
-    router.push("/");
-  }
-
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -266,14 +262,13 @@ export default function ProfilePage() {
 
   return (
     <>
-    <AppBar role={isCandidate ? "candidate" : "employer"} current="/profile" />
+    <AppBar role={isCandidate ? "candidate" : "employer"} />
     <div className="min-h-screen text-neutral-100 font-sans p-4 sm:p-8">
       <div className="max-w-3xl mx-auto space-y-8">
-        <div className="flex items-center justify-between sm:justify-end">
-          <Logo className="sm:hidden" />
-          <button onClick={handleLogout} className="text-sm text-neutral-400 hover:text-white flex items-center gap-2 transition-colors">
-            <LogOut className="w-4 h-4" /> Выйти
-          </button>
+        {/* На телефоне верхней панели нет: логотип и меню аккаунта стоят в самой странице */}
+        <div className="flex items-center justify-between sm:hidden">
+          <Logo />
+          <UserMenu role={isCandidate ? "candidate" : "employer"} />
         </div>
 
         {notice && (

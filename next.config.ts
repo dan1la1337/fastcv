@@ -44,6 +44,10 @@ const nextConfig: NextConfig = {
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL?.replace(/\/$/, "");
     return supabaseUrl ? [{ source: "/sb/:path*", destination: `${supabaseUrl}/:path*` }] : [];
   },
+  async redirects() {
+    // Описание сервиса теперь на главной; адрес сохраняем для старых ссылок и поисковиков
+    return [{ source: "/about", destination: "/", permanent: true }];
+  },
   async headers() {
     return [{ source: "/(.*)", headers: securityHeaders }];
   },

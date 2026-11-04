@@ -1,30 +1,16 @@
-import Link from "next/link";
 import Logo from "@/components/Logo";
 import UserMenu from "@/components/UserMenu";
 
-const SECTIONS = {
-  candidate: [["/applications", "Мои отклики"], ["/messages", "Сообщения"]],
-  employer: [["/employer", "Кабинет"], ["/resumes", "Резюме"], ["/messages", "Сообщения"]],
-} as const;
-
 /**
- * Верхняя панель разделов для вошедших на десктопе. На телефоне её место занимает нижняя панель.
- * В ленту ведёт логотип, в профиль и к выходу — меню аккаунта.
+ * Верхняя панель для вошедших на десктопе: в ленту ведёт логотип, в разделы и к выходу — меню аккаунта.
+ * На телефоне её место занимает нижняя панель.
  */
-export default function AppBar({ role, current }: { role: "candidate" | "employer"; current: string }) {
+export default function AppBar({ role }: { role: "candidate" | "employer" }) {
   return (
     <header className="top-strip hidden sm:block sticky top-0 z-20 px-4 pt-3 pb-3">
       <div className="glass rounded-3xl max-w-6xl mx-auto pl-4 pr-2.5 py-2.5 flex items-center justify-between gap-3">
         <Logo />
-        <nav aria-label="Разделы" className="flex items-center gap-2">
-          {SECTIONS[role].map(([href, label]) => (
-            <Link key={href} href={href} aria-current={href === current ? "page" : undefined}
-              className={`lg px-4 py-2 rounded-full text-sm transition-colors ${href === current ? "lg-on" : "text-neutral-300 hover:text-white"}`}>
-              {label}
-            </Link>
-          ))}
-          <UserMenu role={role} />
-        </nav>
+        <UserMenu role={role} />
       </div>
     </header>
   );

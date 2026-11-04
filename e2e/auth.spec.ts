@@ -30,12 +30,10 @@ test.describe("кандидат", () => {
 
   test("меню аккаунта в ленте: разделы, клавиатура, выход", async ({ page }) => {
     await logIn(page, candidate, "/");
-    const open = page.getByRole("button", { name: "Меню профиля" });
+    const open = page.getByRole("button", { name: /^Меню профиля/ });
     await open.click();
     const menu = page.getByRole("menu", { name: "Меню профиля" });
-    for (const name of ["Мои отклики", "Сообщения", "Профиль", "Выйти"]) {
-      await expect(menu.getByRole("menuitem", { name })).toBeVisible();
-    }
+    await expect(menu.getByRole("menuitem")).toHaveText(["Профиль", "Мои отклики", /^Сообщения/, "Выйти"]);
     // Esc закрывает меню и возвращает фокус на кнопку
     await page.keyboard.press("Escape");
     await expect(menu).toBeHidden();
@@ -56,14 +54,45 @@ test.describe("кандидат", () => {
     await expect(page).toHaveURL(/\/login/);
   });
 
-  test("шапка кабинета: в ленту ведёт логотип, отдельной кнопки нет", async ({ page }, info) => {
+  test("шапка кабинета и ленты: логотип и меню, разделы только в меню", async ({ page }, info) => {
     test.skip(info.project.name !== "desktop", "верхняя панель только на десктопе");
     await logIn(page, candidate, "/profile");
     const bar = page.getByRole("banner");
-    await expect(bar.getByRole("link", { name: "Мои отклики" })).toBeVisible();
-    await expect(bar.getByRole("link", { name: "Лента" })).toHaveCount(0);
+    await expect(bar.getByRole("button", { name: /^Меню профиля/ })).toBeVisible();
+    await expect(bar.getByRole("link")).toHaveCount(1);
     await bar.getByRole("link", { name: "FastCV — на главную" }).click();
     await expect(page).toHaveURL(/\/$/);
+    await expect(bar.getByRole("button", { name: /^Меню профиля/ })).toBeVisible();
+    await expect(bar.getByRole("link")).toHaveCount(1);
+  });
+
+  test("переход из кабинета в ленту не показывает вошедшему кнопку входа и приветствие", async ({ page }, info) => {
+    test.skip(info.project.name !== "desktop", "логотип в кабинете на десктопе стоит в общей панели");
+    await logIn(page, candidate, "/profile");
+    // Каждый кадр смотрим, видел ли человек экран гостя: состояние держится доли секунды
+    await page.evaluate(() => {
+      const state = window as unknown as { guestSeen: boolean };
+      state.guestSeen = false;
+      const check = () => {
+        const login = document.querySelector<HTMLElement>('header a[href="/login"]');
+        const hero = document.querySelector<HTMLElement>(".guest-only");
+        if (login?.offsetParent || hero?.offsetParent) state.guestSeen = true;
+        requestAnimationFrame(check);
+      };
+      check();
+    });
+    await page.getByRole("banner").getByRole("link", { name: "FastCV — на главную" }).click();
+    await expect(page).toHaveURL(/\/$/);
+    await expect(page.locator("#feed section h2").first()).toBeVisible();
+    await expect(page.getByRole("banner").getByRole("button", { name: /^Меню профиля/ })).toBeVisible();
+    expect(await page.evaluate(() => (window as unknown as { guestSeen: boolean }).guestSeen)).toBe(false);
+  });
+
+  test("в профиле выход только в меню аккаунта, на обоих устройствах", async ({ page }) => {
+    await logIn(page, candidate, "/profile");
+    await expect(page.getByRole("button", { name: "Выйти" })).toHaveCount(0);
+    await page.getByRole("button", { name: /^Меню профиля/ }).click();
+    await expect(page.getByRole("menuitem", { name: "Выйти" })).toBeVisible();
   });
 
   test("добавляет вакансию в избранное и убирает обратно", async ({ page }, info) => {

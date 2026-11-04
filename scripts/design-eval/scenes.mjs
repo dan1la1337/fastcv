@@ -71,7 +71,6 @@ export function scenes() {
     { id: "vacancy", as: "guest", run: go(`/vacancy/${data.vacancyId}`) },
     { id: "vacancy-scrolled", as: "guest", run: async p => { await go(`/vacancy/${data.vacancyId}`)(p); await scroll(p); } },
     { id: "company", as: "guest", run: go(`/company/${encodeURIComponent(data.company)}`) },
-    { id: "about", as: "guest", run: go("/about") },
     { id: "login", as: "guest", run: go("/login") },
     { id: "register", as: "guest", run: go("/register") },
     { id: "register-form", as: "guest", run: go("/register/form?role=candidate") },

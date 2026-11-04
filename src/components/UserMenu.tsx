@@ -13,11 +13,13 @@ type Item = { href: string; label: string; icon: LucideIcon };
 const MESSAGES: Item = { href: "/messages", label: "Сообщения", icon: MessageCircle };
 const PROFILE: Item = { href: "/profile", label: "Профиль", icon: UserRound };
 const ITEMS: Record<Role, Item[]> = {
-  candidate: [{ href: "/applications", label: "Мои отклики", icon: MessageSquare }, MESSAGES, PROFILE],
-  employer: [{ href: "/employer", label: "Кабинет", icon: Briefcase }, { href: "/resumes", label: "Резюме", icon: Users }, MESSAGES, PROFILE],
+  candidate: [PROFILE, { href: "/applications", label: "Мои отклики", icon: MessageSquare }, MESSAGES],
+  employer: [PROFILE, { href: "/employer", label: "Кабинет", icon: Briefcase }, { href: "/resumes", label: "Резюме", icon: Users }, MESSAGES],
 };
 
-const ROW = "flex items-center gap-2.5 w-full min-h-11 px-3 rounded-xl text-sm text-left transition-colors hover:bg-white/[0.08] focus:bg-white/[0.08] focus:outline-none";
+/* Радиус строки 16 при отступе панели 8 и её радиусе 24: углы концентричны. Подсветка только по наведению
+   и клавиатурному фокусу (focus-visible), иначе при открытии мышью горели бы две строки сразу */
+const ROW = "flex items-center gap-3 w-full h-11 px-3 rounded-2xl text-sm text-left transition-colors hover:bg-white/[0.08] hover:text-white focus-visible:bg-white/[0.08] focus-visible:text-white";
 
 /** Кружок с буквой аккаунта в шапке: открывает меню с разделами и выходом. */
 export default function UserMenu({ role, email: givenEmail }: { role: Role; email?: string | null }) {
@@ -72,24 +74,25 @@ export default function UserMenu({ role, email: givenEmail }: { role: Role; emai
   return (
     <div ref={root} className="relative">
       <button ref={trigger} type="button" onClick={() => setOpen(value => !value)}
-        aria-label="Меню профиля" aria-haspopup="menu" aria-expanded={open} aria-controls={open ? menuId : undefined}
-        className="lg w-10 h-10 flex items-center justify-center rounded-full text-neutral-100 font-semibold cursor-pointer transition-colors">
+        aria-label={unread ? `Меню профиля, чатов с новыми сообщениями: ${unread}` : "Меню профиля"} aria-haspopup="menu" aria-expanded={open} aria-controls={open ? menuId : undefined}
+        className={`lg relative w-10 h-10 flex items-center justify-center rounded-full font-semibold cursor-pointer transition-colors ${open ? "lg-on" : "text-neutral-100"}`}>
         {email ? email.charAt(0).toUpperCase() : <UserRound className="w-4 h-4" aria-hidden="true" />}
+        {!open && <UnreadDot count={unread} className="absolute -top-1 -right-1" />}
       </button>
       {open && (
-        <div className="absolute right-0 top-full mt-2 w-64 max-w-[calc(100vw-2rem)] rounded-2xl border border-white/15 bg-neutral-900 p-1.5 shadow-2xl shadow-black/60">
-          {email && <p className="px-3 pt-2 pb-2.5 text-xs text-neutral-400 truncate" title={email}>{email}</p>}
-          <div ref={menu} id={menuId} role="menu" aria-label="Меню профиля" onKeyDown={onMenuKey}>
+        <div className="menu-pop glass absolute right-0 top-full mt-3 w-64 max-w-[calc(100vw-2rem)] rounded-3xl p-2">
+          {email && <p className="px-3 pt-2 pb-3 mb-2 border-b border-white/10 text-xs text-neutral-400 truncate" title={email}>{email}</p>}
+          <div ref={menu} id={menuId} role="menu" aria-label="Меню профиля" onKeyDown={onMenuKey} className="flex flex-col gap-1">
             {ITEMS[role].map(({ href, label, icon: Icon }) => (
               <Link key={href} href={href} role="menuitem" onClick={() => setOpen(false)}
                 aria-current={path.startsWith(href) ? "page" : undefined}
-                className={`${ROW} ${path.startsWith(href) ? "text-teal-200" : "text-neutral-200"}`}>
+                className={`${ROW} ${path.startsWith(href) ? "bg-teal-300/10 text-teal-200" : "text-neutral-200"}`}>
                 <Icon className="w-4 h-4 shrink-0" aria-hidden="true" />
                 <span className="flex-1">{label}</span>
                 {href === MESSAGES.href && <UnreadDot count={unread} label="чатов с новыми сообщениями" />}
               </Link>
             ))}
-            <div role="separator" className="my-1.5 border-t border-white/10" />
+            <div role="separator" className="my-1 border-t border-white/10" />
             <button type="button" role="menuitem" onClick={logOut} className={`${ROW} text-neutral-200`}>
               <LogOut className="w-4 h-4 shrink-0" aria-hidden="true" />
               Выйти

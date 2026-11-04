@@ -362,7 +362,20 @@ body {
   background: var(--og-grain) 0 0 / 256px 256px repeat;
   opacity: 0.07;
 }
-/* Витрина (главная для гостя, вход, регистрация, «О сервисе»): студийная плита со стеклянными шарами
+/* Всплывающее меню: короткое появление от угла кнопки */
+/* Панель лежит внутри стеклянной шапки: вложенное размытие не работает, и страница просвечивала бы сквозь текст.
+   Поэтому поверхность сплошная, а стеклянными остаются край и блик */
+.menu-pop {
+  background: linear-gradient(rgba(255, 255, 255, 0.035), rgba(255, 255, 255, 0.035)), var(--obsidian);
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+  box-shadow: var(--glass-lift), 0 24px 60px rgba(0, 0, 0, 0.6);
+  transform-origin: top right;
+  animation: menu-pop 140ms ease-out;
+}
+@keyframes menu-pop { from { opacity: 0; transform: translateY(-4px) scale(0.98); } }
+
+/* Витрина (главная для гостя, вход, регистрация): студийная плита со стеклянными шарами
    у правого края, к тексту гаснет до void. Страница отмечает себя классом .showcase */
 html:not([data-auth]) body:has(.showcase) .page-backdrop,
 body:has(.showcase:not(.guest-only)) .page-backdrop {
@@ -397,6 +410,6 @@ body:has(.showcase:not(.guest-only)) .page-backdrop::before { opacity: 0.22; }
 html[data-auth] .guest-only { display: none; }
 
 @media (prefers-reduced-motion: reduce) {
-  .ring-fill, .live-ping, .ai-shimmer, .letter-write, .bar-grow { animation: none; }
+  .ring-fill, .live-ping, .ai-shimmer, .letter-write, .bar-grow, .menu-pop { animation: none; }
   .lg { transition: none; }
 }

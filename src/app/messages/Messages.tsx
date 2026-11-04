@@ -45,7 +45,7 @@ export default function Messages({ initial }: { initial: string | null }) {
 
   return (
     <>
-    <AppBar role={role === "employer" ? "employer" : "candidate"} current="/messages" />
+    <AppBar role={role === "employer" ? "employer" : "candidate"} />
     <div className="min-h-screen text-neutral-100 p-3 sm:p-6">
       <div className="max-w-6xl mx-auto space-y-4">
         {/* На телефоне в открытом диалоге своя кнопка «назад»: вторая над ней не нужна */}

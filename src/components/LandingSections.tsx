@@ -13,7 +13,7 @@ const SOURCES = [
   { title: "«Работа России»", text: "Открытые данные портала" },
 ];
 
-/** Откуда вакансии: общий блок главной и /about. */
+/** Откуда вакансии. */
 export function SourcesSection() {
   return (
     <section id="sources" aria-labelledby="sources-title" className="flex flex-wrap gap-8 scroll-mt-20">
@@ -36,7 +36,19 @@ export function SourcesSection() {
   );
 }
 
-/** Призыв для работодателей: общий блок главной и /about. */
+/** Что ещё сервис делает с найденной вакансией. */
+export function ExtrasSection() {
+  return (
+    <section aria-labelledby="extras" className="neu-sub rounded-3xl p-8 sm:p-10 space-y-4">
+      <h2 id="extras" className="font-display text-xl font-bold leading-tight">Нашли вакансию? Дальше тоже поможем</h2>
+      <p className="text-neutral-300 leading-relaxed">
+        Покажем, насколько она подходит вашему резюме, напишем сопроводительное письмо и потренируем перед собеседованием.
+      </p>
+    </section>
+  );
+}
+
+/** Призыв для работодателей. */
 export function EmployersSection() {
   return (
     <section aria-labelledby="employers" className="neu-sub rounded-3xl p-8 sm:p-10 flex flex-wrap items-center gap-8">
