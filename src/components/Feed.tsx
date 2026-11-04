@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { supabase } from "@/lib/supabase";
 import {
   AREAS, DEFAULT_FILTERS, DIRECTIONS, experienceLabel, sourceOf, freshnessLabel, ghostSignal, LEVELS, WORK_FORMATS, fetchVacancyPage, formatLabel, formatSalary, levelLabel, plural, PAGE_SIZE,
@@ -30,6 +30,10 @@ const SmartApply = dynamic(() => import("@/components/SmartApply"), { ssr: false
  * в HTML (initialRows): лента видна до загрузки скриптов и индексируется поисковиками.
  * Дальше — запросы из браузера при смене фильтров и «Показать ещё».
  */
+const neverChanges = () => () => {};
+// То же условие, что у скрипта в layout.tsx
+const readSessionCookie = () => /(^|; )sb-[^=]+-auth-token/.test(document.cookie);
+
 export default function Feed({ initialRows, initialTotal, hero, after }: { initialRows: Vacancy[] | null; initialTotal: number; hero?: React.ReactNode; after?: React.ReactNode }) {
   const [vacancies, setVacancies] = useState<Vacancy[]>(initialRows ?? []);
   const [total, setTotal] = useState(initialTotal);
@@ -38,6 +42,10 @@ export default function Feed({ initialRows, initialTotal, hero, after }: { initi
   const [loadingMore, setLoadingMore] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [user, setUser] = useState<User | null>(null);
+  const [authChecked, setAuthChecked] = useState(false);
+  // Пока сессия проверяется, верим куке: иначе при переходе из кабинета вошедший на миг увидит экран гостя
+  const hasSessionCookie = useSyncExternalStore(neverChanges, readSessionCookie, () => false);
+  const signedIn = Boolean(user) || (hasSessionCookie && !authChecked);
   const [userProfile, setUserProfile] = useState<Tables<"profiles"> | null>(null);
 
   // «Для вас»: подборка по профилю кандидата и процент совпадения на карточках
@@ -104,6 +112,9 @@ export default function Feed({ initialRows, initialTotal, hero, after }: { initi
 
   useEffect(() => {
     supabase.auth.getUser().then(async ({ data }) => {
+      setAuthChecked(true);
+      // Кука могла пережить сессию: снимаем метку входа, чтобы гость увидел кнопку входа и приветствие
+      if (!data.user) delete document.documentElement.dataset.auth;
       if (data.user) {
         setUser(data.user);
         const { data: profile } = await supabase
@@ -528,12 +539,12 @@ export default function Feed({ initialRows, initialTotal, hero, after }: { initi
               {loading ? "…" : `${total.toLocaleString("ru-RU")} ${plural(total, VACANCY_FORMS)}`}
             </span>
             
-            {user ? (
-              <UserMenu role={isEmployer ? "employer" : "candidate"} email={user.email} />
+            {signedIn ? (
+              <UserMenu role={isEmployer ? "employer" : "candidate"} email={user?.email} />
             ) : (
               <Link 
                 href="/login"
-                className="lg px-4 py-2 text-neutral-100 rounded-full text-sm font-medium transition-colors relative z-50 whitespace-nowrap"
+                className="guest-only lg px-4 py-2 text-neutral-100 rounded-full text-sm font-medium transition-colors relative z-50 whitespace-nowrap"
               >
                 Войти<span className="hidden sm:inline"> / Регистрация</span>
               </Link>
@@ -542,7 +553,7 @@ export default function Feed({ initialRows, initialTotal, hero, after }: { initi
         </div>
       </header>
 
-      {hero}
+      {!signedIn && hero}
       {/* Вторая строка сетки забирает лишнюю высоту: колонка фильтров занимает обе строки и не растягивает строку поиска */}
       <main id="feed" className="max-w-page mx-auto px-4 py-6 lg:py-8 grid grid-cols-1 lg:grid-cols-4 lg:grid-rows-[auto_1fr] gap-y-4 lg:gap-x-8 relative z-0 scroll-mt-20">
         {/* Поиск над результатами, рядом кнопка фильтров: на телефоне они свёрнуты и открываются под этой строкой */}
@@ -814,7 +825,7 @@ export default function Feed({ initialRows, initialTotal, hero, after }: { initi
         </section>
       </main>
 
-      {after}
+      {!signedIn && after}
 
       {applyVacancy && <SmartApply vacancy={applyVacancy} user={user} onClose={() => setApplyVacancy(null)} />}
     </div>

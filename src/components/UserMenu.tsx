@@ -13,8 +13,8 @@ type Item = { href: string; label: string; icon: LucideIcon };
 const MESSAGES: Item = { href: "/messages", label: "Сообщения", icon: MessageCircle };
 const PROFILE: Item = { href: "/profile", label: "Профиль", icon: UserRound };
 const ITEMS: Record<Role, Item[]> = {
-  candidate: [{ href: "/applications", label: "Мои отклики", icon: MessageSquare }, MESSAGES, PROFILE],
-  employer: [{ href: "/employer", label: "Кабинет", icon: Briefcase }, { href: "/resumes", label: "Резюме", icon: Users }, MESSAGES, PROFILE],
+  candidate: [PROFILE, { href: "/applications", label: "Мои отклики", icon: MessageSquare }, MESSAGES],
+  employer: [PROFILE, { href: "/employer", label: "Кабинет", icon: Briefcase }, { href: "/resumes", label: "Резюме", icon: Users }, MESSAGES],
 };
 
 /* Радиус строки 16 при отступе панели 8 и её радиусе 24: углы концентричны. Подсветка только по наведению
