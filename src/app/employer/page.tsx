@@ -733,23 +733,6 @@ export default function EmployerDashboard() {
                     </div>
                   )}
 
-                  <ScreeningVerdict applicationId={app.id} screening={screenings[app.id]}
-                    onChange={sc => setScreenings(all => ({ ...all, [app.id]: sc }))} />
-
-                  <BlitzAnswers applicationId={app.id} answers={app.blitz_answers ?? []} summary={app.blitz_summary} />
-
-                  {/* Письмо свёрнуто до двух строк: иначе на экран помещается одна карточка, а кнопки решения уходят вниз */}
-                  <details className="group border-t border-white/10 pt-3 text-sm text-neutral-300 leading-relaxed">
-                    <summary className="cursor-pointer list-none">
-                      <span className="flex items-center justify-between gap-2 text-xs text-neutral-500">
-                        Сопроводительное письмо
-                        <ChevronDown className="w-4 h-4 transition-transform group-open:rotate-180" aria-hidden="true" />
-                      </span>
-                      <span className="mt-1.5 line-clamp-2 group-open:hidden">{app.cover_letter || "Письмо не сохранено"}</span>
-                    </summary>
-                    <p className="mt-1.5 whitespace-pre-line">{app.cover_letter || "Письмо не сохранено"}</p>
-                  </details>
-
                   {app.hr_message && reply?.appId !== app.id && (
                     <div className="neu-sub rounded-2xl px-4 py-3 text-sm text-neutral-400">
                       <p className="text-xs text-neutral-500 mb-1">Ваш ответ</p>
@@ -792,7 +775,7 @@ export default function EmployerDashboard() {
 
                   {/* Пока пишем ответ, кнопки решения убраны: иначе рядом два разных «отправить» */}
                   {reply?.appId !== app.id && (
-                  <div className="grid grid-cols-2 sm:flex sm:flex-wrap sm:items-center sm:justify-end gap-2.5 pt-3 border-t border-white/10">
+                  <div className="grid grid-cols-2 sm:flex sm:flex-wrap sm:items-center sm:justify-end gap-2.5">
                     {app.profiles?.resume_path && (
                       <button onClick={() => openResume(app.profiles!.resume_path!)}
                         className="lg col-span-2 sm:mr-auto h-11 px-4 rounded-full text-neutral-200 text-sm transition-colors flex items-center justify-center gap-1.5">
@@ -815,6 +798,24 @@ export default function EmployerDashboard() {
                     </button>
                   </div>
                   )}
+
+                  {/* Решение выше подробностей: кнопки видно, не пролистывая ответы и письмо */}
+                  <ScreeningVerdict applicationId={app.id} screening={screenings[app.id]}
+                    onChange={sc => setScreenings(all => ({ ...all, [app.id]: sc }))} />
+
+                  <BlitzAnswers applicationId={app.id} answers={app.blitz_answers ?? []} summary={app.blitz_summary} />
+
+                  {/* Письмо свёрнуто до двух строк: иначе на экран помещается одна карточка, а кнопки решения уходят вниз */}
+                  <details className="group border-t border-white/10 pt-3 text-sm text-neutral-300 leading-relaxed">
+                    <summary className="cursor-pointer list-none">
+                      <span className="flex items-center justify-between gap-2 text-xs text-neutral-500">
+                        Сопроводительное письмо
+                        <ChevronDown className="w-4 h-4 transition-transform group-open:rotate-180" aria-hidden="true" />
+                      </span>
+                      <span className="mt-1.5 line-clamp-2 group-open:hidden">{app.cover_letter || "Письмо не сохранено"}</span>
+                    </summary>
+                    <p className="mt-1.5 whitespace-pre-line">{app.cover_letter || "Письмо не сохранено"}</p>
+                  </details>
                 </div>
               ))}
             </div>

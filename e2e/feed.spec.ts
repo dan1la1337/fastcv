@@ -119,9 +119,10 @@ test("фильтр по источнику: только Telegram — во вс�
   await page.getByRole("button", { name: "Telegram", exact: true }).click();
   await expect(page.getByRole("button", { name: "Telegram", exact: true })).toHaveAttribute("aria-pressed", "true");
   await expect.poll(() => total(page)).toBeLessThanOrEqual(all);
-  const badges = await page.locator("#feed section").filter({ has: page.locator("h2") })
-    .locator("text=/^(Telegram|SuperJob|Работа России|Сайт компании|Прямой работодатель)$/i").allTextContents();
-  expect(badges.every(b => b.toLowerCase() === "telegram")).toBe(true);
+  // Лента обновляется после ответа базы: ждём, пока старые карточки сменятся
+  const badges = page.locator("#feed section").filter({ has: page.locator("h2") })
+    .locator("text=/^(Telegram|SuperJob|Работа России|Сайт компании|Прямой работодатель)$/i");
+  await expect.poll(async () => (await badges.allTextContents()).every(b => b.toLowerCase() === "telegram")).toBe(true);
   await page.getByRole("button", { name: "Все", exact: true }).first().click();
   await expect.poll(() => total(page)).toBe(all);
 });

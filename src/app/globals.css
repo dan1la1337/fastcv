@@ -24,7 +24,7 @@
   /* Мятный — главное действие и выбранное состояние */
   --accent: #5eead4;
   --accent-hover: #99f6e4;
-  --accent-glow: 0 8px 28px rgba(94, 234, 212, 0.27);
+  --accent-glow: 0 6px 20px rgba(94, 234, 212, 0.16);
   --focus: #ffffff;
 
   --glass-lift: inset 0 1px 0 rgba(255, 255, 255, 0.14), 0 30px 80px rgba(0, 0, 0, 0.55);
@@ -221,14 +221,14 @@ body {
     position: relative;
     color: var(--ink);
     font-weight: 500;
-    background: linear-gradient(180deg, rgba(255, 255, 255, 0.14), rgba(255, 255, 255, 0.04));
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.09), rgba(255, 255, 255, 0.05));
     border: 1px solid var(--glass-rim);
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1);
     -webkit-backdrop-filter: blur(var(--blur-glass));
     backdrop-filter: blur(var(--blur-glass));
     transition: background 160ms ease, border-color 160ms ease, transform 160ms ease;
   }
-  .lg:hover:not(:disabled) { background: rgba(255, 255, 255, 0.14); }
+  .lg:hover:not(:disabled) { background: rgba(255, 255, 255, 0.13); }
   .lg:active:not(:disabled) { background: rgba(255, 255, 255, 0.08); }
   .lg:disabled, .lg[aria-disabled="true"] { opacity: 0.45; cursor: not-allowed; }
 

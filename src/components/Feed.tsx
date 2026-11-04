@@ -6,7 +6,7 @@ import {
   AREAS, DEFAULT_FILTERS, DIRECTIONS, experienceLabel, sourceOf, freshnessLabel, ghostSignal, LEVELS, WORK_FORMATS, fetchVacancyPage, formatLabel, formatSalary, levelLabel, plural, PAGE_SIZE,
   VACANCY_FORMS, SOURCES, type SourceKind, type Area, type Level, type Vacancy, type VacancyFilters, type WorkFormat,
 } from "@/lib/vacancies";
-import { Clock, Search, MapPin, ChevronDown, Sparkles, Loader2, ExternalLink, Globe, SlidersHorizontal, Briefcase, Building2, Target, Bookmark, BookmarkCheck, EyeOff, Ghost, Undo2, X } from "lucide-react";
+import { Clock, Search, MapPin, Sparkles, Loader2, ExternalLink, Globe, SlidersHorizontal, Briefcase, Building2, Target, Bookmark, BookmarkCheck, EyeOff, Ghost, Undo2, X } from "lucide-react";
 import { fetchMarked, fetchMarks, setMark, type MarkKind } from "@/lib/marks";
 import { toast } from "@/components/Toaster";
 import { fetchMatches, fetchRecommended, type Match } from "@/lib/matching";
@@ -582,24 +582,27 @@ export default function Feed({ initialRows, initialTotal, hero, after }: { initi
         </div>
       </header>
 
-      {hero}
+      {/* Поиск первым на странице, рядом кнопка фильтров: на телефоне они свёрнуты.
+          С запросом лендинг убирается, и результаты сразу под полем */}
+      <div className="max-w-6xl mx-auto px-4 pt-4 flex items-center gap-2">
+        <div className="relative flex-1 min-w-0">
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400" aria-hidden="true" />
+          <input id="feed-search" type="search" aria-label="Поиск по вакансиям" placeholder="Должность или навык: Java, Backend..." value={search}
+            onChange={(e) => { setSearch(e.target.value); if (mode !== "all") setMode("all"); }} className="neu-in w-full h-12 pl-10 pr-4 text-sm text-neutral-100" />
+        </div>
+        <button
+          onClick={() => setFiltersOpen(open => !open)}
+          aria-expanded={filtersOpen}
+          aria-label={`Фильтры${activeFilters.length ? `: выбрано ${activeFilters.length}` : ""}`}
+          className="lg lg:hidden shrink-0 inline-flex items-center justify-center gap-1.5 h-12 min-w-12 px-3 rounded-full text-sm text-neutral-200"
+        >
+          <SlidersHorizontal className="w-4 h-4" aria-hidden="true" />
+          {activeFilters.length > 0 && <span className="text-xs tabular-nums text-teal-200">{activeFilters.length}</span>}
+        </button>
+      </div>
+
+      {!search.trim() && hero}
       <main id="feed" className="max-w-6xl mx-auto px-4 py-6 lg:py-8 grid grid-cols-1 lg:grid-cols-4 gap-4 lg:gap-8 relative z-0 scroll-mt-20">
-        {(() => {
-          const active = [search.trim(), formats.length > 0, minSalary > 0, onlyWithSalary, country, city.trim(), selectedDirection, area, selectedLevels.length > 0, sources.length > 0].filter(Boolean).length;
-          return (
-            <button
-              onClick={() => setFiltersOpen(open => !open)}
-              aria-expanded={filtersOpen}
-              className="lg lg:hidden flex items-center justify-between w-full px-5 py-3 rounded-full text-sm font-medium text-neutral-200"
-            >
-              <span className="inline-flex items-center gap-2">
-                <SlidersHorizontal className="w-4 h-4 text-neutral-400" /> Фильтры
-                {active > 0 && <span className="text-xs px-2 py-0.5 rounded-full bg-teal-300 text-neutral-950">{active}</span>}
-              </span>
-              <ChevronDown className={`w-4 h-4 text-neutral-400 transition-transform ${filtersOpen ? "rotate-180" : ""}`} />
-            </button>
-          );
-        })()}
         {/* Sidebar Filters */}
         <aside className={`lg:col-span-1 space-y-6 ${filtersOpen ? "" : "hidden"} lg:block`}>
           <div className="neu-sub rounded-3xl p-5 space-y-6">
@@ -721,12 +724,6 @@ export default function Feed({ initialRows, initialTotal, hero, after }: { initi
 
         {/* Vacancies Feed */}
         <section className="lg:col-span-3 space-y-4">
-          {/* Поиск над результатами, а не в фильтрах: на телефоне они свёрнуты, и искать было негде */}
-          <div className="relative">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400" aria-hidden="true" />
-            <input id="feed-search" type="search" aria-label="Поиск по вакансиям" placeholder="Должность или навык: Java, Backend..." value={search}
-              onChange={(e) => { setSearch(e.target.value); if (mode !== "all") setMode("all"); }} className="neu-in w-full h-12 pl-10 pr-4 text-sm text-neutral-100" />
-          </div>
           <div className="flex items-center gap-2 overflow-x-auto sm:flex-wrap -mx-4 px-4 sm:mx-0 sm:px-0 [scrollbar-width:none]" role="group" aria-label="Раздел ленты">
             {([["", "Все разделы", "Все"], ...AREAS.map(a => [a.id, a.label, a.short])] as [Area | "", string, string][]).map(([id, label, short]) => (
               <button
@@ -769,14 +766,14 @@ export default function Feed({ initialRows, initialTotal, hero, after }: { initi
           )}
 
           {forYou && (
-            <div className="rounded-3xl border border-teal-300/25 bg-teal-300/[0.06] px-5 py-4 text-sm text-neutral-300">
+            <p className="text-xs text-neutral-400">
               {hasPrefs ? (
-                <>Сначала вакансии, которые больше всего подходят вашему профилю. <Link href="/profile#prefs" className="text-teal-300 hover:underline">Изменить, что ищу</Link></>
+                <>Сначала — самые подходящие вашему профилю. <Link href="/profile#prefs" className="text-teal-300 hover:underline">Изменить, что ищу</Link></>
               ) : (
                 <>Подборка пока общая: укажите в профиле направления, уровень и навыки — и вакансии выстроятся под вас.{" "}
                   <Link href="/profile#prefs" className="text-teal-300 hover:underline">Заполнить за минуту</Link></>
               )}
-            </div>
+            </p>
           )}
 
           {mode === "all" && !listLoading && (
@@ -857,7 +854,7 @@ export default function Feed({ initialRows, initialTotal, hero, after }: { initi
         </section>
       </main>
 
-      {after}
+      {!search.trim() && after}
 
       {applyVacancy && <SmartApply vacancy={applyVacancy} user={user} onClose={() => setApplyVacancy(null)} />}
     </div>
