@@ -27,12 +27,13 @@ for (const [name, path] of PAGES) {
   });
 }
 
-test("вид: первый экран /about", async ({ page }) => {
-  await page.goto("/about");
+test("вид: первый экран главной", async ({ page }) => {
+  await page.goto("/");
   await settle(page);
-  // Числа счётчика вакансий меняются каждый запуск
+  // Числа счётчика вакансий меняются каждый запуск: и в блоке, и в шапке
   const live = page.locator("[data-live-stats]");
-  await expect(page).toHaveScreenshot("about-hero.png", {
-    animations: "disabled", maxDiffPixelRatio: 0.02, mask: [live],
+  const headerCount = page.getByRole("banner").locator(".tabular-nums");
+  await expect(page).toHaveScreenshot("home-hero.png", {
+    animations: "disabled", maxDiffPixelRatio: 0.02, mask: [live, headerCount],
   });
 });

@@ -138,3 +138,25 @@ test("фильтр по стране: Россия первой, лента не
   await expect.poll(() => total(page)).toBeLessThanOrEqual(all);
   await expect(page.locator("#feed section h2").first()).toBeVisible();
 });
+
+test("поиск стоит над результатами, под приветствием, и не сдвигает его при вводе", async ({ page }) => {
+  await page.goto("/");
+  const heading = page.getByRole("heading", { level: 1 });
+  const search = page.locator("#feed #feed-search");
+  await expect(search).toBeVisible();
+  expect((await heading.boundingBox())!.y).toBeLessThan((await search.boundingBox())!.y);
+  await search.fill("Python");
+  await expect(heading).toBeVisible();
+  await expect(search).toBeFocused();
+});
+
+test("на телефоне фильтры открываются под строкой поиска, кнопка остаётся на месте", async ({ page }, info) => {
+  test.skip(info.project.name !== "mobile", "на десктопе фильтры открыты всегда");
+  await page.goto("/");
+  const toggle = page.getByRole("button", { name: /^Фильтры/ });
+  await toggle.scrollIntoViewIfNeeded();
+  const before = (await toggle.boundingBox())!.y;
+  await toggle.click();
+  await expect(page.getByText("Направление", { exact: true }).first()).toBeVisible();
+  expect((await toggle.boundingBox())!.y).toBeCloseTo(before, 0);
+});

@@ -381,7 +381,7 @@ export default function EmployerDashboard() {
 
   return (
     <>
-    <AppBar role="employer" current="/employer" />
+    <AppBar role="employer" />
     <div className="min-h-screen text-neutral-100 font-sans p-4 sm:p-8">
       <div className="max-w-6xl mx-auto space-y-6">
         <div className="flex flex-wrap items-center gap-x-6 gap-y-4">

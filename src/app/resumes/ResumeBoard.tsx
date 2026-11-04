@@ -143,7 +143,7 @@ export default function ResumeBoard() {
 
   return (
     <>
-    <AppBar role="employer" current="/resumes" />
+    <AppBar role="employer" />
     <div className="min-h-screen text-neutral-100 p-4 sm:p-8">
       <div className="max-w-6xl mx-auto space-y-6">
         <div className="flex flex-wrap items-center gap-3">

@@ -1,6 +1,6 @@
 import Feed from "@/components/Feed";
 import Hero from "@/components/Hero";
-import { EmployersSection, SourcesSection } from "@/components/LandingSections";
+import { EmployersSection, ExtrasSection, SourcesSection } from "@/components/LandingSections";
 import { fetchLiveStats, type LiveStats } from "@/lib/live";
 import { DEFAULT_FILTERS, fetchVacancyPage, type Vacancy } from "@/lib/vacancies";
 
@@ -28,6 +28,7 @@ export default async function Home() {
   return <Feed initialRows={light} initialTotal={total} hero={<Hero stats={stats} />} after={
     <div className="guest-only max-w-page mx-auto px-4 space-y-20 sm:space-y-24 pt-16 pb-8">
       <SourcesSection />
+      <ExtrasSection />
       <EmployersSection />
     </div>
   } />;

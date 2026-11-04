@@ -137,10 +137,16 @@ test("сброс пароля: ссылка со входа, форма запр
   await expect(page.getByText("Ссылка устарела или уже использована")).toBeVisible();
 });
 
-test("главная страница сервиса доступна по /about: обещание, источники, помощь с откликом, работодателям", async ({ page }) => {
-  await page.goto("/about");
+test("старый адрес /about постоянно перенаправляет на главную", async ({ request }) => {
+  const response = await request.get("/about", { maxRedirects: 0 });
+  expect(response.status()).toBe(308);
+  expect(response.headers().location).toBe("/");
+});
+
+test("главная рассказывает о сервисе: обещание, источники, помощь с откликом, работодателям", async ({ page }) => {
+  await page.goto("/");
   await expect(page.getByRole("heading", { level: 1, name: /Вакансии со всего интернета/ })).toBeVisible();
-  await expect(page.getByRole("link", { name: "Смотреть вакансии" })).toHaveAttribute("href", "/#feed");
+  await expect(page.getByRole("link", { name: "Смотреть вакансии" })).toHaveAttribute("href", "#feed");
   await expect(page.getByRole("heading", { name: "Откуда вакансии" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "Нашли вакансию? Дальше тоже поможем" })).toBeVisible();
   await expect(page.getByRole("link", { name: "Разместить вакансию" })).toHaveAttribute("href", "/register/form?role=employer");
