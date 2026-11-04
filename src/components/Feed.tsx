@@ -351,7 +351,7 @@ export default function Feed({ initialRows, initialTotal, hero, after }: { initi
     // Без заполненного профиля оценка у всех одинаковая — не показываем её
     const match = hasPrefs ? matches[item.id] : undefined;
     return (
-      <div key={item.id} className="neu-sub rounded-3xl p-4 sm:p-6 flex flex-col gap-4 relative overflow-hidden group transition-colors">
+      <div key={item.id} className="neu-sub card-hover rounded-3xl p-4 sm:p-6 flex flex-col gap-4 relative overflow-hidden group">
 
         {/* Метки над заголовком отдельной строкой: поверх длинного названия они его перекрывали.
             На телефоне совпадение тоже здесь: кольцо сжало бы заголовок */}

@@ -1,8 +1,8 @@
 @import "tailwindcss";
 
 /* Дизайн-система Obsidian Glass: тёмный glassmorphism с фотореальным стеклом. Плотные стеклянные
-   панели с зерном плёнки и светящимся краем лежат на почти чёрном void; у правого края —
-   студийный рендер стеклянных шаров, гаснущий к тексту. Палитра монохромная:
+   панели со светящимся краем лежат на почти чёрном void с мягким свечением; на витринных
+   страницах у правого края — студийный рендер стеклянных шаров, гаснущий к тексту. Палитра монохромная:
    цвет несёт только смысл: мятный — есть и главное действие, янтарный — не хватает. Сайт в одной тёмной теме. */
 :root {
   --void: #050506;
@@ -139,8 +139,8 @@ body {
   /* ---------- GlassPanel: карточки ---------- */
 
   /* Крупная карточка (имя .glass осталось с прежней разметки) и вложенная панель — второй и
-     последний слой стекла. Стекло: glass + blur + glass-edge + glass-lift, поверх — зерно плёнки,
-     верхний блик и светящийся край (ярче сверху слева) */
+     последний слой стекла. Стекло: glass + blur + glass-edge + glass-lift, поверх — верхний блик
+     и светящийся край (ярче сверху слева). Зерна под текстом нет: оно рябит и съедает контраст */
   .glass, .neu, .neu-sub {
     position: relative;
     isolation: isolate;
@@ -161,12 +161,13 @@ body {
     pointer-events: none;
     z-index: -1;
     background:
-      var(--og-grain) 0 0 / 256px 256px repeat,
-      linear-gradient(180deg, rgba(255, 255, 255, 0.07), rgba(255, 255, 255, 0) 38%),
-      radial-gradient(120% 80% at 0% 0%, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0) 60%);
-    opacity: 0.07;
+      linear-gradient(180deg, rgba(255, 255, 255, 0.035), rgba(255, 255, 255, 0) 38%),
+      radial-gradient(120% 80% at 0% 0%, rgba(255, 255, 255, 0.03), rgba(255, 255, 255, 0) 60%);
     mix-blend-mode: screen;
   }
+  /* Карточка вакансии под курсором: край светлеет, мятное свечение снизу — живо, но без движения фона */
+  .card-hover { transition: border-color .2s, box-shadow .2s; }
+  .card-hover:hover { border-color: rgba(255, 255, 255, 0.2); box-shadow: var(--glass-lift), 0 0 0 1px rgba(94, 234, 212, 0.08), 0 18px 60px -20px rgba(94, 234, 212, 0.18); }
   .glass::after, .neu::after, .neu-sub::after {
     content: "";
     position: absolute;
@@ -346,21 +347,32 @@ body {
 /* Разделители — steel */
 .border-white\/10, .border-white\/12, .border-white\/15 { border-color: var(--steel); }
 
-/* Фон: студийная плита со стеклянными шарами только у правого края экрана; к тексту она
-   плавно гаснет до void, поэтому блики шаров не попадают под буквы */
+/* Фон рабочих страниц (лента, вакансия, кабинет): два неподвижных мягких свечения — мятное сверху
+   справа и холодное снизу слева — и едва заметное зерно. Глубина есть, под текстом ничего не рябит */
 .page-backdrop {
-  background: var(--og-stage) right center / cover no-repeat, var(--void);
-  -webkit-mask-image: linear-gradient(to left, #000 0, rgba(0, 0, 0, 0.5) 12%, transparent 30%);
-  mask-image: linear-gradient(to left, #000 0, rgba(0, 0, 0, 0.5) 12%, transparent 30%);
-  opacity: 0.6;
+  background:
+    radial-gradient(60rem 38rem at 92% -6%, rgba(94, 234, 212, 0.16), transparent 64%),
+    radial-gradient(56rem 40rem at -6% 104%, rgba(154, 163, 181, 0.12), transparent 62%),
+    var(--void);
 }
 .page-backdrop::before {
   content: "";
   position: absolute;
   inset: 0;
   background: var(--og-grain) 0 0 / 256px 256px repeat;
-  opacity: 0.22;
+  opacity: 0.07;
 }
+/* Витрина (главная для гостя, вход, регистрация, «О сервисе»): студийная плита со стеклянными шарами
+   у правого края, к тексту гаснет до void. Страница отмечает себя классом .showcase */
+html:not([data-auth]) body:has(.showcase) .page-backdrop,
+body:has(.showcase:not(.guest-only)) .page-backdrop {
+  background: var(--og-stage) right center / cover no-repeat, var(--void);
+  -webkit-mask-image: linear-gradient(to left, #000 0, rgba(0, 0, 0, 0.5) 12%, transparent 30%);
+  mask-image: linear-gradient(to left, #000 0, rgba(0, 0, 0, 0.5) 12%, transparent 30%);
+  opacity: 0.6;
+}
+html:not([data-auth]) body:has(.showcase) .page-backdrop::before,
+body:has(.showcase:not(.guest-only)) .page-backdrop::before { opacity: 0.22; }
 
 /* Кольцо совпадения заполняется до своего значения (--ring-to задаёт компонент) */
 @keyframes ring-fill { from { stroke-dashoffset: var(--ring-from); } to { stroke-dashoffset: var(--ring-to); } }
