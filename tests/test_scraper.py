@@ -1,6 +1,5 @@
-"""Тесты сборщика без сети: Telegram, Supabase и ИИ подменены."""
+"""Тесты сборщика без сети: Telegram, Supabase и Gemini подменены."""
 
-import json
 from pathlib import Path
 
 import pytest
@@ -195,7 +194,7 @@ def test_known_post_is_not_sent_to_ai_again():
     store = FakeStore(known={"ch/1"})
 
     def must_not_call(text):
-        raise AssertionError("ИИ не должен вызываться для известного поста")
+        raise AssertionError("Gemini не должен вызываться для известного поста")
 
     assert process_post(post(), store, must_not_call) == "duplicate"
 
@@ -274,43 +273,52 @@ def test_edited_post_is_not_duplicated():
     assert len(store.inserted) == 1
 
 
-# --- повторы запросов к ИИ --------------------------------------------------
+# --- повторы запросов к Gemini --------------------------------------------------
 
 
-def _fake_ai(monkeypatch, outcomes):
-    """Подменяет yandex_ai.Client: complete по очереди отдаёт outcomes (VacancyAI → JSON-текст)."""
-    import yandex_ai
+class _FakeResponse:
+    def __init__(self, parsed):
+        self.parsed = parsed
+        self.text = parsed.model_dump_json()
+
+
+def _fake_gemini(monkeypatch, outcomes):
+    """Подменяет google.genai.Client: generate_content по очереди отдаёт outcomes."""
+    from google import genai
 
     calls = {"n": 0, "models": []}
 
-    class Client:
-        def __init__(self, api_key, folder, timeout_ms=None):
-            calls["timeout"] = timeout_ms
-
-        def complete(self, **kwargs):
+    class Models:
+        def generate_content(self, **kwargs):
             calls["models"].append(kwargs["model"])
             item = outcomes[calls["n"]]
             calls["n"] += 1
             if isinstance(item, Exception):
                 raise item
-            return item if isinstance(item, str) else item.model_dump_json()
+            return _FakeResponse(item)
 
-    monkeypatch.setattr(yandex_ai, "Client", Client)
+    class Client:
+        def __init__(self, api_key, http_options=None):
+            calls["timeout"] = http_options.timeout if http_options else None
+            self.models = Models()
+
+    monkeypatch.setattr(genai, "Client", Client)
     monkeypatch.setattr(main.time, "sleep", lambda s: None)
     return calls
 
 
 def _api_error(code):
-    import yandex_ai
-    return yandex_ai.APIError(code, "x")
+    from google.genai import errors
+    cls = errors.ServerError if code >= 500 else errors.ClientError
+    return cls(code, {"error": {"code": code, "message": "x", "status": "UNAVAILABLE" if code >= 500 else "INVALID_ARGUMENT"}})
 
 
 MODELS = ("model-a", "model-b", "model-c")
 
 
-def test_ai_falls_back_to_next_model_when_overloaded(monkeypatch):
-    calls = _fake_ai(monkeypatch, [_api_error(503), _api_error(429), job()])
-    normalize = main.make_ai_normalizer("key", "folder", MODELS)
+def test_gemini_falls_back_to_next_model_when_overloaded(monkeypatch):
+    calls = _fake_gemini(monkeypatch, [_api_error(503), _api_error(429), job()])
+    normalize = main.make_gemini_normalizer("key", MODELS)
     result = normalize("текст")
     assert result.title == "Python Developer"
     # счётчики за запуск: одно обращение, ошибки по моделям — видно, упираемся ли в лимит
@@ -321,28 +329,28 @@ def test_ai_falls_back_to_next_model_when_overloaded(monkeypatch):
     assert calls["timeout"] == main.AI_TIMEOUT_MS
 
 
-def test_ai_missing_model_is_skipped_immediately(monkeypatch):
-    calls = _fake_ai(monkeypatch, [_api_error(404), job()])
-    main.make_ai_normalizer("key", "folder", MODELS)("текст")
+def test_gemini_missing_model_is_skipped_immediately(monkeypatch):
+    calls = _fake_gemini(monkeypatch, [_api_error(404), job()])
+    main.make_gemini_normalizer("key", MODELS)("текст")
     assert calls["models"] == ["model-a", "model-b"]
 
 
-def test_ai_gives_up_after_all_models(monkeypatch):
-    calls = _fake_ai(monkeypatch, [_api_error(503)] * (main.AI_ATTEMPTS * len(MODELS)))
+def test_gemini_gives_up_after_all_models(monkeypatch):
+    calls = _fake_gemini(monkeypatch, [_api_error(503)] * (main.AI_ATTEMPTS * len(MODELS)))
     with pytest.raises(AIUnavailable):
-        main.make_ai_normalizer("key", "folder", MODELS)("текст")
+        main.make_gemini_normalizer("key", MODELS)("текст")
     assert calls["n"] == main.AI_ATTEMPTS * len(MODELS)
 
 
-def test_ai_does_not_retry_bad_request(monkeypatch):
-    calls = _fake_ai(monkeypatch, [_api_error(400), job()])
+def test_gemini_does_not_retry_bad_request(monkeypatch):
+    calls = _fake_gemini(monkeypatch, [_api_error(400), job()])
     with pytest.raises(AIUnavailable):
-        main.make_ai_normalizer("key", "folder", MODELS)("текст")
+        main.make_gemini_normalizer("key", MODELS)("текст")
     assert calls["n"] == 1
 
 
 def test_circuit_breaker_stops_after_consecutive_ai_failures(monkeypatch):
-    """Если ИИ не отвечает на нескольких каналах подряд, остальные не трогаем."""
+    """Если Gemini не отвечает на нескольких каналах подряд, остальные не трогаем."""
     monkeypatch.setattr(main.time, "sleep", lambda s: None)
     rows = [{"username": f"ch{i}", "last_post_id": 1} for i in range(6)]
     store = FakeStore(rows=rows)
@@ -368,7 +376,7 @@ def test_circuit_breaker_stops_after_consecutive_ai_failures(monkeypatch):
     # отложенные каналы не тронуты: их last_post_id не менялся
     assert set(store.channel_updates) == {f"ch{i}" for i in range(main.AI_CIRCUIT_BREAKER)}
     assert summary.deferred == 6 - main.AI_CIRCUIT_BREAKER
-    assert "ИИ не отвечал" in main.alert_text(summary)
+    assert "Gemini" in main.alert_text(summary)
 
 
 def test_channels_stop_when_time_budget_runs_out(monkeypatch):
@@ -386,7 +394,7 @@ def test_channels_stop_when_time_budget_runs_out(monkeypatch):
     summary = main.run(store, lambda text: job(), clock=lambda: next(ticks), time_budget=25)
     assert [r.channel for r in summary.results] == ["ch0", "ch1"]
     assert summary.out_of_time and summary.deferred == 0
-    assert "ИИ не отвечал" not in (main.alert_text(summary) or "")
+    assert "Gemini" not in (main.alert_text(summary) or "")
 
 
 def test_post_is_fenced_from_instructions():
@@ -396,36 +404,25 @@ def test_post_is_fenced_from_instructions():
     assert wrapped.count("<post>") == 1 and wrapped.count("</post>") == 1
 
 
-def test_ai_gets_instructions_separately(monkeypatch):
-    """Промпт уходит системным сообщением, а пользовательским — только пост в блоке <post>."""
-    import yandex_ai
+def test_gemini_gets_instructions_separately(monkeypatch):
+    """Промпт уходит в system_instruction, а в contents — только пост в блоке <post>."""
+    from google import genai
 
     seen = {}
 
-    class Client:
-        def __init__(self, api_key, folder, **kwargs):
-            pass
-
-        def complete(self, **kwargs):
+    class Models:
+        def generate_content(self, **kwargs):
             seen.update(kwargs)
-            return job().model_dump_json()
+            return _FakeResponse(job())
 
-    monkeypatch.setattr(yandex_ai, "Client", Client)
-    main.make_ai_normalizer("key", "folder")("Ищем QA-инженера")
-    assert seen["user"] == "<post>\nИщем QA-инженера\n</post>"
-    assert seen["system"].startswith(main.PROMPT) and '"is_job"' in seen["system"]
+    class Client:
+        def __init__(self, api_key, **kwargs):
+            self.models = Models()
 
-
-def test_ai_reply_with_thinking_and_fence_is_parsed(monkeypatch):
-    reply = "<think>рассуждаю</think>\n```json\n" + job().model_dump_json() + "\n```"
-    _fake_ai(monkeypatch, [reply])
-    assert main.make_ai_normalizer("key", "folder", MODELS)("текст").title == "Python Developer"
-
-
-def test_ai_invalid_json_is_retried(monkeypatch):
-    calls = _fake_ai(monkeypatch, ["не json", job()])
-    assert main.make_ai_normalizer("key", "folder", MODELS)("текст").is_job
-    assert calls["n"] == 2
+    monkeypatch.setattr(genai, "Client", Client)
+    main.make_gemini_normalizer("key")("Ищем QA-инженера")
+    assert seen["contents"] == "<post>\nИщем QA-инженера\n</post>"
+    assert seen["config"].system_instruction == main.PROMPT
 
 
 # --- оповещения в Telegram ---------------------------------------------------------
@@ -902,14 +899,14 @@ def test_telegram_counts_exclude_imported_sources():
     assert ("filter", ("source_post", "not.like", "superjob/%")) in log
 
 
-def test_ai_overloaded_model_is_skipped_for_the_rest_of_the_run(monkeypatch):
+def test_gemini_overloaded_model_is_skipped_for_the_rest_of_the_run(monkeypatch):
     strikes = main.AI_MODEL_STRIKES
     outcomes = []
     for _ in range(strikes):                      # модель a перегружена, b отвечает
         outcomes += [_api_error(503)] * main.AI_ATTEMPTS + [job()]
     outcomes += [job(), job()]                    # дальше сразу b
-    calls = _fake_ai(monkeypatch, outcomes)
-    normalize = main.make_ai_normalizer("key", "folder", MODELS)
+    calls = _fake_gemini(monkeypatch, outcomes)
+    normalize = main.make_gemini_normalizer("key", MODELS)
     for _ in range(strikes + 2):
         normalize("текст")
     assert calls["models"][-2:] == ["model-b", "model-b"]
@@ -945,7 +942,7 @@ def test_history_stops_after_page_limit_with_cursor():
 
 
 class _Batcher:
-    """Нормализатор с пакетным режимом, как make_ai_normalizer."""
+    """Нормализатор с пакетным режимом, как make_gemini_normalizer."""
 
     def __init__(self, fail_after: int | None = None):
         self.batches: list[int] = []
@@ -1011,23 +1008,29 @@ def test_batched_run_keeps_unprocessed_posts_when_ai_stops(monkeypatch):
     assert summary.results[0].ai_stopped
 
 
-def test_ai_batch_returns_one_result_per_post_and_fills_gaps(monkeypatch):
-    import yandex_ai
+def test_gemini_batch_returns_one_result_per_post_and_fills_gaps(monkeypatch):
+    from google import genai
 
-    batch = [main.BatchItem(post=0, vacancy=job(title="A")).model_dump(), main.BatchItem(post=2, vacancy=job(title="C")).model_dump()]
-    replies = [json.dumps(batch, ensure_ascii=False), job(title="B").model_dump_json()]
+    class Resp:
+        def __init__(self, parsed):
+            self.parsed = parsed
+            self.text = ""
+
+    replies = [[main.BatchItem(post=0, vacancy=job(title="A")), main.BatchItem(post=2, vacancy=job(title="C"))],
+               job(title="B")]
     sent = []
 
+    class Models:
+        def generate_content(self, **kwargs):
+            sent.append(kwargs["contents"])
+            return Resp(replies[len(sent) - 1])
+
     class Client:
-        def __init__(self, api_key, folder, timeout_ms=None):
-            pass
+        def __init__(self, api_key, http_options=None):
+            self.models = Models()
 
-        def complete(self, **kwargs):
-            sent.append(kwargs["user"])
-            return replies[len(sent) - 1]
-
-    monkeypatch.setattr(yandex_ai, "Client", Client)
-    normalize = main.make_ai_normalizer("key", "folder", MODELS)
+    monkeypatch.setattr(genai, "Client", Client)
+    normalize = main.make_gemini_normalizer("key", MODELS)
     result = normalize.many(["пост a", "пост b", "пост c"])
     assert [v.title for v in result] == ["A", "B", "C"]   # на пропущенный пост — отдельный запрос
     assert '<post id=1>' in sent[0] and sent[1].startswith("<post>")

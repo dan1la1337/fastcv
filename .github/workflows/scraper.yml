@@ -56,9 +56,7 @@ jobs:
           # Основной ключ сборщика (обходит RLS). Добавьте секрет в
           # Settings → Secrets and variables → Actions.
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
-          # Yandex AI Studio — одна модель на сайт и сборщик (серверы в России)
-          YANDEX_API_KEY: ${{ secrets.YANDEX_API_KEY }}
-          YANDEX_FOLDER_ID: ${{ secrets.YANDEX_FOLDER_ID }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           # Оповещения о сбоях владельцу (бот из @BotFather); без них сборщик просто молчит
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}

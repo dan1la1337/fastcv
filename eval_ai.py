@@ -31,7 +31,7 @@ def score(cases: list[dict], normalize: Callable[[str], Any], pause: Callable[[]
     failed = 0
     for i, case in enumerate(cases):
         if i:
-            pause()             # как в сборщике: пауза между запросами, чтобы не упереться в лимит
+            pause()             # как в сборщике: без паузы бесплатный лимит Gemini кончается за минуту
         expected = case["expected"]
         try:
             got = normalize(case["text"]).model_dump()
@@ -57,15 +57,14 @@ def score(cases: list[dict], normalize: Callable[[str], Any], pause: Callable[[]
 def main() -> None:
     import time
 
-    import yandex_ai
-    from main import AI_MODELS, AI_PAUSE_SECONDS, make_ai_normalizer
+    from main import AI_PAUSE_SECONDS, GEMINI_MODELS, make_gemini_normalizer
     from supabase import create_client
 
     db = create_client(os.environ["SUPABASE_URL"], os.environ["SUPABASE_SERVICE_ROLE_KEY"])
-    models = yandex_ai.models_from_env(AI_MODELS)
+    models = tuple(m.strip() for m in (os.getenv("GEMINI_MODELS") or "").split(",") if m.strip()) or GEMINI_MODELS
     rows = (db.table("ai_golden").select("source, text, expected")
             .not_.is_("expected", "null").order("id").execute().data or [])
-    normalize = make_ai_normalizer(os.environ["YANDEX_API_KEY"], os.environ["YANDEX_FOLDER_ID"], models)
+    normalize = make_gemini_normalizer(os.environ["GEMINI_API_KEY"], models)
     batch = (os.getenv("EVAL_BATCH") or "").lower() == "true"
     if batch:
         # Как в сборщике: посты пачками по AI_BATCH в одном обращении

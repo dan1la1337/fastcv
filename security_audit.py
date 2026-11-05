@@ -46,14 +46,14 @@ def pip_findings(report: object) -> list[str]:
 
 def key_reminder(rotated_at: Optional[str], now: datetime) -> Optional[str]:
     if not rotated_at:
-        return ("Дата последней ротации ключей не записана. После смены ключей Supabase, Yandex AI Studio и ботов "
+        return ("Дата последней ротации ключей не записана. После смены ключей Supabase, Gemini и ботов "
                 "запишите её: app_settings.keys_rotated_at = ГГГГ-ММ-ДД.")
     try:
         days = (now - datetime.fromisoformat(rotated_at).replace(tzinfo=timezone.utc)).days
     except ValueError:
         return f"Не разобрал дату ротации ключей «{rotated_at}» — нужна ГГГГ-ММ-ДД."
     if days > KEY_ROTATION_DAYS:
-        return f"Ключи не меняли {days} дней (норма — раз в полгода): Supabase, Yandex AI Studio, боты Telegram, Resend."
+        return f"Ключи не меняли {days} дней (норма — раз в полгода): Supabase, Gemini, боты Telegram, Resend."
     return None
 
 

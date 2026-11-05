@@ -1,7 +1,7 @@
 """ИИ-выжимка отзывов о найме для страницы компании (рейтинг работодателя).
 
 Сборщик раз в запуск берёт работодателей, у которых от трёх отзывов и выжимка устарела
-(pending_review_summaries), просит модель (Yandex AI Studio) коротко пересказать, что хвалят и на что жалуются,
+(pending_review_summaries), просит Gemini коротко пересказать, что хвалят и на что жалуются,
 и сохраняет (save_review_summary). Отзывы — пользовательский текст: передаём их как данные.
 """
 from __future__ import annotations
@@ -10,8 +10,7 @@ import json
 import re
 from typing import Callable, Optional
 
-import yandex_ai
-
+GEMINI_MODELS = ("gemini-3.1-flash-lite", "gemini-flash-lite-latest", "gemini-3.5-flash-lite")
 MAX_PER_RUN = 20
 
 INSTRUCTION = """Ты пишешь выжимку отзывов кандидатов о процессе найма в компании — для её страницы на сайте вакансий.
@@ -39,13 +38,17 @@ def clean_summary(text: str) -> Optional[str]:
     return "\n".join(lines)[:1500] or None
 
 
-def make_writer(api_key: str, folder: str, models: tuple[str, ...] = yandex_ai.DEFAULT_MODELS) -> Callable[[str], Optional[str]]:
-    client = yandex_ai.Client(api_key, folder, timeout_ms=30_000)
+def make_writer(api_key: str) -> Callable[[str], Optional[str]]:
+    from google import genai
+    from google.genai import types
+
+    client = genai.Client(api_key=api_key, http_options=types.HttpOptions(timeout=30_000))
+    config = types.GenerateContentConfig(temperature=0.2, max_output_tokens=400, system_instruction=INSTRUCTION)
 
     def write(block: str) -> Optional[str]:
-        for model in models:
+        for model in GEMINI_MODELS:
             try:
-                return client.complete(model=model, system=INSTRUCTION, user=block, temperature=0.2, max_tokens=400)
+                return client.models.generate_content(model=model, contents=block, config=config).text
             except Exception as e:  # перегрузка или сбой — следующая модель
                 print(f"⚠️ Выжимка отзывов, {model}: {type(e).__name__}")
         return None
