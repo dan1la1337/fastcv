@@ -1,0 +1,29 @@
+{$PROXY_DOMAIN} {
+    @supabase_api path /auth/v1/* /rest/v1/* /graphql/v1 /realtime/v1/* /storage/v1/* /functions/v1/* /mcp /sso/* /.well-known/oauth-authorization-server/auth/v1
+
+    handle @supabase_api {
+        reverse_proxy api-gw:8000
+    }
+
+    handle {
+        basic_auth {
+            # PROXY_AUTH_PASSWORD is overwritten with the bcrypt on startup
+            {$PROXY_AUTH_USERNAME} {$PROXY_AUTH_PASSWORD}
+        }
+
+        reverse_proxy studio:3000
+    }
+
+    header -server
+}
+
+# FastCV: шаблоны писем авторизации для GoTrue. Только внутри docker-сети (порт 8080
+# наружу не публикуется): auth забирает их по http://caddy:8080/<шаблон>.html
+:8080 {
+    root * /srv/email
+    file_server
+}
+
+# FastCV, этап 2: сайт на этом же сервере (файлы появляются в sites/ после 05-web.sh;
+# пока их нет — импорт ничего не добавляет)
+import /etc/caddy/sites/*.caddy

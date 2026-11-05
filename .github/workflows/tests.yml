@@ -47,6 +47,15 @@ jobs:
         run: pip install pytest
       - name: Access rules (RLS) tests
         run: python -m pytest -v tests/db
+      # Перенос базы в РФ (infra/ru-migration): schema → data → verify на двух базах.
+      # pg_dump должен быть той же версии, что сервер (17), а на раннере по умолчанию 16
+      - name: Postgres 17 client
+        run: |
+          sudo /usr/share/postgresql-common/pgdg/apt.postgresql.org.sh -y > /dev/null
+          sudo apt-get install -y -qq postgresql-client-17 > /dev/null
+          echo "/usr/lib/postgresql/17/bin" >> "$GITHUB_PATH"
+      - name: RU migration dry run
+        run: bash infra/ru-migration/test-local.sh
 
   web:
     runs-on: ubuntu-latest

@@ -1,0 +1,28 @@
+# Этап 2 (необязательный): сайт fastcv.ru на этом же сервере вместо Vercel.
+# Подключение: в .env добавить docker-compose.web.yml в COMPOSE_FILE и задать
+# FASTCV_REPO, WEB_DOMAIN, GEMINI_API_KEY, TELEGRAM_JOBS_BOT_TOKEN (см. 05-web.sh).
+# Откат: убрать файл из COMPOSE_FILE и вернуть DNS fastcv.ru на Vercel.
+services:
+  web:
+    container_name: fastcv-web
+    build:
+      context: ${FASTCV_REPO}
+      dockerfile: infra/ru-migration/web/Dockerfile
+      args:
+        NEXT_PUBLIC_SUPABASE_URL: ${SUPABASE_PUBLIC_URL}
+        NEXT_PUBLIC_SUPABASE_ANON_KEY: ${ANON_KEY}
+    restart: unless-stopped
+    environment:
+      # В рантайме нужны те же публичные переменные (серверный код читает их из env)
+      NEXT_PUBLIC_SUPABASE_URL: ${SUPABASE_PUBLIC_URL}
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: ${ANON_KEY}
+      GEMINI_API_KEY: ${GEMINI_API_KEY:-}
+      TELEGRAM_JOBS_BOT_TOKEN: ${TELEGRAM_JOBS_BOT_TOKEN:-}
+    depends_on:
+      api-gw:
+        condition: service_healthy
+
+  caddy:
+    environment:
+      # Адрес сайта для volumes/proxy/caddy/sites/web.caddy (папка уже смонтирована в /etc/caddy)
+      WEB_DOMAIN: ${WEB_DOMAIN}
