@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { fence } from "@/lib/ai-safety";
-import { geminiText } from "@/lib/gemini";
+import { aiText } from "@/lib/ai";
 import { parseModelJson } from "@/lib/practice";
 import { toAnalysis } from "@/lib/rejection";
 import { createSupabaseServerClient } from "@/lib/supabase-server";
@@ -97,9 +97,7 @@ export async function POST(req: Request) {
 ${answers ? `Ответы на вопросы работодателя:\n${answers}` : ""}
 Ответ работодателя: ${fence((app.hr_message ?? "").slice(0, 1500)) || "отказ без комментария"}
 </application>`;
-
-  const apiKey = process.env.GEMINI_API_KEY;
-  const raw = apiKey ? await geminiText(apiKey, INSTRUCTION, input, { temperature: 0.3, maxOutputTokens: 2000, json: true }) : null;
+  const raw = await aiText(INSTRUCTION, input, { temperature: 0.3, maxOutputTokens: 2000, json: true });
   const analysis = raw ? toAnalysis(parseModelJson(raw), m?.score ?? null) : null;
   if (!analysis) return NextResponse.json({ error: "ИИ сейчас не отвечает. Попробуйте через минуту." }, { status: 503 });
 

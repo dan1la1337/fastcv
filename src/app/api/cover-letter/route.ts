@@ -5,50 +5,10 @@ import { fence, sanitizeLetter } from "@/lib/ai-safety";
 import { templateLetter } from "@/lib/cover-letter";
 import type { Database } from "@/lib/database.types";
 import { createSupabaseServerClient } from "@/lib/supabase-server";
+import { aiText } from "@/lib/ai";
 
-// Модели по очереди: если одна перегружена (503/429) или недоступна (404),
-// пробуем следующую. Тот же порядок, что и в сборщике вакансий (main.py).
-const GEMINI_MODELS = ["gemini-3.1-flash-lite", "gemini-3.5-flash-lite", "gemini-3.6-flash"];
-const MODEL_TIMEOUT_MS = 20_000;
-
-// Худший случай — три модели по 20 секунд
+// Худший случай — две модели по 25 секунд
 export const maxDuration = 60;
-
-/** Текст письма от первой ответившей модели или null, если не ответила ни одна. */
-async function generate(apiKey: string, instruction: string, input: string): Promise<string | null> {
-  for (const model of GEMINI_MODELS) {
-    try {
-      const response = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`,
-        {
-          method: "POST",
-          // Ключ — в заголовке, а не в URL, чтобы не попадал в логи
-          headers: { "Content-Type": "application/json", "x-goog-api-key": apiKey },
-          // Инструкции — в system_instruction, данные пользователей — отдельным сообщением:
-          // так текст вакансии или профиля не может выдать себя за указания модели
-          body: JSON.stringify({
-            system_instruction: { parts: [{ text: instruction }] },
-            contents: [{ role: "user", parts: [{ text: input }] }],
-            generationConfig: { temperature: 0.7, maxOutputTokens: 1200 },
-          }),
-          signal: AbortSignal.timeout(MODEL_TIMEOUT_MS),
-        },
-      );
-      if (!response.ok) {
-        console.error("Gemini error", model, response.status, (await response.text()).slice(0, 300));
-        // Ошибка в самом запросе (400, 403) — другие модели не помогут
-        if (![404, 429].includes(response.status) && response.status < 500) return null;
-        continue;
-      }
-      const data = await response.json();
-      const text: string | undefined = data.candidates?.[0]?.content?.parts?.[0]?.text;
-      if (text?.trim()) return text.trim();
-    } catch (error) {
-      console.error("Gemini request failed", model, error); // таймаут или сеть — пробуем следующую
-    }
-  }
-  return null;
-}
 
 // Лимит генераций на пользователя. Считается в базе (функция consume_ai_quota),
 // поэтому общий для всех серверных инстансов и не обходится параллельными запросами.
@@ -101,10 +61,9 @@ const clip = (value: unknown, max: number) =>
   typeof value === "string" ? value.slice(0, max) : "";
 
 export async function POST(req: Request) {
-  const apiKey = process.env.GEMINI_API_KEY;
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-  // Без ключа Gemini письмо всё равно будет — по шаблону (например, демо-стенд)
+  // Без ключа ИИ письмо всё равно будет — по шаблону (например, демо-стенд)
   if (!supabaseUrl || !supabaseAnonKey) {
     return NextResponse.json({ error: "Сервер не настроен" }, { status: 500 });
   }
@@ -198,7 +157,7 @@ export async function POST(req: Request) {
     window_seconds: RATE_WINDOW_SECONDS,
   });
   if (quotaError) {
-    // Без счётчика не генерируем: иначе лимит Gemini можно выкачать
+    // Без счётчика не генерируем: иначе лимит ИИ можно выкачать
     console.error("AI quota check failed", quotaError.message);
     return NextResponse.json({ error: "Сервис временно недоступен. Попробуйте позже." }, { status: 503 });
   }
@@ -213,7 +172,7 @@ export async function POST(req: Request) {
   }
 
   // 3. Генерация
-  const raw = apiKey ? await generate(apiKey, instruction, data) : null;
+  const raw = await aiText(instruction, data, { temperature: 0.7, maxOutputTokens: 1200 });
   const text = raw ? sanitizeLetter(raw, data) : null;
   if (!text) {
     // ИИ не ответил — письмо по шаблону из профиля, чтобы отклик не срывался.
