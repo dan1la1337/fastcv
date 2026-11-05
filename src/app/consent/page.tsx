@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import LegalPage from "@/components/LegalPage";
-import { OPERATOR } from "@/lib/legal";
+import { DB_ABROAD, DB_LOCATION, OPERATOR } from "@/lib/legal";
 
 export const metadata: Metadata = {
   title: "Согласие на обработку персональных данных | FastCV",
@@ -60,7 +60,9 @@ export default function ConsentPage() {
         оператора и только для работы сервиса:
       </p>
       <ul>
-        <li><b>Supabase</b> — база данных, хранилище файлов и вход в аккаунт (Германия);</li>
+        {DB_ABROAD
+          ? <li><b>Supabase</b> — база данных, хранилище файлов и вход в аккаунт ({DB_LOCATION});</li>
+          : <li><b>Хостинг-провайдер в России</b> — сервер, на котором хранятся база данных и файлы ({DB_LOCATION});</li>}
         <li><b>Vercel</b> — хостинг сайта (США и другие страны);</li>
         <li><b>Google (Gemini API)</b> — тексты профиля, резюме, отклика и вакансии в обезличенном виде, без имени и контактов (США);</li>
         <li><b>Resend</b> — доставка писем: адрес электронной почты и текст письма (США);</li>
