@@ -89,11 +89,32 @@ sudo -E bash infra/ru-migration/03-migrate.sh verify
 
 ### 4. После переключения
 
+`next.config.ts` уже разрешает в CSP адрес своего Supabase (берётся из `NEXT_PUBLIC_SUPABASE_URL`),
+отдельно менять ничего не нужно.
+
 - Обновить политику конфиденциальности: Supabase → «серверы в России» (`src/app/privacy/page.tsx`).
 - `package.json` → `db:types`: генерировать типы с новой базы (`supabase gen types --db-url …`).
 - Через 2 недели стабильной работы — **удалить** старый облачный проект (Supabase → Settings →
   General → Delete project). До этого он — точка отката; после — копия ПДн за рубежом,
   которую держать дольше нет оснований.
+
+## Этап 2 (по желанию): сайт тоже в России
+
+После переноса базы сайт можно увезти с Vercel на этот же сервер — тогда запросы пользователей
+вообще не проходят через зарубежные серверы. Делается в любой момент, отдельно от переноса базы:
+
+```sh
+sudo GEMINI_API_KEY=... TELEGRAM_JOBS_BOT_TOKEN=... sh infra/ru-migration/05-web.sh
+cd /opt/fastcv-supabase && sudo docker compose build web && sudo sh run.sh recreate
+curl -sk --resolve fastcv.ru:443:127.0.0.1 https://fastcv.ru/ | head -c 300   # проверка до DNS
+```
+
+Затем A-записи `fastcv.ru` и `www.fastcv.ru` → IP сервера, и в `/admin` — «Подключить бота
+подборок» (webhook Telegram переедет на сервер). Нужен сервер на 4 vCPU / 8 ГБ RAM: сборка
+Next.js занимает ~2 ГБ памяти. Обновление после изменений в main — команда в конце вывода `05-web.sh`.
+
+**Откат этапа 2:** DNS `fastcv.ru` обратно на Vercel (сайт там продолжает собираться из main),
+потом `sh infra/ru-migration/05-web.sh off`.
 
 ## Откат
 
@@ -115,14 +136,13 @@ sudo -E bash infra/ru-migration/03-migrate.sh verify
 | `03-migrate.sh` | `check` / `schema` / `data` / `storage` / `verify` |
 | `copy_storage.py` | Копирование файлов резюме через Storage API |
 | `04-backup.sh` | Ежедневные копии базы на сервере, 14 дней |
+| `05-web.sh`, `web/Dockerfile`, `overlay/docker-compose.web.yml` | Этап 2: сайт на этом же сервере вместо Vercel (Caddy, HTTPS для fastcv.ru) |
 | `test-local.sh` | Проверка переноса на двух локальных базах; запускается в CI |
 
 ## Что остаётся за рубежом и как с этим быть
 
 - **Vercel (хостинг сайта)** — запросы с данными проходят через серверы Vercel, но не хранятся
-  там. Первичная запись теперь — в российской базе. Следующий шаг при желании — перенести и сайт
-  на тот же сервер (`next start` в Docker), тогда за рубеж не уходит ничего, кроме обезличенного
-  текста в Gemini.
+  там. Первичная запись теперь — в российской базе. Этап 2 (выше) убирает и это.
 - **Gemini** — получает обезличенные тексты (`src/lib/redact.ts`).
 - **Resend, Telegram** — email-адрес и chat id для доставки сообщений. Это трансграничная
   передача: нужны уведомление РКН и согласие пользователя (см. документы в отчёте).

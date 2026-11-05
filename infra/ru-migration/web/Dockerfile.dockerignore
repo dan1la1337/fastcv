@@ -1,0 +1,11 @@
+# Контекст сборки — корень репозитория; лишнее и секреты в образ не берём
+.git
+node_modules
+.next
+.env*
+!.env.example
+infra/ru-migration/.work
+tests
+e2e
+*.py
+__pycache__

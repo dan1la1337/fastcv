@@ -23,3 +23,7 @@
     root * /srv/email
     file_server
 }
+
+# FastCV, этап 2: сайт на этом же сервере (файлы появляются в sites/ после 05-web.sh;
+# пока их нет — импорт ничего не добавляет)
+import /etc/caddy/sites/*.caddy
