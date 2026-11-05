@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { fence, sanitizeLetter } from "@/lib/ai-safety";
 import { templateLetter } from "@/lib/cover-letter";
+import { NAME_TOKEN, redactPersonal, restoreName } from "@/lib/redact";
 import type { Database } from "@/lib/database.types";
 import { createSupabaseServerClient } from "@/lib/supabase-server";
 
@@ -66,7 +67,8 @@ const INSTRUCTION = `Ты профессиональный IT-копирайте
 2. Подчеркни ровно те навыки кандидата, которые пересекаются с вакансией.
 3. Не придумывай опыт, которого нет в профиле.
 4. Язык письма — язык вакансии, если в параметрах не сказано иначе.
-5. Верни только текст письма, без заголовков, пояснений и разметки.`;
+5. Верни только текст письма, без заголовков, пояснений и разметки.
+6. Имя кандидата заменено меткой [ИМЯ]: где нужно имя, пиши ровно [ИМЯ]. Метки [email], [телефон], [ссылка], [контакт] в письмо не вставляй.`;
 
 // Настройки письма, которые выбирает кандидат. Значения — только из этих списков,
 // поэтому текст, который попадает в инструкцию модели, полностью наш.
@@ -90,7 +92,7 @@ const pick = <T extends Record<string, string>>(options: T, value: unknown, fall
   typeof value === "string" && value in options ? (value as keyof T) : fallback;
 
 // Меняется вместе с INSTRUCTION: старые письма в кэше не будут выдаваться за новые
-const PROMPT_VERSION = "2026-10-23b";
+const PROMPT_VERSION = "2026-11-05";
 
 type Source = "ai" | "cache" | "template";
 
@@ -212,9 +214,12 @@ export async function POST(req: Request) {
     );
   }
 
-  // 3. Генерация
-  const raw = apiKey ? await generate(apiKey, instruction, data) : null;
-  const text = raw ? sanitizeLetter(raw, data) : null;
+  // 3. Генерация. В Gemini (США) — обезличенные данные: вместо имени метка, без контактов и ссылок;
+  // настоящее имя подставляем в готовое письмо уже здесь
+  const aiData = redactPersonal(data.replace(`Имя: ${fence(name)}`, `Имя: ${NAME_TOKEN}`), [name]);
+  const raw = apiKey ? await generate(apiKey, instruction, aiData) : null;
+  const letter = raw ? sanitizeLetter(raw, aiData) : null;
+  const text = letter ? restoreName(letter, name) : null;
   if (!text) {
     // ИИ не ответил — письмо по шаблону из профиля, чтобы отклик не срывался.
     // В кэш не кладём: при следующей попытке пусть снова пробует ИИ.
