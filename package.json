@@ -11,6 +11,7 @@
     "db:types": "supabase gen types typescript --project-id wyanvkaoqxgceaxzlqvk > src/lib/database.types.ts"
   },
   "dependencies": {
+    "@fontsource-variable/onest": "^5.3.1",
     "@supabase/ssr": "^0.12.7",
     "@supabase/supabase-js": "^2.112.4",
     "lucide-react": "^1.60.0",
