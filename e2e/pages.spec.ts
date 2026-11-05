@@ -120,12 +120,21 @@ test("страница источников: ссылка в подвале и �
   await expect(page.getByRole("article").getByRole("link", { name: "eqytest@gmail.com" })).toHaveAttribute("href", /^mailto:eqytest@gmail\.com\?subject=/);
 });
 
-test("регистрация недоступна без согласия с соглашением и политикой", async ({ page }) => {
+test("регистрация недоступна без обеих отметок: соглашение и отдельное согласие на обработку ПДн", async ({ page }) => {
   await page.goto("/register/form?role=candidate");
   const submit = page.getByRole("button", { name: "Зарегистрироваться" });
   await expect(submit).toBeDisabled();
-  await page.getByRole("checkbox").check();
+  await page.getByRole("checkbox", { name: "Принимаю пользовательское соглашение и политику" }).check();
+  await expect(submit).toBeDisabled();   // одной отметки мало: согласие — отдельный документ
+  await page.getByRole("checkbox", { name: "Даю согласие на обработку персональных данных" }).check();
   await expect(submit).toBeEnabled();
+});
+
+test("согласие на обработку ПДн — отдельная страница со ссылкой в подвале", async ({ page }) => {
+  await page.goto("/");
+  await page.getByRole("contentinfo").getByRole("link", { name: "Согласие на обработку данных" }).click();
+  await expect(page.getByRole("heading", { name: "Согласие на обработку персональных данных", level: 1 })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "5. Кому передаются данные, в том числе за рубеж" })).toBeVisible();
 });
 
 test("сброс пароля: ссылка со входа, форма запроса, без ссылки из письма — подсказка", async ({ page }) => {
