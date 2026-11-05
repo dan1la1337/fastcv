@@ -30,6 +30,9 @@ function RegisterFormContent() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [agreed, setAgreed] = useState(false);
+  // Согласие на обработку ПДн — отдельной отметкой, не вместе с соглашением (ч. 1 ст. 9 152-ФЗ)
+  const [pdConsent, setPdConsent] = useState(false);
+  const ready = agreed && pdConsent;
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [awaitingConfirmation, setAwaitingConfirmation] = useState(false);
@@ -43,8 +46,14 @@ function RegisterFormContent() {
       email: email.trim(),
       password,
       options: {
-        // Согласие с соглашением и политикой: редакция и время — для подтверждения по 152-ФЗ
-        data: { role, consent_version: LEGAL_VERSION, consent_at: new Date().toISOString() },
+        // Редакции и время обеих отметок — подтверждение согласия по 152-ФЗ (хранятся в аккаунте)
+        data: {
+          role,
+          consent_version: LEGAL_VERSION,
+          consent_at: new Date().toISOString(),
+          pd_consent_version: LEGAL_VERSION,
+          pd_consent_at: new Date().toISOString(),
+        },
         emailRedirectTo: `${window.location.origin}/auth/callback`,
       },
     });
@@ -111,11 +120,19 @@ function RegisterFormContent() {
 
           <label className="flex items-start gap-3 text-xs text-neutral-400 leading-relaxed cursor-pointer">
             <input type="checkbox" required checked={agreed} onChange={(e) => setAgreed(e.target.checked)}
-              className="mt-0.5" />
+              className="mt-0.5" aria-label="Принимаю пользовательское соглашение и политику" />
             <span>
-              Принимаю <Link href="/terms" target="_blank" className="text-teal-300 hover:underline">пользовательское соглашение</Link> и
-              даю согласие на обработку персональных данных, в том числе их передачу за рубеж, на условиях{' '}
-              <Link href="/privacy" target="_blank" className="text-teal-300 hover:underline">политики</Link>
+              Принимаю <Link href="/terms" target="_blank" className="text-teal-300 hover:underline">пользовательское соглашение</Link> и{' '}
+              <Link href="/privacy" target="_blank" className="text-teal-300 hover:underline">политику обработки персональных данных</Link>
+            </span>
+          </label>
+
+          <label className="flex items-start gap-3 text-xs text-neutral-400 leading-relaxed cursor-pointer">
+            <input type="checkbox" required checked={pdConsent} onChange={(e) => setPdConsent(e.target.checked)}
+              className="mt-0.5" aria-label="Даю согласие на обработку персональных данных" />
+            <span>
+              Даю <Link href="/consent" target="_blank" className="text-teal-300 hover:underline">согласие на обработку персональных данных</Link>,
+              в том числе на их передачу за рубеж
             </span>
           </label>
 
@@ -123,11 +140,11 @@ function RegisterFormContent() {
             <FormError>{error}</FormError>
           )}
 
-          {!agreed && <p className="text-xs text-neutral-500 text-center">Чтобы продолжить, отметьте согласие выше</p>}
+          {!ready && <p className="text-xs text-neutral-500 text-center">Чтобы продолжить, отметьте обе галочки выше</p>}
 
           <button
             type="submit"
-            disabled={loading || !agreed}
+            disabled={loading || !ready}
             className="lg lg-accent w-full flex items-center justify-center gap-2 py-3 rounded-full text-sm font-semibold transition-colors disabled:opacity-50 mt-6"
           >
             {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Зарегистрироваться'}

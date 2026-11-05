@@ -3,8 +3,10 @@ export const OPERATOR = {
   name: "Лобанов Данила Ильич",
   status: "физическое лицо",
   email: "eqytest@gmail.com",
+  // Почтовый адрес оператора — обязательный реквизит согласия (п. 1 ч. 4 ст. 9 152-ФЗ). Заполнить
+  address: "",
 };
 
 // Редакция документов: меняется вместе с текстом, сохраняется в согласии при регистрации
-export const LEGAL_VERSION = "2026-10-24";
-export const LEGAL_DATE = "24 октября 2026 г.";
+export const LEGAL_VERSION = "2026-11-05";
+export const LEGAL_DATE = "5 ноября 2026 г.";
