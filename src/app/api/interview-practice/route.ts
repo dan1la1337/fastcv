@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { fence } from "@/lib/ai-safety";
-import { aiText } from "@/lib/ai";
+import { geminiText } from "@/lib/gemini";
 import { createSupabaseServerClient } from "@/lib/supabase-server";
 import {
   ANSWER_MAX, fallbackQuestions, parseModelJson, toGrade, toQuestions, type PracticeQuestion,
@@ -87,6 +87,7 @@ export async function POST(req: Request) {
 Описание: ${fence((vacancy.description ?? "").slice(0, 3000))}
 ${employerQuestions.length ? `Вопросы работодателя: ${fence(employerQuestions.join(" | "))}` : ""}
 </vacancy>`;
+  const apiKey = process.env.GEMINI_API_KEY;
 
   if (action === "questions") {
     const { data: profile } = await supabase.from("profiles").select("skills, pref_level, description").eq("id", auth.user.id).maybeSingle();
@@ -97,7 +98,7 @@ ${employerQuestions.length ? `Вопросы работодателя: ${fence(e
 Навыки: ${fence(stringList(profile?.skills).slice(0, 40).join(", ")) || "не указаны"}
 О себе: ${fence((profile?.description ?? "").slice(0, 1500))}
 </candidate>`;
-    const raw = await aiText(QUESTIONS_INSTRUCTION, input, { temperature: 0.8, maxOutputTokens: 2000, json: true });
+    const raw = apiKey ? await geminiText(apiKey, QUESTIONS_INSTRUCTION, input, { temperature: 0.8, maxOutputTokens: 2000, json: true }) : null;
     let questions: PracticeQuestion[] = raw ? toQuestions(parseModelJson(raw), employerQuestions) : [];
     let source: "ai" | "template" = "ai";
     if (questions.length < 4) {
@@ -116,7 +117,7 @@ ${fence(question)}
 <answer>
 ${fence(answer)}
 </answer>`;
-  const raw = await aiText(GRADE_INSTRUCTION, input, { temperature: 0.2, maxOutputTokens: 2000, json: true });
+  const raw = apiKey ? await geminiText(apiKey, GRADE_INSTRUCTION, input, { temperature: 0.2, maxOutputTokens: 2000, json: true }) : null;
   const grade = raw ? toGrade(parseModelJson(raw)) : null;
   if (!grade) return NextResponse.json({ error: "ИИ сейчас не отвечает. Попробуйте через минуту." }, { status: 503 });
   return NextResponse.json({ grade });

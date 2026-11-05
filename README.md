@@ -7,7 +7,7 @@ AI-биржа вакансий. Вакансии собираются из Teleg
 | Часть | Где | Что делает |
 |---|---|---|
 | Сайт | `src/` | Next.js 16 + Tailwind. Лента с фильтрами, Smart Apply, кабинеты кандидата и работодателя |
-| API писем | `src/app/api/cover-letter` | Генерирует сопроводительное через Yandex AI Studio (Qwen3). Только для вошедших, с лимитом запросов |
+| API писем | `src/app/api/cover-letter` | Генерирует сопроводительное через Gemini. Только для вошедших, с лимитом запросов |
 | Сборщик | `main.py` | Раз в 6 часов (GitHub Actions) забирает новые посты из каналов таблицы `channels`, нормализует их через Gemini и сохраняет вакансии со ссылкой на оригинал |
 | База | `supabase/migrations/` | Таблицы, триггеры и правила доступа (RLS) для Supabase, по миграциям |
 
@@ -112,6 +112,6 @@ npm run db:types
 
 ## Деплой
 
-- **Сайт (Vercel):** задайте `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `YANDEX_API_KEY` и `YANDEX_FOLDER_ID` в Environment Variables. ИИ-функции сайта работают через Yandex AI Studio, чтобы данные пользователей не уходили за рубеж; Gemini остался только у сборщика вакансий. В `NEXT_PUBLIC_SUPABASE_ANON_KEY` — только **публичный** ключ (`sb_publishable_…` или `anon`): всё с префиксом `NEXT_PUBLIC_` попадает в браузер. С секретным ключом сборка остановится. Переменные `NEXT_PUBLIC_*` вшиваются при сборке, поэтому после их изменения нужен редеплой.
+- **Сайт (Vercel):** задайте `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY` и `GEMINI_API_KEY` в Environment Variables. В `NEXT_PUBLIC_SUPABASE_ANON_KEY` — только **публичный** ключ (`sb_publishable_…` или `anon`): всё с префиксом `NEXT_PUBLIC_` попадает в браузер. С секретным ключом сборка остановится. Переменные `NEXT_PUBLIC_*` вшиваются при сборке, поэтому после их изменения нужен редеплой.
 - **Сборщик (GitHub Actions):** секреты `NEXT_PUBLIC_SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY` и `GEMINI_API_KEY`.
 - **Supabase → Authentication → URL Configuration:** добавьте `https://<ваш-домен>/auth/callback` в Redirect URLs, чтобы работала ссылка подтверждения почты.
