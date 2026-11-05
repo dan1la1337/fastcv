@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
-import { Onest } from "next/font/google";
+// Шрифт — из npm-пакета, а не с Google Fonts: сборка не зависит от доступности
+// fonts.googleapis.com (5.11 прод-деплой упал на загрузке шрифта), посетители не ходят к Google
+import "@fontsource-variable/onest";
 import "./globals.css";
 import Link from "next/link";
 import { Suspense } from "react";
@@ -9,8 +11,6 @@ import { OPERATOR } from "@/lib/legal";
 
 // Дизайн-система Obsidian Glass: одно семейство на оба алфавита. В вакансиях латиница идёт вперемешку
 // с кириллицей («Python-разработчик»), и пара разных шрифтов давала скачки размера и толщины внутри слова
-const onest = Onest({ variable: "--font-onest", subsets: ["latin", "cyrillic"], weight: ["400", "500", "600"] });
-
 // Признак входа до первой отрисовки: вошедшим не показываем экран-приветствие (.guest-only).
 // Куки сессии Supabase читаются из браузера; сама сессия здесь не проверяется — только скрытие блока
 const AUTH_HINT = `try{if(/(^|; )sb-[^=]+-auth-token/.test(document.cookie))document.documentElement.dataset.auth="1"}catch(e){}`;
@@ -29,7 +29,7 @@ export default function RootLayout({
   return (
     <html
       lang="ru"
-      className={`${onest.variable} h-full antialiased`}
+      className="h-full antialiased"
     >
       <head>
         <script dangerouslySetInnerHTML={{ __html: AUTH_HINT }} />

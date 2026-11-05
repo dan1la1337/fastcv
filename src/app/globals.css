@@ -36,7 +36,7 @@
   --og-stage: url("/og/stage.webp");
   --og-grain: url("/og/grain.webp");
 
-  --font-og: var(--font-onest), "Segoe UI", system-ui, sans-serif;
+  --font-og: "Onest Variable", "Segoe UI", system-ui, sans-serif;
 
   --background: var(--void);
   --foreground: var(--ink);
