@@ -5,14 +5,14 @@
   2. читает публичную ленту канала (t.me/s/<канал>) и выбирает посты новее
      последнего обработанного (channels.last_post_id), листая историю назад,
      если с прошлого запуска вышло больше одной страницы;
-  3. прогоняет каждый новый пост через Gemini, который возвращает структуру
+  3. прогоняет каждый новый пост через ИИ, который возвращает структуру
      вакансии по JSON-схеме;
   4. сохраняет вакансию со ссылкой на оригинальный пост;
   5. отправляет в архив внешние вакансии старше ARCHIVE_AFTER_DAYS дней;
   6. если что-то пошло не так, пишет владельцу в Telegram (TELEGRAM_BOT_TOKEN,
      TELEGRAM_CHAT_ID); без этих переменных оповещения просто выключены.
 
-Если Gemini недоступен, обработка канала останавливается на этом посте,
+Если ИИ недоступен, обработка канала останавливается на этом посте,
 и при следующем запуске он будет обработан снова — посты не теряются.
 """
 
@@ -33,25 +33,25 @@ import requests
 from bs4 import BeautifulSoup
 from pydantic import BaseModel
 
+import yandex_ai
+
 ARCHIVE_AFTER_DAYS = 30
 DUPLICATE_DAYS = 21  # в этом окне та же должность той же компании — дубль из другого канала
 FIRST_RUN_POSTS = 10  # сколько последних постов брать у нового канала
 MAX_PAGES = 5  # сколько страниц истории (~20 постов каждая) листать за запуск
 MIN_TEXT_LEN = 40  # короче — точно не вакансия
-# Модели по очереди: если одна перегружена (503) или упёрлась в лимит (429),
-# запрос уходит в следующую. Переопределяется переменной GEMINI_MODELS.
-# 26.10: 3.1-flash-lite быстрая, но часто перегружена; flash-lite-latest стабильно отвечает
-# за ~15 с на пачку из 10 постов; 3.5-flash-lite надёжна, но медленная; 3.6-flash часто 503.
-GEMINI_MODELS = ("gemini-3.1-flash-lite", "gemini-flash-lite-latest", "gemini-3.5-flash-lite", "gemini-3.6-flash")
+# Модели Yandex AI Studio по очереди: если одна перегружена (503) или упёрлась в лимит (429),
+# запрос уходит в следующую. Переопределяется переменной YANDEX_AI_MODELS — общей с сайтом.
+AI_MODELS = yandex_ai.DEFAULT_MODELS
 AI_ATTEMPTS = 2  # попыток на каждую модель
 AI_TIMEOUT_MS = 60_000  # без таймаута зависший запрос держал весь прогон
 AI_MODEL_STRIKES = 3  # обращений подряд, когда модель перегружена, — дальше в этом запуске без неё
-AI_CIRCUIT_BREAKER = 3  # каналов подряд без ответа Gemini — дальше не пытаемся
+AI_CIRCUIT_BREAKER = 3  # каналов подряд без ответа ИИ — дальше не пытаемся
 AI_PAUSE_SECONDS = 2
-# Постов в одном обращении к Gemini: пачка из 10 разбирается за 10–30 с, как один пост,
+# Постов в одном обращении к ИИ: пачка из 10 разбирается за 10–30 с, как один пост,
 # поэтому за запуск успеваем в 5–10 раз больше (замер 26.10)
 AI_BATCH = 10
-AI_PARALLEL = 3   # пачек одновременно; бесплатный лимит — 15 запросов в минуту, мы укладываемся
+AI_PARALLEL = 3   # пачек одновременно
 # История канала: при подключении дочитываем посты за последние HISTORY_DAYS дней
 # (столько вакансия и живёт в ленте), по HISTORY_PAGES страниц за запуск на канал
 HISTORY_DAYS = ARCHIVE_AFTER_DAYS
@@ -200,7 +200,7 @@ def collect_history(
 
 
 # ---------------------------------------------------------------------------
-# Нормализация через Gemini
+# Нормализация через ИИ
 # ---------------------------------------------------------------------------
 
 
@@ -220,7 +220,7 @@ HiringType = Literal["product", "outsource", "agency"]
 
 
 class VacancyAI(BaseModel):
-    """Ответ Gemini. Все поля обязательны, но могут быть null: так модель
+    """Ответ модели. Все поля обязательны, но могут быть null: так модель
     всегда возвращает полную структуру, а схема не зависит от значений по умолчанию."""
 
     is_job: bool
@@ -361,22 +361,17 @@ def wrap_posts(texts: list[str]) -> str:
 
 
 class AIUnavailable(Exception):
-    """Gemini не ответил после всех попыток (перегрузка, лимит, сбой сети)."""
+    """ИИ не ответил после всех попыток (перегрузка, лимит, сбой сети)."""
 
 
-def make_gemini_normalizer(api_key: str, models: tuple[str, ...] = GEMINI_MODELS) -> Callable[[str], VacancyAI]:
-    import httpx
-    from google import genai
-    from google.genai import errors, types
+def make_ai_normalizer(api_key: str, folder: str, models: Optional[tuple[str, ...]] = None) -> Callable[[str], VacancyAI]:
+    from pydantic import TypeAdapter
 
-    client = genai.Client(api_key=api_key, http_options=types.HttpOptions(timeout=AI_TIMEOUT_MS))
-    config = types.GenerateContentConfig(
-        response_mime_type="application/json",
-        response_schema=VacancyAI,
-        temperature=0,
-        # Инструкции отдельно от данных: текст поста не может выдать себя за указания модели
-        system_instruction=PROMPT,
-    )
+    models = models or AI_MODELS
+    client = yandex_ai.Client(api_key, folder, timeout_ms=AI_TIMEOUT_MS)
+    # Инструкции отдельно от данных: текст поста не может выдать себя за указания модели
+    system_one = PROMPT + yandex_ai.json_instruction(VacancyAI.model_json_schema())
+    system_many = PROMPT + BATCH_NOTE + yandex_ai.json_instruction(TypeAdapter(list[BatchItem]).json_schema())
 
     # Счётчики за запуск: сколько обращений, сколько секунд ждали, какие ошибки (429 — лимит)
     stats: dict = {"calls": 0, "ok": 0, "seconds": 0.0, "errors": {}}
@@ -395,51 +390,53 @@ def make_gemini_normalizer(api_key: str, models: tuple[str, ...] = GEMINI_MODELS
     # иначе каждый пост сначала ждёт две неудачные попытки на ней (25.10 так уходило ~12 с на пост)
     strikes: dict[str, int] = {}
 
-    def _ask(contents: str, cfg, parse: Callable, failures: list[str]):
+    def _ask(system: str, user: str, max_tokens: int, parse: Callable, failures: list[str]):
         stats["calls"] += 1
         healthy = [m for m in models if strikes.get(m, 0) < AI_MODEL_STRIKES] or list(models)
         for model in healthy:
             for attempt in range(AI_ATTEMPTS):
                 try:
-                    response = client.models.generate_content(model=model, contents=contents, config=cfg)
+                    result = parse(client.complete(model=model, system=system, user=user,
+                                                   temperature=0, max_tokens=max_tokens))
                     stats["ok"] += 1
                     strikes[model] = 0
-                    return parse(response)
-                except errors.APIError as e:
+                    return result
+                except yandex_ai.APIError as e:
                     if e.code == 404:  # модели нет (сняли с поддержки) — сразу к следующей
                         failures.append(f"{model}: 404")
                         break
-                    if e.code != 429 and not (e.code and e.code >= 500):
+                    if e.code != 429 and e.code < 500:
                         # 400 и подобные — ошибка в запросе, другие модели не помогут
-                        raise AIUnavailable(f"{model}: {e.code} {e.status}") from e
+                        raise AIUnavailable(f"{model}: {e.code}") from e
                     failures.append(f"{model}: {e.code}")
                     if attempt + 1 == AI_ATTEMPTS:
                         strikes[model] = strikes.get(model, 0) + 1
-                except (httpx.HTTPError, requests.RequestException, ValueError) as e:
+                except (requests.RequestException, ValueError) as e:  # сеть, таймаут, невалидный JSON
                     failures.append(f"{model}: {type(e).__name__}")
                 if attempt + 1 < AI_ATTEMPTS:
                     time.sleep(AI_PAUSE_SECONDS * 2 ** attempt)
         raise AIUnavailable("; ".join(failures[-3:]) or "нет ответа")
 
-    def _parse_one(response) -> VacancyAI:
-        if isinstance(response.parsed, VacancyAI):
-            return response.parsed
-        return VacancyAI.model_validate_json(response.text)
+    def _parse_one(text: str) -> VacancyAI:
+        data = yandex_ai.parse_json(text)
+        if isinstance(data, list) and len(data) == 1:
+            data = data[0]
+        return VacancyAI.model_validate(data)
 
     def _normalize(text: str, failures: list[str]) -> VacancyAI:
-        return _ask(wrap_post(text), config, _parse_one, failures)
+        return _ask(system_one, wrap_post(text), 2_000, _parse_one, failures)
 
-    batch_config = types.GenerateContentConfig(
-        response_mime_type="application/json",
-        response_schema=list[BatchItem],
-        temperature=0,
-        system_instruction=PROMPT + BATCH_NOTE,
-    )
-
-    def _parse_many(response) -> list[BatchItem]:
-        if isinstance(response.parsed, list):
-            return [x for x in response.parsed if isinstance(x, BatchItem)]
-        return [BatchItem.model_validate(x) for x in json.loads(response.text)]
+    def _parse_many(text: str) -> list[BatchItem]:
+        data = yandex_ai.parse_json(text)
+        if isinstance(data, dict):  # модель завернула список в объект: {"items": [...]}
+            data = next((v for v in data.values() if isinstance(v, list)), [])
+        items = []
+        for x in data if isinstance(data, list) else []:
+            try:
+                items.append(BatchItem.model_validate(x))
+            except ValueError:
+                pass  # битый элемент — этот пост разберём отдельно
+        return items
 
     def many(texts: list[str]) -> list[VacancyAI]:
         """Несколько постов одним обращением. Пост, на который модель не ответила
@@ -449,7 +446,7 @@ def make_gemini_normalizer(api_key: str, models: tuple[str, ...] = GEMINI_MODELS
         failures: list[str] = []
         started = time.monotonic()
         try:
-            items = _ask(wrap_posts(texts), batch_config, _parse_many, failures)
+            items = _ask(system_many, wrap_posts(texts), 1_500 * len(texts), _parse_many, failures)
         finally:
             stats["seconds"] = round(stats["seconds"] + time.monotonic() - started, 1)
             for f in failures:
@@ -500,7 +497,7 @@ class Store:
                 .select("username, category, last_post_id, failed_runs, history_before")
                 .eq("is_active", True)
                 # Сначала каналы, которые дольше всего не проверялись: если предохранитель
-                # Gemini прервёт прогон, в следующий раз очередь дойдёт до остальных
+                # ИИ прервёт прогон, в следующий раз очередь дойдёт до остальных
                 .order("last_parsed_at", nullsfirst=True).order("username")
                 .execute().data)
 
@@ -875,13 +872,13 @@ def process_channel(
         except AIUnavailable as e:
             # Не сдвигаем last_post_id: этот и следующие посты обработаем в следующий раз
             result.ai_stopped = True
-            result.error = f"Gemini недоступен: {e}"
+            result.error = f"ИИ недоступен: {e}"
             break
         if outcome == "saved":
             result.saved += 1
         last_done = post.post_id
         if outcome in ("saved", "not_job"):
-            pause(AI_PAUSE_SECONDS)  # пауза только после обращения к Gemini
+            pause(AI_PAUSE_SECONDS)  # пауза только после обращения к ИИ
 
     store.update_channel(channel, {
         "last_parsed_at": now,
@@ -897,7 +894,7 @@ class RunSummary:
     channels: int
     results: list[ChannelResult]
     archived: int = 0
-    out_of_time: bool = False  # каналы отложены по времени — это штатно, не сбой Gemini
+    out_of_time: bool = False  # каналы отложены по времени — это штатно, не сбой ИИ
     deactivated: list[str] = field(default_factory=list)  # выключенные мёртвые каналы
 
     @property
@@ -910,7 +907,7 @@ class RunSummary:
 
     @property
     def deferred(self) -> int:
-        """Каналы, до которых не дошли из-за отказа Gemini."""
+        """Каналы, до которых не дошли из-за отказа ИИ."""
         return 0 if self.out_of_time else self.channels - len(self.results)
 
     @property
@@ -924,7 +921,7 @@ def alert_text(summary: RunSummary) -> Optional[str]:
     ai_stopped = [r for r in summary.results if r.ai_stopped]
     if ai_stopped or summary.deferred:
         problems.append(
-            f"Gemini не отвечал: обработка остановлена на {len(ai_stopped)} канал(ах)"
+            f"ИИ не отвечал: обработка остановлена на {len(ai_stopped)} канал(ах)"
             + (f", ещё {summary.deferred} отложено" if summary.deferred else "")
             + ". Посты не потеряны, следующий запуск продолжит с того же места."
         )
@@ -1189,9 +1186,9 @@ def run(store: Store, normalize: Callable[[str], VacancyAI],
                   f"первыми пойдут в следующий запуск.")
             break
         if ai_failures_in_row >= AI_CIRCUIT_BREAKER:
-            # Gemini лежит: остальные каналы не трогаем, их last_post_id не меняется,
+            # ИИ лежит: остальные каналы не трогаем, их last_post_id не меняется,
             # и следующий запуск продолжит с того же места
-            print(f"⏸ Gemini недоступен на {AI_CIRCUIT_BREAKER} каналах подряд — "
+            print(f"⏸ ИИ недоступен на {AI_CIRCUIT_BREAKER} каналах подряд — "
                   f"остальные каналы ({len(channels) - len(results)}) отложены до следующего запуска.")
             break
         r = process_channel(row, store, normalize)
@@ -1216,7 +1213,7 @@ def finish_run(store: Store, summary: RunSummary) -> RunSummary:
     if unavailable:
         print(f"Каналы без доступной ленты ({len(unavailable)}): {', '.join('@' + c for c in unavailable)}")
     if any(r.ai_stopped for r in results):
-        print("Часть постов отложена до следующего запуска: Gemini был недоступен.")
+        print("Часть постов отложена до следующего запуска: ИИ был недоступен.")
     return summary
 
 
@@ -1237,7 +1234,7 @@ def run_batched(store: Store, normalize, channels: list[dict],
                 fetch: Callable[[str], str] = fetch_page,
                 pause: Callable[[float], None] = time.sleep) -> RunSummary:
     """Сначала читаем ленты всех каналов, потом разбираем новые посты пачками по AI_BATCH
-    через одно обращение к Gemini, на остаток времени — историю каналов за HISTORY_DAYS дней.
+    через одно обращение к ИИ, на остаток времени — историю каналов за HISTORY_DAYS дней.
     Канал запоминает последний пост, до которого всё разобрано: недоделанное — в следующий раз."""
     started = clock()
     works: list[ChannelWork] = []
@@ -1297,7 +1294,7 @@ def run_batched(store: Store, normalize, channels: list[dict],
 
     ai_stopped: Optional[str] = None
     chunks = [pending[i:i + AI_BATCH] for i in range(0, len(pending), AI_BATCH)]
-    # Пачки уходят в Gemini по AI_PARALLEL одновременно: ответ на пачку ~15 с, и почти всё это
+    # Пачки уходят в ИИ по AI_PARALLEL одновременно: ответ на пачку ~15 с, и почти всё это
     # время — ожидание модели. Сохраняем по порядку: на первой неудаче останавливаемся.
     with ThreadPoolExecutor(max_workers=AI_PARALLEL) as pool:
         for w in range(0, len(chunks), AI_PARALLEL):
@@ -1310,7 +1307,7 @@ def run_batched(store: Store, normalize, channels: list[dict],
                 try:
                     vacancies = future.result()
                 except AIUnavailable as e:
-                    ai_stopped = f"Gemini недоступен: {e}"
+                    ai_stopped = f"ИИ недоступен: {e}"
                     break
                 for (work, prepared), vacancy in zip(chunk, vacancies):
                     outcome = save_post(prepared, vacancy, store)
@@ -1402,7 +1399,8 @@ def main() -> None:
     load_dotenv(".env")
 
     supabase_url = env("SUPABASE_URL", "NEXT_PUBLIC_SUPABASE_URL")
-    gemini_key = env("GEMINI_API_KEY")
+    ai_key = env("YANDEX_API_KEY")
+    ai_folder = env("YANDEX_FOLDER_ID")
     # Сборщику нужен service-role ключ: запись в vacancies и channels для
     # публичного ключа закрыта правилами доступа (supabase/migrations).
     supabase_key = env("SUPABASE_SERVICE_ROLE_KEY")
@@ -1414,8 +1412,8 @@ def main() -> None:
 
     if not supabase_url or not supabase_key:
         fail("Не найдены ключи Supabase! Проверьте .env или .env.local")
-    if not gemini_key:
-        fail("Не найден GEMINI_API_KEY! Проверьте .env или .env.local")
+    if not ai_key or not ai_folder:
+        fail("Не найдены YANDEX_API_KEY и YANDEX_FOLDER_ID! Проверьте .env или .env.local")
 
     print(f"Ключ Supabase: {describe_key(supabase_key)}, длина {len(supabase_key)}")
     if not supabase_key.isascii() or any(c.isspace() for c in supabase_key):
@@ -1435,11 +1433,11 @@ def main() -> None:
         return
 
     print("==================== ЗАПУСК СБОРА ====================")
-    models = tuple(m.strip() for m in (env("GEMINI_MODELS") or "").split(",") if m.strip()) or GEMINI_MODELS
-    print(f"Модели Gemini: {', '.join(models)}")
+    models = yandex_ai.models_from_env(AI_MODELS)
+    print(f"Модели ИИ: {', '.join(models)}")
     try:
         store = Store(create_client(supabase_url, supabase_key))
-        channel_normalizer = make_gemini_normalizer(gemini_key, models)
+        channel_normalizer = make_ai_normalizer(ai_key, ai_folder, models)
         summary = run(store, channel_normalizer)
     except Exception as e:
         # Текст ошибки без значений ключей: они в заголовках запросов, а не в сообщении
@@ -1448,8 +1446,8 @@ def main() -> None:
     text = alert_text(summary)
     if text:
         notify(text)
-    # Итоги каналов и Gemini — в базу (логи Actions не всегда доступны): видно, упирается ли
-    # сбор в лимит Gemini (ошибки 429) или во время
+    # Итоги каналов и ИИ — в базу (логи Actions не всегда доступны): видно, упирается ли
+    # сбор в лимит ИИ (ошибки 429) или во время
     try:
         store.set_setting("channels_last_run", json.dumps({
             "at": datetime.now(timezone.utc).isoformat(),
@@ -1474,10 +1472,10 @@ def main() -> None:
         except Exception as e:
             print(f"⚠️ Опросы о собеседованиях: {type(e).__name__}: {str(e)[:200]}")
     # ИИ-выжимка отзывов о найме для страниц компаний (рейтинг работодателя)
-    if gemini_key:
+    if ai_key:
         try:
             import reviews
-            print(f"Отзывы о найме: {reviews.run(store.db, reviews.make_writer(gemini_key))}")
+            print(f"Отзывы о найме: {reviews.run(store.db, reviews.make_writer(ai_key, ai_folder, models))}")
         except Exception as e:  # выжимка не должна ронять сбор
             print(f"⚠️ Выжимка отзывов: {type(e).__name__}: {str(e)[:200]}")
     # Непрочитанные сообщения в чате — письмом и в Telegram-бот (кому он подключён)
@@ -1517,7 +1515,7 @@ def main() -> None:
             offset = int(store.get_setting("careers_offset") or 0) % len(careers.COMPANIES)
             store.set_setting("careers_offset", str(offset + 1))
             order = careers.COMPANIES[offset:] + careers.COMPANIES[:offset]
-            career_stats = careers.import_careers(store, make_gemini_normalizer(gemini_key, models), fetcher, order)
+            career_stats = careers.import_careers(store, make_ai_normalizer(ai_key, ai_folder, models), fetcher, order)
             print(f"Сайты компаний: {career_stats}")
             # Итоги по компаниям — в базу: логи Actions не всегда под рукой, а так видно в /admin и SQL
             store.set_setting("careers_last_run", json.dumps(
@@ -1551,7 +1549,7 @@ def main() -> None:
     backfill = min(int(float(env("BACKFILL_COMPANY") or 0)), 600)
     if backfill > 0:
         try:
-            checked, filled = backfill_companies(store, make_gemini_normalizer(gemini_key, models), backfill)
+            checked, filled = backfill_companies(store, make_ai_normalizer(ai_key, ai_folder, models), backfill)
             print(f"Компании: проверено вакансий {checked}, заполнено {filled}")
         except Exception as e:  # дозаполнение не должно ронять успешный сбор
             print(f"⚠️ Дозаполнение компаний остановлено: {type(e).__name__}: {str(e)[:200]}")
