@@ -1,4 +1,8 @@
 // Только для серверного кода: запрос к Gemini с перебором моделей.
+// Gemini — серверы в США, поэтому пользовательские данные уходят туда только обезличенными:
+// без имени, телефонов, email, ссылок и ников (redactPersonal).
+
+import { redactPersonal } from "@/lib/redact";
 
 // Тот же порядок, что и в сборщике вакансий (main.py)
 export const GEMINI_MODELS = ["gemini-3.1-flash-lite", "gemini-3.5-flash-lite", "gemini-3.6-flash"];
@@ -12,8 +16,9 @@ export async function geminiText(
   apiKey: string,
   instruction: string,
   input: string,
-  options: { temperature?: number; maxOutputTokens?: number; json?: boolean } = {},
+  options: { temperature?: number; maxOutputTokens?: number; json?: boolean; names?: string[] } = {},
 ): Promise<string | null> {
+  const safeInput = redactPersonal(input, options.names);
   for (const model of GEMINI_MODELS) {
     try {
       const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`, {
@@ -21,7 +26,7 @@ export async function geminiText(
         headers: { "Content-Type": "application/json", "x-goog-api-key": apiKey },
         body: JSON.stringify({
           system_instruction: { parts: [{ text: instruction }] },
-          contents: [{ role: "user", parts: [{ text: input }] }],
+          contents: [{ role: "user", parts: [{ text: safeInput }] }],
           generationConfig: {
             temperature: options.temperature ?? 0.3,
             maxOutputTokens: options.maxOutputTokens ?? 600,

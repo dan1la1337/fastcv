@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createSupabaseServerClient } from "@/lib/supabase-server";
 import type { VacancyDraft } from "@/lib/vacancy-draft";
+import { redactPersonal } from "@/lib/redact";
 
 // ИИ-помощник работодателя: из пары строк заметок — полный текст вакансии.
 // Ничего не публикует: черновик подставляется в форму, работодатель правит и публикует сам.
@@ -73,7 +74,7 @@ async function askGemini(apiKey: string, notes: string): Promise<VacancyDraft | 
         headers: { "Content-Type": "application/json", "x-goog-api-key": apiKey },
         body: JSON.stringify({
           system_instruction: { parts: [{ text: INSTRUCTION }] },
-          contents: [{ role: "user", parts: [{ text: `<notes>\n${notes.replace(/<\/?\s*notes[^>]*>/gi, "")}\n</notes>` }] }],
+          contents: [{ role: "user", parts: [{ text: `<notes>\n${redactPersonal(notes.replace(/<\/?\s*notes[^>]*>/gi, ""))}\n</notes>` }] }],
           generationConfig: { temperature: 0.4, responseMimeType: "application/json", responseSchema: SCHEMA },
         }),
         signal: AbortSignal.timeout(MODEL_TIMEOUT_MS),
