@@ -17,6 +17,8 @@ from typing import Callable, Optional
 
 import requests
 
+import http_retry
+
 API = "https://opendata.trudvsem.ru/api/v1/vacancies"
 PAGE = 100
 SYNC_KEY = "trudvsem_synced_at"
@@ -139,8 +141,8 @@ def map_vacancy(v: dict) -> Optional[dict]:
 
 
 def fetch_json(url: str, params: dict) -> dict:
-    response = requests.get(url, params=params, timeout=40, headers={"User-Agent": "FastCV/1.0 (+https://fastcv.ru)"})
-    response.raise_for_status()
+    response = http_retry.get(requests.get, url, params=params, timeout=40,
+                              headers={"User-Agent": "FastCV/1.0 (+https://fastcv.ru)"})
     return response.json()
 
 

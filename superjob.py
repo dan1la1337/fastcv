@@ -19,6 +19,7 @@ from typing import Callable, Optional
 
 import requests
 
+import http_retry
 from trudvsem import level_for, money, sphere_direction, text
 
 API = "https://api.superjob.ru/2.0/vacancies/"
@@ -101,8 +102,7 @@ def make_fetch(api_key: str) -> Callable[[dict], dict]:
 
     def fetch(params: dict) -> dict:
         time.sleep(REQUEST_PAUSE)
-        response = session.get(API, params=params, timeout=30)
-        response.raise_for_status()
+        response = http_retry.get(session.get, API, params=params, timeout=30)
         return response.json()
 
     return fetch
