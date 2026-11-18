@@ -2,6 +2,7 @@ import { NextResponse, type NextRequest } from "next/server";
 import { createServerClient } from "@supabase/ssr";
 import { supabaseAnonKey, supabaseUrl } from "@/lib/supabase";
 import type { Database } from "@/lib/database.types";
+import { contentSecurityPolicy, createNonce } from "@/lib/csp";
 
 /** Разделы только для вошедших и роль, которой они принадлежат (null — любая). */
 const PROTECTED: { prefix: string; role: "candidate" | "employer" | null; elsewhere: string }[] = [
@@ -20,8 +21,19 @@ const PROTECTED: { prefix: string; role: "candidate" | "employer" | null; elsewh
  * 1. обновляет сессию Supabase в cookies (иначе через час пользователя «выкинет»);
  * 2. не пускает в кабинеты без входа и в кабинет чужой роли — до того, как страница
  *    отрисуется. Проверки на самих страницах остаются как второй рубеж.
+ * 3. ставит Content-Security-Policy с новым nonce. Next.js читает nonce из заголовка запроса
+ *    и ставит его на свои скрипты; страницы берут его из x-nonce.
  */
 export async function proxy(request: NextRequest) {
+  const nonce = createNonce();
+  const csp = contentSecurityPolicy(nonce);
+  request.headers.set("x-nonce", nonce);
+  request.headers.set("content-security-policy", csp);
+  const withCsp = (res: NextResponse) => {
+    res.headers.set("Content-Security-Policy", csp);
+    return res;
+  };
+
   let response = NextResponse.next({ request });
 
   const supabase = createServerClient<Database>(supabaseUrl, supabaseAnonKey, {
@@ -45,7 +57,7 @@ export async function proxy(request: NextRequest) {
 
   const { pathname, search } = request.nextUrl;
   const rule = PROTECTED.find(r => pathname === r.prefix || pathname.startsWith(r.prefix + "/"));
-  if (!rule) return response;
+  if (!rule) return withCsp(response);
 
   if (!userId) {
     const login = request.nextUrl.clone();
@@ -65,7 +77,7 @@ export async function proxy(request: NextRequest) {
     }
   }
 
-  return response;
+  return withCsp(response);
 }
 
 /** Редирект, который сохраняет обновлённые cookies сессии и запрет кеширования. */

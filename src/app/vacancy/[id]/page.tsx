@@ -2,6 +2,7 @@ import PageBar from "@/components/PageBar";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { headers } from "next/headers";
 import { cache } from "react";
 import { AlertTriangle, Calendar, ChevronRight, ExternalLink, Ghost, MessagesSquare } from "lucide-react";
 import ClosedReport from "@/components/ClosedReport";
@@ -60,6 +61,7 @@ export default async function VacancyPage({ params }: Props) {
   const vacancy = await getVacancy((await params).id);
   if (!vacancy) notFound();
   const jsonLd = jobPostingJsonLd(vacancy);
+  const nonce = (await headers()).get("x-nonce") ?? undefined;
   const estimate = estimateSalary(vacancy, await fetchSalaryBenchmarks());
 
   const posted = new Date(vacancy.first_seen_at ?? vacancy.posted_at ?? vacancy.created_at).toLocaleDateString("ru-RU", {
@@ -82,6 +84,7 @@ export default async function VacancyPage({ params }: Props) {
       {!vacancy.archived_at && !isMirrored(vacancy) && jsonLd && (
         <script
           type="application/ld+json"
+          nonce={nonce}
           // JSON.stringify экранирует строки; "<" заменяем, чтобы текст вакансии не мог закрыть тег
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, "\\u003c") }}
         />
