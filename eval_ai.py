@@ -57,7 +57,7 @@ def score(cases: list[dict], normalize: Callable[[str], Any], pause: Callable[[]
 def main() -> None:
     import time
 
-    from main import AI_PAUSE_SECONDS, GEMINI_MODELS, make_gemini_normalizer
+    from ai_client import AI_PAUSE_SECONDS, GEMINI_MODELS, make_gemini_normalizer
     from supabase import create_client
 
     db = create_client(os.environ["SUPABASE_URL"], os.environ["SUPABASE_SERVICE_ROLE_KEY"])

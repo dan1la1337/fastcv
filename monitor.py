@@ -91,7 +91,8 @@ def decide(problems: list[str], state: dict, now: datetime) -> tuple[Optional[st
 
 
 def main() -> None:
-    from main import Store, notify
+    from bots import notify
+    from store import Store
     from supabase import create_client
 
     store = Store(create_client(os.environ["SUPABASE_URL"], os.environ["SUPABASE_SERVICE_ROLE_KEY"]))

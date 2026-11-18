@@ -17,7 +17,7 @@ import subprocess
 from datetime import datetime, timezone
 from typing import Callable, Optional
 
-from main import notify
+from bots import notify
 
 KEY_ROTATION_DAYS = 180
 SEVERITY_ORDER = ("critical", "high", "moderate", "low", "info")
