@@ -1,6 +1,7 @@
 """Провайдер ИИ сборщика выбирается переменной AI_PROVIDER; модели — в ai_client.MODELS."""
 
 import json
+import pathlib
 
 import pytest
 
@@ -100,3 +101,21 @@ def test_gemini_clients_use_v1beta(monkeypatch):
     ai_client.GeminiProvider("g")
     reviews.make_writer("g")
     assert [o.api_version for o in options] == ["v1beta", "v1beta"]
+
+
+def test_models_come_from_shared_ai_models_json():
+    """Сайт и сборщик берут провайдер и порядок моделей из одного файла в корне репозитория."""
+    config = json.loads(ai_client.MODELS_FILE.read_text(encoding="utf-8"))
+    assert ai_client.MODELS_FILE.parent / "ai_client.py" == pathlib.Path(ai_client.__file__).resolve()
+    assert ai_client.MODELS == {name: tuple(p["models"]) for name, p in config["providers"].items()}
+    assert ai_client.DEFAULT_PROVIDER == config["provider"]
+
+
+def test_load_models_reads_the_given_file(tmp_path):
+    path = tmp_path / "ai-models.json"
+    path.write_text(json.dumps({"provider": "yandex", "providers": {
+        "gemini": {"models": ["g1"]}, "yandex": {"models": ["y1", "y2"]}}}), encoding="utf-8")
+    assert ai_client.load_models(path) == ({"gemini": ("g1",), "yandex": ("y1", "y2")}, "yandex")
+    path.write_text(json.dumps({"provider": "openai", "providers": {"gemini": {"models": ["g1"]}}}), encoding="utf-8")
+    with pytest.raises(ValueError, match="ai-models.json"):
+        ai_client.load_models(path)
