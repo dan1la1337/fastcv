@@ -44,7 +44,7 @@ export default function Feed({ initialRows, initialTotal, hero, after }: { initi
   // Пока сессия проверяется, верим куке: иначе при переходе из кабинета вошедший на миг увидит экран гостя
   const hasSessionCookie = useSyncExternalStore(neverChanges, readSessionCookie, () => false);
   const signedIn = Boolean(user) || (hasSessionCookie && !authChecked);
-  const [userProfile, setUserProfile] = useState<Tables<"profiles"> | null>(null);
+  const [userProfile, setUserProfile] = useState<Pick<Tables<"profiles">, "role" | "skills" | "pref_directions" | "pref_level"> | null>(null);
 
   // «Для вас»: подборка по профилю кандидата и процент совпадения на карточках
   const [mode, setMode] = useState<FeedMode>("all");
@@ -84,7 +84,7 @@ export default function Feed({ initialRows, initialTotal, hero, after }: { initi
         setUser(data.user);
         const { data: profile } = await supabase
           .from("profiles")
-          .select("*")
+          .select("role, skills, pref_directions, pref_level")
           .eq("id", data.user.id)
           .single();
         if (profile) setUserProfile(profile);

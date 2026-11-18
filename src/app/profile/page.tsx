@@ -83,11 +83,12 @@ export default function ProfilePage() {
       setUser(user);
       setRole(await getUserRole(user));
 
-      const { data: profile } = await supabase
+      // resume_path — служебное поле: читается только своё и только через my_private_profile()
+      const [{ data: profile }, { data: secret }] = await Promise.all([supabase
         .from("profiles")
-        .select("name, description, skills, primary_skills, resume_path, pref_directions, pref_level, pref_format, pref_formats, experience_years, pref_city, pref_salary, leads_people, level_reason, level_source")
+        .select("name, description, skills, primary_skills, pref_directions, pref_level, pref_format, pref_formats, experience_years, pref_city, pref_salary, leads_people, level_reason, level_source")
         .eq("id", user.id)
-        .maybeSingle();
+        .maybeSingle(), supabase.rpc("my_private_profile").maybeSingle()]);
       if (profile) {
         setName(profile.name || "");
         setDescription(profile.description || "");
@@ -96,7 +97,7 @@ export default function ProfilePage() {
         const primaryLower = new Set(primary.map(x => x.toLowerCase()));
         setPrimarySkills(primary.join(", "));
         setSkills(all.filter(x => !primaryLower.has(x.toLowerCase())).join(", "));
-        setResumePath(profile.resume_path ?? null);
+        setResumePath(secret?.resume_path ?? null);
         setPrefDirections(profile.pref_directions ?? []);
         setPrefLevel((profile.pref_level as Level | null) ?? "");
         setPrefFormats(profile.pref_formats?.length ? (profile.pref_formats as WorkFormat[]) : profile.pref_format ? [profile.pref_format as WorkFormat] : []);

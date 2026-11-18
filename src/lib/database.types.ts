@@ -334,6 +334,7 @@ export type Database = {
           level_source: string | null
           pref_salary: number | null
           resume_path: string | null
+          has_resume: boolean
           role: string
           skills: Json | null
           telegram_chat_id: number | null
@@ -366,6 +367,7 @@ export type Database = {
           level_source?: string | null
           pref_salary?: number | null
           resume_path?: string | null
+          has_resume?: never
           role: string
           skills?: Json | null
           telegram_chat_id?: number | null
@@ -397,6 +399,7 @@ export type Database = {
           level_source?: string | null
           pref_salary?: number | null
           resume_path?: string | null
+          has_resume?: never
           role?: string
           skills?: Json | null
           telegram_chat_id?: number | null
@@ -732,6 +735,14 @@ export type Database = {
       consume_ai_quota: {
         Args: { max_calls: number; quota_kind: string; window_seconds: number }
         Returns: Json
+      }
+      my_private_profile: {
+        Args: never
+        Returns: {
+          company_verify_token: string | null
+          resume_path: string | null
+          telegram_chat_id: number | null
+        }[]
       }
       my_application_matches: {
         Args: never

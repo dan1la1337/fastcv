@@ -27,11 +27,13 @@ export default function CompanyVerification({ userId }: { userId: string }) {
   const [copied, setCopied] = useState(false);
 
   useEffect(() => {
-    supabase.from("profiles").select("company_domain, company_verify_token, company_verified_at").eq("id", userId).maybeSingle()
-      .then(({ data }) => {
-        setState({ domain: data?.company_domain ?? null, token: data?.company_verify_token ?? null, verifiedAt: data?.company_verified_at ?? null });
-        setDomain(data?.company_domain ?? "");
-      });
+    Promise.all([
+      supabase.from("profiles").select("company_domain, company_verified_at").eq("id", userId).maybeSingle(),
+      supabase.rpc("my_private_profile").maybeSingle(),
+    ]).then(([{ data }, { data: secret }]) => {
+      setState({ domain: data?.company_domain ?? null, token: secret?.company_verify_token ?? null, verifiedAt: data?.company_verified_at ?? null });
+      setDomain(data?.company_domain ?? "");
+    });
   }, [userId]);
 
   async function start(e: React.FormEvent) {

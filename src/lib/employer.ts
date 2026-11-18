@@ -13,6 +13,7 @@ export type ReplyStatus = "interview_scheduled" | "rejected";
 
 export interface Application {
   id: string;
+  candidate_id: string;
   status: string;
   hr_message: string | null;
   cover_letter: string | null;
@@ -20,7 +21,7 @@ export interface Application {
   blitz_answers: BlitzAnswer[];
   blitz_summary: string | null;
   vacancies: { id: string; title: string; employer_id: string };
-  profiles: { name: string | null; skills: string[] | null; resume_path: string | null } | null;
+  profiles: { name: string | null; skills: string[] | null; has_resume: boolean } | null;
   /** Чат с кандидатом (открывается откликом) */
   conversations: { id: string } | null;
 }

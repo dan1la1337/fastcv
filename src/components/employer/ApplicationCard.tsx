@@ -108,15 +108,15 @@ export default function ApplicationCard({
       {/* Пока пишем ответ, кнопки решения убраны: иначе рядом два разных «отправить» */}
       {reply?.appId !== app.id && (
       <div className="grid grid-cols-2 sm:flex sm:flex-wrap sm:items-center sm:justify-end gap-2.5">
-        {app.profiles?.resume_path && (
-          <button onClick={() => onOpenResume(app.profiles!.resume_path!)}
+        {app.profiles?.has_resume && (
+          <button onClick={() => onOpenResume(`${app.candidate_id}/resume.pdf`)}
             className="lg col-span-2 sm:mr-auto h-11 px-4 rounded-full text-neutral-200 text-sm transition-colors flex items-center justify-center gap-1.5">
             <FileText className="w-3.5 h-3.5" /> Резюме (PDF)
           </button>
         )}
         {app.conversations?.id && (
           <Link href={`/messages?c=${app.conversations.id}`}
-            className={`${app.profiles?.resume_path ? "" : "sm:mr-auto "}lg h-11 px-4 rounded-full text-neutral-200 text-sm transition-colors flex items-center justify-center gap-1.5`}>
+            className={`${app.profiles?.has_resume ? "" : "sm:mr-auto "}lg h-11 px-4 rounded-full text-neutral-200 text-sm transition-colors flex items-center justify-center gap-1.5`}>
             <MessageCircle className="w-3.5 h-3.5" /> Написать
           </Link>
         )}
