@@ -8,8 +8,10 @@ import { supabase } from "@/lib/supabase";
 const CONFIRM_WORD = "удалить";
 
 /**
- * Удаление аккаунта (152-ФЗ). Сначала файлы резюме из хранилища (из SQL их не удалить),
- * потом delete_my_account() — профиль, отклики или вакансии, избранное, письма, сам аккаунт.
+ * Удаление аккаунта (152-ФЗ). Сначала delete_my_account() — профиль, отклики или вакансии,
+ * избранное, письма, сам аккаунт; файлы резюме из хранилища (из SQL их не удалить) — только
+ * после успеха, чтобы при ошибке у живого аккаунта не пропало резюме. Токен сессии ещё
+ * действует, и правила хранилища пускают в свою папку.
  */
 export default function DeleteAccount({ userId }: { userId: string }) {
   const router = useRouter();
@@ -21,15 +23,15 @@ export default function DeleteAccount({ userId }: { userId: string }) {
   async function remove() {
     setBusy(true);
     setError(null);
-    const files = await supabase.storage.from("resumes").list(userId);
-    const paths = (files.data ?? []).map(f => `${userId}/${f.name}`);
-    if (paths.length) await supabase.storage.from("resumes").remove(paths);
     const { error } = await supabase.rpc("delete_my_account");
     if (error) {
       setError("Не получилось удалить аккаунт. Попробуйте ещё раз или напишите нам — удалим вручную.");
       setBusy(false);
       return;
     }
+    const files = await supabase.storage.from("resumes").list(userId);
+    const paths = (files.data ?? []).map(f => `${userId}/${f.name}`);
+    if (paths.length) await supabase.storage.from("resumes").remove(paths);
     await supabase.auth.signOut();
     router.push("/?account=deleted");
     router.refresh();
