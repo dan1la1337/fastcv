@@ -1,0 +1,14 @@
+{
+  "provider": "gemini",
+  "providers": {
+    "gemini": {
+      "api_key_env": "GEMINI_API_KEY",
+      "models": ["gemini-3.1-flash-lite", "gemini-3.5-flash-lite", "gemini-3.6-flash"]
+    },
+    "yandex": {
+      "api_key_env": "YANDEX_API_KEY",
+      "folder_env": "YANDEX_FOLDER_ID",
+      "models": ["qwen3-235b-a22b-fp8/latest", "yandexgpt/latest"]
+    }
+  }
+}

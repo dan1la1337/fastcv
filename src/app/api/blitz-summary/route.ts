@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { fence, sanitizeLetter } from "@/lib/ai-safety";
-import { geminiText } from "@/lib/gemini";
+import { aiText } from "@/lib/ai";
 import { createSupabaseServerClient } from "@/lib/supabase-server";
 
 // ИИ-выжимка ответов кандидата на микро-блиц (план 1.15). Вызывает работодатель из кабинета;
@@ -69,8 +69,7 @@ export async function POST(req: Request) {
 ${pairs.join("\n\n")}
 </answers>`;
 
-  const apiKey = process.env.GEMINI_API_KEY;
-  const raw = apiKey ? await geminiText(apiKey, INSTRUCTION, input) : null;
+  const raw = await aiText(INSTRUCTION, input, { maxOutputTokens: 600 });
   if (!raw) return NextResponse.json({ error: "ИИ сейчас не отвечает. Попробуйте через минуту." }, { status: 503 });
   const text = sanitizeLetter(raw, input).slice(0, 1500);
 
