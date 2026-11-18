@@ -79,7 +79,7 @@ const LEVEL_IDS = new Set<string>(LEVELS.map(l => l.id));
 const DIRECTION_IDS = new Set(DIRECTIONS.map(d => d.id));
 const FORMAT_IDS = new Set<string>(WORK_FORMATS.map(f => f.id));
 // Метки обезличивания модели иногда повторяют в тексте — убираем
-const unmask = (v: string) => v.replace(/\[(?:ИМЯ|email|телефон|ссылка|контакт)\]/g, "").replace(/ {2,}/g, " ");
+const unmask = (v: string) => v.replace(/\[(?:ИМЯ|email|телефон|ссылка|контакт|дата рождения|адрес)\]/g, "").replace(/ {2,}/g, " ");
 const text = (v: unknown, max: number) => (typeof v === "string" && v.trim() ? unmask(v).trim().slice(0, max) || null : null);
 
 /** Проверяем ответ модели сами: схема помогает, но не гарантирует. */

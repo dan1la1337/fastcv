@@ -7,6 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
+    "test": "vitest run",
     "test:e2e": "playwright test",
     "db:types": "supabase gen types typescript --project-id wyanvkaoqxgceaxzlqvk > src/lib/database.types.ts"
   },
@@ -31,6 +32,7 @@
     "eslint-config-next": "16.4.2",
     "sharp": "^0.35.5",
     "tailwindcss": "^4",
-    "typescript": "^5"
+    "typescript": "^5",
+    "vitest": "^5.1.0"
   }
 }
