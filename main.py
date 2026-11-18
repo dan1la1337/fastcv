@@ -71,7 +71,8 @@ IMPORTED_SOURCES = ("trudvsem", "superjob", "career")
 DEAD_AFTER_FAILED_RUNS = 36
 # Доля каналов без доступной ленты, при которой это похоже на блокировку, а не на закрытые каналы
 MASS_FAILURE_SHARE = 0.5
-USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"
+# Честный User-Agent, как у careers.py и ats.py: сайт видит, кто и откуда его читает
+USER_AGENT = "Mozilla/5.0 (compatible; FastCVBot/1.0; +https://fastcv.ru)"
 
 
 # ---------------------------------------------------------------------------
@@ -364,8 +365,19 @@ class AIUnavailable(Exception):
     """Gemini не ответил после всех попыток (перегрузка, лимит, сбой сети)."""
 
 
+def transport_errors() -> tuple[type[BaseException], ...]:
+    """Сетевые ошибки клиента Gemini. google-genai 3.x работает через httpx2:
+    его ReadTimeout не наследует httpx.HTTPError и раньше ронял весь запуск (17.11)."""
+    found: list[type[BaseException]] = [requests.RequestException, TimeoutError, ConnectionError]
+    for name in ("httpx", "httpx2"):
+        try:
+            found.append(__import__(name).HTTPError)
+        except (ImportError, AttributeError):
+            pass
+    return tuple(found)
+
+
 def make_gemini_normalizer(api_key: str, models: tuple[str, ...] = GEMINI_MODELS) -> Callable[[str], VacancyAI]:
-    import httpx
     from google import genai
     from google.genai import errors, types
 
@@ -394,6 +406,7 @@ def make_gemini_normalizer(api_key: str, models: tuple[str, ...] = GEMINI_MODELS
     # Модель, которая отвечает 503/429 несколько обращений подряд, до конца запуска пропускаем:
     # иначе каждый пост сначала ждёт две неудачные попытки на ней (25.10 так уходило ~12 с на пост)
     strikes: dict[str, int] = {}
+    network_errors = transport_errors()
 
     def _ask(contents: str, cfg, parse: Callable, failures: list[str]):
         stats["calls"] += 1
@@ -415,8 +428,11 @@ def make_gemini_normalizer(api_key: str, models: tuple[str, ...] = GEMINI_MODELS
                     failures.append(f"{model}: {e.code}")
                     if attempt + 1 == AI_ATTEMPTS:
                         strikes[model] = strikes.get(model, 0) + 1
-                except (httpx.HTTPError, requests.RequestException, ValueError) as e:
+                except (*network_errors, ValueError) as e:
+                    # Таймаут и обрыв связи — как перегрузка: повтор с паузой, потом другая модель
                     failures.append(f"{model}: {type(e).__name__}")
+                    if attempt + 1 == AI_ATTEMPTS and not isinstance(e, ValueError):
+                        strikes[model] = strikes.get(model, 0) + 1
                 if attempt + 1 < AI_ATTEMPTS:
                     time.sleep(AI_PAUSE_SECONDS * 2 ** attempt)
         raise AIUnavailable("; ".join(failures[-3:]) or "нет ответа")
@@ -1296,29 +1312,37 @@ def run_batched(store: Store, normalize, channels: list[dict],
     pending.sort(key=lambda wp: wp[1].post not in wp[0].new)
 
     ai_stopped: Optional[str] = None
+    failed_in_row = 0
     chunks = [pending[i:i + AI_BATCH] for i in range(0, len(pending), AI_BATCH)]
     # Пачки уходят в Gemini по AI_PARALLEL одновременно: ответ на пачку ~15 с, и почти всё это
-    # время — ожидание модели. Сохраняем по порядку: на первой неудаче останавливаемся.
+    # время — ожидание модели. Пачку, на которую Gemini так и не ответил (повторы с паузой
+    # внутри normalize.many), пропускаем: её посты останутся необработанными и пойдут в
+    # следующий запуск. После AI_CIRCUIT_BREAKER неудачных пачек подряд останавливаемся.
     with ThreadPoolExecutor(max_workers=AI_PARALLEL) as pool:
         for w in range(0, len(chunks), AI_PARALLEL):
             if clock() - started > time_budget:
                 out_of_time = True
+                break
+            if failed_in_row >= AI_CIRCUIT_BREAKER:
+                print(f"⏸ Gemini не ответил на {failed_in_row} пачек подряд — остальное в следующий запуск.")
                 break
             wave = chunks[w:w + AI_PARALLEL]
             futures = [pool.submit(normalize.many, [p.post.text for _, p in chunk]) for chunk in wave]
             for chunk, future in zip(wave, futures):
                 try:
                     vacancies = future.result()
-                except AIUnavailable as e:
-                    ai_stopped = f"Gemini недоступен: {e}"
-                    break
+                except Exception as e:  # noqa: BLE001 — AIUnavailable или непойманный сбой клиента
+                    ai_stopped = f"Gemini недоступен: {e}" if isinstance(e, AIUnavailable) \
+                        else f"Gemini недоступен: {type(e).__name__}"
+                    failed_in_row += 1
+                    print(f"⚠️ Пачка из {len(chunk)} постов пропущена: {ai_stopped}")
+                    continue
+                failed_in_row = 0
                 for (work, prepared), vacancy in zip(chunk, vacancies):
                     outcome = save_post(prepared, vacancy, store)
                     work.done[prepared.post.post_id] = outcome
                     if outcome == "saved":
                         work.result.saved += 1
-            if ai_stopped:
-                break
             pause(AI_PAUSE_SECONDS)
 
     now = datetime.now(timezone.utc).isoformat()
