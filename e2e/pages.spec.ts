@@ -50,6 +50,9 @@ test("заголовки безопасности на месте", async ({ req
   expect(headers["x-frame-options"]).toBe("DENY");
   expect(headers["x-content-type-options"]).toBe("nosniff");
   expect(headers["x-powered-by"]).toBeUndefined();
+  // Голосовой ввод в тренажёре собеседования: микрофон разрешён только нашему сайту
+  expect(headers["permissions-policy"]).toContain("microphone=(self)");
+  expect(headers["permissions-policy"]).toContain("camera=()");
 });
 
 test("страница направления отдаёт список вакансий в HTML", async ({ page, request }) => {
