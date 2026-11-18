@@ -41,7 +41,7 @@ const ABROAD = new Set([
   "армения", "сербия", "черногория", "турция", "оаэ", "польша", "германия", "пакистан", "израиль",
 ]);
 
-function isAbroad(city: string | null | undefined): boolean {
+export function isAbroad(city: string | null | undefined): boolean {
   if (!city) return false;
   const name = city.trim().toLowerCase();
   // Город латиницей (Toronto, Serbia, North America) — почти всегда не Россия

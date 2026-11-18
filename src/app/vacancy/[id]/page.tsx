@@ -14,6 +14,7 @@ import ViewCounter from "@/components/ViewCounter";
 import CompanyLine from "@/components/CompanyLine";
 import { estimateSalary, fetchSalaryBenchmarks } from "@/lib/salary";
 import SalaryEstimate from "@/components/SalaryEstimate";
+import { jobPostingJsonLd } from "@/lib/jobPosting";
 
 type Props = { params: Promise<{ id: string }> };
 
@@ -52,38 +53,6 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     // В поиск не попадают архивные вакансии (открываются по старым ссылкам) и вакансии
     // «Работы России» и SuperJob: живут недолго и повторяют оригинал — в выдаче были бы дубли и 404
     robots: vacancy.archived_at || isMirrored(vacancy) ? { index: false } : undefined,
-  };
-}
-
-/**
- * Разметка schema.org/JobPosting: по ней Google показывает вакансии в поиске.
- * Обязательны компания и место работы (город; для удалёнки Google ещё требует страну
- * кандидата, а её в постах нет). Без них разметка не выводится: неполная только
- * копит ошибки в Search Console и всё равно не попадает в выдачу вакансий.
- */
-function jobPostingJsonLd(v: Vacancy) {
-  if (!v.company_name?.trim() || !v.city) return null;
-  const posted = v.posted_at ?? v.created_at;
-  const validThrough = new Date(Date.parse(posted) + 30 * 864e5).toISOString();
-  const salaryValue = v.salary_min || v.salary_max
-    ? {
-        "@type": "MonetaryAmount",
-        currency: v.salary_currency ?? undefined,
-        value: { "@type": "QuantitativeValue", minValue: v.salary_min ?? undefined, maxValue: v.salary_max ?? undefined, unitText: "MONTH" },
-      }
-    : undefined;
-  return {
-    "@context": "https://schema.org",
-    "@type": "JobPosting",
-    title: v.title,
-    description: v.description ?? v.title,
-    datePosted: posted,
-    validThrough,
-    ...(v.work_format === "remote" || (!v.work_format && v.is_remote) ? { jobLocationType: "TELECOMMUTE" } : {}),
-    jobLocation: { "@type": "Place", address: { "@type": "PostalAddress", addressLocality: v.city } },
-    ...(salaryValue && v.salary_currency ? { baseSalary: salaryValue } : {}),
-    ...(v.stack?.length ? { skills: v.stack.join(", ") } : {}),
-    hiringOrganization: { "@type": "Organization", name: v.company_name.trim() },
   };
 }
 
