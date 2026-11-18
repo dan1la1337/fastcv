@@ -45,6 +45,11 @@ describe("bulkRejections", () => {
 });
 
 describe("vacancyFields", () => {
+  it("отмечает дискриминационные требования в названии и описании", () => {
+    const result = vacancyFields({ ...EMPTY_FORM, title: "Менеджер", description: "Ищем кандидата до 35 лет. Только мужчины" }, null);
+    expect("fields" in result && result.fields.discrimination_flags).toEqual(["age", "sex"]);
+  });
+
   it("«от» больше «до» — ошибка", () => {
     expect(vacancyFields({ ...EMPTY_FORM, salaryMin: "300", salaryMax: "200" }, null)).toEqual({ error: "Зарплата «от» больше, чем «до»." });
   });
@@ -56,7 +61,7 @@ describe("vacancyFields", () => {
     expect(result).toEqual({
       fields: {
         title: "Go", description: "", salary_min: null, salary_max: null, salary_currency: null, city: null, is_remote: false,
-        company_name: "ООО", stack: ["Go", "Postgres"], blitz_questions: ["Опыт?"],
+        company_name: "ООО", stack: ["Go", "Postgres"], blitz_questions: ["Опыт?"], discrimination_flags: [],
       },
     });
   });
