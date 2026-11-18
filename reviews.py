@@ -10,7 +10,7 @@ import json
 import re
 from typing import Callable, Optional
 
-from ai_client import GEMINI_MODELS
+from ai_client import GEMINI_API_VERSION, GEMINI_MODELS
 MAX_PER_RUN = 20
 
 INSTRUCTION = """Ты пишешь выжимку отзывов кандидатов о процессе найма в компании — для её страницы на сайте вакансий.
@@ -42,7 +42,8 @@ def make_writer(api_key: str) -> Callable[[str], Optional[str]]:
     from google import genai
     from google.genai import types
 
-    client = genai.Client(api_key=api_key, http_options=types.HttpOptions(timeout=30_000))
+    client = genai.Client(api_key=api_key, http_options=types.HttpOptions(
+        api_version=GEMINI_API_VERSION, timeout=30_000))
     config = types.GenerateContentConfig(temperature=0.2, max_output_tokens=400, system_instruction=INSTRUCTION)
 
     def write(block: str) -> Optional[str]:
