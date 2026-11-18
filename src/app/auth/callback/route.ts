@@ -1,6 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 import type { EmailOtpType } from "@supabase/supabase-js";
 import { createSupabaseServerClient } from "@/lib/supabase-server";
+import { safeNext } from "@/lib/safe-next";
 
 /**
  * Сюда ведёт ссылка из письма Supabase (подтверждение почты, сброс пароля).
@@ -45,12 +46,12 @@ export async function GET(request: NextRequest) {
     .eq("id", auth.user.id)
     .maybeSingle();
 
-  // Внутренний адрес возврата (?next=/vacancy/…) — только путь на нашем сайте
-  const safeNext = next && next.startsWith("/") && !next.startsWith("//") ? next : null;
+  // Внутренний адрес возврата (?next=/vacancy/…) — только страница нашего сайта
+  const back = safeNext(next, origin);
 
   // Первый вход: кандидата — в онбординг «Что вы ищете?», работодателя — заполнить компанию
   const target = !profile?.name
     ? (profile?.role === "employer" ? "/profile" : "/welcome")
-    : safeNext ?? (profile.role === "employer" ? "/employer" : "/");
+    : back ?? (profile.role === "employer" ? "/employer" : "/");
   return NextResponse.redirect(`${origin}${target}`);
 }
