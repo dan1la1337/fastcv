@@ -1,5 +1,6 @@
 import { createHash } from "node:crypto";
 import { NextResponse } from "next/server";
+import { consumeAiQuota } from "@/lib/ai-quota";
 import { createClient } from "@supabase/supabase-js";
 import { aiText } from "@/lib/ai";
 import { fence, sanitizeLetter } from "@/lib/ai-safety";
@@ -11,10 +12,8 @@ import { createSupabaseServerClient } from "@/lib/supabase-server";
 // Худший случай — три модели по 20 секунд
 export const maxDuration = 60;
 
-// Лимит генераций на пользователя. Считается в базе (функция consume_ai_quota),
-// поэтому общий для всех серверных инстансов и не обходится параллельными запросами.
+// Лимит генераций в час на пользователя (src/lib/ai-quota.ts)
 const RATE_LIMIT = 10;
-const RATE_WINDOW_SECONDS = 60 * 60;
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
@@ -153,25 +152,8 @@ export async function POST(req: Request) {
     if (cached?.text) return NextResponse.json({ text: cached.text, source: "cache" satisfies Source });
   }
 
-  const { data: quota, error: quotaError } = await supabase.rpc("consume_ai_quota", {
-    quota_kind: "cover_letter",
-    max_calls: RATE_LIMIT,
-    window_seconds: RATE_WINDOW_SECONDS,
-  });
-  if (quotaError) {
-    // Без счётчика не генерируем: иначе лимит ИИ можно выкачать
-    console.error("AI quota check failed", quotaError.message);
-    return NextResponse.json({ error: "Сервис временно недоступен. Попробуйте позже." }, { status: 503 });
-  }
-  // consume_ai_quota возвращает jsonb: { allowed, retry_after }
-  const { allowed, retry_after: retryAfter = 3600 } = (quota ?? {}) as { allowed?: boolean; retry_after?: number };
-  if (!allowed) {
-    const minutes = Math.max(1, Math.ceil(retryAfter / 60));
-    return NextResponse.json(
-      { error: `Лимит: ${RATE_LIMIT} писем в час. Следующее можно сгенерировать через ${minutes} мин.` },
-      { status: 429, headers: { "Retry-After": String(retryAfter) } },
-    );
-  }
+  const limited = await consumeAiQuota(supabase, { kind: "cover_letter", max: RATE_LIMIT, label: "писем" });
+  if (limited) return limited;
 
   // 3. Генерация. В модель — обезличенные данные: вместо имени метка, без контактов и ссылок;
   // настоящее имя подставляем в готовое письмо уже здесь
