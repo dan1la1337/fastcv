@@ -29,10 +29,12 @@ export function fakeSupabase({ user = { id: "user-1" }, tables = {}, rpc = {} }:
     rpcCalls,
     auth: { getUser: async () => ({ data: { user }, error: null }) },
     from,
-    rpc: async (name: string, args?: unknown): Promise<Result> => {
+    // Как в supabase-js: ответ можно ждать сразу или через .maybeSingle()/.single()
+    rpc: (name: string, args?: unknown) => {
       rpcCalls.push({ name, args });
       const value = rpc[name];
-      return isResult(value) ? value : { data: value ?? null, error: null };
+      const result = Promise.resolve<Result>(isResult(value) ? value : { data: value ?? null, error: null });
+      return Object.assign(result, { maybeSingle: () => result, single: () => result });
     },
   };
 }
