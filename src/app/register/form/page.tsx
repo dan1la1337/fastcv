@@ -6,7 +6,7 @@ import Link from 'next/link';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { ArrowLeft, Loader2, MailCheck } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
-import { authErrorText } from '@/lib/auth-errors';
+import { authErrorText, PASSWORD_MIN_LENGTH } from '@/lib/auth-errors';
 import { LEGAL_VERSION } from '@/lib/legal';
 
 const card = 'max-w-md w-full glass rounded-3xl p-8 shadow-2xl';
@@ -105,8 +105,8 @@ function RegisterFormContent() {
           <div>
             <label htmlFor="password" className={label}>Пароль</label>
             <input id="password" type="password" autoComplete="new-password" value={password} onChange={(e) => setPassword(e.target.value)}
-              required minLength={6} aria-describedby="password-hint" className={input} placeholder="Введите пароль" />
-            <p id="password-hint" className="mt-1.5 text-xs text-neutral-500">Минимум 6 символов</p>
+              required minLength={PASSWORD_MIN_LENGTH} aria-describedby="password-hint" className={input} placeholder="Введите пароль" />
+            <p id="password-hint" className="mt-1.5 text-xs text-neutral-500">Минимум {PASSWORD_MIN_LENGTH} символов</p>
           </div>
 
           <label className="flex items-start gap-3 text-xs text-neutral-400 leading-relaxed cursor-pointer">

@@ -1,3 +1,6 @@
+/** Минимальная длина нового пароля: при регистрации и при смене пароля. */
+export const PASSWORD_MIN_LENGTH = 8;
+
 /** Сообщения Supabase Auth приходят на английском: переводим частые случаи. */
 export function authErrorText(message: string | undefined): string {
   const m = (message ?? "").toLowerCase();
@@ -6,7 +9,7 @@ export function authErrorText(message: string | undefined): string {
   if (m.includes("already registered")) return "Аккаунт с этой почтой уже есть. Попробуйте войти.";
   if (m.includes("rate limit") || m.includes("too many")) return "Слишком много попыток. Подождите минуту и попробуйте снова.";
   if (m.includes("should be different")) return "Новый пароль совпадает со старым — придумайте другой.";
-  if (m.includes("password should be")) return "Пароль слишком простой: нужно не меньше 6 символов.";
+  if (m.includes("password should be")) return `Пароль слишком простой: нужно не меньше ${PASSWORD_MIN_LENGTH} символов.`;
   if (isNetworkError(m)) return "Нет связи с сервером. Проверьте интернет и попробуйте ещё раз.";
   return message || "Не удалось войти. Попробуйте ещё раз.";
 }

@@ -7,7 +7,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Loader2 } from "lucide-react";
 import { getUserRole, homeForRole, supabase } from "@/lib/supabase";
-import { authErrorText } from "@/lib/auth-errors";
+import { authErrorText, PASSWORD_MIN_LENGTH } from "@/lib/auth-errors";
 
 const input = "w-full px-4 py-3 neu-in rounded-2xl text-sm text-neutral-100 transition-colors";
 
@@ -56,12 +56,12 @@ export default function NewPasswordPage() {
           <form onSubmit={submit} className="space-y-4">
             <div>
               <label htmlFor="password" className="block text-xs font-bold text-neutral-500 uppercase tracking-wider mb-2">Новый пароль</label>
-              <input id="password" type="password" required minLength={6} autoComplete="new-password" value={password}
-                onChange={e => setPassword(e.target.value)} placeholder="Минимум 6 символов" className={input} />
+              <input id="password" type="password" required minLength={PASSWORD_MIN_LENGTH} autoComplete="new-password" value={password}
+                onChange={e => setPassword(e.target.value)} placeholder={`Минимум ${PASSWORD_MIN_LENGTH} символов`} className={input} />
             </div>
             <div>
               <label htmlFor="repeat" className="block text-xs font-bold text-neutral-500 uppercase tracking-wider mb-2">Ещё раз</label>
-              <input id="repeat" type="password" required minLength={6} autoComplete="new-password" value={repeat}
+              <input id="repeat" type="password" required minLength={PASSWORD_MIN_LENGTH} autoComplete="new-password" value={repeat}
                 onChange={e => setRepeat(e.target.value)} className={input} />
             </div>
             {error && <FormError>{error}</FormError>}
