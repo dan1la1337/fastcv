@@ -1,12 +1,11 @@
 import { NextResponse } from "next/server";
 import { createSupabaseServerClient } from "@/lib/supabase-server";
 import type { VacancyDraft } from "@/lib/vacancy-draft";
-import { redactPersonal } from "@/lib/redact";
+import { aiConfigured, aiText } from "@/lib/ai";
 
 // ИИ-помощник работодателя: из пары строк заметок — полный текст вакансии.
 // Ничего не публикует: черновик подставляется в форму, работодатель правит и публикует сам.
 
-const GEMINI_MODELS = ["gemini-3.1-flash-lite", "gemini-3.5-flash-lite", "gemini-3.6-flash"];
 const MODEL_TIMEOUT_MS = 20_000;
 export const maxDuration = 60;
 
@@ -66,37 +65,14 @@ function clean(raw: unknown): VacancyDraft | null {
   };
 }
 
-async function askGemini(apiKey: string, notes: string): Promise<VacancyDraft | null> {
-  for (const model of GEMINI_MODELS) {
-    try {
-      const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json", "x-goog-api-key": apiKey },
-        body: JSON.stringify({
-          system_instruction: { parts: [{ text: INSTRUCTION }] },
-          contents: [{ role: "user", parts: [{ text: `<notes>\n${redactPersonal(notes.replace(/<\/?\s*notes[^>]*>/gi, ""))}\n</notes>` }] }],
-          generationConfig: { temperature: 0.4, responseMimeType: "application/json", responseSchema: SCHEMA },
-        }),
-        signal: AbortSignal.timeout(MODEL_TIMEOUT_MS),
-      });
-      if (!response.ok) {
-        console.error("Gemini vacancy draft error", model, response.status, (await response.text()).slice(0, 300));
-        if (![404, 429].includes(response.status) && response.status < 500) return null;
-        continue;
-      }
-      const data = await response.json();
-      const out: string | undefined = data.candidates?.[0]?.content?.parts?.[0]?.text;
-      if (out) return clean(JSON.parse(out));
-    } catch (error) {
-      console.error("Gemini vacancy draft request failed", model, error);
-    }
-  }
-  return null;
+async function askAi(notes: string): Promise<VacancyDraft | null> {
+  const input = `<notes>\n${notes.replace(/<\/?\s*notes[^>]*>/gi, "")}\n</notes>`;
+  const out = await aiText(INSTRUCTION, input, { temperature: 0.4, schema: SCHEMA, timeoutMs: MODEL_TIMEOUT_MS });
+  return out ? clean(JSON.parse(out)) : null;
 }
 
 export async function POST(req: Request) {
-  const apiKey = process.env.GEMINI_API_KEY;
-  if (!apiKey) return NextResponse.json({ error: "ИИ не настроен на сервере" }, { status: 503 });
+  if (!aiConfigured()) return NextResponse.json({ error: "ИИ не настроен на сервере" }, { status: 503 });
 
   const supabase = await createSupabaseServerClient();
   const { data: auth } = await supabase.auth.getUser();
@@ -126,7 +102,7 @@ export async function POST(req: Request) {
     );
   }
 
-  const draft = await askGemini(apiKey, notes);
+  const draft = await askAi(notes);
   if (!draft) return NextResponse.json({ error: "ИИ сейчас не ответил. Попробуйте через минуту." }, { status: 503 });
   return NextResponse.json({ draft });
 }

@@ -4,12 +4,12 @@ import { DIRECTIONS, LEVELS, WORK_FORMATS, levelApplies } from "@/lib/vacancies"
 import { experienceFromJobs, type ResumeDraft, type ResumeJob } from "@/lib/resume-draft";
 import { extractText, getDocumentProxy } from "unpdf";
 import { nameFromResume, redactPersonal } from "@/lib/redact";
+import { aiConfigured, aiText } from "@/lib/ai";
 
 // Заполнение профиля по PDF-резюме: текст достаём из файла кандидата на своём сервере,
-// убираем имя и контакты и только такой, обезличенный, текст отдаём Gemini (серверы в США).
+// убираем имя и контакты и только такой, обезличенный, текст отдаём модели (src/lib/ai.ts).
 // Имя берём из резюме сами. Сохраняет кандидат — после проверки в форме.
 
-const GEMINI_MODELS = ["gemini-3.1-flash-lite", "gemini-3.5-flash-lite", "gemini-3.6-flash"];
 const MODEL_TIMEOUT_MS = 30_000;
 export const maxDuration = 60;
 
@@ -115,40 +115,14 @@ async function pdfText(bytes: Uint8Array): Promise<string> {
   return text.replace(/[ \t]+/g, " ").replace(/\n{3,}/g, "\n\n").trim().slice(0, MAX_RESUME_CHARS);
 }
 
-async function askGemini(apiKey: string, resume: string, name: string | null): Promise<ResumeDraft | null> {
-  for (const model of GEMINI_MODELS) {
-    try {
-      const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json", "x-goog-api-key": apiKey },
-        body: JSON.stringify({
-          system_instruction: { parts: [{ text: INSTRUCTION }] },
-          contents: [{
-            role: "user",
-            parts: [{ text: `<resume>\n${resume.replace(/<\/?\s*resume[^>]*>/gi, "")}\n</resume>` }],
-          }],
-          generationConfig: { temperature: 0, responseMimeType: "application/json", responseSchema: SCHEMA },
-        }),
-        signal: AbortSignal.timeout(MODEL_TIMEOUT_MS),
-      });
-      if (!response.ok) {
-        console.error("Gemini resume error", model, response.status, (await response.text()).slice(0, 300));
-        if (![404, 429].includes(response.status) && response.status < 500) return null;
-        continue;
-      }
-      const data = await response.json();
-      const out: string | undefined = data.candidates?.[0]?.content?.parts?.[0]?.text;
-      if (out) return clean(JSON.parse(out), name);
-    } catch (error) {
-      console.error("Gemini resume request failed", model, error);
-    }
-  }
-  return null;
+async function askAi(resume: string, name: string | null): Promise<ResumeDraft | null> {
+  const input = `<resume>\n${resume.replace(/<\/?\s*resume[^>]*>/gi, "")}\n</resume>`;
+  const out = await aiText(INSTRUCTION, input, { temperature: 0, schema: SCHEMA, timeoutMs: MODEL_TIMEOUT_MS, names: [name] });
+  return out ? clean(JSON.parse(out), name) : null;
 }
 
 export async function POST() {
-  const apiKey = process.env.GEMINI_API_KEY;
-  if (!apiKey) return NextResponse.json({ error: "ИИ не настроен на сервере" }, { status: 503 });
+  if (!aiConfigured()) return NextResponse.json({ error: "ИИ не настроен на сервере" }, { status: 503 });
 
   const supabase = await createSupabaseServerClient();
   const { data: auth } = await supabase.auth.getUser();
@@ -190,7 +164,7 @@ export async function POST() {
   }
   const name = nameFromResume(resumeText);
   const resume = redactPersonal(resumeText, [name ?? "", profile.name ?? ""]);
-  const draft = await askGemini(apiKey, resume, name);
+  const draft = await askAi(resume, name);
   if (!draft) return NextResponse.json({ error: "ИИ сейчас не ответил. Попробуйте через минуту." }, { status: 503 });
   return NextResponse.json({ draft });
 }
