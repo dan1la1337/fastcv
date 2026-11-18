@@ -2,6 +2,7 @@
 // Перебор моделей, обезличивание и проверка ответа — в src/lib/ai.ts, общие для всех.
 
 import type { AiRequest } from "@/lib/ai";
+import { aiFetch } from "@/lib/ai-fetch";
 
 /** Ответ одной модели: текст, либо ошибка — пробовать ли следующую модель. */
 export type ModelResult = { ok: true; text: string } | { ok: false; tryNext: boolean };
@@ -15,7 +16,7 @@ export interface AiProvider {
 const tryNextAfter = (status: number) => status === 404 || status === 429 || status >= 500;
 
 async function post(url: string, headers: Record<string, string>, body: unknown, request: AiRequest, label: string) {
-  const response = await fetch(url, {
+  const response = await aiFetch(url, {
     method: "POST",
     headers: { "Content-Type": "application/json", ...headers },
     body: JSON.stringify(body),

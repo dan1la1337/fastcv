@@ -1,5 +1,6 @@
 // Только для серверного кода (route handlers): здесь работа с токеном бота.
 import { createHash } from "node:crypto";
+import { aiFetch } from "@/lib/ai-fetch";
 
 /**
  * Бот подборок для кандидатов (не путать с ботом оповещений владельца в сборщике).
@@ -25,7 +26,7 @@ export class TelegramApiError extends Error {
 }
 
 export async function telegram<T = unknown>(token: string, method: string, payload: Record<string, unknown> = {}): Promise<T> {
-  const response = await fetch(`https://api.telegram.org/bot${token}/${method}`, {
+  const response = await aiFetch(`https://api.telegram.org/bot${token}/${method}`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(payload),

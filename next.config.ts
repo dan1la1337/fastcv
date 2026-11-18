@@ -5,6 +5,16 @@ const isDev = process.env.NODE_ENV === "development";
 const isPreview = process.env.VERCEL_ENV === "preview";
 const vercelLive = isPreview ? " https://vercel.live" : "";
 const vercelLiveWs = isPreview ? " wss://ws-us3.pusher.com https://*.pusher.com" : "";
+// Свой сервер Supabase (перенос в РФ, infra/ru-migration): его адрес тоже разрешаем.
+// Облачный *.supabase.co разрешён и так; браузер в основном ходит через /sb (свой домен)
+const supabaseOrigin = (() => {
+  try {
+    const u = new URL(process.env.NEXT_PUBLIC_SUPABASE_URL ?? "");
+    return u.hostname.endsWith(".supabase.co") ? "" : ` ${u.origin} wss://${u.host}`;
+  } catch {
+    return "";
+  }
+})();
 
 /**
  * Content Security Policy без nonce: так страницы остаются статическими и быстрыми.
@@ -16,7 +26,7 @@ const csp = [
   `script-src 'self' 'unsafe-inline'${isDev ? " 'unsafe-eval'" : ""}${vercelLive}`,
   "style-src 'self' 'unsafe-inline'",
   // Supabase: API, авторизация, хранилище резюме (fetch) и realtime (wss)
-  `connect-src 'self' https://*.supabase.co wss://*.supabase.co${vercelLive}${vercelLiveWs}`,
+  `connect-src 'self' https://*.supabase.co wss://*.supabase.co${supabaseOrigin}${vercelLive}${vercelLiveWs}`,
   `img-src 'self' blob: data:${vercelLive} https://vercel.com`,
   "font-src 'self' data:",
   `frame-src 'self'${vercelLive}`,

@@ -1,0 +1,23 @@
+# FastCV поверх официального docker-compose self-hosted Supabase.
+# Подключается через COMPOSE_FILE в .env (см. 02-configure.sh). Удалить из COMPOSE_FILE —
+# и стек снова полностью официальный.
+services:
+  caddy:
+    volumes:
+      - ./volumes/email:/srv/email:ro
+
+  auth:
+    environment:
+      # Русские письма; ссылки ведут на fastcv.ru/auth/callback с token_hash —
+      # так подтверждение работает, даже если письмо открыли на другом устройстве
+      GOTRUE_MAILER_SUBJECTS_CONFIRMATION: "Подтвердите почту — FastCV"
+      GOTRUE_MAILER_SUBJECTS_RECOVERY: "Сброс пароля — FastCV"
+      GOTRUE_MAILER_SUBJECTS_EMAIL_CHANGE: "Подтвердите новый email — FastCV"
+      GOTRUE_MAILER_SUBJECTS_MAGIC_LINK: "Вход в FastCV"
+      GOTRUE_MAILER_TEMPLATES_CONFIRMATION: http://caddy:8080/confirmation.html
+      GOTRUE_MAILER_TEMPLATES_RECOVERY: http://caddy:8080/recovery.html
+      GOTRUE_MAILER_TEMPLATES_EMAIL_CHANGE: http://caddy:8080/email_change.html
+      GOTRUE_MAILER_TEMPLATES_MAGIC_LINK: http://caddy:8080/magic_link.html
+      # Не чаще одного письма в минуту на адрес — как в облачном Supabase
+      GOTRUE_SMTP_MAX_FREQUENCY: 60s
+      GOTRUE_PASSWORD_MIN_LENGTH: "8"

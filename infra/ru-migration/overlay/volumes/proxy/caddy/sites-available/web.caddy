@@ -1,0 +1,9 @@
+# Сайт fastcv.ru (этап 2). Копируется в sites/ скриптом 05-web.sh, подключается import в Caddyfile.
+{$WEB_DOMAIN}, www.{$WEB_DOMAIN} {
+    @www host www.{$WEB_DOMAIN}
+    redir @www https://{$WEB_DOMAIN}{uri} permanent
+
+    encode zstd gzip
+    reverse_proxy web:3000
+    header -server
+}
