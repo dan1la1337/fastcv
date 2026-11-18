@@ -6,7 +6,7 @@ import { ArrowLeft, Briefcase, CalendarClock, Check, CheckCheck, CheckCircle2, L
 import { supabase } from "@/lib/supabase";
 import { SLOT_COLUMNS, type Slot } from "@/lib/interviews";
 import { BookingMessage, ProposeSlots, SlotsMessage, UpcomingInterview } from "@/components/chat/Interview";
-import { chatErrorText, dayLabel, MESSAGE_COLUMNS, MESSAGE_MAX, splitLinks, type Conversation, type Message } from "@/lib/chat";
+import { chatErrorText, dayLabel, mergeMessages, MESSAGE_COLUMNS, MESSAGE_MAX, pollCursor, splitLinks, type Conversation, type Message } from "@/lib/chat";
 
 const POLL_MS = 4_000;
 const HISTORY = 200;
@@ -53,12 +53,7 @@ export default function ChatThread({ conversation, userId, onBack, onChanged }: 
   }, [id, onChanged]);
 
   const append = useCallback((fresh: Message[]) => {
-    if (!fresh.length) return;
-    lastId.current = Math.max(lastId.current, ...fresh.map(m => m.id));
-    setMessages(prev => {
-      const known = new Set((prev ?? []).map(m => m.id));
-      return [...(prev ?? []), ...fresh.filter(m => !known.has(m.id))].sort((a, b) => a.id - b.id);
-    });
+    if (fresh.length) setMessages(prev => mergeMessages(prev, fresh));
   }, []);
 
   // Варианты времени перечитываем, когда в переписке появилось предложение, запись или отмена
@@ -100,6 +95,7 @@ export default function ChatThread({ conversation, userId, onBack, onChanged }: 
       const { data } = await supabase.from("messages").select(MESSAGE_COLUMNS)
         .eq("conversation_id", id).gt("id", lastId.current).order("id");
       const fresh = (data ?? []) as Message[];
+      lastId.current = pollCursor(lastId.current, fresh);
       if (fresh.length) {
         append(fresh);
         if (fresh.some(m => m.sender_id !== userId)) markRead();
