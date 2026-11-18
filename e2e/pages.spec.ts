@@ -98,11 +98,14 @@ test("разметка JobPosting выводится только полной",
   expect(hrefs.length).toBeGreaterThan(0);
   for (const href of hrefs) {
     const html = await (await request.get(href)).text();
-    const match = html.match(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/);
+    const match = html.match(/<script type="application\/ld\+json"[^>]*>([\s\S]*?)<\/script>/);
     if (!match) continue;
     const data = JSON.parse(match[1]);
     expect(data.hiringOrganization?.name, href).toBeTruthy();
-    expect(data.jobLocation?.address?.addressLocality, href).toBeTruthy();
+    // Место работы: адрес с городом или страной, либо удалёнка со страной кандидата
+    const address = data.jobLocation?.address;
+    const remote = data.jobLocationType === "TELECOMMUTE" && data.applicantLocationRequirements?.name;
+    expect(Boolean(address?.addressLocality || address?.addressCountry || remote), href).toBe(true);
   }
 });
 
