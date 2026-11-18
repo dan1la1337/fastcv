@@ -5,87 +5,27 @@ import type { User } from "@supabase/supabase-js";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import AppBar from "@/components/AppBar";
-import {
-  Archive, Briefcase, CheckCircle2, Eye, FileText, Loader2, MessageCircle, Pencil, Plus, RotateCcw, Send, Sparkles, XCircle,
-  ChevronDown,
-} from "lucide-react";
+import { Briefcase, Loader2, Plus } from "lucide-react";
 import { toMatch, type Match } from "@/lib/matching";
-import MatchRing from "@/components/MatchRing";
-import BlitzAnswers, { type BlitzAnswer } from "@/components/BlitzAnswers";
 import type { VacancyDraft } from "@/lib/vacancy-draft";
 import EmployerReviews from "@/components/EmployerReviews";
-import VacancyInsights from "@/components/VacancyInsights";
 import { fetchSalaryBenchmarks, type SalaryBenchmark } from "@/lib/salary";
-import ScreeningVerdict, { requestScreening } from "@/components/ScreeningVerdict";
-import { FIT_ORDER, type Screening } from "@/lib/screening";
+import { requestScreening } from "@/components/ScreeningVerdict";
+import type { Screening } from "@/lib/screening";
 import UpcomingInterviews from "@/components/UpcomingInterviews";
 import { rejectAll, rejectNotice } from "@/lib/bulk-reject";
 import { loadErrorText } from "@/lib/load-errors";
 import { supabase, getUserRole } from "@/lib/supabase";
-import { formatSalary, plural, type Vacancy } from "@/lib/vacancies";
-
-type Tab = "applications" | "vacancies" | "reviews" | "form";
-
-interface Application {
-  id: string;
-  status: string;
-  hr_message: string | null;
-  cover_letter: string | null;
-  created_at: string;
-  blitz_answers: BlitzAnswer[];
-  blitz_summary: string | null;
-  vacancies: { id: string; title: string; employer_id: string };
-  profiles: { name: string | null; skills: string[] | null; resume_path: string | null } | null;
-  /** Чат с кандидатом (открывается откликом) */
-  conversations: { id: string } | null;
-}
-
-interface VacancyForm {
-  title: string;
-  description: string;
-  salaryMin: string;
-  salaryMax: string;
-  currency: string;
-  city: string;
-  isRemote: boolean;
-  /** Технологии через запятую. */
-  stack: string;
-  /** Микро-блиц: до трёх вопросов кандидату. */
-  questions: [string, string, string];
-}
-
-const EMPTY_FORM: VacancyForm = {
-  title: "", description: "", salaryMin: "", salaryMax: "", currency: "RUB", city: "", isRemote: false, stack: "", questions: ["", "", ""],
-};
-
-const STATUS_LABELS: Record<string, string> = {
-  new: "Новый отклик",
-  viewed: "Просмотрен",
-  interview_scheduled: "Собеседование назначено",
-  rejected: "Отклонено",
-};
-
-// Черновики ответа кандидату; работодатель правит их перед отправкой
-const REPLY_TEMPLATES: Record<"interview_scheduled" | "rejected", (vacancy: string) => string> = {
-  interview_scheduled: vacancy =>
-    `Здравствуйте! Спасибо за отклик на вакансию «${vacancy}». Ваш опыт нам интересен — приглашаем на собеседование. ` +
-    "Напишите, пожалуйста, когда вам удобно поговорить на этой неделе.",
-  rejected: vacancy =>
-    `Здравствуйте! Спасибо за интерес к вакансии «${vacancy}». Сейчас мы продолжим общение с другими кандидатами, ` +
-    "чей опыт ближе к задачам. Желаем удачи в поиске!",
-};
-
-/** Причина отказа в один клик (план 2.5.1): кандидат получает полезный ответ, а не безликий шаблон. */
-const REJECT_REASONS: { label: string; text: string }[] = [
-  { label: "Не хватило опыта со стеком", text: "Причина: нам нужен больше практического опыта с основным стеком вакансии." },
-  { label: "Вилка выше бюджета", text: "Причина: ваши ожидания по зарплате выше бюджета этой позиции." },
-  { label: "Взяли кандидата", text: "Причина: мы уже выбрали кандидата на эту позицию." },
-  { label: "Формат или часовой пояс", text: "Причина: не совпали формат работы или часовой пояс." },
-];
-
-const inputClass =
-  "w-full px-4 py-3 neu-in rounded-2xl text-sm text-neutral-100";
-const labelClass = "block text-xs text-neutral-400 mb-2";
+import type { Vacancy } from "@/lib/vacancies";
+import {
+  bulkRejections, EMPTY_FORM, formFromVacancy, formWithDraft, isWaiting, sortApplications, vacancyFields,
+  type Application, type SortBy, type Tab, type VacancyForm,
+} from "@/lib/employer";
+import ApplicationCard, { type Reply } from "@/components/employer/ApplicationCard";
+import ApplicationsToolbar from "@/components/employer/ApplicationsToolbar";
+import BulkReject from "@/components/employer/BulkReject";
+import EmployerVacancyCard from "@/components/employer/EmployerVacancyCard";
+import VacancyFormPanel from "@/components/employer/VacancyFormPanel";
 
 export default function EmployerDashboard() {
   const router = useRouter();
@@ -102,7 +42,7 @@ export default function EmployerDashboard() {
   const [notice, setNotice] = useState<{ kind: "ok" | "error"; text: string } | null>(null);
 
   const [matches, setMatches] = useState<Record<string, Match>>({});
-  const [sortBy, setSortBy] = useState<"new" | "match" | "ai">("match");
+  const [sortBy, setSortBy] = useState<SortBy>("match");
   // ИИ-вердикты по откликам и пакетный разбор новых
   const [screenings, setScreenings] = useState<Record<string, Screening>>({});
   const [batch, setBatch] = useState<{ done: number; total: number } | null>(null);
@@ -113,7 +53,7 @@ export default function EmployerDashboard() {
   // Справочник зарплат для сравнения вакансий с рынком
   const [benchmarks, setBenchmarks] = useState<SalaryBenchmark[]>([]);
   // Ответ кандидату: какой отклик, какой статус и текст письма
-  const [reply, setReply] = useState<{ appId: string; status: "interview_scheduled" | "rejected"; text: string } | null>(null);
+  const [reply, setReply] = useState<Reply | null>(null);
   const [replying, setReplying] = useState(false);
 
   // ИИ-помощник: заметки работодателя → черновик вакансии в форме
@@ -182,17 +122,7 @@ export default function EmployerDashboard() {
     setNotice(null);
     if (vacancy) {
       setEditingId(vacancy.id);
-      setForm({
-        title: vacancy.title,
-        description: vacancy.description ?? "",
-        salaryMin: vacancy.salary_min?.toString() ?? "",
-        salaryMax: vacancy.salary_max?.toString() ?? "",
-        currency: vacancy.salary_currency ?? "RUB",
-        city: vacancy.city ?? "",
-        isRemote: Boolean(vacancy.is_remote),
-        stack: (vacancy.stack ?? []).join(", "),
-        questions: [0, 1, 2].map(i => vacancy.blitz_questions?.[i] ?? "") as [string, string, string],
-      });
+      setForm(formFromVacancy(vacancy));
     } else {
       setEditingId(null);
       setForm(EMPTY_FORM);
@@ -203,28 +133,15 @@ export default function EmployerDashboard() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!user) return;
-    const salaryMin = form.salaryMin ? parseInt(form.salaryMin, 10) : null;
-    const salaryMax = form.salaryMax ? parseInt(form.salaryMax, 10) : null;
-    if (salaryMin && salaryMax && salaryMin > salaryMax) {
-      setNotice({ kind: "error", text: "Зарплата «от» больше, чем «до»." });
+    const result = vacancyFields(form, companyName);
+    if ("error" in result) {
+      setNotice({ kind: "error", text: result.error });
       return;
     }
     setSaving(true);
     setNotice(null);
 
-    const fields = {
-      title: form.title.trim(),
-      description: form.description.trim(),
-      salary_min: salaryMin,
-      salary_max: salaryMax,
-      salary_currency: salaryMin || salaryMax ? form.currency : null,
-      city: form.city.trim() || null,
-      is_remote: form.isRemote,
-      company_name: companyName,
-      stack: [...new Set(form.stack.split(",").map(s => s.trim()).filter(Boolean))].slice(0, 15),
-      blitz_questions: form.questions.map(q => q.trim()).filter(Boolean),
-    };
-
+    const { fields } = result;
     const { error } = editingId
       ? await supabase.from("vacancies").update(fields).eq("id", editingId)
       : await supabase.from("vacancies").insert({
@@ -262,16 +179,7 @@ export default function EmployerDashboard() {
         return;
       }
       const draft = data.draft as VacancyDraft;
-      setForm(prev => ({
-        ...prev,
-        title: draft.title,
-        description: draft.description,
-        salaryMin: draft.salary_min ? String(draft.salary_min) : prev.salaryMin,
-        salaryMax: draft.salary_max ? String(draft.salary_max) : prev.salaryMax,
-        city: draft.city ?? prev.city,
-        isRemote: draft.is_remote || prev.isRemote,
-        stack: draft.stack.join(", ") || prev.stack,
-      }));
+      setForm(prev => formWithDraft(prev, draft));
       setNotice({ kind: "ok", text: "Черновик готов — проверьте текст и опубликуйте." });
     } catch {
       setNotice({ kind: "error", text: "Не удалось связаться с сервером. Попробуйте ещё раз." });
@@ -327,7 +235,7 @@ export default function EmployerDashboard() {
     );
   }
 
-  const waitingIds = applications.filter(a => a.status === "new" || a.status === "viewed").map(a => a.id);
+  const waitingIds = applications.filter(isWaiting).map(a => a.id);
   const weakIds = waitingIds.filter(id => screenings[id]?.fit === "weak");
   function toggleSelected(id: string) {
     setSelected(prev => {
@@ -340,16 +248,9 @@ export default function EmployerDashboard() {
   // Каждый получает вежливый отказ с названием своей вакансии и, если выбрана, причиной
   async function sendBulkReject() {
     if (!bulk) return;
-    const reason = REJECT_REASONS.find(r => r.label === bulk.reason);
-    const chosen = applications.filter(a => selected.has(a.id) && (a.status === "new" || a.status === "viewed"));
-    const byTitle = new Map<string, string[]>();
-    for (const a of chosen) byTitle.set(a.vacancies.title, [...(byTitle.get(a.vacancies.title) ?? []), a.id]);
+    const letters = bulkRejections(applications, selected, bulk.reason);
     setBulkSending(true);
-    const groups = [...byTitle].map(([title, ids]) => ({
-      message: (REPLY_TEMPLATES.rejected(title) + (reason ? `\n\n${reason.text}` : "")).slice(0, 2000),
-      ids,
-    }));
-    const result = await rejectAll(groups, async (ids, message) => {
+    const result = await rejectAll(letters, async (ids, message) => {
       const { data, error } = await supabase.from("applications")
         .update({ status: "rejected", hr_message: message, hr_replied_at: new Date().toISOString() })
         .in("id", ids)
@@ -366,7 +267,7 @@ export default function EmployerDashboard() {
   }
 
   // Пакетный разбор: отклики без вердикта, ждущие ответа, — по одному, чтобы не упереться в лимиты
-  const unscreened = applications.filter(a => !screenings[a.id] && (a.status === "new" || a.status === "viewed"));
+  const unscreened = applications.filter(a => !screenings[a.id] && isWaiting(a));
   async function screenAll() {
     const queue = unscreened.slice(0, 15);
     setBatch({ done: 0, total: queue.length });
@@ -439,102 +340,9 @@ export default function EmployerDashboard() {
 
         {/* Форма публикации / редактирования */}
         {activeTab === "form" && (
-          <div className="glass rounded-3xl p-6 sm:p-8 space-y-6">
-            <h2 className="font-display text-lg font-bold">{editingId ? "Редактирование вакансии" : "Новая вакансия"}</h2>
-            {!editingId && (
-              <div className="rounded-2xl border border-teal-300/25 bg-teal-300/[0.06] p-4 space-y-3">
-                <p className="text-sm text-neutral-300 flex items-center gap-2">
-                  <Sparkles className="w-4 h-4 text-teal-300" /> Опишите вакансию парой фраз — ИИ напишет полный текст
-                </p>
-                <textarea rows={3} maxLength={2000} value={notes} onChange={e => setNotes(e.target.value)}
-                  placeholder="Ищем мидл-бэкендера на Python в финтех, Django + Postgres, удалёнка, 250–300к"
-                  className={`${inputClass} resize-y`} />
-                <button type="button" onClick={draftWithAi} disabled={drafting || notes.trim().length < 15}
-                  className="lg lg-accent inline-flex items-center gap-2 h-10 px-4 rounded-full text-sm font-semibold disabled:opacity-50">
-                  {drafting ? <><Loader2 className="w-4 h-4 animate-spin" /> Пишем…</> : "Написать черновик"}
-                </button>
-              </div>
-            )}
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div>
-                <label className={labelClass}>Название должности</label>
-                <input required maxLength={200} type="text" placeholder="Например: Senior Java Developer"
-                  value={form.title} onChange={e => setForm({ ...form, title: e.target.value })} className={inputClass} />
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-[1fr_1fr_8rem] gap-4">
-                <div>
-                  <label className={labelClass}>Зарплата от</label>
-                  <input type="number" min={0} placeholder="150000"
-                    value={form.salaryMin} onChange={e => setForm({ ...form, salaryMin: e.target.value })} className={inputClass} />
-                </div>
-                <div>
-                  <label className={labelClass}>Зарплата до</label>
-                  <input type="number" min={0} placeholder="250000"
-                    value={form.salaryMax} onChange={e => setForm({ ...form, salaryMax: e.target.value })} className={inputClass} />
-                </div>
-                <div>
-                  <label className={labelClass}>Валюта</label>
-                  <select value={form.currency} onChange={e => setForm({ ...form, currency: e.target.value })} className={inputClass}>
-                    {["RUB", "USD", "EUR", "KZT", "BYN", "UZS"].map(c => <option key={c} value={c}>{c}</option>)}
-                  </select>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 items-center">
-                <div>
-                  <label className={labelClass}>Город</label>
-                  <input type="text" placeholder="Москва" value={form.city}
-                    onChange={e => setForm({ ...form, city: e.target.value })} className={inputClass} />
-                </div>
-                <label className="flex items-center gap-3 cursor-pointer sm:pt-6">
-                  <input type="checkbox" checked={form.isRemote} onChange={e => setForm({ ...form, isRemote: e.target.checked })}
-                    className="w-5 h-5 accent-teal-300" />
-                  <span className="text-sm text-neutral-300">Возможна удалённая работа</span>
-                </label>
-              </div>
-
-              <div>
-                <label className={labelClass}>Технологии (через запятую)</label>
-                <input type="text" placeholder="Python, Django, PostgreSQL" value={form.stack}
-                  onChange={e => setForm({ ...form, stack: e.target.value })} className={inputClass} />
-              </div>
-
-              <fieldset className="space-y-2">
-                <legend className={labelClass}>Микро-блиц: до трёх вопросов кандидату (необязательно)</legend>
-                <p className="text-xs text-neutral-500 -mt-1">Кандидат ответит на них вместе с письмом, а ИИ сделает выжимку ответов.</p>
-                {form.questions.map((q, i) => (
-                  <input key={i} type="text" maxLength={200} aria-label={`Вопрос ${i + 1}`}
-                    placeholder={["Почему вам интересна эта вакансия?", "Был ли опыт с highload? Расскажите коротко", "Когда готовы выйти?"][i]}
-                    value={q} onChange={e => {
-                      const questions = [...form.questions] as [string, string, string];
-                      questions[i] = e.target.value;
-                      setForm({ ...form, questions });
-                    }} className={inputClass} />
-                ))}
-              </fieldset>
-
-              <div>
-                <label className={labelClass}>Обязанности и требования</label>
-                <textarea required rows={6} placeholder="Опишите стек, проект и задачи кандидата..."
-                  value={form.description} onChange={e => setForm({ ...form, description: e.target.value })}
-                  className={`${inputClass} leading-relaxed resize-y max-h-52`} />
-              </div>
-
-              <div className="flex flex-col sm:flex-row gap-3">
-                <button type="submit" disabled={saving}
-                  className="lg lg-accent flex-1 h-12 rounded-full text-sm font-semibold transition-colors disabled:opacity-50 flex items-center justify-center gap-2">
-                  {saving ? <Loader2 className="w-5 h-5 animate-spin" /> : editingId ? "Сохранить изменения" : "Опубликовать"}
-                </button>
-                {editingId && (
-                  <button type="button" onClick={() => { setEditingId(null); setActiveTab("vacancies"); }}
-                    className="lg px-6 h-12 rounded-full text-sm text-neutral-300 hover:text-white">
-                    Отмена
-                  </button>
-                )}
-              </div>
-            </form>
-          </div>
+          <VacancyFormPanel editingId={editingId} form={form} setForm={setForm} notes={notes} setNotes={setNotes}
+            drafting={drafting} onDraft={draftWithAi} saving={saving} onSubmit={handleSubmit}
+            onCancelEdit={() => { setEditingId(null); setActiveTab("vacancies"); }} />
         )}
 
         {/* Мои вакансии */}
@@ -549,71 +357,10 @@ export default function EmployerDashboard() {
             </div>
           ) : (
             <div className="grid gap-3">
-              {vacancies.map(v => {
-                const forVacancy = applications.filter(a => a.vacancies.id === v.id);
-                const count = forVacancy.length;
-                const invited = forVacancy.filter(a => a.status === "interview_scheduled").length;
-                const views = v.views_count ?? 0;
-                const top = Math.max(views, count, invited, 1);
-                const funnel = [
-                  { label: "Просмотры", value: views, color: "bg-indigo-400", word: ["просмотр", "просмотра", "просмотров"] as [string, string, string] },
-                  { label: "Отклики", value: count, color: "bg-teal-300", word: ["отклик", "отклика", "откликов"] as [string, string, string] },
-                  { label: "Приглашения", value: invited, color: "bg-teal-100", word: ["приглашение", "приглашения", "приглашений"] as [string, string, string] },
-                ];
-                return (
-                  <div key={v.id} className={`glass rounded-3xl p-5 sm:p-6 space-y-4 ${v.archived_at ? "opacity-60" : ""}`}>
-                    <div className="flex flex-wrap items-start gap-4">
-                      <div className="flex-1 min-w-[14rem]">
-                        <div className="flex flex-wrap items-center gap-2">
-                          <h3 className="font-display text-lg font-bold text-white">{v.title}</h3>
-                          {v.archived_at && <span className="text-xs px-2.5 py-0.5 rounded-full neu-chip text-neutral-400">закрыта</span>}
-                        </div>
-                        <p className="text-sm text-neutral-400 mt-1">
-                          {formatSalary(v.salary_min, v.salary_max, v.salary_currency)}
-                          {v.city ? ` · ${v.city}` : ""}{v.is_remote ? " · удалённо" : ""}
-                        </p>
-                      </div>
-                      <div className="flex items-center gap-2 shrink-0">
-                        <Link href={`/vacancy/${v.id}`} title="Открыть страницу вакансии" aria-label="Открыть страницу вакансии"
-                          className="lg w-10 h-10 inline-flex items-center justify-center rounded-full text-neutral-400 hover:text-white"><Eye className="w-4 h-4" /></Link>
-                        <button onClick={() => openForm(v)} title="Редактировать" aria-label="Редактировать"
-                          className="lg w-10 h-10 inline-flex items-center justify-center rounded-full text-neutral-400 hover:text-white"><Pencil className="w-4 h-4" /></button>
-                        {v.archived_at ? (
-                          <button onClick={() => setArchived(v, false)}
-                            className="lg inline-flex items-center gap-1.5 h-10 px-4 rounded-full text-sm text-neutral-300 hover:text-white">
-                            <RotateCcw className="w-3.5 h-3.5" /> Открыть снова
-                          </button>
-                        ) : (
-                          <button onClick={() => setArchived(v, true)}
-                            className="lg inline-flex items-center gap-1.5 h-10 px-4 rounded-full text-sm text-neutral-300 hover:text-red-300">
-                            <Archive className="w-3.5 h-3.5" /> Закрыть
-                          </button>
-                        )}
-                      </div>
-                    </div>
-                    <div className="space-y-2 text-sm" aria-label="Воронка вакансии">
-                      {funnel.map((f, i) => (
-                        <div key={f.label} className="grid grid-cols-[7.5rem_1fr_3rem] items-center gap-3">
-                          <span className="text-neutral-400">{f.label}</span>
-                          <span className="h-2.5 rounded-r-md neu-chip overflow-hidden">
-                            <span className={`bar-grow block h-full rounded-r-md ${f.color}`}
-                              style={{ width: `${Math.max(f.value ? 2 : 0, (f.value / top) * 100)}%`, animationDelay: `${i * 0.15}s` }} />
-                          </span>
-                          <span className="text-right tabular-nums" title={`${f.value} ${plural(f.value, f.word)}`}>{f.value}</span>
-                        </div>
-                      ))}
-                    </div>
-                    {!v.archived_at && (
-                      <VacancyInsights benchmarks={benchmarks} vacancy={{
-                        id: v.id, salary_min: v.salary_min, salary_max: v.salary_max, salary_currency: v.salary_currency,
-                        direction: v.direction ?? null, level: v.level ?? null, views,
-                        applications: forVacancy.map(a => ({ status: a.status, created_at: a.created_at })),
-                        matchScores: forVacancy.map(a => matches[a.id]?.score).filter((x): x is number => typeof x === "number"),
-                      }} />
-                    )}
-                  </div>
-                );
-              })}
+              {vacancies.map(v => (
+                <EmployerVacancyCard key={v.id} vacancy={v} forVacancy={applications.filter(a => a.vacancies.id === v.id)}
+                  matches={matches} benchmarks={benchmarks} onEdit={openForm} onArchive={setArchived} />
+              ))}
             </div>
           )
         )}
@@ -628,200 +375,15 @@ export default function EmployerDashboard() {
             </div>
           ) : (
             <div className="grid gap-4">
-              <div className="flex flex-wrap items-center justify-between gap-3">
-                <div role="group" aria-label="Сортировка откликов" className="neu-in grid grid-cols-3 w-full sm:w-auto sm:inline-flex gap-1 p-1 text-xs sm:text-sm">
-                  {([["match", "По совпадению"], ["ai", "По вердикту ИИ"], ["new", "Сначала новые"]] as const).map(([id, label]) => (
-                    <button key={id} onClick={() => setSortBy(id)} aria-pressed={sortBy === id}
-                      className={`lg min-w-0 px-1 sm:px-4 py-1.5 rounded-lg leading-tight transition-colors ${sortBy === id ? "lg lg-on" : "text-neutral-400 hover:text-white"}`}>
-                      {label}
-                    </button>
-                  ))}
-                </div>
-                {unscreened.length > 0 ? (
-                  <button onClick={screenAll} disabled={!!batch}
-                    className="lg inline-flex items-center gap-1.5 px-4 h-9 rounded-full text-sm text-indigo-200 disabled:opacity-60">
-                    {batch ? <><Loader2 className="w-4 h-4 animate-spin" /> Разбираю {batch.done} из {batch.total}…</>
-                      : <><Sparkles className="w-4 h-4" /> ИИ-разбор новых откликов · {Math.min(unscreened.length, 15)}</>}
-                  </button>
-                ) : (
-                  <p className="text-xs text-neutral-500">Порядок зависит только от совпадения с вакансией — не от оплаты</p>
-                )}
-              </div>
+              <ApplicationsToolbar sortBy={sortBy} setSortBy={setSortBy} unscreenedCount={unscreened.length} batch={batch} onScreenAll={screenAll} />
 
-              {waitingIds.length > 1 && (
-                <div className="flex flex-wrap items-center gap-2 text-sm" role="group" aria-label="Выбор откликов">
-                  <span className="text-neutral-500">Выбрать:</span>
-                  <button onClick={() => setSelected(new Set(waitingIds))} className="lg px-3 py-1 rounded-full text-neutral-300">все ждущие · {waitingIds.length}</button>
-                  {weakIds.length > 0 && (
-                    <button onClick={() => setSelected(new Set(weakIds))} className="lg px-3 py-1 rounded-full text-neutral-300">слабые по ИИ · {weakIds.length}</button>
-                  )}
-                  {selected.size > 0 && <button onClick={() => setSelected(new Set())} className="px-3 py-1 text-neutral-400 hover:text-white">снять выбор</button>}
-                </div>
-              )}
-
-              {selected.size > 0 && (
-                <div className="sticky bottom-20 md:bottom-4 z-20 glass rounded-2xl p-4 space-y-3" aria-label="Действия с выбранными">
-                  <div className="flex flex-wrap items-center gap-3">
-                    <p className="text-sm text-white font-semibold">Выбрано: {selected.size}</p>
-                    <span className="flex-1" />
-                    {!bulk && (
-                      <button onClick={() => setBulk({ reason: null })}
-                        className="lg h-10 px-4 rounded-full text-sm text-neutral-200 hover:text-red-200 inline-flex items-center gap-1.5">
-                        <XCircle className="w-4 h-4" /> Отказать выбранным
-                      </button>
-                    )}
-                  </div>
-                  {bulk && (
-                    <div className="space-y-3">
-                      <p className="text-xs text-neutral-400">Каждый кандидат получит вежливый отказ с названием своей вакансии. Причина — по желанию, кандидатам она полезна.</p>
-                      <div className="flex flex-wrap gap-2" role="group" aria-label="Причина отказа для всех">
-                        {REJECT_REASONS.map(r => (
-                          <button key={r.label} type="button" aria-pressed={bulk.reason === r.label}
-                            onClick={() => setBulk({ reason: bulk.reason === r.label ? null : r.label })}
-                            className={`lg px-3 py-1 rounded-full text-xs transition-colors ${bulk.reason === r.label ? "lg lg-on" : "lg text-neutral-300"}`}>
-                            {r.label}
-                          </button>
-                        ))}
-                      </div>
-                      <div className="flex justify-end gap-2">
-                        <button onClick={() => setBulk(null)} className="px-3 h-10 text-sm text-neutral-400 hover:text-white">Отмена</button>
-                        <button onClick={sendBulkReject} disabled={bulkSending}
-                          className="lg lg-accent h-10 px-5 rounded-full text-sm font-semibold disabled:opacity-50 inline-flex items-center gap-2">
-                          {bulkSending && <Loader2 className="w-4 h-4 animate-spin" />} Отправить отказы · {selected.size}
-                        </button>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              )}
-              {(sortBy === "match"
-                ? [...applications].sort((a, b) => (matches[b.id]?.score ?? -1) - (matches[a.id]?.score ?? -1))
-                : sortBy === "ai"
-                  ? [...applications].sort((a, b) =>
-                      (FIT_ORDER[screenings[a.id]?.fit] ?? 3) - (FIT_ORDER[screenings[b.id]?.fit] ?? 3)
-                      || (matches[b.id]?.score ?? -1) - (matches[a.id]?.score ?? -1))
-                  : applications
-              ).map(app => (
-                <div key={app.id} className={`glass rounded-3xl p-5 sm:p-6 space-y-4 ${selected.has(app.id) ? "ring-1 ring-teal-300/50" : ""}`}>
-                  <div className="flex flex-wrap items-center gap-4">
-                    {(app.status === "new" || app.status === "viewed") && (
-                      <input type="checkbox" checked={selected.has(app.id)} onChange={() => toggleSelected(app.id)}
-                        aria-label={`Выбрать отклик: ${app.profiles?.name || "без имени"}`}
-                        className="w-5 h-5 accent-teal-300 cursor-pointer" />
-                    )}
-                    {matches[app.id] && (
-                      <MatchRing value={matches[app.id].score} size={64} stroke={matches[app.id].score >= 70 ? "#5eead4" : "#fcd34d"} />
-                    )}
-                    <div className="flex-1 min-w-[14rem]">
-                      <p className="text-lg font-semibold text-white flex flex-wrap items-center gap-2">
-                        {app.profiles?.name || "Без имени"}
-                        <span className={`text-xs px-2.5 py-0.5 rounded-full font-medium ${
-                          app.status === "interview_scheduled" ? "bg-teal-300/15 text-teal-200"
-                            : app.status === "rejected" ? "bg-white/[0.08] text-neutral-400"
-                            : "bg-white/[0.08] text-neutral-200"
-                        }`}>
-                          {STATUS_LABELS[app.status] ?? app.status}
-                        </span>
-                      </p>
-                      <p className="text-sm text-neutral-200 mt-1">{app.vacancies.title}</p>
-                      {app.profiles?.skills?.length ? <p className="text-xs text-neutral-500 mt-0.5">{app.profiles.skills.slice(0, 6).join(", ")}</p> : null}
-                    </div>
-                  </div>
-
-                  {matches[app.id] && (matches[app.id].matched.length + matches[app.id].related.length + matches[app.id].missing.length > 0) && (
-                    <div className="flex flex-wrap gap-2 text-xs">
-                      {matches[app.id].matched.map(s => <span key={s} className="neu-chip px-2 py-1 text-xs !text-teal-200 !border-teal-300/40">{s} ✓</span>)}
-                      {matches[app.id].related.map(r => (
-                        <span key={r.skill} title="Засчитано наполовину: у кандидата смежный опыт" className="px-2.5 py-1 rounded-full bg-sky-400/10 text-sky-200">{r.skill} ≈ {r.via}</span>
-                      ))}
-                      {matches[app.id].missing.map(s => <span key={s} className="neu-chip px-2 py-1 text-xs !text-amber-300 !border-amber-300/40">нет {s}</span>)}
-                    </div>
-                  )}
-
-                  {app.hr_message && reply?.appId !== app.id && (
-                    <div className="neu-sub rounded-2xl px-4 py-3 text-sm text-neutral-400">
-                      <p className="text-xs text-neutral-500 mb-1">Ваш ответ</p>
-                      <p className="whitespace-pre-line">{app.hr_message}</p>
-                    </div>
-                  )}
-
-                  {reply?.appId === app.id && (
-                    <div className="space-y-3 rounded-2xl border border-teal-300/30 bg-teal-300/[0.06] p-4">
-                      <p className="text-xs text-neutral-300">
-                        {reply.status === "interview_scheduled" ? "Приглашение на собеседование" : "Отказ"} — кандидат увидит этот текст
-                      </p>
-                      {reply.status === "rejected" && (
-                        <div className="flex flex-wrap gap-2" role="group" aria-label="Причина отказа">
-                          {REJECT_REASONS.map(reason => {
-                            const base = REPLY_TEMPLATES.rejected(app.vacancies.title);
-                            const active = reply.text === `${base}\n\n${reason.text}`;
-                            return (
-                              <button key={reason.label} type="button" aria-pressed={active}
-                                onClick={() => setReply({ ...reply, text: active ? base : `${base}\n\n${reason.text}` })}
-                                className={`lg px-3 py-1 rounded-full text-xs transition-colors ${active ? "lg lg-on" : "lg text-neutral-300"}`}>
-                                {reason.label}
-                              </button>
-                            );
-                          })}
-                        </div>
-                      )}
-                      <textarea value={reply.text} maxLength={2000} rows={6} aria-label="Текст ответа кандидату"
-                        onChange={e => setReply({ ...reply, text: e.target.value })}
-                        className={`${inputClass} leading-relaxed resize-y max-h-52`} />
-                      <div className="flex justify-end gap-2">
-                        <button onClick={() => setReply(null)} className="lg h-11 px-4 rounded-full text-sm text-neutral-200 transition-colors">Отмена</button>
-                        <button onClick={sendReply} disabled={replying}
-                          className="lg lg-accent h-11 px-5 rounded-full text-sm font-semibold flex items-center gap-1.5 disabled:opacity-50">
-                          {replying ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Send className="w-3.5 h-3.5" />} Отправить
-                        </button>
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Пока пишем ответ, кнопки решения убраны: иначе рядом два разных «отправить» */}
-                  {reply?.appId !== app.id && (
-                  <div className="grid grid-cols-2 sm:flex sm:flex-wrap sm:items-center sm:justify-end gap-2.5">
-                    {app.profiles?.resume_path && (
-                      <button onClick={() => openResume(app.profiles!.resume_path!)}
-                        className="lg col-span-2 sm:mr-auto h-11 px-4 rounded-full text-neutral-200 text-sm transition-colors flex items-center justify-center gap-1.5">
-                        <FileText className="w-3.5 h-3.5" /> Резюме (PDF)
-                      </button>
-                    )}
-                    {app.conversations?.id && (
-                      <Link href={`/messages?c=${app.conversations.id}`}
-                        className={`${app.profiles?.resume_path ? "" : "sm:mr-auto "}lg h-11 px-4 rounded-full text-neutral-200 text-sm transition-colors flex items-center justify-center gap-1.5`}>
-                        <MessageCircle className="w-3.5 h-3.5" /> Написать
-                      </Link>
-                    )}
-                    <button onClick={() => setReply({ appId: app.id, status: "rejected", text: REPLY_TEMPLATES.rejected(app.vacancies.title) })}
-                      className="lg h-11 px-4 rounded-full text-neutral-300 hover:text-red-300 text-sm transition-colors flex items-center justify-center gap-1.5">
-                      <XCircle className="w-3.5 h-3.5" /> Отказать
-                    </button>
-                    <button onClick={() => setReply({ appId: app.id, status: "interview_scheduled", text: REPLY_TEMPLATES.interview_scheduled(app.vacancies.title) })}
-                      className="lg lg-accent col-span-2 order-first sm:order-none h-12 sm:h-11 px-5 rounded-full text-sm font-semibold transition-colors flex items-center justify-center gap-1.5">
-                      <CheckCircle2 className="w-4 h-4" /> Пригласить
-                    </button>
-                  </div>
-                  )}
-
-                  {/* Решение выше подробностей: кнопки видно, не пролистывая ответы и письмо */}
-                  <ScreeningVerdict applicationId={app.id} screening={screenings[app.id]}
-                    onChange={sc => setScreenings(all => ({ ...all, [app.id]: sc }))} />
-
-                  <BlitzAnswers applicationId={app.id} answers={app.blitz_answers ?? []} summary={app.blitz_summary} />
-
-                  {/* Письмо свёрнуто до двух строк: иначе на экран помещается одна карточка, а кнопки решения уходят вниз */}
-                  <details className="group border-t border-white/10 pt-3 text-sm text-neutral-300 leading-relaxed">
-                    <summary className="cursor-pointer list-none">
-                      <span className="flex items-center justify-between gap-2 text-xs text-neutral-500">
-                        Сопроводительное письмо
-                        <ChevronDown className="w-4 h-4 transition-transform group-open:rotate-180" aria-hidden="true" />
-                      </span>
-                      <span className="mt-1.5 line-clamp-2 group-open:hidden">{app.cover_letter || "Письмо не сохранено"}</span>
-                    </summary>
-                    <p className="mt-1.5 whitespace-pre-line">{app.cover_letter || "Письмо не сохранено"}</p>
-                  </details>
-                </div>
+              <BulkReject waitingIds={waitingIds} weakIds={weakIds} selected={selected} setSelected={setSelected}
+                bulk={bulk} setBulk={setBulk} bulkSending={bulkSending} onSend={sendBulkReject} />
+              {sortApplications(applications, sortBy, matches, screenings).map(app => (
+                <ApplicationCard key={app.id} app={app} match={matches[app.id]} screening={screenings[app.id]}
+                  selected={selected.has(app.id)} onToggleSelected={toggleSelected}
+                  reply={reply} setReply={setReply} replying={replying} onSendReply={sendReply} onOpenResume={openResume}
+                  onScreeningChange={(id, sc) => setScreenings(all => ({ ...all, [id]: sc }))} />
               ))}
             </div>
           )
