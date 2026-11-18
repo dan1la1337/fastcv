@@ -33,6 +33,8 @@ import requests
 from bs4 import BeautifulSoup
 from pydantic import BaseModel
 
+import redact
+
 ARCHIVE_AFTER_DAYS = 30
 DUPLICATE_DAYS = 21  # в этом окне та же должность той же компании — дубль из другого канала
 FIRST_RUN_POSTS = 10  # сколько последних постов брать у нового канала
@@ -310,7 +312,10 @@ PROMPT = """Ты нормализатор вакансий для доски о�
   «удалёнка из Казахстана»); если пост на русском, зарплата в рублях и нет признаков другой
   страны — Россия; «из любой страны», «worldwide» или неясно — null;
 - contact_type и contact_value: "telegram" и username без @, либо "email" и адрес;
-  если контакта нет или это только ссылка на сайт — оба null;
+  если контакта нет или это только ссылка на сайт — оба null. Ники, ссылки t.me, адреса почты,
+  телефоны и имена в тексте заменены метками: [контакт1], [email1], [телефон1], [имя1].
+  В contact_value верни метку контакта или почты без изменений, например [контакт1]; в остальных
+  полях метки тоже оставляй как есть;
 - stack: ключевые технологии и инструменты из текста (Python, React, PostgreSQL, Figma…),
   без общих слов вроде «опыт» или «английский»; пустой список, если их нет.
 Если это не вакансия, верни is_job=false, остальные поля null, stack пустой, is_remote false.
@@ -443,7 +448,9 @@ def make_gemini_normalizer(api_key: str, models: tuple[str, ...] = GEMINI_MODELS
         return VacancyAI.model_validate_json(response.text)
 
     def _normalize(text: str, failures: list[str]) -> VacancyAI:
-        return _ask(wrap_post(text), config, _parse_one, failures)
+        # В Gemini — пост без телефонов, ников и имён; контакт возвращаем по метке
+        clean, table = redact.redact(text)
+        return restore_vacancy(_ask(wrap_post(clean), config, _parse_one, failures), table)
 
     batch_config = types.GenerateContentConfig(
         response_mime_type="application/json",
@@ -464,19 +471,36 @@ def make_gemini_normalizer(api_key: str, models: tuple[str, ...] = GEMINI_MODELS
             return [normalize(texts[0])]
         failures: list[str] = []
         started = time.monotonic()
+        redacted = [redact.redact(t) for t in texts]
         try:
-            items = _ask(wrap_posts(texts), batch_config, _parse_many, failures)
+            items = _ask(wrap_posts([clean for clean, _ in redacted]), batch_config, _parse_many, failures)
         finally:
             stats["seconds"] = round(stats["seconds"] + time.monotonic() - started, 1)
             for f in failures:
                 stats["errors"][f] = stats["errors"].get(f, 0) + 1
-        by_id = {item.post: item.vacancy for item in items if 0 <= item.post < len(texts)}
+        by_id = {item.post: restore_vacancy(item.vacancy, redacted[item.post][1])
+                 for item in items if 0 <= item.post < len(texts)}
         stats["batched"] = stats.get("batched", 0) + len(by_id)
         return [by_id[i] if i in by_id else normalize(t) for i, t in enumerate(texts)]
 
     normalize.stats = stats  # type: ignore[attr-defined]
     normalize.many = many  # type: ignore[attr-defined]
     return normalize
+
+
+def restore_vacancy(vacancy: VacancyAI, table: dict[str, str]) -> VacancyAI:
+    """Ответ модели на обезличенный пост → поля с исходными контактами и именами."""
+    if not table:
+        return vacancy
+    contact_type, contact_value = redact.restore_contact(vacancy.contact_value, table)
+    return vacancy.model_copy(update={
+        "title": redact.restore(vacancy.title, table),
+        "company": redact.restore(vacancy.company, table),
+        "description": redact.restore(vacancy.description, table),
+        "scope_note": redact.restore(vacancy.scope_note, table),
+        "contact_type": contact_type or vacancy.contact_type,
+        "contact_value": contact_value,
+    })
 
 
 def clean_stack(items: list[str]) -> list[str]:
