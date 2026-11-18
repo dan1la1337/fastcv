@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import PageBar from "@/components/PageBar";
-import { supabase } from "@/lib/supabase";
+import { cachedDirectionCounts } from "@/lib/public-data";
 import { AREAS, DIRECTIONS, plural, VACANCY_FORMS, type Direction } from "@/lib/vacancies";
 
 // Каталог направлений: сколько открытых вакансий в каждом. Пересобирается раз в полчаса.
@@ -14,13 +14,6 @@ export const metadata: Metadata = {
   alternates: { canonical: "/jobs" },
 };
 
-async function countByDirection(): Promise<Record<string, number>> {
-  // Агрегат в базе: вакансий десятки тысяч, читать строки на клиент нельзя
-  const { data } = await supabase.from("direction_counts").select("direction, vacancies");
-  const counts: Record<string, number> = {};
-  for (const row of data ?? []) counts[row.direction] = row.vacancies;
-  return counts;
-}
 
 function Section({ title, items, counts }: { title: string; items: Direction[]; counts: Record<string, number> }) {
   // По числу вакансий, но «Другое» всегда последним
@@ -50,7 +43,7 @@ function Section({ title, items, counts }: { title: string; items: Direction[]; 
 }
 
 export default async function JobsIndexPage() {
-  const counts = await countByDirection();
+  const counts = await cachedDirectionCounts();
   const total = Object.values(counts).reduce((a, b) => a + b, 0);
 
   return (

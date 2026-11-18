@@ -1,12 +1,10 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { cache } from "react";
 import PageBar from "@/components/PageBar";
-import { supabase } from "@/lib/supabase";
-import { VACANCY_COLUMNS, plural, VACANCY_FORMS, type Vacancy } from "@/lib/vacancies";
+import { cachedCompanyRating, cachedCompanyVacancies } from "@/lib/public-data";
+import { plural, VACANCY_FORMS } from "@/lib/vacancies";
 import VacancyListStatic from "@/components/VacancyListStatic";
 import CompanyRatingCard from "@/components/CompanyRatingCard";
-import type { CompanyRating } from "@/lib/rating";
 
 type Props = { params: Promise<{ name: string }> };
 
@@ -14,24 +12,8 @@ export const revalidate = 1800;
 
 const nameFrom = async (params: Props["params"]) => decodeURIComponent((await params).name).trim().slice(0, 200);
 
-// Название компании сравнивается без учёта регистра; % и _ — не шаблоны
-const getVacancies = cache(async (name: string): Promise<Vacancy[]> => {
-  if (!name) return [];
-  const { data } = await supabase
-    .from("vacancies")
-    .select(VACANCY_COLUMNS)
-    .is("archived_at", null)
-    .ilike("company_name", name.replace(/[%_\\]/g, "\\$&"))
-    .order("created_at", { ascending: false })
-    .limit(60);
-  return (data ?? []) as Vacancy[];
-});
-
-const getRating = cache(async (name: string): Promise<CompanyRating | null> => {
-  if (!name) return null;
-  const { data } = await supabase.rpc("company_rating", { company: name });
-  return (data as CompanyRating | null) ?? null;
-});
+const getVacancies = cachedCompanyVacancies;
+const getRating = cachedCompanyRating;
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const name = await nameFrom(params);

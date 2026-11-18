@@ -5,6 +5,7 @@ import "@fontsource-variable/onest";
 import "./globals.css";
 import Link from "next/link";
 import { Suspense } from "react";
+import { headers } from "next/headers";
 import Toaster from "@/components/Toaster";
 import MobileNav from "@/components/MobileNav";
 import { OPERATOR } from "@/lib/legal";
@@ -24,18 +25,21 @@ export const metadata: Metadata = {
 
 export const viewport: Viewport = { themeColor: THEME_COLOR };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  // nonce из src/proxy.ts: без него CSP не пустит встроенный скрипт. Чтение заголовков делает
+  // все страницы динамическими: статический HTML собран без запроса и nonce не знает
+  const nonce = (await headers()).get("x-nonce") ?? undefined;
   return (
     <html
       lang="ru"
       className="h-full antialiased"
     >
       <head>
-        <script dangerouslySetInnerHTML={{ __html: AUTH_HINT }} />
+        <script nonce={nonce} dangerouslySetInnerHTML={{ __html: AUTH_HINT }} />
       </head>
       <body className="min-h-full flex flex-col relative">
         {/* Фон за всеми страницами: мягкое свечение, на витринах (.showcase) — стеклянные шары у правого края */}
