@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 // Шрифт — из npm-пакета, а не с Google Fonts: сборка не зависит от доступности
 // fonts.googleapis.com (5.11 прод-деплой упал на загрузке шрифта), посетители не ходят к Google
 import "@fontsource-variable/onest";
@@ -8,6 +8,7 @@ import { Suspense } from "react";
 import Toaster from "@/components/Toaster";
 import MobileNav from "@/components/MobileNav";
 import { OPERATOR } from "@/lib/legal";
+import { THEME_COLOR } from "./manifest";
 
 // Дизайн-система Obsidian Glass: одно семейство на оба алфавита. В вакансиях латиница идёт вперемешку
 // с кириллицей («Python-разработчик»), и пара разных шрифтов давала скачки размера и толщины внутри слова
@@ -20,6 +21,8 @@ export const metadata: Metadata = {
   title: "FastCV — вакансии с откликом от ИИ",
   description: "Свежие вакансии из Telegram-каналов, SuperJob, «Работы России» и от прямых работодателей: IT, digital и другие профессии. Сопроводительное письмо под каждую вакансию пишет ИИ.",
 };
+
+export const viewport: Viewport = { themeColor: THEME_COLOR };
 
 export default function RootLayout({
   children,
