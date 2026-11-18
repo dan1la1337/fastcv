@@ -19,6 +19,8 @@ import { fetchSalaryBenchmarks, type SalaryBenchmark } from "@/lib/salary";
 import ScreeningVerdict, { requestScreening } from "@/components/ScreeningVerdict";
 import { FIT_ORDER, type Screening } from "@/lib/screening";
 import UpcomingInterviews from "@/components/UpcomingInterviews";
+import { rejectAll, rejectNotice } from "@/lib/bulk-reject";
+import { loadErrorText } from "@/lib/load-errors";
 import { supabase, getUserRole } from "@/lib/supabase";
 import { formatSalary, plural, type Vacancy } from "@/lib/vacancies";
 
@@ -119,7 +121,7 @@ export default function EmployerDashboard() {
   const [drafting, setDrafting] = useState(false);
 
   const loadData = useCallback(async (currentUser: User) => {
-    const [{ data: prof }, { data: apps }, { data: own }] = await Promise.all([
+    const [{ data: prof, error: profError }, { data: apps, error: appsError }, { data: own, error: ownError }] = await Promise.all([
       supabase.from("profiles").select("name").eq("id", currentUser.id).maybeSingle(),
       supabase
         .from("applications")
@@ -138,7 +140,7 @@ export default function EmployerDashboard() {
     setVacancies((own ?? []) as Vacancy[]);
 
     fetchSalaryBenchmarks().then(setBenchmarks);
-    const [{ data: scored }, { data: screened }] = await Promise.all([
+    const [{ data: scored, error: scoredError }, { data: screened, error: screenedError }] = await Promise.all([
       supabase.rpc("my_application_matches"),
       supabase.from("application_screenings").select("application_id, screening"),
     ]);
@@ -148,7 +150,13 @@ export default function EmployerDashboard() {
     // Работодатель открыл кабинет — кандидаты видят, что отклик просмотрен.
     // На экране оставляем «Новый отклик», чтобы было видно, что пришло с прошлого раза.
     const unseen = loaded.filter(a => a.status === "new").map(a => a.id);
-    if (unseen.length) await supabase.from("applications").update({ status: "viewed" }).in("id", unseen);
+    const { error: viewedError } = unseen.length
+      ? await supabase.from("applications").update({ status: "viewed" }).in("id", unseen)
+      : { error: null };
+    return loadErrorText([
+      ["профиль", profError], ["отклики", appsError], ["вакансии", ownError],
+      ["совпадения", scoredError], ["ИИ-разбор", screenedError], ["отметку «просмотрен»", viewedError],
+    ]);
   }, []);
 
   useEffect(() => {
@@ -164,7 +172,8 @@ export default function EmployerDashboard() {
         return;
       }
       setUser(user);
-      await loadData(user);
+      const loadError = await loadData(user);
+      if (loadError) setNotice({ kind: "error", text: loadError });
       setLoading(false);
     })();
   }, [router, loadData]);
@@ -230,8 +239,9 @@ export default function EmployerDashboard() {
       setNotice({ kind: "error", text: "Не удалось сохранить вакансию: " + error.message });
       return;
     }
-    await loadData(user);
-    setNotice({ kind: "ok", text: editingId ? "Изменения сохранены." : "Вакансия опубликована." });
+    const loadError = await loadData(user);
+    const saved = editingId ? "Изменения сохранены." : "Вакансия опубликована.";
+    setNotice(loadError ? { kind: "error", text: `${saved} ${loadError}` } : { kind: "ok", text: saved });
     setEditingId(null);
     setForm(EMPTY_FORM);
     setActiveTab("vacancies");
@@ -335,24 +345,24 @@ export default function EmployerDashboard() {
     const byTitle = new Map<string, string[]>();
     for (const a of chosen) byTitle.set(a.vacancies.title, [...(byTitle.get(a.vacancies.title) ?? []), a.id]);
     setBulkSending(true);
-    const done: Record<string, string> = {};
-    for (const [title, ids] of byTitle) {
-      const message = (REPLY_TEMPLATES.rejected(title) + (reason ? `\n\n${reason.text}` : "")).slice(0, 2000);
-      const { error } = await supabase.from("applications")
+    const groups = [...byTitle].map(([title, ids]) => ({
+      message: (REPLY_TEMPLATES.rejected(title) + (reason ? `\n\n${reason.text}` : "")).slice(0, 2000),
+      ids,
+    }));
+    const result = await rejectAll(groups, async (ids, message) => {
+      const { data, error } = await supabase.from("applications")
         .update({ status: "rejected", hr_message: message, hr_replied_at: new Date().toISOString() })
-        .in("id", ids);
-      if (error) {
-        setNotice({ kind: "error", text: "Не все отказы отправлены: " + error.message });
-        break;
-      }
-      ids.forEach(id => { done[id] = message; });
-    }
+        .in("id", ids)
+        .select("id");
+      return { updated: (data ?? []).map(r => r.id), error: error?.message ?? null };
+    });
     setBulkSending(false);
-    const sent = Object.keys(done).length;
+    const { done, failed } = result;
     setApplications(prev => prev.map(a => done[a.id] ? { ...a, status: "rejected", hr_message: done[a.id] } : a));
-    setSelected(new Set());
-    setBulk(null);
-    if (sent) setNotice({ kind: "ok", text: `Отправлено отказов: ${sent}. Кандидаты увидят ответ в «Моих откликах» и в чате.` });
+    // Неотправленные остаются выбранными, панель открыта — можно повторить
+    setSelected(new Set(failed.flatMap(f => f.ids)));
+    if (!failed.length) setBulk(null);
+    setNotice(rejectNotice(result));
   }
 
   // Пакетный разбор: отклики без вердикта, ждущие ответа, — по одному, чтобы не упереться в лимиты

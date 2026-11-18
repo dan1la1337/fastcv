@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
 import { createSupabaseServerClient } from "@/lib/supabase-server";
+import { isAccessDenied, loadErrorText } from "@/lib/load-errors";
 import { DIRECTIONS, plural } from "@/lib/vacancies";
 import TelegramBotSetup from "@/components/TelegramBotSetup";
 import ChannelOptOut, { type ExcludedChannel } from "@/components/ChannelOptOut";
@@ -43,10 +44,24 @@ export default async function AdminPage() {
   const supabase = await createSupabaseServerClient();
   const { data, error } = await supabase.rpc("admin_metrics");
   // Не администратор — страницы для него не существует
-  if (error || !data) notFound();
+  if (isAccessDenied(error) || (!error && !data)) notFound();
+  // Сбой базы или сети — показываем ошибку, а не 404
+  if (error) {
+    return (
+      <main className="min-h-screen text-neutral-100 px-4 py-8">
+        <div className="max-w-6xl mx-auto space-y-4">
+          <h1 className="font-display text-2xl font-bold">Метрики FastCV</h1>
+          <p role="alert" className="rounded-xl px-4 py-3 text-sm border bg-red-500/10 border-red-500/20 text-red-300">
+            {loadErrorText([["метрики", error]])}
+          </p>
+        </div>
+      </main>
+    );
+  }
   const m = data as unknown as Metrics;
-  const { data: botSetting } = await supabase.from("app_settings").select("value").eq("key", "telegram_bot_username").maybeSingle();
-  const { data: excluded } = await supabase.rpc("excluded_channels");
+  const { data: botSetting, error: botError } = await supabase.from("app_settings").select("value").eq("key", "telegram_bot_username").maybeSingle();
+  const { data: excluded, error: excludedError } = await supabase.rpc("excluded_channels");
+  const settingsError = loadErrorText([["имя Telegram-бота", botError], ["исключённые каналы", excludedError]]);
 
   const days = m.vacancies_by_day ?? [];
   const totals = days.map(d => d.external + d.internal);
@@ -165,6 +180,9 @@ export default async function AdminPage() {
             ) : <p className="text-xs text-neutral-500">За неделю вакансий из каналов не было.</p>}
           </section>
         </div>
+        {settingsError && (
+          <p role="alert" className="rounded-xl px-4 py-3 text-sm border bg-red-500/10 border-red-500/20 text-red-300">{settingsError}</p>
+        )}
         <TelegramBotSetup current={botSetting?.value ?? null} />
         <ChannelOptOut initial={(excluded ?? []) as ExcludedChannel[]} />
       </div>
