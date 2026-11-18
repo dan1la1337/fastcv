@@ -57,14 +57,14 @@ def score(cases: list[dict], normalize: Callable[[str], Any], pause: Callable[[]
 def main() -> None:
     import time
 
-    from ai_client import AI_PAUSE_SECONDS, GEMINI_MODELS, make_gemini_normalizer
+    from ai_client import AI_PAUSE_SECONDS, make_normalizer, provider_from_env
     from supabase import create_client
 
     db = create_client(os.environ["SUPABASE_URL"], os.environ["SUPABASE_SERVICE_ROLE_KEY"])
-    models = tuple(m.strip() for m in (os.getenv("GEMINI_MODELS") or "").split(",") if m.strip()) or GEMINI_MODELS
     rows = (db.table("ai_golden").select("source, text, expected")
             .not_.is_("expected", "null").order("id").execute().data or [])
-    normalize = make_gemini_normalizer(os.environ["GEMINI_API_KEY"], models)
+    provider, models = provider_from_env(os.getenv)
+    normalize = make_normalizer(provider, models)
     batch = (os.getenv("EVAL_BATCH") or "").lower() == "true"
     if batch:
         # Как в сборщике: посты пачками по AI_BATCH в одном обращении

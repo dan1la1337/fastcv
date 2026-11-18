@@ -38,7 +38,7 @@ import requests
 # и eval_ai.py по-прежнему находили их в main
 from ai_client import (  # noqa: F401
     AI_ATTEMPTS, AI_MODEL_STRIKES, AI_PAUSE_SECONDS, AI_TIMEOUT_MS, GEMINI_MODELS, PROMPT, AIUnavailable, BatchItem,
-    VacancyAI, make_gemini_normalizer, wrap_post,
+    VacancyAI, make_gemini_normalizer, make_normalizer, provider_from_env, wrap_post,
 )
 from bots import (  # noqa: F401
     TelegramBot, TelegramError, alert_text, daily_report_text, notify, send_digests, send_interview_surveys,
@@ -555,7 +555,6 @@ def main() -> None:
     load_dotenv(".env")
 
     supabase_url = env("SUPABASE_URL", "NEXT_PUBLIC_SUPABASE_URL")
-    gemini_key = env("GEMINI_API_KEY")
     # Сборщику нужен service-role ключ: запись в vacancies и channels для
     # публичного ключа закрыта правилами доступа (supabase/migrations).
     supabase_key = env("SUPABASE_SERVICE_ROLE_KEY")
@@ -567,8 +566,11 @@ def main() -> None:
 
     if not supabase_url or not supabase_key:
         fail("Не найдены ключи Supabase! Проверьте .env или .env.local")
-    if not gemini_key:
-        fail("Не найден GEMINI_API_KEY! Проверьте .env или .env.local")
+    gemini_key = env("GEMINI_API_KEY")  # выжимка отзывов (reviews.py) работает только с Gemini
+    try:
+        provider, models = provider_from_env(env)
+    except ValueError as e:
+        fail(str(e))
 
     print(f"Ключ Supabase: {describe_key(supabase_key)}, длина {len(supabase_key)}")
     if not supabase_key.isascii() or any(c.isspace() for c in supabase_key):
@@ -588,11 +590,10 @@ def main() -> None:
         return
 
     print("==================== ЗАПУСК СБОРА ====================")
-    models = tuple(m.strip() for m in (env("GEMINI_MODELS") or "").split(",") if m.strip()) or GEMINI_MODELS
-    print(f"Модели Gemini: {', '.join(models)}")
+    print(f"ИИ: {provider.name}, модели: {', '.join(models)}")
     try:
         store = Store(create_client(supabase_url, supabase_key))
-        channel_normalizer = make_gemini_normalizer(gemini_key, models)
+        channel_normalizer = make_normalizer(provider, models)
         summary = run(store, channel_normalizer)
     except Exception as e:
         # Текст ошибки без значений ключей: они в заголовках запросов, а не в сообщении
@@ -670,7 +671,7 @@ def main() -> None:
             offset = int(store.get_setting("careers_offset") or 0) % len(careers.COMPANIES)
             store.set_setting("careers_offset", str(offset + 1))
             order = careers.COMPANIES[offset:] + careers.COMPANIES[:offset]
-            career_stats = careers.import_careers(store, make_gemini_normalizer(gemini_key, models), fetcher, order)
+            career_stats = careers.import_careers(store, make_normalizer(provider, models), fetcher, order)
             print(f"Сайты компаний: {career_stats}")
             # Итоги по компаниям — в базу: логи Actions не всегда под рукой, а так видно в /admin и SQL
             store.set_setting("careers_last_run", json.dumps(
@@ -704,7 +705,7 @@ def main() -> None:
     backfill = min(int(float(env("BACKFILL_COMPANY") or 0)), 600)
     if backfill > 0:
         try:
-            checked, filled = backfill_companies(store, make_gemini_normalizer(gemini_key, models), backfill)
+            checked, filled = backfill_companies(store, make_normalizer(provider, models), backfill)
             print(f"Компании: проверено вакансий {checked}, заполнено {filled}")
         except Exception as e:  # дозаполнение не должно ронять успешный сбор
             print(f"⚠️ Дозаполнение компаний остановлено: {type(e).__name__}: {str(e)[:200]}")

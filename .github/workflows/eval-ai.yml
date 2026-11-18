@@ -30,6 +30,10 @@ jobs:
           SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
-          GEMINI_MODELS: ${{ inputs.models }}
+          # Провайдер ИИ (переменная репозитория AI_PROVIDER: gemini или yandex); пусто — gemini
+          AI_PROVIDER: ${{ vars.AI_PROVIDER }}
+          YANDEX_API_KEY: ${{ secrets.YANDEX_API_KEY }}
+          YANDEX_FOLDER_ID: ${{ secrets.YANDEX_FOLDER_ID }}
+          AI_MODELS: ${{ inputs.models }}
           EVAL_BATCH: ${{ inputs.batch }}
         run: python -u eval_ai.py

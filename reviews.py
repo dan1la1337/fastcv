@@ -10,7 +10,7 @@ import json
 import re
 from typing import Callable, Optional
 
-GEMINI_MODELS = ("gemini-3.1-flash-lite", "gemini-flash-lite-latest", "gemini-3.5-flash-lite")
+from ai_client import GEMINI_MODELS
 MAX_PER_RUN = 20
 
 INSTRUCTION = """Ты пишешь выжимку отзывов кандидатов о процессе найма в компании — для её страницы на сайте вакансий.
