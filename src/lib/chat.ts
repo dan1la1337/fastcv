@@ -79,3 +79,18 @@ export function chatErrorText(message: string): string {
   if (isNetworkError(message)) return "Нет связи с сервером. Сообщение не отправлено — попробуйте ещё раз.";
   return "Не удалось отправить сообщение. Попробуйте ещё раз.";
 }
+
+/** Добавить сообщения в ленту без дублей, по порядку ID. */
+export function mergeMessages(shown: Message[] | null, fresh: Message[]): Message[] {
+  const known = new Set((shown ?? []).map(m => m.id));
+  return [...(shown ?? []), ...fresh.filter(m => !known.has(m.id))].sort((a, b) => a.id - b.id);
+}
+
+/**
+ * Курсор опроса после ответа базы: максимальный ID среди полученных сообщений.
+ * Собственное отправленное сообщение курсор не двигает: перед ним могут быть
+ * входящие, которые опрос ещё не получил (#142).
+ */
+export function pollCursor(cursor: number, received: Message[]): number {
+  return Math.max(cursor, ...received.map(m => m.id));
+}
