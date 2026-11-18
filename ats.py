@@ -19,11 +19,9 @@ from typing import Callable, Optional
 
 import requests
 
-SOURCE = "career"
-USER_AGENT = "Mozilla/5.0 (compatible; FastCVBot/1.0; +https://fastcv.ru)"
-RANKING_WEIGHT = 1.0
-_TAG = re.compile(r"<[^>]+>")
-_SPACE = re.compile(r"\s+")
+import careers
+# Вакансии из ATS сохраняются как вакансии с сайтов компаний: тот же источник, вес и User-Agent
+from careers import _SPACE, RANKING_WEIGHT, SOURCE, USER_AGENT
 # В игровой студии геймдев — те, кто делает игры; продажи, найм, финансы и т. п. — по названию
 _NOT_DEV = re.compile(r"account|sales|recruit|talent|\bhr\b|people|financ|payroll|legal|counsel|"
                       r"marketing|office|procurement|business development|\bpr\b|communication|"
@@ -73,10 +71,8 @@ BOARDS = [
 
 
 def clean(value: object, limit: int) -> Optional[str]:
-    if not isinstance(value, str):
-        return None
-    text = _SPACE.sub(" ", html.unescape(_TAG.sub(" ", html.unescape(value)))).strip()
-    return text[:limit] or None
+    # API отдают HTML экранированным («&lt;p&gt;»): сначала раскрываем сущности, потом чистим теги
+    return careers.clean(html.unescape(value) if isinstance(value, str) else value, limit)
 
 
 def city_of(location: str) -> tuple[Optional[str], bool]:
