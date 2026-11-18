@@ -2,25 +2,23 @@
 
 import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { supabase } from "@/lib/supabase";
-import {
-  AREAS, DEFAULT_FILTERS, DIRECTIONS, experienceLabel, sourceOf, freshnessLabel, ghostSignal, LEVELS, WORK_FORMATS, fetchVacancyPage, formatLabel, formatSalary, levelLabel, plural, PAGE_SIZE,
-  VACANCY_FORMS, SOURCES, type SourceKind, type Area, type Level, type Vacancy, type VacancyFilters, type WorkFormat,
-} from "@/lib/vacancies";
-import { Clock, Search, MapPin, Sparkles, Loader2, ExternalLink, Globe, SlidersHorizontal, Briefcase, Building2, Target, Bookmark, BookmarkCheck, EyeOff, Ghost, Undo2, X } from "lucide-react";
-import { fetchMarked, fetchMarks, setMark, type MarkKind } from "@/lib/marks";
+import { DEFAULT_FILTERS, fetchVacancyPage, plural, PAGE_SIZE, VACANCY_FORMS, type Area, type Vacancy, type VacancyFilters } from "@/lib/vacancies";
+import { Search, Loader2, SlidersHorizontal, X } from "lucide-react";
 import { toast } from "@/components/Toaster";
+import { fetchMarked } from "@/lib/marks";
 import { fetchMatches, fetchRecommended, type Match } from "@/lib/matching";
 import type { Tables } from "@/lib/database.types";
 import type { User } from "@supabase/supabase-js";
 import Link from "next/link";
-import UserMenu from "@/components/UserMenu";
-import Logo from "@/components/Logo";
-import MatchRing from "@/components/MatchRing";
 import dynamic from "next/dynamic";
-import CompanyLine from "@/components/CompanyLine";
-import { estimateSalary, fetchSalaryBenchmarks, type SalaryBenchmark } from "@/lib/salary";
-import SalaryEstimate from "@/components/SalaryEstimate";
-import SearchSelect, { type SelectOption } from "@/components/SearchSelect";
+import { activeFilters as listActiveFilters, cityOptions as toCityOptions, mergeById, withArea, withCountry } from "@/lib/feed-filters";
+import FeedHeader from "@/components/feed/FeedHeader";
+import FeedFilters from "@/components/feed/FeedFilters";
+import { AreaTabs, ModeTabs, type FeedMode } from "@/components/feed/FeedTabs";
+import HiddenVacancies from "@/components/feed/HiddenVacancies";
+import VacancyCard from "@/components/feed/VacancyCard";
+import { useFeedOptions } from "@/components/feed/useFeedOptions";
+import { useVacancyMarks } from "@/components/feed/useVacancyMarks";
 
 // Окно Smart Apply нужно только по клику: его код не грузим вместе с лентой
 const SmartApply = dynamic(() => import("@/components/SmartApply"), { ssr: false });
@@ -49,61 +47,28 @@ export default function Feed({ initialRows, initialTotal, hero, after }: { initi
   const [userProfile, setUserProfile] = useState<Tables<"profiles"> | null>(null);
 
   // «Для вас»: подборка по профилю кандидата и процент совпадения на карточках
-  const [mode, setMode] = useState<"all" | "for-you" | "saved">("all");
+  const [mode, setMode] = useState<FeedMode>("all");
 
   // Избранное и скрытые: отметки пользователя на вакансиях
-  const [marks, setMarks] = useState<Map<string, MarkKind>>(new Map());
-  // Вакансии, отметка которых ещё сохраняется: второй клик до ответа базы мог обогнать первый
-  const [pendingMarks, setPendingMarks] = useState<Set<string>>(new Set());
   const hiddenRef = useRef<string[]>([]);
   const [savedList, setSavedList] = useState<Vacancy[]>([]);
   const [hiddenList, setHiddenList] = useState<Vacancy[]>([]);
   const [savedLoading, setSavedLoading] = useState(false);
   const [matches, setMatches] = useState<Record<string, Match>>({});
-  // Города для фильтра — только те, где есть вакансии, по убыванию числа вакансий
-  const [cities, setCities] = useState<{ city: string; country: string | null; vacancies: number }[]>([]);
-  // Страны для фильтра: Россия первой, остальные по числу вакансий
-  const [countryOptions, setCountryOptions] = useState<SelectOption[]>([]);
-  useEffect(() => {
-    supabase.from("vacancy_cities").select("city, country, vacancies").order("vacancies", { ascending: false }).limit(300)
-      .then(({ data }) => setCities(data ?? []));
-    supabase.from("vacancy_countries").select("country, vacancies").order("vacancies", { ascending: false })
-      .then(({ data }) => setCountryOptions((data ?? [])
-        .sort((a, b) => Number(b.country === "Россия") - Number(a.country === "Россия"))
-        .map(c => ({ value: c.country, label: c.country, count: c.vacancies }))));
-  }, []);
-  // Справочник для оценки скрытой зарплаты: десятки строк, грузим один раз
-  const [benchmarks, setBenchmarks] = useState<SalaryBenchmark[]>([]);
-  useEffect(() => {
-    fetchSalaryBenchmarks().then(setBenchmarks);
-  }, []);
+  const { cities, countryOptions, benchmarks } = useFeedOptions();
   const requestedMatches = useRef(new Set<string>());
   const [recommended, setRecommended] = useState<Vacancy[]>([]);
   const [recPage, setRecPage] = useState(0);
   const [recHasMore, setRecHasMore] = useState(false);
   const [recLoading, setRecLoading] = useState(false);
 
-  // Фильтры
-  const [search, setSearch] = useState("");
-  const [formats, setFormats] = useState<WorkFormat[]>([]);
-  const [sources, setSources] = useState<SourceKind[]>([]);
-  const [minSalary, setMinSalary] = useState<number>(0);
-  const [onlyWithSalary, setOnlyWithSalary] = useState<boolean>(false);
-  const [city, setCity] = useState("");
-  const [country, setCountry] = useState("");
-  // Выбрана страна — в списке городов только её города
-  const cityOptions: SelectOption[] = cities
-    .filter(c => !country || c.country === country)
-    .map(c => ({ value: c.city, label: c.city, count: c.vacancies }));
-  function chooseCountry(value: string) {
-    setCountry(value);
-    if (value && city && !cities.some(c => c.city === city && c.country === value)) setCity("");
-  }
-
-  const [selectedDirection, setSelectedDirection] = useState<string | null>(null);
-  const [area, setArea] = useState<Area | "">("");
-  const [selectedLevels, setSelectedLevels] = useState<Level[]>([]);
-  const [selectedStack, setSelectedStack] = useState<string[]>([]);
+  // Фильтры применяются в базе: так поиск идёт по всем вакансиям, а не по
+  // первой тысяче, и страница грузит только PAGE_SIZE карточек за раз.
+  const [filters, setFilters] = useState<VacancyFilters>(DEFAULT_FILTERS);
+  const { search, area } = filters;
+  const cityOptions = toCityOptions(cities, filters.country);
+  const chooseCountry = (value: string) => setFilters(f => withCountry(f, value, cities));
+  const chooseArea = (next: Area | "") => setFilters(f => withArea(f, next));
   // На телефоне фильтры свёрнуты, иначе они занимают весь первый экран
   const [filtersOpen, setFiltersOpen] = useState(false);
 
@@ -138,21 +103,6 @@ export default function Feed({ initialRows, initialTotal, hero, after }: { initi
     });
   }, []);
 
-  // Фильтры применяются в базе: так поиск идёт по всем вакансиям, а не по
-  // первой тысяче, и страница грузит только PAGE_SIZE карточек за раз.
-  const filters: VacancyFilters = {
-    search,
-    formats,
-    minSalary,
-    withSalary: onlyWithSalary,
-    country,
-    city,
-    direction: selectedDirection ?? "",
-    area,
-    levels: selectedLevels,
-    stack: selectedStack,
-    sources,
-  };
   const filtersKey = JSON.stringify(filters);
   const requestId = useRef(0);
   // Данные для фильтров по умолчанию уже пришли с сервера — первый запрос не нужен
@@ -186,22 +136,13 @@ export default function Feed({ initialRows, initialTotal, hero, after }: { initi
     return () => clearTimeout(timer);
   }, [filtersKey]);
 
-  /** Раздел ленты; направление из другого раздела сбрасываем, иначе лента окажется пустой. */
-  function chooseArea(next: Area | "") {
-    setArea(next);
-    if (next && selectedDirection && DIRECTIONS.find(d => d.id === selectedDirection)?.group !== next) {
-      setSelectedDirection(null);
-      setSelectedStack([]);
-    }
-  }
-
   async function loadMore() {
     const id = requestId.current;
     setLoadingMore(true);
     try {
       const { rows, total } = await fetchVacancyPage(filters, page + 1, hiddenRef.current);
       if (id !== requestId.current) return;
-      setVacancies(prev => [...prev, ...rows.filter(r => !prev.some(p => p.id === r.id))]);
+      setVacancies(prev => mergeById(prev, rows));
       setTotal(total);
       setPage(page + 1);
     } catch {
@@ -217,6 +158,8 @@ export default function Feed({ initialRows, initialTotal, hero, after }: { initi
   const isCandidate = Boolean(user) && userProfile?.role === "candidate";
   const profileSkills = Array.isArray(userProfile?.skills) ? userProfile.skills : [];
   const hasPrefs = Boolean(userProfile?.pref_directions?.length || profileSkills.length || userProfile?.pref_level);
+
+  const { marks, pendingMarks, toggleMark } = useVacancyMarks({ userId: user?.id, isCandidate, hiddenRef, setSavedList, setHiddenList });
 
   // Процент совпадения для карточек общей ленты (подборка приходит уже с ним)
   useEffect(() => {
@@ -253,41 +196,6 @@ export default function Feed({ initialRows, initialTotal, hero, after }: { initi
     toast(`«${skill}» добавлен в профиль — совпадение пересчитано.`, "ok");
   }
 
-  // Отметки загружаем один раз после входа; дальше меняем локально вместе с базой
-  useEffect(() => {
-    if (!isCandidate) return;
-    fetchMarks().then(found => {
-      setMarks(found);
-      hiddenRef.current = [...found].filter(([, kind]) => kind === "hidden").map(([id]) => id);
-    }).catch(() => {});
-  }, [isCandidate]);
-
-  async function toggleMark(item: Vacancy, kind: MarkKind) {
-    if (!user || pendingMarks.has(item.id)) return;
-    setPendingMarks(prev => new Set(prev).add(item.id));
-    const next = marks.get(item.id) === kind ? null : kind;
-    const before = marks;
-    const updated = new Map(marks);
-    if (next) updated.set(item.id, next); else updated.delete(item.id);
-    setMarks(updated);
-    hiddenRef.current = [...updated].filter(([, k]) => k === "hidden").map(([id]) => id);
-    if (next === "saved") setSavedList(prev => [item, ...prev.filter(v => v.id !== item.id)]);
-    if (next !== "saved") setSavedList(prev => prev.filter(v => v.id !== item.id));
-    if (next === "hidden") setHiddenList(prev => [item, ...prev.filter(v => v.id !== item.id)]);
-    if (next !== "hidden") setHiddenList(prev => prev.filter(v => v.id !== item.id));
-    try {
-      await setMark(user.id, item.id, next);
-      if (next === "hidden") toast("Вакансия скрыта. Вернуть можно во вкладке «Избранное».", "info");
-      if (next === "saved") toast("Добавлено в избранное.", "ok");
-    } catch {
-      setMarks(before);
-      hiddenRef.current = [...before].filter(([, k]) => k === "hidden").map(([id]) => id);
-      toast("Не удалось сохранить отметку. Попробуйте ещё раз.", "error");
-    } finally {
-      setPendingMarks(prev => { const rest = new Set(prev); rest.delete(item.id); return rest; });
-    }
-  }
-
   async function showSaved() {
     setMode("saved");
     setSavedLoading(true);
@@ -308,7 +216,7 @@ export default function Feed({ initialRows, initialTotal, hero, after }: { initi
     setLoadError(null);
     try {
       const { rows, matches: found, hasMore } = await fetchRecommended(nextPage, PAGE_SIZE);
-      setRecommended(prev => nextPage === 0 ? rows : [...prev, ...rows.filter(r => !prev.some(p => p.id === r.id))]);
+      setRecommended(prev => nextPage === 0 ? rows : mergeById(prev, rows));
       setMatches(prev => ({ ...prev, ...found }));
       setRecPage(nextPage);
       setRecHasMore(hasMore);
@@ -324,19 +232,6 @@ export default function Feed({ initialRows, initialTotal, hero, after }: { initi
     void loadRecommended(0);
   }
 
-  const toggleStack = (tech: string) => {
-    setSelectedStack(prev => prev.includes(tech) ? prev.filter(t => t !== tech) : [...prev, tech]);
-  };
-  const toggleLevel = (level: Level) => {
-    setSelectedLevels(prev => prev.includes(level) ? prev.filter(l => l !== level) : [...prev, level]);
-  };
-  const direction = DIRECTIONS.find(d => d.id === selectedDirection);
-  const showLevels = selectedLevels.length > 0 || (area !== "work" && direction?.group !== "work");
-  const chip = (active: boolean) =>
-    `text-xs px-3 py-1.5 rounded-full transition-colors ${active
-      ? "lg lg-on"
-      : "lg text-neutral-300 hover:text-neutral-100"}`;
-
   const forYou = mode === "for-you";
   const savedMode = mode === "saved";
   const notHidden = (v: Vacancy) => marks.get(v.id) !== "hidden";
@@ -344,214 +239,12 @@ export default function Feed({ initialRows, initialTotal, hero, after }: { initi
   const listLoading = savedMode ? savedLoading : forYou ? recLoading && recommended.length === 0 : loading;
 
   // Что сейчас сужает ленту: показываем над результатами, каждое условие снимается по клику
-  const activeFilters: { key: string; label: string; clear: () => void }[] = [
-    search.trim() && { key: "search", label: `«${search.trim()}»`, clear: () => setSearch("") },
-    area && { key: "area", label: AREAS.find(a => a.id === area)?.label ?? area, clear: () => setArea("") },
-    selectedDirection && { key: "direction", label: DIRECTIONS.find(d => d.id === selectedDirection)?.label ?? selectedDirection, clear: () => { setSelectedDirection(null); setSelectedStack([]); } },
-    ...selectedLevels.map(l => ({ key: `level-${l}`, label: levelLabel(l) ?? l, clear: () => setSelectedLevels(prev => prev.filter(x => x !== l)) })),
-    ...formats.map(f => ({ key: `format-${f}`, label: formatLabel(f) ?? f, clear: () => setFormats(prev => prev.filter(x => x !== f)) })),
-    city.trim() && { key: "city", label: city, clear: () => setCity("") },
-    country && { key: "country", label: country, clear: () => setCountry("") },
-    minSalary > 0 && { key: "salary", label: `от ${minSalary.toLocaleString("ru-RU")} ₽`, clear: () => setMinSalary(0) },
-    onlyWithSalary && { key: "with-salary", label: "С зарплатой", clear: () => setOnlyWithSalary(false) },
-    ...sources.map(id => ({ key: `source-${id}`, label: SOURCES.find(x => x.id === id)?.label ?? id, clear: () => setSources(prev => prev.filter(x => x !== id)) })),
-  ].filter(f => !!f);
-
-  const card = (item: Vacancy) => {
-    // Без заполненного профиля оценка у всех одинаковая — не показываем её
-    const match = hasPrefs ? matches[item.id] : undefined;
-    return (
-      <div key={item.id} className="neu-sub card-hover rounded-3xl p-4 sm:p-6 flex flex-col gap-4 relative overflow-hidden group">
-
-        {/* Метки над заголовком отдельной строкой: поверх длинного названия они его перекрывали.
-            На телефоне совпадение тоже здесь: кольцо сжало бы заголовок */}
-        <div className="flex flex-wrap items-center gap-2">
-          {match && (
-            <span className={`sm:hidden neu-chip text-xs px-2 py-0.5 tabular-nums ${match.score >= 70 ? "!text-teal-200 !border-teal-300/40" : "!text-amber-300 !border-amber-300/40"}`}>
-              {match.score}%
-            </span>
-          )}
-          {item.source_type === 'external' ? (
-            <span className="neu-chip text-xs px-2 py-0.5">{sourceOf(item).badge}</span>
-          ) : (
-            <span className="neu-chip text-xs px-2 py-0.5 inline-flex items-center gap-1.5">
-              <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse"></span>
-              Прямой работодатель
-            </span>
-          )}
-        </div>
-
-        <div className="flex flex-col sm:flex-row justify-between gap-4">
-          <div className="flex gap-4 sm:gap-5 items-start min-w-0">
-          {match && <span className="hidden sm:block shrink-0"><MatchRing value={match.score} size={64} stroke={match.score >= 70 ? "#5eead4" : "#fcd34d"} /></span>}
-          <div className="min-w-0">
-            <h2 className="text-lg sm:text-xl font-semibold text-neutral-100 leading-snug">
-              <Link href={`/vacancy/${item.id}`} className="hover:text-teal-300 transition-colors">{item.title}</Link>
-            </h2>
-            <CompanyLine vacancy={item} className="text-sm text-neutral-400 mt-0.5" />
-            <p className="text-base font-semibold text-neutral-100 mt-1.5 flex flex-wrap items-center gap-2">
-              {formatSalary(item.salary_min, item.salary_max, item.salary_currency)}
-              {(() => {
-                const estimate = estimateSalary(item, benchmarks);
-                return estimate && <SalaryEstimate estimate={estimate} className="text-xs" />;
-              })()}
-            </p>
-            <p className="flex flex-wrap items-center gap-3 text-xs text-neutral-400 mt-2">
-              {(item.level || item.experience_min != null) && (
-              <span className="inline-flex items-center gap-1"><Briefcase className="w-3.5 h-3.5" />
-                {[item.level && levelLabel(item.level), experienceLabel(item.experience_min)].filter(Boolean).join(" · ")}
-              </span>
-            )}
-              {(item.city || item.country) && (
-                <span className="inline-flex items-center gap-1"><MapPin className="w-3.5 h-3.5" />
-                  {/* Зарубежный город — со страной: «Белград, Сербия» */}
-                  {[item.city, item.country !== "Россия" || !item.city ? item.country : null].filter(Boolean).join(", ")}
-                </span>
-              )}
-              {item.work_format === "remote" || (!item.work_format && item.is_remote)
-                ? <span className="inline-flex items-center gap-1"><Globe className="w-3.5 h-3.5" />Удалённо</span>
-                : item.work_format && <span className="inline-flex items-center gap-1"><Building2 className="w-3.5 h-3.5" />{formatLabel(item.work_format)}</span>}
-              <span className="inline-flex items-center gap-1" title="Когда вакансию впервые опубликовали и во скольких каналах" suppressHydrationWarning>
-                <Clock className="w-3.5 h-3.5" />{freshnessLabel(item)}
-              </span>
-              {ghostSignal(item) && (
-                <span className="inline-flex items-center gap-1 text-amber-300" title={ghostSignal(item)!}>
-                  <Ghost className="w-3.5 h-3.5" aria-hidden="true" />Возможно, неактуальна
-                </span>
-              )}
-            </p>
-          </div>
-          </div>
-
-          <button
-            onClick={() => setApplyVacancy(item)}
-            className="lg lg-tint inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-full text-sm font-semibold transition-colors shrink-0 relative z-10 sm:self-end"
-          >
-            <Sparkles className="w-4 h-4" /> Откликнуться с ИИ
-          </button>
-        </div>
-        <p className="text-sm text-neutral-400 leading-relaxed line-clamp-2 sm:line-clamp-3">{item.description}</p>
-
-        {match?.core && match.core.fit !== "match" && match.core.stack.length > 0 && (
-          <p className={`text-xs ${match.core.fit === "foreign" ? "text-amber-300" : "text-neutral-400"}`}>
-            Основной стек вакансии: <span className="font-medium">{match.core.stack.join(", ")}</span>
-            {match.core.fit === "foreign" && " — не ваш, поэтому совпадение не выше 40%"}
-            {match.core.fit === "related" && " — смежный с вашим"}
-            {match.core.fit === "unknown" && " — укажите в профиле свой основной стек, чтобы совпадение было точнее"}
-          </p>
-        )}
-
-        {match && (match.matched.length > 0 || match.missing.length > 0 || match.related.length > 0) && (
-          <p className="text-xs text-neutral-500">
-            {match.matched.length > 0 && <>Есть у вас: <span className="text-teal-200">{match.matched.join(", ")}</span></>}
-            {match.related.length > 0 && (
-              <>
-                {match.matched.length > 0 && " · "}
-                Близко:{" "}
-                <span className="text-sky-300" title="Засчитано наполовину: у вас есть смежный опыт">
-                  {match.related.map(r => `${r.skill} (у вас ${r.via})`).join(", ")}
-                </span>
-              </>
-            )}
-            {(match.matched.length > 0 || match.related.length > 0) && match.missing.length > 0 && " · "}
-            {match.missing.length > 0 && (
-              <>
-                Не хватает:{" "}
-                {match.missing.map((skill, i) => (
-                  <span key={skill}>
-                    {i > 0 && ", "}
-                    <button
-                      onClick={() => addSkill(skill)}
-                      disabled={addingSkill !== null}
-                      title="У меня есть этот опыт — добавить в профиль"
-                      aria-label={`+ ${skill} в профиль: у меня есть этот опыт`}
-                      className="text-amber-300 underline decoration-dotted underline-offset-2 hover:text-amber-200 disabled:opacity-60"
-                    >
-                      {addingSkill === skill ? "добавляем…" : `+ ${skill} в профиль`}
-                    </button>
-                  </span>
-                ))}
-                <span className="hidden sm:inline text-neutral-600"> — нажмите на навык, если он у вас есть</span>
-              </>
-            )}
-          </p>
-        )}
-
-        {(item.stack?.length || item.source_url || isCandidate) ? (
-          <div className="flex flex-wrap items-center gap-2">
-            {/* С совпадением навыки уже названы строкой «Есть у вас / Не хватает»: второй раз не повторяем */}
-            {!match && item.stack?.slice(0, 8).map(tech => (
-              <span key={tech} className="text-xs px-2 py-0.5 neu-chip">
-                {tech}
-              </span>
-            ))}
-            <span className="ml-auto inline-flex items-center gap-3">
-              {isCandidate && (
-                <>
-                  <button
-                    onClick={() => toggleMark(item, "saved")}
-                    disabled={pendingMarks.has(item.id)}
-                    aria-pressed={marks.get(item.id) === "saved"}
-                    className={`inline-flex items-center gap-1 text-xs transition-colors ${marks.get(item.id) === "saved" ? "text-amber-300" : "text-neutral-500 hover:text-amber-300"}`}
-                  >
-                    {marks.get(item.id) === "saved" ? <BookmarkCheck className="w-3.5 h-3.5" /> : <Bookmark className="w-3.5 h-3.5" />}
-                    {marks.get(item.id) === "saved" ? "В избранном" : "В избранное"}
-                  </button>
-                  {!savedMode && (
-                    <button
-                      onClick={() => toggleMark(item, "hidden")}
-                      disabled={pendingMarks.has(item.id)}
-                      className="inline-flex items-center gap-1 text-xs text-neutral-500 hover:text-neutral-300 transition-colors"
-                    >
-                      <EyeOff className="w-3.5 h-3.5" /> Скрыть
-                    </button>
-                  )}
-                </>
-              )}
-              {item.source_url && (
-                <a
-                  href={item.source_url}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="inline-flex items-center gap-1 text-xs text-neutral-500 hover:text-teal-300 transition-colors"
-                >
-                  {sourceOf(item).link} <ExternalLink className="w-3 h-3" />
-                </a>
-              )}
-            </span>
-          </div>
-        ) : null}
-      </div>
-    );
-  };
+  const activeFilters = listActiveFilters(filters);
+  const clearAllFilters = () => activeFilters.forEach(f => setFilters(f.clear));
 
   return (
     <div className="min-h-screen text-neutral-100 antialiased font-sans relative">
-      <header className="top-strip sticky top-0 z-20 px-3 sm:px-4 pt-3 pb-3">
-        <div className="glass rounded-3xl max-w-6xl mx-auto pl-4 pr-2.5 py-2.5 flex items-center justify-between gap-3">
-          <Logo />
-          <div className="flex items-center gap-2 sm:gap-4">
-            <span className="inline-flex items-center gap-2 tabular-nums text-xs text-teal-300 whitespace-nowrap">
-              <span className="relative h-2 w-2" aria-hidden="true">
-                <span className="live-ping absolute inset-0 rounded-full bg-teal-300" />
-                <span className="absolute inset-0 rounded-full bg-teal-300" />
-              </span>
-              {loading ? "…" : `${total.toLocaleString("ru-RU")} ${plural(total, VACANCY_FORMS)}`}
-            </span>
-            
-            {signedIn ? (
-              <UserMenu role={isEmployer ? "employer" : "candidate"} email={user?.email} />
-            ) : (
-              <Link 
-                href="/login"
-                className="guest-only lg px-4 py-2 text-neutral-100 rounded-full text-sm font-medium transition-colors relative z-50 whitespace-nowrap"
-              >
-                Войти<span className="hidden sm:inline"> / Регистрация</span>
-              </Link>
-            )}
-          </div>
-        </div>
-      </header>
+      <FeedHeader loading={loading} total={total} signedIn={signedIn} isEmployer={isEmployer} email={user?.email} />
 
       {!signedIn && hero}
       {/* Вторая строка сетки забирает лишнюю высоту: колонка фильтров занимает обе строки и не растягивает строку поиска */}
@@ -561,7 +254,7 @@ export default function Feed({ initialRows, initialTotal, hero, after }: { initi
           <div className="relative flex-1 min-w-0">
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400" aria-hidden="true" />
             <input id="feed-search" type="search" aria-label="Поиск по вакансиям" placeholder="Должность или навык: Java, Backend..." value={search}
-              onChange={(e) => { setSearch(e.target.value); if (mode !== "all") setMode("all"); }} className="neu-in w-full h-12 pl-10 pr-4 text-sm text-neutral-100" />
+              onChange={(e) => { const value = e.target.value; setFilters(f => ({ ...f, search: value })); if (mode !== "all") setMode("all"); }} className="neu-in w-full h-12 pl-10 pr-4 text-sm text-neutral-100" />
           </div>
           <button
             onClick={() => setFiltersOpen(open => !open)}
@@ -574,160 +267,13 @@ export default function Feed({ initialRows, initialTotal, hero, after }: { initi
           </button>
         </div>
 
-        {/* Sidebar Filters */}
-        <aside className={`lg:col-start-1 lg:row-start-1 lg:row-span-2 space-y-6 ${filtersOpen ? "" : "hidden"} lg:block`}>
-          <div className="neu-sub rounded-3xl p-5 space-y-6">
-            {/* Направление и уточнение по технологиям — главное для кандидата */}
-            <div className="space-y-3">
-              <label className="text-xs font-bold text-neutral-500 uppercase tracking-wider">Направление</label>
-
-              <SearchSelect label="Направление" placeholder="Например: frontend, маркетинг, React…" emptyLabel="Все направления"
-                options={AREAS.filter(a => !area || a.id === area).flatMap(a => DIRECTIONS.filter(d => d.group === a.id).map(d => ({
-                  value: d.id, label: d.label, group: a.label, keywords: d.tech,
-                })))}
-                value={selectedDirection ?? ""}
-                onChange={v => { setSelectedDirection(v || null); setSelectedStack([]); }} />
-
-              {direction?.tech && (
-                <div className="pt-1">
-                  <p className="text-xs text-neutral-500 mb-2">Уточнить по технологиям (можно несколько):</p>
-                  <div className="flex flex-wrap gap-2">
-                    {direction.tech.map(tech => (
-                      <button key={tech} onClick={() => toggleStack(tech)} className={chip(selectedStack.includes(tech))} aria-pressed={selectedStack.includes(tech)}>
-                        {tech}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
-
-            {/* Уровень — грейды есть в IT и digital; для «других профессий» не показываем */}
-            {showLevels && (<div className="space-y-3 pt-2 border-t border-white/[0.08]">
-              <label className="text-xs font-bold text-neutral-500 uppercase tracking-wider">Уровень</label>
-              <div className="flex flex-wrap gap-2">
-                {LEVELS.map(l => (
-                  <button key={l.id} onClick={() => toggleLevel(l.id)} className={chip(selectedLevels.includes(l.id))} aria-pressed={selectedLevels.includes(l.id)}>
-                    {l.label}
-                  </button>
-                ))}
-              </div>
-            </div>)}
-
-            {/* Формат работы */}
-            <div className="space-y-3 pt-2 border-t border-white/[0.08]">
-              <label className="text-xs font-bold text-neutral-500 uppercase tracking-wider">Формат</label>
-              <div className="flex flex-wrap gap-2">
-                <button onClick={() => setFormats([])} className={chip(formats.length === 0)} aria-pressed={formats.length === 0}>Любой</button>
-                {WORK_FORMATS.map(f => (
-                  <button key={f.id}
-                    onClick={() => setFormats(prev => prev.includes(f.id) ? prev.filter(x => x !== f.id) : [...prev, f.id])}
-                    className={chip(formats.includes(f.id))} aria-pressed={formats.includes(f.id)}>
-                    {f.label}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* Город */}
-            <div className="space-y-3 pt-2 border-t border-white/[0.08]">
-              <label className="text-xs font-bold text-neutral-500 uppercase tracking-wider">Город</label>
-              <SearchSelect label="Город" placeholder="Начните вводить город…" emptyLabel="Любой город"
-                options={cityOptions} value={city} onChange={setCity} />
-            </div>
-            {/* Ползунок зарплаты и чекбокс */}
-            <div className="space-y-4 pt-2 border-t border-white/[0.08]">
-              <div className="flex items-center justify-between">
-                <label htmlFor="feed-salary" className="text-xs font-bold text-neutral-500 uppercase tracking-wider">Зарплата от</label>
-                <span className="text-xs font-semibold text-teal-200 transition-all duration-200">
-                  {minSalary === 0 ? "Любая" : `${minSalary.toLocaleString("ru-RU")} ₽`}
-                </span>
-              </div>
-
-              <div className="space-y-2">
-                <input
-                  id="feed-salary"
-                  type="range"
-                  min={0}
-                  max={500000}
-                  step={25000}
-                  value={minSalary}
-                  onChange={(e) => setMinSalary(Number(e.target.value))}
-                  className="w-full appearance-none cursor-pointer"
-                />
-                <div className="flex justify-between text-xs text-neutral-500 tabular-nums">
-                  <span>0 ₽</span>
-                  <span>250k</span>
-                  <span>500k+</span>
-                </div>
-              </div>
-
-              <label className="flex items-center gap-3 cursor-pointer pt-1 select-none text-xs text-neutral-300 hover:text-neutral-100 transition-colors">
-                <input type="checkbox" checked={onlyWithSalary} onChange={e => setOnlyWithSalary(e.target.checked)} />
-                Только с указанной зарплатой
-              </label>
-            </div>
-
-            {/* Страна */}
-            <div className="space-y-3 pt-2 border-t border-white/[0.08]">
-              <label className="text-xs font-bold text-neutral-500 uppercase tracking-wider">Страна</label>
-              <SearchSelect label="Страна" placeholder="Начните вводить страну…" emptyLabel="Все страны"
-                options={countryOptions} value={country} onChange={chooseCountry} />
-            </div>
-
-            {/* Источник */}
-            <div className="space-y-3 pt-2 border-t border-white/[0.08]">
-              <label className="text-xs font-bold text-neutral-500 uppercase tracking-wider">Источник</label>
-              <div className="flex flex-wrap gap-2">
-                <button onClick={() => setSources([])} className={chip(sources.length === 0)} aria-pressed={sources.length === 0}>Все</button>
-                {SOURCES.map(s => (
-                  <button key={s.id}
-                    onClick={() => setSources(prev => prev.includes(s.id) ? prev.filter(x => x !== s.id) : [...prev, s.id])}
-                    className={chip(sources.includes(s.id))} aria-pressed={sources.includes(s.id)}>
-                    {s.label}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-          </div>
-        </aside>
+        <FeedFilters filters={filters} setFilters={setFilters} open={filtersOpen}
+          cityOptions={cityOptions} countryOptions={countryOptions} chooseCountry={chooseCountry} />
 
         {/* Vacancies Feed */}
         <section className="lg:col-start-2 lg:col-span-3 lg:row-start-2 min-w-0 space-y-4">
-          <div className="flex items-center gap-2 overflow-x-auto sm:flex-wrap -mx-4 px-4 sm:mx-0 sm:px-0 [scrollbar-width:none]" role="group" aria-label="Раздел ленты">
-            {([["", "Все разделы", "Все"], ...AREAS.map(a => [a.id, a.label, a.short])] as [Area | "", string, string][]).map(([id, label, short]) => (
-              <button
-                key={id || "all"}
-                onClick={() => chooseArea(id)}
-                aria-pressed={area === id}
-                className={`lg shrink-0 whitespace-nowrap px-4 py-2 rounded-full text-sm transition-colors ${
-                  area === id ? "lg lg-on" : "lg text-neutral-300"
-                }`}
-              >
-                <span className="sm:hidden">{short}</span><span className="hidden sm:inline">{label}</span>
-              </button>
-            ))}
-          </div>
-          {isCandidate && (
-            <div className="grid grid-cols-3 gap-2 sm:flex sm:items-center" role="tablist" aria-label="Какие вакансии показать">
-              {([["all", "Все вакансии"], ["for-you", "Для вас"], ["saved", "Избранное"]] as const).map(([id, label]) => (
-                <button
-                  key={id}
-                  role="tab"
-                  aria-selected={mode === id}
-                  onClick={() => (id === "for-you" ? showForYou() : id === "saved" ? showSaved() : setMode("all"))}
-                  className={`lg inline-flex items-center justify-center gap-1.5 px-2 sm:px-4 h-10 rounded-full text-sm font-medium whitespace-nowrap transition-colors ${
-                    mode === id ? "lg lg-on" : "lg text-neutral-400 hover:text-neutral-100"
-                  }`}
-                >
-                  {id === "for-you" && <Target className="hidden sm:block w-4 h-4" />}
-                  {id === "saved" && <Bookmark className="hidden sm:block w-4 h-4" />}
-                  {label}
-                </button>
-              ))}
-            </div>
-          )}
+          <AreaTabs area={area} chooseArea={chooseArea} />
+          {isCandidate && <ModeTabs mode={mode} showForYou={showForYou} showSaved={showSaved} showAll={() => setMode("all")} />}
 
           {isCandidate && !hasPrefs && !forYou && (
             <div className="neu-sub rounded-3xl px-5 py-4 text-sm text-neutral-300">
@@ -751,13 +297,13 @@ export default function Feed({ initialRows, initialTotal, hero, after }: { initi
             <div className="flex flex-wrap items-center gap-x-3 gap-y-2" aria-live="polite">
               <p className="text-lg font-semibold text-neutral-100 tabular-nums">{total.toLocaleString("ru-RU")} {plural(total, VACANCY_FORMS)}</p>
               {activeFilters.map(f => (
-                <button key={f.key} onClick={f.clear} aria-label={`${f.label}: снять условие`}
+                <button key={f.key} onClick={() => setFilters(f.clear)} aria-label={`${f.label}: снять условие`}
                   className="lg inline-flex items-center gap-1.5 h-8 px-3 rounded-full text-xs text-neutral-200 transition-colors">
                   {f.label} <X className="w-3.5 h-3.5" aria-hidden="true" />
                 </button>
               ))}
               {activeFilters.length > 1 && (
-                <button onClick={() => activeFilters.forEach(f => f.clear())} className="text-xs text-neutral-400 hover:text-white transition-colors">Сбросить всё</button>
+                <button onClick={() => clearAllFilters()} className="text-xs text-neutral-400 hover:text-white transition-colors">Сбросить всё</button>
               )}
             </div>
           )}
@@ -774,14 +320,30 @@ export default function Feed({ initialRows, initialTotal, hero, after }: { initi
                   : forYou ? "Свежих вакансий пока нет — загляните позже" : "Попробуйте ослабить фильтры"}
               </p>
               {mode === "all" && activeFilters.length > 0 && (
-                <button onClick={() => activeFilters.forEach(f => f.clear())} className="lg mt-5 inline-flex items-center h-11 px-5 rounded-full text-sm text-neutral-100 transition-colors">
+                <button onClick={() => clearAllFilters()} className="lg mt-5 inline-flex items-center h-11 px-5 rounded-full text-sm text-neutral-100 transition-colors">
                   Сбросить фильтры
                 </button>
               )}
             </div>
           ) : (
             <div className="flex flex-col gap-4">
-              {list.map(card)}
+              {list.map(item => (
+                <VacancyCard
+                  key={item.id}
+                  item={item}
+                  // Без заполненного профиля оценка у всех одинаковая — не показываем её
+                  match={hasPrefs ? matches[item.id] : undefined}
+                  benchmarks={benchmarks}
+                  isCandidate={isCandidate}
+                  savedMode={savedMode}
+                  mark={marks.get(item.id)}
+                  pending={pendingMarks.has(item.id)}
+                  addingSkill={addingSkill}
+                  onApply={setApplyVacancy}
+                  onAddSkill={addSkill}
+                  onToggleMark={toggleMark}
+                />
+              ))}
 
               {savedMode ? null : forYou ? (
                 recHasMore && (
@@ -807,21 +369,7 @@ export default function Feed({ initialRows, initialTotal, hero, after }: { initi
             </div>
           )}
 
-          {savedMode && hiddenList.length > 0 && (
-            <details className="neu-sub rounded-3xl px-5 py-4">
-              <summary className="cursor-pointer text-sm text-neutral-300">Скрытые вакансии ({hiddenList.length})</summary>
-              <ul className="mt-3 space-y-2">
-                {hiddenList.map(v => (
-                  <li key={v.id} className="flex items-center justify-between gap-3 text-sm">
-                    <Link href={`/vacancy/${v.id}`} className="text-neutral-300 hover:text-teal-300 truncate">{v.title}</Link>
-                    <button onClick={() => toggleMark(v, "hidden")} className="inline-flex items-center gap-1 text-xs text-teal-300 hover:underline shrink-0">
-                      <Undo2 className="w-3.5 h-3.5" /> Вернуть в ленту
-                    </button>
-                  </li>
-                ))}
-              </ul>
-            </details>
-          )}
+          {savedMode && hiddenList.length > 0 && <HiddenVacancies hiddenList={hiddenList} onToggleMark={toggleMark} />}
         </section>
       </main>
 
