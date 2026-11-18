@@ -69,7 +69,17 @@ test.describe("база резюме", () => {
     await hr.page.getByRole("button", { name: "Предложить время собеседования" }).click();
     const form = hr.page.getByRole("group", { name: "Предложить время собеседования" });
     await form.getByLabel("Ссылка или адрес").fill("https://meet.example/e2e");
+    const proposed = hr.page.waitForResponse(r => r.url().includes("/rpc/propose_interview_slots"));
     await form.getByRole("button", { name: "Отправить варианты" }).click();
+    const response = await proposed;
+    // У работодателя не больше 50 предложений времени за сутки (propose_interview_slots).
+    // Тестовый работодатель на staging общий для всех прогонов: лимит исчерпан — сценарий проверить нечем.
+    if (!response.ok() && (await response.text()).includes("слишком много предложений за сутки")) {
+      await hr.close();
+      test.skip(true, "на staging исчерпан дневной лимит предложений времени у тестового работодателя");
+    }
+    expect(response.ok()).toBe(true);
+    await expect(form).toBeHidden();
     await expect(hr.page.getByRole("log").getByText("Вы предложили время собеседования").last()).toBeVisible();
 
     const cand = await asUser(browser, candidate, chatUrl);
