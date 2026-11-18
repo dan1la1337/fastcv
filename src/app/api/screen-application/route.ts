@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { consumeAiQuota } from "@/lib/ai-quota";
 import { fence } from "@/lib/ai-safety";
 import { aiText } from "@/lib/ai";
 import { parseModelJson } from "@/lib/practice";
@@ -62,13 +63,8 @@ export async function POST(req: Request) {
     title: string; description: string | null; stack: unknown; level: string | null; city: string | null; work_format: string | null;
   };
 
-  const { data: quota, error: quotaError } = await supabase.rpc("consume_ai_quota", {
-    quota_kind: "screening", max_calls: RATE_LIMIT, window_seconds: 3600,
-  });
-  if (quotaError) return NextResponse.json({ error: "Сервис временно недоступен. Попробуйте позже." }, { status: 503 });
-  if (!(quota as { allowed?: boolean } | null)?.allowed) {
-    return NextResponse.json({ error: `Лимит: ${RATE_LIMIT} разборов в час. Попробуйте позже.` }, { status: 429 });
-  }
+  const limited = await consumeAiQuota(supabase, { kind: "screening", max: RATE_LIMIT, label: "разборов" });
+  if (limited) return limited;
 
   const [{ data: profile }, { data: matches }] = await Promise.all([
     supabase.from("profiles").select("name, skills, description, pref_level, experience_years, pref_city").eq("id", app.candidate_id!).maybeSingle(),

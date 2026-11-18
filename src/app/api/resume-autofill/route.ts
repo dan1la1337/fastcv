@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { consumeAiQuota } from "@/lib/ai-quota";
 import { createSupabaseServerClient } from "@/lib/supabase-server";
 import { DIRECTIONS, LEVELS, WORK_FORMATS, levelApplies } from "@/lib/vacancies";
 import { experienceFromJobs, type ResumeDraft, type ResumeJob } from "@/lib/resume-draft";
@@ -14,7 +15,6 @@ const MODEL_TIMEOUT_MS = 30_000;
 export const maxDuration = 60;
 
 const RATE_LIMIT = 5;
-const RATE_WINDOW_SECONDS = 60 * 60;
 const MAX_PDF_BYTES = 5 * 1024 * 1024;
 
 const INSTRUCTION = `Ты опытный IT-рекрутер. Помоги кандидату заполнить профиль на сайте вакансий по его резюме (текст — в блоке <resume>; имя и контакты в нём скрыты метками).
@@ -132,17 +132,8 @@ export async function POST() {
   if (profile?.role !== "candidate") return NextResponse.json({ error: "Только для соискателей" }, { status: 403 });
   if (!profile.resume_path) return NextResponse.json({ error: "Сначала загрузите резюме в PDF" }, { status: 400 });
 
-  const { data: quota, error: quotaError } = await supabase.rpc("consume_ai_quota", {
-    quota_kind: "resume_parse", max_calls: RATE_LIMIT, window_seconds: RATE_WINDOW_SECONDS,
-  });
-  if (quotaError) return NextResponse.json({ error: "Сервис временно недоступен. Попробуйте позже." }, { status: 503 });
-  const { allowed, retry_after: retryAfter = 3600 } = (quota ?? {}) as { allowed?: boolean; retry_after?: number };
-  if (!allowed) {
-    return NextResponse.json(
-      { error: `Можно ${RATE_LIMIT} раз в час. Попробуйте через ${Math.max(1, Math.ceil(retryAfter / 60))} мин.` },
-      { status: 429, headers: { "Retry-After": String(retryAfter) } },
-    );
-  }
+  const limited = await consumeAiQuota(supabase, { kind: "resume_parse", max: RATE_LIMIT, label: "разборов резюме" });
+  if (limited) return limited;
 
   // Файл читаем с правами самого кандидата: правила Storage пускают только в свою папку
   const { data: file, error: fileError } = await supabase.storage.from("resumes").download(profile.resume_path);

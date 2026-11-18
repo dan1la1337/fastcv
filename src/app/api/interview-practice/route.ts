@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { consumeAiQuota } from "@/lib/ai-quota";
 import { fence } from "@/lib/ai-safety";
 import { aiText } from "@/lib/ai";
 import { createSupabaseServerClient } from "@/lib/supabase-server";
@@ -69,16 +70,8 @@ export async function POST(req: Request) {
     if (!question || answer.length < 3) return NextResponse.json({ error: "Напишите ответ" }, { status: 400 });
   }
 
-  const limit = LIMITS[action];
-  const { data: quota, error: quotaError } = await supabase.rpc("consume_ai_quota", {
-    quota_kind: limit.kind, max_calls: limit.max, window_seconds: 3600,
-  });
-  if (quotaError) return NextResponse.json({ error: "Сервис временно недоступен. Попробуйте позже." }, { status: 503 });
-  const { allowed, retry_after: retryAfter = 3600 } = (quota ?? {}) as { allowed?: boolean; retry_after?: number };
-  if (!allowed) {
-    const minutes = Math.max(1, Math.ceil(retryAfter / 60));
-    return NextResponse.json({ error: `Лимит: ${limit.max} ${limit.label} в час. Продолжить можно через ${minutes} мин.` }, { status: 429 });
-  }
+  const limited = await consumeAiQuota(supabase, LIMITS[action]);
+  if (limited) return limited;
 
   const vacancyBlock = `<vacancy>
 Название: ${fence(vacancy.title.slice(0, 300))}
