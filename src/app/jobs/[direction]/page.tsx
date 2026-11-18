@@ -1,10 +1,9 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { cache } from "react";
 import PageBar from "@/components/PageBar";
-import { supabase } from "@/lib/supabase";
-import { DIRECTIONS, VACANCY_COLUMNS, plural, VACANCY_FORMS, type Vacancy } from "@/lib/vacancies";
+import { cachedDirectionVacancies } from "@/lib/public-data";
+import { DIRECTIONS, plural, VACANCY_FORMS } from "@/lib/vacancies";
 import VacancyListStatic from "@/components/VacancyListStatic";
 
 type Props = { params: Promise<{ direction: string }> };
@@ -19,17 +18,7 @@ export function generateStaticParams() {
 
 const byParam = (param: string) => DIRECTIONS.find(d => d.id === param.replace("-", "_"));
 
-const getVacancies = cache(async (direction: string): Promise<Vacancy[]> => {
-  const { data } = await supabase
-    .from("vacancies")
-    .select(VACANCY_COLUMNS)
-    .is("archived_at", null)
-    .eq("direction", direction)
-    .order("ranking_weight", { ascending: false, nullsFirst: false })
-    .order("created_at", { ascending: false })
-    .limit(60);
-  return (data ?? []) as Vacancy[];
-});
+const getVacancies = cachedDirectionVacancies;
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const direction = byParam((await params).direction);

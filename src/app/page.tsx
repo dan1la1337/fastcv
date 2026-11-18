@@ -1,8 +1,9 @@
 import Feed from "@/components/Feed";
 import Hero from "@/components/Hero";
 import { EmployersSection, ExtrasSection, SourcesSection } from "@/components/LandingSections";
-import { fetchLiveStats, type LiveStats } from "@/lib/live";
-import { DEFAULT_FILTERS, fetchVacancyPage, type Vacancy } from "@/lib/vacancies";
+import type { LiveStats } from "@/lib/live";
+import { cachedHomeFeed, cachedLiveStats } from "@/lib/public-data";
+import type { Vacancy } from "@/lib/vacancies";
 
 // Первая страница ленты собирается на сервере и кэшируется на 5 минут:
 // главная открывается сразу с вакансиями, а поисковики видят их в HTML.
@@ -13,13 +14,13 @@ export default async function Home() {
   let total = 0;
   let stats: LiveStats | null = null;
   try {
-    ({ rows, total } = await fetchVacancyPage(DEFAULT_FILTERS, 0));
+    ({ rows, total } = await cachedHomeFeed());
   } catch (error) {
     // База недоступна при сборке или запросе — лента загрузится уже в браузере
     console.error("Feed prefetch failed", error);
   }
   try {
-    stats = await fetchLiveStats();
+    stats = await cachedLiveStats();
   } catch {
     // без счётчика первый экран всё равно открывается
   }
