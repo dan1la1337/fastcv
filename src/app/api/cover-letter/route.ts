@@ -1,12 +1,10 @@
 import { createHash } from "node:crypto";
 import { NextResponse } from "next/server";
 import { consumeAiQuota } from "@/lib/ai-quota";
-import { createClient } from "@supabase/supabase-js";
 import { aiText } from "@/lib/ai";
 import { fence, sanitizeLetter } from "@/lib/ai-safety";
 import { templateLetter } from "@/lib/cover-letter";
 import { NAME_TOKEN, redactPersonal, restoreName } from "@/lib/redact";
-import type { Database } from "@/lib/database.types";
 import { createSupabaseServerClient } from "@/lib/supabase-server";
 
 // Худший случай — три модели по 20 секунд
@@ -62,25 +60,10 @@ const clip = (value: unknown, max: number) =>
   typeof value === "string" ? value.slice(0, max) : "";
 
 export async function POST(req: Request) {
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-  // Без ключа ИИ письмо всё равно будет — по шаблону (например, демо-стенд)
-  if (!supabaseUrl || !supabaseAnonKey) {
-    return NextResponse.json({ error: "Сервер не настроен" }, { status: 500 });
-  }
-
-  // 1. Только для вошедших пользователей. Сессия — из cookies; заголовок Bearer
-  // принимается для вкладок, открытых до перехода на cookies.
-  const token = req.headers.get("authorization")?.replace(/^Bearer\s+/i, "");
+  // 1. Только для вошедших пользователей, сессия — из cookies.
   // Клиент от имени пользователя: запросы ниже проходят через его правила доступа
-  const supabase = token
-    ? createClient<Database>(supabaseUrl, supabaseAnonKey, {
-        global: { headers: { Authorization: `Bearer ${token}` } },
-        auth: { persistSession: false, autoRefreshToken: false },
-      })
-    : await createSupabaseServerClient();
-
-  const { data: auth } = token ? await supabase.auth.getUser(token) : await supabase.auth.getUser();
+  const supabase = await createSupabaseServerClient();
+  const { data: auth } = await supabase.auth.getUser();
   if (!auth.user) {
     return NextResponse.json({ error: "Войдите, чтобы сгенерировать письмо" }, { status: 401 });
   }
