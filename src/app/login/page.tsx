@@ -4,15 +4,14 @@ import FormError from "@/components/FormError";
 import { Suspense, useState } from "react";
 import { supabase, getUserRole, homeForRole } from "@/lib/supabase";
 import { authErrorText } from "@/lib/auth-errors";
+import { safeNext } from "@/lib/safe-next";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Loader2 } from "lucide-react";
 import Link from "next/link";
 
 function LoginForm() {
   const searchParams = useSearchParams();
-  // Куда вернуть после входа: только путь на нашем сайте
   const nextParam = searchParams.get("next");
-  const next = nextParam && nextParam.startsWith("/") && !nextParam.startsWith("//") ? nextParam : null;
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -41,7 +40,8 @@ function LoginForm() {
       router.refresh();
       return;
     }
-    router.push(next ?? homeForRole(role));
+    // Куда вернуть после входа: только страница нашего сайта
+    router.push(safeNext(nextParam, window.location.origin) ?? homeForRole(role));
     router.refresh();
   };
 
