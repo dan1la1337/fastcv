@@ -6,6 +6,7 @@ from __future__ import annotations
 import json
 import re
 import time
+from pathlib import Path
 from typing import Any, Callable, Literal, Optional, Union
 
 import requests
@@ -14,16 +15,26 @@ from pydantic import BaseModel, TypeAdapter
 import redact
 
 
-# Модели по провайдерам, по порядку перебора: если одна перегружена (503) или упёрлась
-# в лимит (429), запрос уходит в следующую. Повторяет ai-models.json в корне репозитория,
-# откуда модели берёт сайт. Переопределяется переменной AI_MODELS (для gemini — и GEMINI_MODELS).
-# 26.10: 3.1-flash-lite быстрая, но часто перегружена; flash-lite-latest стабильно отвечает
-# за ~15 с на пачку из 10 постов; 3.5-flash-lite надёжна, но медленная; 3.6-flash часто 503.
-MODELS: dict[str, tuple[str, ...]] = {
-    "gemini": ("gemini-3.1-flash-lite", "gemini-flash-lite-latest", "gemini-3.5-flash-lite", "gemini-3.6-flash"),
-    "yandex": ("qwen3-235b-a22b-fp8/latest", "yandexgpt/latest"),
-}
-DEFAULT_PROVIDER = "gemini"  # другой — переменной AI_PROVIDER
+# Провайдер по умолчанию и модели по провайдерам, по порядку перебора — в ai-models.json в корне
+# репозитория, общем с сайтом (src/lib/ai.ts). Если модель перегружена (503) или упёрлась
+# в лимит (429), запрос уходит в следующую. Переопределяется переменной AI_MODELS
+# (для gemini — и GEMINI_MODELS); провайдер — переменной AI_PROVIDER.
+# 26.10: 3.1-flash-lite быстрая, но часто перегружена; 3.5-flash-lite надёжна, но медленная;
+# 3.6-flash часто 503. gemini-flash-lite-latest (стабильно отвечал за ~15 с на пачку из 10 постов)
+# в общем списке нет: вернуть его сборщику — GEMINI_MODELS.
+MODELS_FILE = Path(__file__).resolve().parent / "ai-models.json"
+
+
+def load_models(path: Path = MODELS_FILE) -> tuple[dict[str, tuple[str, ...]], str]:
+    """Модели по провайдерам и провайдер по умолчанию из ai-models.json."""
+    config = json.loads(path.read_text(encoding="utf-8"))
+    models = {name: tuple(provider["models"]) for name, provider in config["providers"].items()}
+    if config["provider"] not in models or not all(models.values()):
+        raise ValueError(f"{path.name}: провайдер по умолчанию не описан или у провайдера нет моделей")
+    return models, config["provider"]
+
+
+MODELS, DEFAULT_PROVIDER = load_models()
 GEMINI_MODELS = MODELS["gemini"]
 AI_ATTEMPTS = 2  # попыток на каждую модель
 AI_TIMEOUT_MS = 60_000  # без таймаута зависший запрос держал весь прогон
