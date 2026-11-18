@@ -1,23 +1,30 @@
-"""Клиент Gemini: схема ответа, промпт, повторы по моделям, обезличивание поста."""
+"""Клиент ИИ сборщика: схема ответа, промпт, провайдеры (Gemini, Yandex AI Studio),
+повторы по моделям, обезличивание поста. Провайдер выбирается переменной AI_PROVIDER."""
 
 from __future__ import annotations
 
 import json
 import re
 import time
-from typing import Callable, Literal, Optional
+from typing import Any, Callable, Literal, Optional, Union
 
 import requests
-from pydantic import BaseModel
+from pydantic import BaseModel, TypeAdapter
 
 import redact
 
 
-# Модели по очереди: если одна перегружена (503) или упёрлась в лимит (429),
-# запрос уходит в следующую. Переопределяется переменной GEMINI_MODELS.
+# Модели по провайдерам, по порядку перебора: если одна перегружена (503) или упёрлась
+# в лимит (429), запрос уходит в следующую. Повторяет ai-models.json в корне репозитория,
+# откуда модели берёт сайт. Переопределяется переменной AI_MODELS (для gemini — и GEMINI_MODELS).
 # 26.10: 3.1-flash-lite быстрая, но часто перегружена; flash-lite-latest стабильно отвечает
 # за ~15 с на пачку из 10 постов; 3.5-flash-lite надёжна, но медленная; 3.6-flash часто 503.
-GEMINI_MODELS = ("gemini-3.1-flash-lite", "gemini-flash-lite-latest", "gemini-3.5-flash-lite", "gemini-3.6-flash")
+MODELS: dict[str, tuple[str, ...]] = {
+    "gemini": ("gemini-3.1-flash-lite", "gemini-flash-lite-latest", "gemini-3.5-flash-lite", "gemini-3.6-flash"),
+    "yandex": ("qwen3-235b-a22b-fp8/latest", "yandexgpt/latest"),
+}
+DEFAULT_PROVIDER = "gemini"  # другой — переменной AI_PROVIDER
+GEMINI_MODELS = MODELS["gemini"]
 AI_ATTEMPTS = 2  # попыток на каждую модель
 AI_TIMEOUT_MS = 60_000  # без таймаута зависший запрос держал весь прогон
 AI_MODEL_STRIKES = 3  # обращений подряд, когда модель перегружена, — дальше в этом запуске без неё
@@ -167,11 +174,19 @@ def wrap_posts(texts: list[str]) -> str:
 
 
 class AIUnavailable(Exception):
-    """Gemini не ответил после всех попыток (перегрузка, лимит, сбой сети)."""
+    """ИИ не ответил после всех попыток (перегрузка, лимит, сбой сети)."""
+
+
+class ProviderError(Exception):
+    """Ответ API с кодом ошибки: по коду решаем, пробовать ли следующую модель."""
+
+    def __init__(self, code: Optional[int], status: str = ""):
+        super().__init__(f"{code} {status}".strip())
+        self.code, self.status = code, status
 
 
 def transport_errors() -> tuple[type[BaseException], ...]:
-    """Сетевые ошибки клиента Gemini. google-genai 3.x работает через httpx2:
+    """Сетевые ошибки клиентов ИИ. google-genai 3.x работает через httpx2:
     его ReadTimeout не наследует httpx.HTTPError и раньше ронял весь запуск (17.11)."""
     found: list[type[BaseException]] = [requests.RequestException, TimeoutError, ConnectionError]
     for name in ("httpx", "httpx2"):
@@ -182,19 +197,130 @@ def transport_errors() -> tuple[type[BaseException], ...]:
     return tuple(found)
 
 
+class GeminiProvider:
+    """Google Gemini: ответ по JSON-схеме (response_schema) разбирает сам SDK."""
+
+    name = "gemini"
+
+    def __init__(self, api_key: str):
+        from google import genai
+        from google.genai import errors, types
+
+        self._types, self._errors = types, errors
+        self._client = genai.Client(api_key=api_key, http_options=types.HttpOptions(timeout=AI_TIMEOUT_MS))
+
+    def generate(self, model: str, system: str, user: str, schema: Any) -> Any:
+        config = self._types.GenerateContentConfig(
+            response_mime_type="application/json", response_schema=schema, temperature=0,
+            # Инструкции отдельно от данных: текст поста не может выдать себя за указания модели
+            system_instruction=system,
+        )
+        try:
+            response = self._client.models.generate_content(model=model, contents=user, config=config)
+        except self._errors.APIError as e:
+            raise ProviderError(e.code, e.status) from e
+        if schema is VacancyAI:
+            if isinstance(response.parsed, VacancyAI):
+                return response.parsed
+            return VacancyAI.model_validate_json(response.text)
+        if isinstance(response.parsed, list):
+            return [x for x in response.parsed if isinstance(x, BatchItem)]
+        return [BatchItem.model_validate(x) for x in json.loads(response.text)]
+
+
+class YandexProvider:
+    """Yandex AI Studio, OpenAI-совместимый Chat Completions API (серверы в России).
+    JSON-схема передаётся в системной инструкции, ответ разбираем сами."""
+
+    name = "yandex"
+    ENDPOINT = "https://llm.api.cloud.yandex.net/v1/chat/completions"
+
+    def __init__(self, api_key: str, folder: str):
+        self.api_key, self.folder = api_key, folder
+
+    def generate(self, model: str, system: str, user: str, schema: Any) -> Any:
+        many = schema is not VacancyAI
+        json_schema = TypeAdapter(list[BatchItem]).json_schema() if many else VacancyAI.model_json_schema()
+        response = requests.post(
+            self.ENDPOINT,
+            json={
+                "model": model if model.startswith("gpt://") else f"gpt://{self.folder}/{model}",
+                "messages": [
+                    {"role": "system", "content": system + "\n\nОтвет — только JSON строго по этой JSON Schema, "
+                     "без markdown, пояснений и текста вокруг:\n" + json.dumps(json_schema, ensure_ascii=False)},
+                    {"role": "user", "content": user},
+                ],
+                "temperature": 0,
+            },
+            headers={"Authorization": f"Api-Key {self.api_key}", "x-folder-id": self.folder},
+            timeout=AI_TIMEOUT_MS / 1000,
+        )
+        if response.status_code >= 400:
+            raise ProviderError(response.status_code, response.text[:300])
+        content = (response.json().get("choices") or [{}])[0].get("message", {}).get("content")
+        data = _parse_json(content if isinstance(content, str) else "")
+        if not many:
+            if isinstance(data, list) and len(data) == 1:
+                data = data[0]
+            return VacancyAI.model_validate(data)
+        if isinstance(data, dict):  # модель завернула список в объект: {"items": [...]}
+            data = next((v for v in data.values() if isinstance(v, list)), [])
+        items = []
+        for x in data if isinstance(data, list) else []:
+            try:
+                items.append(BatchItem.model_validate(x))
+            except ValueError:
+                pass  # битый элемент — этот пост разберём отдельно
+        return items
+
+
+def _parse_json(text: str) -> Any:
+    """JSON из ответа модели без блока рассуждений (<think>) и markdown-ограждения;
+    если вокруг попал лишний текст — от первой скобки до последней."""
+    body = re.sub(r"<think>[\s\S]*?</think>", "", text, flags=re.IGNORECASE).strip()
+    body = re.sub(r"\s*```$", "", re.sub(r"^```(?:json)?\s*", "", body, flags=re.IGNORECASE)).strip()
+    if not body:
+        raise ValueError("пустой ответ модели")
+    try:
+        return json.loads(body)
+    except ValueError:
+        starts = [i for i in (body.find("{"), body.find("[")) if i >= 0]
+        last = max(body.rfind("}"), body.rfind("]"))
+        if not starts or last <= min(starts):
+            raise
+        return json.loads(body[min(starts):last + 1])
+
+
+Provider = Union[GeminiProvider, YandexProvider]
+
+
+def provider_from_env(get: Callable[[str], Optional[str]]) -> tuple[Provider, tuple[str, ...]]:
+    """Провайдер и модели из переменных окружения: AI_PROVIDER (gemini или yandex,
+    по умолчанию gemini), AI_MODELS — модели через запятую вместо списка из MODELS.
+    Для gemini по-прежнему действует GEMINI_MODELS. Нет ключа — ValueError с текстом для алерта."""
+    name = (get("AI_PROVIDER") or DEFAULT_PROVIDER).strip().lower()
+    if name not in MODELS:
+        raise ValueError(f"Неизвестный AI_PROVIDER={name!r}: допустимы {', '.join(MODELS)}")
+    raw = get("AI_MODELS") or (get("GEMINI_MODELS") if name == "gemini" else None) or ""
+    models = tuple(m.strip() for m in raw.split(",") if m.strip()) or MODELS[name]
+    if name == "yandex":
+        key, folder = get("YANDEX_API_KEY"), get("YANDEX_FOLDER_ID")
+        if not key or not folder:
+            raise ValueError("Не найдены YANDEX_API_KEY и YANDEX_FOLDER_ID! Проверьте .env или .env.local")
+        return YandexProvider(key, folder), models
+    key = get("GEMINI_API_KEY")
+    if not key:
+        raise ValueError("Не найден GEMINI_API_KEY! Проверьте .env или .env.local")
+    return GeminiProvider(key), models
+
+
 def make_gemini_normalizer(api_key: str, models: tuple[str, ...] = GEMINI_MODELS) -> Callable[[str], VacancyAI]:
-    from google import genai
-    from google.genai import errors, types
+    return make_normalizer(GeminiProvider(api_key), models)
 
-    client = genai.Client(api_key=api_key, http_options=types.HttpOptions(timeout=AI_TIMEOUT_MS))
-    config = types.GenerateContentConfig(
-        response_mime_type="application/json",
-        response_schema=VacancyAI,
-        temperature=0,
-        # Инструкции отдельно от данных: текст поста не может выдать себя за указания модели
-        system_instruction=PROMPT,
-    )
 
+def make_normalizer(provider: Provider, models: tuple[str, ...]) -> Callable[[str], VacancyAI]:
+    """Разбор постов через provider: модели по очереди, повторы с паузой, обезличивание.
+    Возвращает normalize(text); normalize.many(texts) — пачка одним обращением, normalize.stats — счётчики."""
     # Счётчики за запуск: сколько обращений, сколько секунд ждали, какие ошибки (429 — лимит)
     stats: dict = {"calls": 0, "ok": 0, "seconds": 0.0, "errors": {}}
 
@@ -213,17 +339,17 @@ def make_gemini_normalizer(api_key: str, models: tuple[str, ...] = GEMINI_MODELS
     strikes: dict[str, int] = {}
     network_errors = transport_errors()
 
-    def _ask(contents: str, cfg, parse: Callable, failures: list[str]):
+    def _ask(system: str, user: str, schema: Any, failures: list[str]):
         stats["calls"] += 1
         healthy = [m for m in models if strikes.get(m, 0) < AI_MODEL_STRIKES] or list(models)
         for model in healthy:
             for attempt in range(AI_ATTEMPTS):
                 try:
-                    response = client.models.generate_content(model=model, contents=contents, config=cfg)
+                    result = provider.generate(model, system, user, schema)
                     stats["ok"] += 1
                     strikes[model] = 0
-                    return parse(response)
-                except errors.APIError as e:
+                    return result
+                except ProviderError as e:
                     if e.code == 404:  # модели нет (сняли с поддержки) — сразу к следующей
                         failures.append(f"{model}: 404")
                         break
@@ -242,27 +368,10 @@ def make_gemini_normalizer(api_key: str, models: tuple[str, ...] = GEMINI_MODELS
                     time.sleep(AI_PAUSE_SECONDS * 2 ** attempt)
         raise AIUnavailable("; ".join(failures[-3:]) or "нет ответа")
 
-    def _parse_one(response) -> VacancyAI:
-        if isinstance(response.parsed, VacancyAI):
-            return response.parsed
-        return VacancyAI.model_validate_json(response.text)
-
     def _normalize(text: str, failures: list[str]) -> VacancyAI:
-        # В Gemini — пост без телефонов, ников и имён; контакт возвращаем по метке
+        # В модель — пост без телефонов, ников и имён; контакт возвращаем по метке
         clean, table = redact.redact(text)
-        return restore_vacancy(_ask(wrap_post(clean), config, _parse_one, failures), table)
-
-    batch_config = types.GenerateContentConfig(
-        response_mime_type="application/json",
-        response_schema=list[BatchItem],
-        temperature=0,
-        system_instruction=PROMPT + BATCH_NOTE,
-    )
-
-    def _parse_many(response) -> list[BatchItem]:
-        if isinstance(response.parsed, list):
-            return [x for x in response.parsed if isinstance(x, BatchItem)]
-        return [BatchItem.model_validate(x) for x in json.loads(response.text)]
+        return restore_vacancy(_ask(PROMPT, wrap_post(clean), VacancyAI, failures), table)
 
     def many(texts: list[str]) -> list[VacancyAI]:
         """Несколько постов одним обращением. Пост, на который модель не ответила
@@ -273,7 +382,7 @@ def make_gemini_normalizer(api_key: str, models: tuple[str, ...] = GEMINI_MODELS
         started = time.monotonic()
         redacted = [redact.redact(t) for t in texts]
         try:
-            items = _ask(wrap_posts([clean for clean, _ in redacted]), batch_config, _parse_many, failures)
+            items = _ask(PROMPT + BATCH_NOTE, wrap_posts([clean for clean, _ in redacted]), list[BatchItem], failures)
         finally:
             stats["seconds"] = round(stats["seconds"] + time.monotonic() - started, 1)
             for f in failures:
@@ -285,6 +394,7 @@ def make_gemini_normalizer(api_key: str, models: tuple[str, ...] = GEMINI_MODELS
 
     normalize.stats = stats  # type: ignore[attr-defined]
     normalize.many = many  # type: ignore[attr-defined]
+    normalize.provider = provider.name  # type: ignore[attr-defined]
     return normalize
 
 
