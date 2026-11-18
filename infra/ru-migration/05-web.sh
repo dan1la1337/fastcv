@@ -2,7 +2,10 @@
 # Этап 2 (необязательный): сайт fastcv.ru на этом же сервере вместо Vercel.
 # Тогда за рубеж не уходит ничего, кроме обезличенного текста в Gemini и писем через Resend.
 #
-#   sudo GEMINI_API_KEY=... TELEGRAM_JOBS_BOT_TOKEN=... sh infra/ru-migration/05-web.sh
+#   sudo GEMINI_API_KEY=... TELEGRAM_JOBS_BOT_TOKEN=... AI_HTTPS_PROXY=http://user:pass@host:port sh infra/ru-migration/05-web.sh
+#
+# AI_HTTPS_PROXY — исходящий прокси за рубежом для запросов к Gemini: с российского IP
+# Google отвечает отказом по региону. Без него ИИ-функции сайта на этом сервере не работают.
 #
 # Делает: прописывает настройки сайта в .env Supabase, подключает docker-compose.web.yml и
 # сайт в Caddy. Запуск и переключение DNS — вручную (команды в конце), чтобы выбрать момент.
@@ -43,7 +46,9 @@ set_env FASTCV_REPO "$REPO"
 set_env WEB_DOMAIN "$WEB_DOMAIN"
 [ -n "${GEMINI_API_KEY:-}" ] && set_env GEMINI_API_KEY "$GEMINI_API_KEY"
 [ -n "${TELEGRAM_JOBS_BOT_TOKEN:-}" ] && set_env TELEGRAM_JOBS_BOT_TOKEN "$TELEGRAM_JOBS_BOT_TOKEN"
+[ -n "${AI_HTTPS_PROXY:-}" ] && set_env AI_HTTPS_PROXY "$AI_HTTPS_PROXY"
 grep -q '^GEMINI_API_KEY=.' "$ENV_FILE" || echo "⚠️  GEMINI_API_KEY не задан: ИИ-функции сайта будут отвечать «ИИ не настроен»" >&2
+grep -q '^AI_HTTPS_PROXY=.' "$ENV_FILE" || echo "⚠️  AI_HTTPS_PROXY не задан: с российского IP Gemini отвечает отказом, ИИ-функции сайта работать не будут" >&2
 
 mkdir -p "$SITES"
 cp "$HERE/overlay/volumes/proxy/caddy/sites-available/web.caddy" "$SITES/"

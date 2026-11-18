@@ -104,10 +104,13 @@ sudo -E bash infra/ru-migration/03-migrate.sh verify
 вообще не проходят через зарубежные серверы. Делается в любой момент, отдельно от переноса базы:
 
 ```sh
-sudo GEMINI_API_KEY=... TELEGRAM_JOBS_BOT_TOKEN=... sh infra/ru-migration/05-web.sh
+sudo GEMINI_API_KEY=... TELEGRAM_JOBS_BOT_TOKEN=... AI_HTTPS_PROXY=http://user:pass@host:port sh infra/ru-migration/05-web.sh
 cd /opt/fastcv-supabase && sudo docker compose build web && sudo sh run.sh recreate
 curl -sk --resolve fastcv.ru:443:127.0.0.1 https://fastcv.ru/ | head -c 300   # проверка до DNS
 ```
+
+`AI_HTTPS_PROXY` — исходящий HTTP(S)-прокси за рубежом: Gemini не обслуживает запросы с российских IP, а Telegram Bot API из РФ заблокирован. Через него идут запросы сайта к ИИ и к Telegram.
+Через него идут только запросы сайта к Gemini (`src/lib/ai-fetch.ts`), остальное — напрямую.
 
 Затем A-записи `fastcv.ru` и `www.fastcv.ru` → IP сервера, и в `/admin` — «Подключить бота
 подборок» (webhook Telegram переедет на сервер). Нужен сервер на 4 vCPU / 8 ГБ RAM: сборка

@@ -1,6 +1,6 @@
 # Этап 2 (необязательный): сайт fastcv.ru на этом же сервере вместо Vercel.
 # Подключение: в .env добавить docker-compose.web.yml в COMPOSE_FILE и задать
-# FASTCV_REPO, WEB_DOMAIN, GEMINI_API_KEY, TELEGRAM_JOBS_BOT_TOKEN (см. 05-web.sh).
+# FASTCV_REPO, WEB_DOMAIN, GEMINI_API_KEY, TELEGRAM_JOBS_BOT_TOKEN, AI_HTTPS_PROXY (см. 05-web.sh).
 # Откат: убрать файл из COMPOSE_FILE и вернуть DNS fastcv.ru на Vercel.
 services:
   web:
@@ -17,6 +17,8 @@ services:
       NEXT_PUBLIC_SUPABASE_URL: ${SUPABASE_PUBLIC_URL}
       NEXT_PUBLIC_SUPABASE_ANON_KEY: ${ANON_KEY}
       GEMINI_API_KEY: ${GEMINI_API_KEY:-}
+      # Прокси за рубежом только для запросов к Gemini (src/lib/ai-fetch.ts)
+      AI_HTTPS_PROXY: ${AI_HTTPS_PROXY:-}
       TELEGRAM_JOBS_BOT_TOKEN: ${TELEGRAM_JOBS_BOT_TOKEN:-}
     depends_on:
       api-gw:
