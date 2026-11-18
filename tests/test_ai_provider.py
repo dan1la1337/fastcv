@@ -84,3 +84,19 @@ def test_yandex_batch_skips_broken_items(monkeypatch):
     result = normalize.many(["пост 0", "пост 1"])
     # битый элемент для поста 0 — пост разобран отдельным запросом
     assert [v.title for v in result] == ["Отдельно", "Python Developer"]
+
+
+def test_gemini_clients_use_v1beta(monkeypatch):
+    """google-genai 3 по умолчанию ходит в v1, где нет алиаса gemini-flash-lite-latest."""
+    from google import genai
+
+    options = []
+
+    class Client:
+        def __init__(self, api_key, http_options):
+            options.append(http_options)
+
+    monkeypatch.setattr(genai, "Client", Client)
+    ai_client.GeminiProvider("g")
+    reviews.make_writer("g")
+    assert [o.api_version for o in options] == ["v1beta", "v1beta"]

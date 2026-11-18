@@ -27,6 +27,7 @@ DEFAULT_PROVIDER = "gemini"  # другой — переменной AI_PROVIDER
 GEMINI_MODELS = MODELS["gemini"]
 AI_ATTEMPTS = 2  # попыток на каждую модель
 AI_TIMEOUT_MS = 60_000  # без таймаута зависший запрос держал весь прогон
+GEMINI_API_VERSION = "v1beta"  # google-genai 3 по умолчанию v1, а алиасы *-latest есть только в v1beta
 AI_MODEL_STRIKES = 3  # обращений подряд, когда модель перегружена, — дальше в этом запуске без неё
 AI_PAUSE_SECONDS = 2
 
@@ -207,7 +208,8 @@ class GeminiProvider:
         from google.genai import errors, types
 
         self._types, self._errors = types, errors
-        self._client = genai.Client(api_key=api_key, http_options=types.HttpOptions(timeout=AI_TIMEOUT_MS))
+        self._client = genai.Client(api_key=api_key, http_options=types.HttpOptions(
+            api_version=GEMINI_API_VERSION, timeout=AI_TIMEOUT_MS))
 
     def generate(self, model: str, system: str, user: str, schema: Any) -> Any:
         config = self._types.GenerateContentConfig(
