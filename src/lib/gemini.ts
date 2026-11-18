@@ -1,6 +1,7 @@
 // Только для серверного кода: запрос к Gemini с перебором моделей.
 // Gemini — серверы в США, поэтому пользовательские данные уходят туда только обезличенными:
-// без имени, телефонов, email, ссылок и ников (redactPersonal).
+// без имени, телефонов, email, ссылок, ников, дат рождения и адресов (redactPersonal).
+// Имя человека из профиля передавайте в options.names: без него оно уйдёт как есть.
 
 import { redactPersonal } from "@/lib/redact";
 
@@ -16,7 +17,7 @@ export async function geminiText(
   apiKey: string,
   instruction: string,
   input: string,
-  options: { temperature?: number; maxOutputTokens?: number; json?: boolean; names?: string[] } = {},
+  options: { temperature?: number; maxOutputTokens?: number; json?: boolean; names?: (string | null | undefined)[] } = {},
 ): Promise<string | null> {
   const safeInput = redactPersonal(input, options.names);
   for (const model of GEMINI_MODELS) {

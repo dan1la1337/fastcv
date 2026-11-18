@@ -66,6 +66,8 @@ jobs:
         run: npx eslint src --max-warnings 0
       - name: Type check
         run: npx tsc --noEmit
+      - name: Unit tests (Vitest)
+        run: npm test
       - name: Build
         run: npm run build
 

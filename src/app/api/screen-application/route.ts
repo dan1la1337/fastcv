@@ -71,7 +71,7 @@ export async function POST(req: Request) {
   }
 
   const [{ data: profile }, { data: matches }] = await Promise.all([
-    supabase.from("profiles").select("skills, description, pref_level, experience_years, pref_city").eq("id", app.candidate_id!).maybeSingle(),
+    supabase.from("profiles").select("name, skills, description, pref_level, experience_years, pref_city").eq("id", app.candidate_id!).maybeSingle(),
     supabase.rpc("my_application_matches"),
   ]);
   const m = (matches ?? []).find(x => x.application_id === app.id);
@@ -101,7 +101,7 @@ ${answers ? `Ответы на вопросы:\n${answers}` : ""}
 </candidate>`;
 
   const apiKey = process.env.GEMINI_API_KEY;
-  const raw = apiKey ? await geminiText(apiKey, INSTRUCTION, input, { temperature: 0.2, maxOutputTokens: 1500, json: true }) : null;
+  const raw = apiKey ? await geminiText(apiKey, INSTRUCTION, input, { temperature: 0.2, maxOutputTokens: 1500, json: true, names: [profile?.name] }) : null;
   const screening = raw ? toScreening(parseModelJson(raw)) : null;
   if (!screening) return NextResponse.json({ error: "ИИ сейчас не отвечает. Попробуйте через минуту." }, { status: 503 });
 
