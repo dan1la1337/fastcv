@@ -25,6 +25,8 @@ from urllib.parse import urlparse
 
 import requests
 
+from roles import pm_direction
+
 SOURCE = "career"
 USER_AGENT = "Mozilla/5.0 (compatible; FastCVBot/1.0; +https://fastcv.ru)"
 ROBOTS_AGENT = "FastCVBot"
@@ -422,8 +424,9 @@ def import_careers(store, normalize: Callable[[str], object], fetcher: Optional[
                     except Exception as e:      # ИИ недоступен — остальное дочитаем в следующий раз
                         info["ai"] = f"{type(e).__name__}: {str(e)[:120]}"
                         break
-                if row and not row.get("direction"):
-                    row["direction"] = next((d for part, d in company.categories if part in url), None)
+                if row:
+                    direction = row.get("direction") or next((d for part, d in company.categories if part in url), None)
+                    row["direction"] = pm_direction(row["title"], direction)
                     if not row["direction"]:
                         del row["direction"]                # определит база по названию
                 # Страница не про вакансию (промо, мероприятие) — запоминаем архивной, чтобы не читать снова

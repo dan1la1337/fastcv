@@ -242,6 +242,28 @@ class Store:
     def update_description(self, source_post: str, description: str) -> None:
         self.db.table("vacancies").update({"description": description}).eq("source_post", source_post).execute()
 
+    def reclassify_pm(self, page: int = 1000) -> int:
+        """Открытые вакансии из Telegram и с сайтов компаний, где менеджер проектов или продукта
+        попал не в product (ИИ и база относили их к руководству, data_ml и т. п.), → product.
+        После первого запуска таких почти нет: новые вакансии сразу получают product."""
+        from roles import FIXABLE, is_pm_title
+        words = ("project", "product", "program", "delivery", "scrum", "проект", "продукт", "продакт",
+                 "проджект", "программ", "скрам", "cpo")
+        fixable = sorted(d for d in FIXABLE if d)
+        ids, start = [], 0
+        while True:
+            rows = (self.db.table("vacancies").select("id, title")
+                    .is_("archived_at", "null").in_("source_kind", ["telegram", "career"])
+                    .in_("direction", fixable).or_(",".join(f"title.ilike.*{w}*" for w in words))
+                    .order("id").range(start, start + page - 1).execute().data or [])
+            ids += [r["id"] for r in rows if is_pm_title(r["title"])]
+            if len(rows) < page:
+                break
+            start += page
+        for i in range(0, len(ids), 200):
+            self.db.table("vacancies").update({"direction": "product"}).in_("id", ids[i:i + 200]).execute()
+        return len(ids)
+
     def archive_career(self, company: str, ids: list[str]) -> int:
         now = datetime.now(timezone.utc).isoformat()
         for i in range(0, len(ids), 200):

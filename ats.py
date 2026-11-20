@@ -20,6 +20,7 @@ from typing import Callable, Optional
 import requests
 
 import careers
+from roles import pm_direction
 # Вакансии из ATS сохраняются как вакансии с сайтов компаний: тот же источник, вес и User-Agent
 from careers import _SPACE, RANKING_WEIGHT, SOURCE, USER_AGENT
 # В игровой студии геймдев — те, кто делает игры; продажи, найм, финансы и т. п. — по названию
@@ -158,7 +159,8 @@ def rows_for(board: Board, jobs: list[dict]) -> list[dict]:
         }
         # Ключ есть у всех строк: в пакетной записи столбцы берутся одни на все строки;
         # None — направление определит база по названию
-        row["direction"] = board.direction if board.direction and not _NOT_DEV.search(row["title"] or "") else None
+        direction = board.direction if board.direction and not _NOT_DEV.search(row["title"] or "") else None
+        row["direction"] = pm_direction(row["title"], direction)
         rows.append(row)
     return rows
 
