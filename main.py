@@ -694,6 +694,15 @@ def main() -> None:
                 {"at": datetime.now(timezone.utc).isoformat(), "boards": ats_stats}, ensure_ascii=False))
         except Exception as e:
             print(f"⚠️ Системы найма: {type(e).__name__}: {str(e)[:200]}")
+        # «Хабр Карьера»: открытая RSS-лента менеджеров продукта и проектов, продуктовых аналитиков
+        try:
+            import habr
+            habr_stats = habr.run(store)
+            print(f"Хабр Карьера: {habr_stats}")
+            store.set_setting("habr_last_run", json.dumps(
+                {"at": datetime.now(timezone.utc).isoformat(), "feeds": habr_stats}, ensure_ascii=False))
+        except Exception as e:
+            print(f"⚠️ Хабр Карьера: {type(e).__name__}: {str(e)[:200]}")
     # «Работа России»: открытые данные без ИИ. Отключается переменной TRUDVSEM=off
     if (env("TRUDVSEM") or "on").lower() != "off":
         try:
