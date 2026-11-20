@@ -34,6 +34,8 @@ from typing import Callable, Literal, Optional
 
 import requests
 
+import discrimination
+
 # Части сборщика. Некоторые имена main сам не использует: они импортированы, чтобы тесты
 # и eval_ai.py по-прежнему находили их в main
 from ai_client import (  # noqa: F401
@@ -169,6 +171,8 @@ def save_post(prepared: Prepared, vacancy: VacancyAI, store: Store) -> Outcome:
         "experience_min": clean_experience(vacancy.experience_min),
         # Город точнее: база возьмёт страну из него, а ответ ИИ — для вакансий без города
         "country": (vacancy.country or "").strip()[:60] or None,
+        # Флаги модели и правил: требования к возрасту, полу, национальности
+        "discrimination_flags": discrimination.merge(vacancy.discrimination, discrimination.rule_flags(post.text)),
         "ranking_weight": 1.0,
         "source_type": "external",
     })
