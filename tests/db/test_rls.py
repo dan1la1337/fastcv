@@ -1021,7 +1021,9 @@ CHECKS: list[tuple] = [
           join pg_namespace n on n.oid = c.relnamespace and n.nspname = 'public'
           cross join lateral unnest(p.polroles) r
          where not has_table_privilege(r, c.oid,
-                 case p.polcmd when 'a' then 'insert' when 'w' then 'update' when 'd' then 'delete' else 'select' end)""",
+                 case p.polcmd when 'a' then 'insert' when 'w' then 'update' when 'd' then 'delete' else 'select' end)
+           -- profiles: SELECT выдан по колонкам, без служебных
+           and not (p.polcmd in ('r', '*') and has_any_column_privilege(r, c.oid, 'select'))""",
      "postgres", None, "ok"),
     ("очередь писем: новый отклик — работодателю, приглашение — кандидату; после отметки пусто", True,
      f"""update auth.users set email = 'c@example.com' where id = '{C}';
@@ -1068,7 +1070,7 @@ CHECKS: list[tuple] = [
              || ' ' || ((select count(*) from profiles) > 0)::text""",
      "postgres", None, "0 true"),
     ("кандидат отвязывает Telegram", True,
-     "select unlink_telegram(); select coalesce(telegram_chat_id::text, 'нет') from profiles where id = auth.uid()",
+     "select unlink_telegram(); select coalesce(telegram_chat_id::text, 'нет') from my_private_profile()",
      "authenticated", C, "нет"),
 ]
 

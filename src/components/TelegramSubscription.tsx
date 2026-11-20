@@ -21,10 +21,11 @@ export default function TelegramSubscription({ userId }: { userId: string }) {
 
   useEffect(() => {
     Promise.all([
-      supabase.from("profiles").select("telegram_chat_id, telegram_notify").eq("id", userId).maybeSingle(),
+      supabase.from("profiles").select("telegram_notify").eq("id", userId).maybeSingle(),
+      supabase.rpc("my_private_profile").maybeSingle(),
       supabase.from("app_settings").select("value").eq("key", "telegram_bot_username").maybeSingle(),
-    ]).then(([{ data: profile }, { data: setting }]) => {
-      setLinked(Boolean(profile?.telegram_chat_id));
+    ]).then(([{ data: profile }, { data: secret }, { data: setting }]) => {
+      setLinked(Boolean(secret?.telegram_chat_id));
       setNotify(Boolean(profile?.telegram_notify));
       setBot(setting?.value ?? null);
       setLoaded(true);
@@ -37,10 +38,13 @@ export default function TelegramSubscription({ userId }: { userId: string }) {
     let tries = 0;
     const timer = setInterval(async () => {
       tries += 1;
-      const { data } = await supabase.from("profiles").select("telegram_chat_id, telegram_notify").eq("id", userId).maybeSingle();
-      if (data?.telegram_chat_id) {
+      const [{ data: secret }, { data }] = await Promise.all([
+        supabase.rpc("my_private_profile").maybeSingle(),
+        supabase.from("profiles").select("telegram_notify").eq("id", userId).maybeSingle(),
+      ]);
+      if (secret?.telegram_chat_id) {
         setLinked(true);
-        setNotify(Boolean(data.telegram_notify));
+        setNotify(Boolean(data?.telegram_notify));
         toast("Telegram подключён — подборка включена.", "ok");
         clearInterval(timer);
       } else if (tries >= 60) {

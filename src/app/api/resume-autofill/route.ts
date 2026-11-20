@@ -128,15 +128,19 @@ export async function POST() {
   const { data: auth } = await supabase.auth.getUser();
   if (!auth.user) return NextResponse.json({ error: "Войдите, чтобы заполнить профиль" }, { status: 401 });
 
-  const { data: profile } = await supabase.from("profiles").select("role, resume_path, name").eq("id", auth.user.id).maybeSingle();
+  const [{ data: profile }, { data: secret }] = await Promise.all([
+    supabase.from("profiles").select("role, name").eq("id", auth.user.id).maybeSingle(),
+    supabase.rpc("my_private_profile").maybeSingle(),
+  ]);
   if (profile?.role !== "candidate") return NextResponse.json({ error: "Только для соискателей" }, { status: 403 });
-  if (!profile.resume_path) return NextResponse.json({ error: "Сначала загрузите резюме в PDF" }, { status: 400 });
+  const resumePath = secret?.resume_path;
+  if (!resumePath) return NextResponse.json({ error: "Сначала загрузите резюме в PDF" }, { status: 400 });
 
   const limited = await consumeAiQuota(supabase, { kind: "resume_parse", max: RATE_LIMIT, label: "разборов резюме" });
   if (limited) return limited;
 
   // Файл читаем с правами самого кандидата: правила Storage пускают только в свою папку
-  const { data: file, error: fileError } = await supabase.storage.from("resumes").download(profile.resume_path);
+  const { data: file, error: fileError } = await supabase.storage.from("resumes").download(resumePath);
   if (fileError || !file) return NextResponse.json({ error: "Не удалось прочитать резюме" }, { status: 404 });
   if (file.size > MAX_PDF_BYTES) return NextResponse.json({ error: "Файл больше 5 МБ" }, { status: 413 });
 

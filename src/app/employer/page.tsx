@@ -65,7 +65,7 @@ export default function EmployerDashboard() {
       supabase.from("profiles").select("name").eq("id", currentUser.id).maybeSingle(),
       supabase
         .from("applications")
-        .select("id, status, hr_message, cover_letter, created_at, blitz_answers, blitz_summary, vacancies!inner (id, title, employer_id), profiles (name, skills, resume_path), conversations (id)")
+        .select("id, candidate_id, status, hr_message, cover_letter, created_at, blitz_answers, blitz_summary, vacancies!inner (id, title, employer_id), profiles (name, skills, has_resume), conversations (id)")
         .eq("vacancies.employer_id", currentUser.id)
         .order("created_at", { ascending: false }),
       supabase

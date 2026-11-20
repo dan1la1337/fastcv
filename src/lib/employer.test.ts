@@ -12,7 +12,7 @@ import type { Screening } from "@/lib/screening";
 import type { VacancyDraft } from "@/lib/vacancy-draft";
 
 const app = (id: string, title: string, status = "new"): Application => ({
-  id, status, hr_message: null, cover_letter: null, created_at: "2026-11-01T00:00:00Z", blitz_answers: [], blitz_summary: null,
+  id, candidate_id: `c-${id}`, status, hr_message: null, cover_letter: null, created_at: "2026-11-01T00:00:00Z", blitz_answers: [], blitz_summary: null,
   vacancies: { id: `v-${title}`, title, employer_id: "e" }, profiles: null, conversations: null,
 });
 

@@ -15,7 +15,7 @@ const cases = [
   { route: "rejection-analysis", kind: "rejection_analysis", body: { applicationId: ID } },
   { route: "blitz-summary", kind: "blitz_summary", body: { applicationId: ID } },
   { route: "cover-letter", kind: "cover_letter", body: { vacancyId: ID } },
-  { route: "resume-autofill", kind: "resume_parse", body: {}, profile: { role: "candidate", resume_path: "c1/cv.pdf" } },
+  { route: "resume-autofill", kind: "resume_parse", body: {}, profile: { role: "candidate" }, rpc: { my_private_profile: { resume_path: "c1/cv.pdf" } } },
   { route: "vacancy-draft", kind: "vacancy_draft", body: { notes: "Ищем Python-разработчика в команду платежей" }, profile: { role: "employer" } },
   { route: "interview-practice", kind: "practice_questions", body: { action: "questions", vacancyId: ID } },
   { route: "interview-practice", kind: "practice_grade", body: { action: "grade", vacancyId: ID, question: "Что такое GIL?", answer: "Глобальная блокировка" } },
@@ -34,11 +34,11 @@ afterEach(() => {
   vi.unstubAllGlobals();
 });
 
-describe.each(cases)("$route ($kind)", ({ route, kind, body, profile }) => {
+describe.each(cases)("$route ($kind)", ({ route, kind, body, profile, rpc }) => {
   it("stops with 429 before calling the model when the limit is used up", async () => {
     const supabase = fakeSupabase({
       tables: { applications: application, vacancies: vacancy, profiles: profile ?? { name: "Иван", skills: [] } },
-      rpc: { consume_ai_quota: { allowed: false, retry_after: 600 } },
+      rpc: { consume_ai_quota: { allowed: false, retry_after: 600 }, ...rpc },
     });
     client.current = supabase;
     const { POST } = await import(`@/app/api/${route}/route`);
