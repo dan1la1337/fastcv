@@ -1,12 +1,14 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import CatalogPager from "@/components/CatalogPager";
 import PageBar from "@/components/PageBar";
-import { cachedDirectionVacancies } from "@/lib/public-data";
+import { pageCount, pageHref, parsePage } from "@/lib/catalog-pages";
+import { cachedDirectionCounts, cachedDirectionVacancies } from "@/lib/public-data";
 import { DIRECTIONS, plural, VACANCY_FORMS } from "@/lib/vacancies";
 import VacancyListStatic from "@/components/VacancyListStatic";
 
-type Props = { params: Promise<{ direction: string }> };
+type Props = { params: Promise<{ direction: string }>; searchParams: Promise<{ page?: string | string[] }> };
 
 // Страница направления пересобирается раз в полчаса: вакансии приходят каждые 6 часов
 export const revalidate = 1800;
@@ -18,21 +20,34 @@ export function generateStaticParams() {
 
 const byParam = (param: string) => DIRECTIONS.find(d => d.id === param.replace("-", "_"));
 
-const getVacancies = cachedDirectionVacancies;
-
-export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const direction = byParam((await params).direction);
-  if (!direction) return {};
-  const count = (await getVacancies(direction.id)).length;
-  const title = `Вакансии: ${direction.label} — удалённо и в офисе | FastCV`;
-  const description = `${count} свежих ${plural(count, VACANCY_FORMS)} по направлению «${direction.label}» из Telegram-каналов, SuperJob, «Работы России» и от работодателей. Отклик с сопроводительным письмом от ИИ.`;
-  return { title, description, alternates: { canonical: `/jobs/${(await params).direction}` }, openGraph: { title, description } };
+/** Направление, номер страницы, вакансии страницы и общее число; null — такой страницы нет. */
+async function load({ params, searchParams }: Props) {
+  const slug = (await params).direction;
+  const direction = byParam(slug);
+  const page = parsePage((await searchParams).page);
+  if (!direction || !page) return null;
+  const [{ vacancies, hasNext }, counts] = await Promise.all([
+    cachedDirectionVacancies(direction.id, page), cachedDirectionCounts()]);
+  // Пустая — только первая страница («вакансий пока нет»), за последней — 404
+  if (page > 1 && !vacancies.length) return null;
+  const { total, pages } = pageCount(page, vacancies.length, hasNext, counts[direction.id] ?? null);
+  return { direction, base: `/jobs/${slug}`, page, pages, total, vacancies };
 }
 
-export default async function DirectionPage({ params }: Props) {
-  const direction = byParam((await params).direction);
-  if (!direction) notFound();
-  const vacancies = await getVacancies(direction.id);
+export async function generateMetadata(props: Props): Promise<Metadata> {
+  const data = await load(props);
+  if (!data) return {};
+  const { direction, base, page, total } = data;
+  const suffix = page > 1 ? ` — страница ${page}` : "";
+  const title = `Вакансии: ${direction.label} — удалённо и в офисе${suffix} | FastCV`;
+  const description = `${total} ${plural(total, VACANCY_FORMS)} по направлению «${direction.label}» из Telegram-каналов, SuperJob, «Работы России» и от работодателей. Отклик с сопроводительным письмом от ИИ.`;
+  return { title, description, alternates: { canonical: pageHref(base, page) }, openGraph: { title, description } };
+}
+
+export default async function DirectionPage(props: Props) {
+  const data = await load(props);
+  if (!data) notFound();
+  const { direction, base, page, pages, total, vacancies } = data;
 
   const remote = vacancies.filter(v => v.work_format === "remote" || v.is_remote).length;
   const cities = Object.entries(
@@ -47,8 +62,9 @@ export default async function DirectionPage({ params }: Props) {
         <header className="space-y-2">
           <h1 className="font-display text-2xl sm:text-3xl font-bold">Вакансии: {direction.label}</h1>
           <p className="text-sm text-neutral-400">
-            {vacancies.length} {plural(vacancies.length, VACANCY_FORMS)}
-            {vacancies.length > 0 && <> · удалённо — {remote}</>}
+            {total} {plural(total, VACANCY_FORMS)}
+            {pages > 1 && <> · страница {page} из {pages}</>}
+            {vacancies.length > 0 && <> · на странице удалённо — {remote}</>}
             {cities.length > 0 && <> · {cities.map(([city, n]) => `${city} ${n}`).join(", ")}</>}
           </p>
           {direction.tech && (
@@ -57,7 +73,10 @@ export default async function DirectionPage({ params }: Props) {
         </header>
 
         {vacancies.length ? (
-          <VacancyListStatic vacancies={vacancies} />
+          <>
+            <VacancyListStatic vacancies={vacancies} />
+            <CatalogPager base={base} page={page} pages={pages} />
+          </>
         ) : (
           <p className="text-sm text-neutral-400 py-10 text-center border border-dashed border-white/10 rounded-2xl">
             Сейчас открытых вакансий нет — новые приходят каждые несколько часов.

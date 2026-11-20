@@ -75,6 +75,15 @@ test("неизвестное направление — 404", async ({ request }
   expect((await request.get("/jobs/astronaut")).status()).toBe(404);
 });
 
+test("страницы направления: ?page за последней или мусор — 404, первая — без ?page в canonical", async ({ request }) => {
+  expect((await request.get("/jobs/qa?page=abc")).status()).toBe(404);
+  expect((await request.get("/jobs/qa?page=0")).status()).toBe(404);
+  expect((await request.get("/jobs/qa?page=9999")).status()).toBe(404);
+  const html = await (await request.get("/jobs/qa?page=1")).text();
+  expect(html).toMatch(/<link rel="canonical" href="[^"]*\/jobs\/qa"/);
+  expect(html).toMatch(/\d+ ваканси/);
+});
+
 test("название компании ведёт на её страницу", async ({ page }) => {
   await page.goto("/");
   const company = page.locator('section a[href^="/company/"]').first();
