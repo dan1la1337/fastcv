@@ -454,6 +454,7 @@ export type Database = {
           created_at: string | null
           description: string | null
           direction: string | null
+          discrimination_flags: string[]
           employer_id: string | null
           employer_verified: boolean
           employer_slow: boolean
@@ -498,6 +499,7 @@ export type Database = {
           created_at?: string | null
           description?: string | null
           direction?: string | null
+          discrimination_flags?: string[]
           employer_id?: string | null
           employer_verified?: boolean
           employer_slow?: boolean
@@ -542,6 +544,7 @@ export type Database = {
           created_at?: string | null
           description?: string | null
           direction?: string | null
+          discrimination_flags?: string[]
           employer_id?: string | null
           employer_verified?: boolean
           employer_slow?: boolean

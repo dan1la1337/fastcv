@@ -2,6 +2,7 @@ import type { BlitzAnswer } from "@/components/BlitzAnswers";
 import type { Match } from "@/lib/matching";
 import { FIT_ORDER, type Screening } from "@/lib/screening";
 import type { VacancyDraft } from "@/lib/vacancy-draft";
+import { discriminationFlags, type DiscriminationFlag } from "@/lib/discrimination";
 import type { Vacancy } from "@/lib/vacancies";
 
 /** Чистая логика кабинета работодателя: форма вакансии, отклики, отказы. Без React и без запросов. */
@@ -110,6 +111,7 @@ export interface VacancyFields {
   company_name: string | null;
   stack: string[];
   blitz_questions: string[];
+  discrimination_flags: DiscriminationFlag[];
 }
 
 /** Поля вакансии для базы из формы; error — форму нельзя сохранить. */
@@ -131,6 +133,8 @@ export function vacancyFields(form: VacancyForm, companyName: string | null): { 
       company_name: companyName,
       stack: [...new Set(form.stack.split(",").map(s => s.trim()).filter(Boolean))].slice(0, 15),
       blitz_questions: form.questions.map(q => q.trim()).filter(Boolean),
+      // Требования к возрасту, полу, национальности: база уберёт вакансию из ленты
+      discrimination_flags: discriminationFlags(`${form.title}\n${form.description}`),
     },
   };
 }

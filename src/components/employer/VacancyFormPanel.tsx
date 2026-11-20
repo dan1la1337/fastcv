@@ -1,6 +1,7 @@
 import { Loader2, Sparkles } from "lucide-react";
 import type { VacancyForm } from "@/lib/employer";
 import { inputClass, labelClass } from "@/components/employer/styles";
+import DiscriminationWarning from "@/components/DiscriminationWarning";
 
 /** Форма публикации и редактирования вакансии; для новой — ИИ-черновик по заметкам. */
 export default function VacancyFormPanel({ editingId, form, setForm, notes, setNotes, drafting, onDraft, saving, onSubmit, onCancelEdit }: {
@@ -97,6 +98,8 @@ export default function VacancyFormPanel({ editingId, form, setForm, notes, setN
             value={form.description} onChange={e => setForm({ ...form, description: e.target.value })}
             className={`${inputClass} leading-relaxed resize-y max-h-52`} />
         </div>
+
+        <DiscriminationWarning text={`${form.title}\n${form.description}`} />
 
         <div className="flex flex-col sm:flex-row gap-3">
           <button type="submit" disabled={saving}
