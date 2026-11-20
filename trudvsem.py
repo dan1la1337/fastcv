@@ -18,6 +18,7 @@ from typing import Callable, Optional
 import requests
 
 import http_retry
+from roles import pm_direction
 
 API = "https://opendata.trudvsem.ru/api/v1/vacancies"
 PAGE = 100
@@ -100,6 +101,10 @@ def direction_of(v: dict) -> Optional[str]:
     return sphere_direction((v.get("category") or {}).get("specialisation") or "")
 
 
+def is_it_sphere(v: dict) -> bool:
+    return "информационные технологии" in ((v.get("category") or {}).get("specialisation") or "").lower()
+
+
 def map_vacancy(v: dict) -> Optional[dict]:
     """Вакансия «Работы России» → строка vacancies. None — если не хватает главного."""
     vid, title = v.get("id"), text(v.get("job-name"), 200)
@@ -127,7 +132,7 @@ def map_vacancy(v: dict) -> Optional[dict]:
         "salary_max": salary_max,
         "salary_currency": "RUB" if (salary_min or salary_max) else None,
         "city": city_of(v),
-        "direction": direction_of(v),
+        "direction": pm_direction(title, direction_of(v), it_context=is_it_sphere(v)),
         "is_remote": remote,
         "work_format": "remote" if remote else None,
         "experience_min": years,

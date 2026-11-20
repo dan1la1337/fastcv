@@ -43,6 +43,7 @@ from ai_client import (  # noqa: F401
 from bots import (  # noqa: F401
     TelegramBot, TelegramError, alert_text, daily_report_text, notify, send_digests, send_interview_surveys,
 )
+from roles import pm_direction
 from store import Store, channel_week  # noqa: F401
 from telegram_feed import (  # noqa: F401
     ARCHIVE_AFTER_DAYS, HISTORY_DAYS, HISTORY_PAGES, MAX_PAGES, ChannelUnavailable, Post, collect_history,
@@ -160,7 +161,8 @@ def save_post(prepared: Prepared, vacancy: VacancyAI, store: Store) -> Outcome:
         "stack": clean_stack(vacancy.stack),
         # Пустые значения база заполнит сама (триггер vacancies_normalize), город — приведёт к единому виду
         "level": vacancy.level,
-        "direction": vacancy.direction,
+        # ИИ относил «Руководителя проектов» и «Delivery Lead» к руководству — поправляем по названию
+        "direction": pm_direction(title, vacancy.direction),
         "work_format": vacancy.work_format,
         "hiring_type": vacancy.hiring_type,
         "scope_note": (vacancy.scope_note or "").strip()[:300] or None,
@@ -661,6 +663,11 @@ def main() -> None:
             print(f"Письма об откликах: {notifications.send_notifications(store, notifications.make_sender(resend_key))}")
         except Exception as e:  # письма не должны ронять сбор; текст ошибки может содержать ключ
             print(f"⚠️ Письма об откликах: {type(e).__name__}")
+    # Менеджеры проектов и продукта, которых раньше отнесли не к product (ИИ, правила базы)
+    try:
+        print(f"Менеджеры проектов и продукта → product: {store.reclassify_pm()}")
+    except Exception as e:
+        print(f"⚠️ Направление менеджеров проектов: {type(e).__name__}: {str(e)[:200]}")
     # Сайты компаний (карты сайтов): JobPosting или разбор страницы тем же ИИ. CAREERS=off — выключить
     if (env("CAREERS") or "on").lower() != "off":
         try:

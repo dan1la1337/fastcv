@@ -20,6 +20,7 @@ from typing import Callable, Optional
 import requests
 
 import http_retry
+from roles import pm_direction
 from trudvsem import level_for, money, sphere_direction, text
 
 API = "https://api.superjob.ru/2.0/vacancies/"
@@ -76,7 +77,9 @@ def map_vacancy(v: dict) -> Optional[dict]:
         "salary_max": salary_max,
         "salary_currency": currency,
         "city": text((v.get("town") or {}).get("title"), 100),
-        "direction": catalogue_direction(catalogues),
+        # Вне рубрики «IT» менеджер проектов бывает и на стройке: там нужен признак ИТ в названии
+        "direction": pm_direction(title, catalogue_direction(catalogues),
+                                  it_context=any(c.get("key") == IT_CATALOGUE for c in catalogues)),
         "is_remote": remote,
         "work_format": "remote" if remote else None,
         "experience_min": years,
